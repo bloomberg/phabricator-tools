@@ -47,14 +47,14 @@ def getWithoutPrefix(string, prefix):
 
 WorkingBranch = collections.namedtuple(
     "abdt_naming__WorkingBranch", [
-        "original",
+        "full_name",
         "description",
         "base",
         "id"])
 
 ReviewBranch = collections.namedtuple(
     "abdt_naming__ReviewBranch", [
-        "original",
+        "full_name",
         "description",
         "base"])
 
@@ -123,7 +123,7 @@ def makeReviewBranchFromName(branch_name):
     Usage example:
         >>> makeReviewBranchFromName('ph-review/mywork/master')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__ReviewBranch(original='ph-review/mywork/master',
+        abdt_naming__ReviewBranch(full_name='ph-review/mywork/master',
                                   description='mywork',
                                   base='master')
 
@@ -142,7 +142,7 @@ def makeReviewBranchFromName(branch_name):
         return None  # suffix should be description/base(/...)
 
     return ReviewBranch(
-        original=branch_name,
+        full_name=branch_name,
         description=parts[0],
         base='/'.join(parts[1:]))
 
@@ -153,7 +153,7 @@ def makeWorkingBranchFromName(branch_name):
     Usage example:
         >>> makeWorkingBranchFromName('dev/phab/mywork/master/99')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__WorkingBranch(original='dev/phab/mywork/master/99',
+        abdt_naming__WorkingBranch(full_name='dev/phab/mywork/master/99',
                                    description='mywork',
                                    base='master',
                                    id='99')
@@ -173,7 +173,7 @@ def makeWorkingBranchFromName(branch_name):
         return None  # suffix should be description/base(/...)/id
 
     return WorkingBranch(
-        original=branch_name,
+        full_name=branch_name,
         description=parts[0],
         base='/'.join(parts[1:-1]),
         id=parts[-1])
@@ -187,7 +187,7 @@ def getWorkingBranches(branch_list):
     Usage example:
         >>> getWorkingBranches(['dev/phab/mywork/master/99'])
         ... # doctest: +NORMALIZE_WHITESPACE
-        [abdt_naming__WorkingBranch(original='dev/phab/mywork/master/99',
+        [abdt_naming__WorkingBranch(full_name='dev/phab/mywork/master/99',
                                    description='mywork',
                                    base='master',
                                    id='99')]
@@ -228,7 +228,7 @@ class TestNaming(unittest.TestCase):
         self.assertTrue(isReviewBranchName(b))
         r = makeReviewBranchFromName(b)
         self.assertTrue(r)
-        self.assertEqual(r.original, b)
+        self.assertEqual(r.full_name, b)
         self.assertEqual(r.description, "mywork")
         self.assertEqual(r.base, "master")
         self.assertFalse(makeWorkingBranchFromName(b))
@@ -238,7 +238,7 @@ class TestNaming(unittest.TestCase):
         self.assertFalse(makeReviewBranchFromName(b))
         w = makeWorkingBranchFromName(b)
         self.assertTrue(w)
-        self.assertEqual(w.original, b)
+        self.assertEqual(w.full_name, b)
         self.assertEqual(w.description, "mywork")
         self.assertEqual(w.base, "master")
         self.assertEqual(w.id, "1")
