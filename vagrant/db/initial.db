@@ -1,0 +1,5042 @@
+--
+-- Current Database: `phabricator_audit`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_audit` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_audit`;
+
+--
+-- Table structure for table `audit_comment`
+--
+
+DROP TABLE IF EXISTS `audit_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `audit_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `targetPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `actorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `action` varchar(64) NOT NULL,
+  `content` longtext NOT NULL,
+  `metadata` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `targetPHID` (`targetPHID`,`actorPHID`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `audit_comment`
+--
+
+LOCK TABLES `audit_comment` WRITE;
+/*!40000 ALTER TABLE `audit_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `audit_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `audit_inlinecomment`
+--
+
+DROP TABLE IF EXISTS `audit_inlinecomment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `audit_inlinecomment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commitPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `pathID` int(10) unsigned NOT NULL,
+  `auditCommentID` int(10) unsigned DEFAULT NULL,
+  `isNewFile` tinyint(1) NOT NULL,
+  `lineNumber` int(10) unsigned NOT NULL,
+  `lineLength` int(10) unsigned NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `cache` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `commitPHID` (`commitPHID`,`pathID`),
+  KEY `authorPHID` (`authorPHID`,`commitPHID`,`auditCommentID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `audit_inlinecomment`
+--
+
+LOCK TABLES `audit_inlinecomment` WRITE;
+/*!40000 ALTER TABLE `audit_inlinecomment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `audit_inlinecomment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_cache`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_cache` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_cache`;
+
+--
+-- Table structure for table `cache_general`
+--
+
+DROP TABLE IF EXISTS `cache_general`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cache_general` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `cacheKeyHash` char(12) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `cacheKey` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `cacheFormat` varchar(16) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `cacheData` longblob NOT NULL,
+  `cacheCreated` int(10) unsigned NOT NULL,
+  `cacheExpires` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_cacheKeyHash` (`cacheKeyHash`),
+  KEY `key_cacheCreated` (`cacheCreated`),
+  KEY `key_ttl` (`cacheExpires`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cache_general`
+--
+
+LOCK TABLES `cache_general` WRITE;
+/*!40000 ALTER TABLE `cache_general` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cache_general` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `cache_markupcache`
+--
+
+DROP TABLE IF EXISTS `cache_markupcache`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `cache_markupcache` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cacheKey` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `cacheData` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `metadata` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cacheKey` (`cacheKey`),
+  KEY `dateCreated` (`dateCreated`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `cache_markupcache`
+--
+
+LOCK TABLES `cache_markupcache` WRITE;
+/*!40000 ALTER TABLE `cache_markupcache` DISABLE KEYS */;
+/*!40000 ALTER TABLE `cache_markupcache` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_calendar`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_calendar` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_calendar`;
+
+--
+-- Table structure for table `calendar_holiday`
+--
+
+DROP TABLE IF EXISTS `calendar_holiday`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `calendar_holiday` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `day` date NOT NULL,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `day` (`day`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `calendar_holiday`
+--
+
+LOCK TABLES `calendar_holiday` WRITE;
+/*!40000 ALTER TABLE `calendar_holiday` DISABLE KEYS */;
+/*!40000 ALTER TABLE `calendar_holiday` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_chatlog`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_chatlog` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_chatlog`;
+
+--
+-- Table structure for table `chatlog_channel`
+--
+
+DROP TABLE IF EXISTS `chatlog_channel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chatlog_channel` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `serviceName` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `serviceType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `channelName` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_channel` (`channelName`,`serviceType`,`serviceName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `chatlog_channel`
+--
+
+LOCK TABLES `chatlog_channel` WRITE;
+/*!40000 ALTER TABLE `chatlog_channel` DISABLE KEYS */;
+/*!40000 ALTER TABLE `chatlog_channel` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `chatlog_event`
+--
+
+DROP TABLE IF EXISTS `chatlog_event`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `chatlog_event` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `epoch` int(10) unsigned NOT NULL,
+  `author` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` varchar(4) NOT NULL,
+  `message` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `loggedByPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `channelID` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `channel` (`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `chatlog_event`
+--
+
+LOCK TABLES `chatlog_event` WRITE;
+/*!40000 ALTER TABLE `chatlog_event` DISABLE KEYS */;
+/*!40000 ALTER TABLE `chatlog_event` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_conduit`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_conduit` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_conduit`;
+
+--
+-- Table structure for table `conduit_certificatetoken`
+--
+
+DROP TABLE IF EXISTS `conduit_certificatetoken`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conduit_certificatetoken` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `token` varchar(64) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userPHID` (`userPHID`),
+  UNIQUE KEY `token` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conduit_certificatetoken`
+--
+
+LOCK TABLES `conduit_certificatetoken` WRITE;
+/*!40000 ALTER TABLE `conduit_certificatetoken` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conduit_certificatetoken` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `conduit_connectionlog`
+--
+
+DROP TABLE IF EXISTS `conduit_connectionlog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conduit_connectionlog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `client` varchar(255) DEFAULT NULL,
+  `clientVersion` varchar(255) DEFAULT NULL,
+  `clientDescription` varchar(255) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conduit_connectionlog`
+--
+
+LOCK TABLES `conduit_connectionlog` WRITE;
+/*!40000 ALTER TABLE `conduit_connectionlog` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conduit_connectionlog` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `conduit_methodcalllog`
+--
+
+DROP TABLE IF EXISTS `conduit_methodcalllog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conduit_methodcalllog` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `connectionID` bigint(20) unsigned DEFAULT NULL,
+  `method` varchar(255) NOT NULL,
+  `error` varchar(255) NOT NULL,
+  `duration` bigint(20) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conduit_methodcalllog`
+--
+
+LOCK TABLES `conduit_methodcalllog` WRITE;
+/*!40000 ALTER TABLE `conduit_methodcalllog` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conduit_methodcalllog` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_config`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_config` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_config`;
+
+--
+-- Table structure for table `config_entry`
+--
+
+DROP TABLE IF EXISTS `config_entry`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `config_entry` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `namespace` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `configKey` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `value` longtext NOT NULL,
+  `isDeleted` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_name` (`namespace`,`configKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `config_entry`
+--
+
+LOCK TABLES `config_entry` WRITE;
+/*!40000 ALTER TABLE `config_entry` DISABLE KEYS */;
+/*!40000 ALTER TABLE `config_entry` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `config_transaction`
+--
+
+DROP TABLE IF EXISTS `config_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `config_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `config_transaction`
+--
+
+LOCK TABLES `config_transaction` WRITE;
+/*!40000 ALTER TABLE `config_transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `config_transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_conpherence`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_conpherence` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_conpherence`;
+
+--
+-- Table structure for table `conpherence_participant`
+--
+
+DROP TABLE IF EXISTS `conpherence_participant`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conpherence_participant` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `participantPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `conpherencePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `participationStatus` int(10) unsigned NOT NULL DEFAULT '0',
+  `dateTouched` int(10) unsigned NOT NULL,
+  `behindTransactionPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `conpherencePHID` (`conpherencePHID`,`participantPHID`),
+  KEY `participantPHID` (`participantPHID`,`participationStatus`,`dateTouched`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conpherence_participant`
+--
+
+LOCK TABLES `conpherence_participant` WRITE;
+/*!40000 ALTER TABLE `conpherence_participant` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conpherence_participant` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `conpherence_thread`
+--
+
+DROP TABLE IF EXISTS `conpherence_thread`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conpherence_thread` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `imagePHIDs` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `mailKey` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conpherence_thread`
+--
+
+LOCK TABLES `conpherence_thread` WRITE;
+/*!40000 ALTER TABLE `conpherence_thread` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conpherence_thread` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `conpherence_transaction`
+--
+
+DROP TABLE IF EXISTS `conpherence_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conpherence_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conpherence_transaction`
+--
+
+LOCK TABLES `conpherence_transaction` WRITE;
+/*!40000 ALTER TABLE `conpherence_transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conpherence_transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `conpherence_transaction_comment`
+--
+
+DROP TABLE IF EXISTS `conpherence_transaction_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `conpherence_transaction_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transactionPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `isDeleted` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `conpherencePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_version` (`transactionPHID`,`commentVersion`),
+  UNIQUE KEY `key_draft` (`authorPHID`,`conpherencePHID`,`transactionPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `conpherence_transaction_comment`
+--
+
+LOCK TABLES `conpherence_transaction_comment` WRITE;
+/*!40000 ALTER TABLE `conpherence_transaction_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `conpherence_transaction_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_countdown`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_countdown` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_countdown`;
+
+--
+-- Table structure for table `countdown_timer`
+--
+
+DROP TABLE IF EXISTS `countdown_timer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `countdown_timer` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `datepoint` int(10) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `countdown_timer`
+--
+
+LOCK TABLES `countdown_timer` WRITE;
+/*!40000 ALTER TABLE `countdown_timer` DISABLE KEYS */;
+/*!40000 ALTER TABLE `countdown_timer` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_daemon`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_daemon` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_daemon`;
+
+--
+-- Table structure for table `daemon_log`
+--
+
+DROP TABLE IF EXISTS `daemon_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `daemon_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `daemon` varchar(255) NOT NULL,
+  `host` varchar(255) NOT NULL,
+  `pid` int(10) unsigned NOT NULL,
+  `argv` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `status` varchar(8) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `daemon_log`
+--
+
+LOCK TABLES `daemon_log` WRITE;
+/*!40000 ALTER TABLE `daemon_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `daemon_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `daemon_logevent`
+--
+
+DROP TABLE IF EXISTS `daemon_logevent`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `daemon_logevent` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `logID` int(10) unsigned NOT NULL,
+  `logType` varchar(4) NOT NULL,
+  `message` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `epoch` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `logID` (`logID`,`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `daemon_logevent`
+--
+
+LOCK TABLES `daemon_logevent` WRITE;
+/*!40000 ALTER TABLE `daemon_logevent` DISABLE KEYS */;
+/*!40000 ALTER TABLE `daemon_logevent` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_differential`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_differential` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_differential`;
+
+--
+-- Table structure for table `differential_affectedpath`
+--
+
+DROP TABLE IF EXISTS `differential_affectedpath`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_affectedpath` (
+  `repositoryID` int(10) unsigned NOT NULL,
+  `pathID` int(10) unsigned NOT NULL,
+  `epoch` int(10) unsigned NOT NULL,
+  `revisionID` int(10) unsigned NOT NULL,
+  KEY `repositoryID` (`repositoryID`,`pathID`,`epoch`),
+  KEY `revisionID` (`revisionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_affectedpath`
+--
+
+LOCK TABLES `differential_affectedpath` WRITE;
+/*!40000 ALTER TABLE `differential_affectedpath` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_affectedpath` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_auxiliaryfield`
+--
+
+DROP TABLE IF EXISTS `differential_auxiliaryfield`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_auxiliaryfield` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `revisionPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `value` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `revisionPHID` (`revisionPHID`,`name`),
+  KEY `name` (`name`,`value`(64))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_auxiliaryfield`
+--
+
+LOCK TABLES `differential_auxiliaryfield` WRITE;
+/*!40000 ALTER TABLE `differential_auxiliaryfield` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_auxiliaryfield` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_changeset`
+--
+
+DROP TABLE IF EXISTS `differential_changeset`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_changeset` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `diffID` int(10) unsigned NOT NULL,
+  `oldFile` varchar(255) DEFAULT NULL,
+  `filename` varchar(255) NOT NULL,
+  `awayPaths` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `changeType` int(10) unsigned NOT NULL,
+  `fileType` int(10) unsigned NOT NULL,
+  `metadata` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `oldProperties` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `newProperties` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `addLines` int(10) unsigned NOT NULL,
+  `delLines` int(10) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `diffID` (`diffID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_changeset`
+--
+
+LOCK TABLES `differential_changeset` WRITE;
+/*!40000 ALTER TABLE `differential_changeset` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_changeset` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_changeset_parse_cache`
+--
+
+DROP TABLE IF EXISTS `differential_changeset_parse_cache`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_changeset_parse_cache` (
+  `id` int(10) unsigned NOT NULL,
+  `cache` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `dateCreated` (`dateCreated`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_changeset_parse_cache`
+--
+
+LOCK TABLES `differential_changeset_parse_cache` WRITE;
+/*!40000 ALTER TABLE `differential_changeset_parse_cache` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_changeset_parse_cache` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_comment`
+--
+
+DROP TABLE IF EXISTS `differential_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `revisionID` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `action` varchar(64) NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `cache` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `metadata` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `revisionID` (`revisionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_comment`
+--
+
+LOCK TABLES `differential_comment` WRITE;
+/*!40000 ALTER TABLE `differential_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_commit`
+--
+
+DROP TABLE IF EXISTS `differential_commit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_commit` (
+  `revisionID` int(10) unsigned NOT NULL,
+  `commitPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`revisionID`,`commitPHID`),
+  UNIQUE KEY `commitPHID` (`commitPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_commit`
+--
+
+LOCK TABLES `differential_commit` WRITE;
+/*!40000 ALTER TABLE `differential_commit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_commit` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_diff`
+--
+
+DROP TABLE IF EXISTS `differential_diff`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_diff` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `revisionID` int(10) unsigned DEFAULT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `sourceMachine` varchar(255) DEFAULT NULL,
+  `sourcePath` varchar(255) DEFAULT NULL,
+  `sourceControlSystem` varchar(64) DEFAULT NULL,
+  `sourceControlBaseRevision` varchar(255) DEFAULT NULL,
+  `sourceControlPath` varchar(255) DEFAULT NULL,
+  `lintStatus` int(10) unsigned NOT NULL,
+  `unitStatus` int(10) unsigned NOT NULL,
+  `lineCount` int(10) unsigned NOT NULL,
+  `branch` varchar(255) DEFAULT NULL,
+  `bookmark` varchar(255) DEFAULT NULL,
+  `parentRevisionID` int(10) unsigned DEFAULT NULL,
+  `arcanistProjectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `creationMethod` varchar(255) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `repositoryUUID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `revisionID` (`revisionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_diff`
+--
+
+LOCK TABLES `differential_diff` WRITE;
+/*!40000 ALTER TABLE `differential_diff` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_diff` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_diffproperty`
+--
+
+DROP TABLE IF EXISTS `differential_diffproperty`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_diffproperty` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `diffID` int(10) unsigned NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `diffID` (`diffID`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_diffproperty`
+--
+
+LOCK TABLES `differential_diffproperty` WRITE;
+/*!40000 ALTER TABLE `differential_diffproperty` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_diffproperty` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_hunk`
+--
+
+DROP TABLE IF EXISTS `differential_hunk`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_hunk` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `changesetID` int(10) unsigned NOT NULL,
+  `changes` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `oldOffset` int(10) unsigned NOT NULL,
+  `oldLen` int(10) unsigned NOT NULL,
+  `newOffset` int(10) unsigned NOT NULL,
+  `newLen` int(10) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `changesetID` (`changesetID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_hunk`
+--
+
+LOCK TABLES `differential_hunk` WRITE;
+/*!40000 ALTER TABLE `differential_hunk` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_hunk` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_inlinecomment`
+--
+
+DROP TABLE IF EXISTS `differential_inlinecomment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_inlinecomment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `revisionID` int(10) unsigned NOT NULL,
+  `commentID` int(10) unsigned DEFAULT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `changesetID` int(10) unsigned NOT NULL,
+  `isNewFile` tinyint(1) NOT NULL,
+  `lineNumber` int(10) unsigned NOT NULL,
+  `lineLength` int(10) unsigned NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `cache` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  PRIMARY KEY (`id`),
+  KEY `changesetID` (`changesetID`),
+  KEY `commentID` (`commentID`),
+  KEY `revisionID` (`revisionID`,`authorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_inlinecomment`
+--
+
+LOCK TABLES `differential_inlinecomment` WRITE;
+/*!40000 ALTER TABLE `differential_inlinecomment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_inlinecomment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_relationship`
+--
+
+DROP TABLE IF EXISTS `differential_relationship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_relationship` (
+  `revisionID` int(10) unsigned NOT NULL,
+  `relation` varchar(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `sequence` int(10) unsigned NOT NULL,
+  `reasonPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`revisionID`,`relation`,`objectPHID`),
+  KEY `objectPHID` (`objectPHID`,`relation`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_relationship`
+--
+
+LOCK TABLES `differential_relationship` WRITE;
+/*!40000 ALTER TABLE `differential_relationship` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_relationship` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_revision`
+--
+
+DROP TABLE IF EXISTS `differential_revision`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_revision` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `originalTitle` varchar(255) NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `status` varchar(32) NOT NULL,
+  `summary` longtext NOT NULL,
+  `testPlan` text NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `lastReviewerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCommitted` int(10) unsigned DEFAULT NULL,
+  `lineCount` int(10) unsigned DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `attached` longtext NOT NULL,
+  `mailKey` varchar(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `branchName` varchar(255) DEFAULT NULL,
+  `arcanistProjectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `authorPHID` (`authorPHID`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_revision`
+--
+
+LOCK TABLES `differential_revision` WRITE;
+/*!40000 ALTER TABLE `differential_revision` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_revision` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `differential_revisionhash`
+--
+
+DROP TABLE IF EXISTS `differential_revisionhash`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `differential_revisionhash` (
+  `revisionID` int(10) unsigned NOT NULL,
+  `type` char(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `hash` varchar(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  KEY `type` (`type`,`hash`),
+  KEY `revisionID` (`revisionID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `differential_revisionhash`
+--
+
+LOCK TABLES `differential_revisionhash` WRITE;
+/*!40000 ALTER TABLE `differential_revisionhash` DISABLE KEYS */;
+/*!40000 ALTER TABLE `differential_revisionhash` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_draft`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_draft` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_draft`;
+
+--
+-- Table structure for table `draft`
+--
+
+DROP TABLE IF EXISTS `draft`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `draft` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `draftKey` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `draft` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `metadata` longtext,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `authorPHID` (`authorPHID`,`draftKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `draft`
+--
+
+LOCK TABLES `draft` WRITE;
+/*!40000 ALTER TABLE `draft` DISABLE KEYS */;
+/*!40000 ALTER TABLE `draft` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_drydock`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_drydock` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_drydock`;
+
+--
+-- Table structure for table `drydock_lease`
+--
+
+DROP TABLE IF EXISTS `drydock_lease`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `drydock_lease` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `resourceID` int(10) unsigned DEFAULT NULL,
+  `status` int(10) unsigned NOT NULL,
+  `until` int(10) unsigned DEFAULT NULL,
+  `ownerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `attributes` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `taskID` int(10) unsigned DEFAULT NULL,
+  `resourceType` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `drydock_lease`
+--
+
+LOCK TABLES `drydock_lease` WRITE;
+/*!40000 ALTER TABLE `drydock_lease` DISABLE KEYS */;
+/*!40000 ALTER TABLE `drydock_lease` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `drydock_log`
+--
+
+DROP TABLE IF EXISTS `drydock_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `drydock_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `resourceID` int(10) unsigned DEFAULT NULL,
+  `leaseID` int(10) unsigned DEFAULT NULL,
+  `epoch` int(10) unsigned NOT NULL,
+  `message` longtext NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `resourceID` (`resourceID`,`epoch`),
+  KEY `leaseID` (`leaseID`,`epoch`),
+  KEY `epoch` (`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `drydock_log`
+--
+
+LOCK TABLES `drydock_log` WRITE;
+/*!40000 ALTER TABLE `drydock_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `drydock_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `drydock_resource`
+--
+
+DROP TABLE IF EXISTS `drydock_resource`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `drydock_resource` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `ownerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `status` int(10) unsigned NOT NULL,
+  `blueprintClass` varchar(255) NOT NULL,
+  `type` varchar(64) NOT NULL,
+  `attributes` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `capabilities` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `drydock_resource`
+--
+
+LOCK TABLES `drydock_resource` WRITE;
+/*!40000 ALTER TABLE `drydock_resource` DISABLE KEYS */;
+/*!40000 ALTER TABLE `drydock_resource` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_fact`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_fact` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_fact`;
+
+--
+-- Table structure for table `fact_aggregate`
+--
+
+DROP TABLE IF EXISTS `fact_aggregate`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `fact_aggregate` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `factType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `valueX` bigint(20) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `factType` (`factType`,`objectPHID`),
+  KEY `factType_2` (`factType`,`valueX`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fact_aggregate`
+--
+
+LOCK TABLES `fact_aggregate` WRITE;
+/*!40000 ALTER TABLE `fact_aggregate` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fact_aggregate` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `fact_cursor`
+--
+
+DROP TABLE IF EXISTS `fact_cursor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `fact_cursor` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `position` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fact_cursor`
+--
+
+LOCK TABLES `fact_cursor` WRITE;
+/*!40000 ALTER TABLE `fact_cursor` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fact_cursor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `fact_raw`
+--
+
+DROP TABLE IF EXISTS `fact_raw`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `fact_raw` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `factType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectA` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `valueX` bigint(20) NOT NULL,
+  `valueY` bigint(20) NOT NULL,
+  `epoch` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `objectPHID` (`objectPHID`),
+  KEY `factType` (`factType`,`epoch`),
+  KEY `factType_2` (`factType`,`objectA`,`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fact_raw`
+--
+
+LOCK TABLES `fact_raw` WRITE;
+/*!40000 ALTER TABLE `fact_raw` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fact_raw` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_feed`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_feed` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_feed`;
+
+--
+-- Table structure for table `feed_storydata`
+--
+
+DROP TABLE IF EXISTS `feed_storydata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `feed_storydata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `chronologicalKey` bigint(20) unsigned NOT NULL,
+  `storyType` varchar(64) NOT NULL,
+  `storyData` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `chronologicalKey` (`chronologicalKey`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `feed_storydata`
+--
+
+LOCK TABLES `feed_storydata` WRITE;
+/*!40000 ALTER TABLE `feed_storydata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `feed_storydata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `feed_storynotification`
+--
+
+DROP TABLE IF EXISTS `feed_storynotification`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `feed_storynotification` (
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `primaryObjectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `chronologicalKey` bigint(20) unsigned NOT NULL,
+  `hasViewed` tinyint(1) NOT NULL,
+  UNIQUE KEY `userPHID` (`userPHID`,`chronologicalKey`),
+  KEY `userPHID_2` (`userPHID`,`hasViewed`,`primaryObjectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `feed_storynotification`
+--
+
+LOCK TABLES `feed_storynotification` WRITE;
+/*!40000 ALTER TABLE `feed_storynotification` DISABLE KEYS */;
+/*!40000 ALTER TABLE `feed_storynotification` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `feed_storyreference`
+--
+
+DROP TABLE IF EXISTS `feed_storyreference`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `feed_storyreference` (
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `chronologicalKey` bigint(20) unsigned NOT NULL,
+  UNIQUE KEY `objectPHID` (`objectPHID`,`chronologicalKey`),
+  KEY `chronologicalKey` (`chronologicalKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `feed_storyreference`
+--
+
+LOCK TABLES `feed_storyreference` WRITE;
+/*!40000 ALTER TABLE `feed_storyreference` DISABLE KEYS */;
+/*!40000 ALTER TABLE `feed_storyreference` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_file`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_file` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_file`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `file`
+--
+
+DROP TABLE IF EXISTS `file`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `mimeType` varchar(255) DEFAULT NULL,
+  `byteSize` bigint(20) unsigned NOT NULL,
+  `storageEngine` varchar(32) NOT NULL,
+  `storageFormat` varchar(32) NOT NULL,
+  `storageHandle` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `secretKey` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `contentHash` varchar(40) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `metadata` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `ttl` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `authorPHID` (`authorPHID`),
+  KEY `contentHash` (`contentHash`),
+  KEY `key_ttl` (`ttl`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `file`
+--
+
+LOCK TABLES `file` WRITE;
+/*!40000 ALTER TABLE `file` DISABLE KEYS */;
+/*!40000 ALTER TABLE `file` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `file_imagemacro`
+--
+
+DROP TABLE IF EXISTS `file_imagemacro`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_imagemacro` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `filePHID` varchar(64) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `isDisabled` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_disabled` (`isDisabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `file_imagemacro`
+--
+
+LOCK TABLES `file_imagemacro` WRITE;
+/*!40000 ALTER TABLE `file_imagemacro` DISABLE KEYS */;
+/*!40000 ALTER TABLE `file_imagemacro` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `file_storageblob`
+--
+
+DROP TABLE IF EXISTS `file_storageblob`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_storageblob` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longblob NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `file_storageblob`
+--
+
+LOCK TABLES `file_storageblob` WRITE;
+/*!40000 ALTER TABLE `file_storageblob` DISABLE KEYS */;
+/*!40000 ALTER TABLE `file_storageblob` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `file_transformedfile`
+--
+
+DROP TABLE IF EXISTS `file_transformedfile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_transformedfile` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `originalPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transform` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transformedPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `originalPHID` (`originalPHID`,`transform`),
+  KEY `transformedPHID` (`transformedPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `file_transformedfile`
+--
+
+LOCK TABLES `file_transformedfile` WRITE;
+/*!40000 ALTER TABLE `file_transformedfile` DISABLE KEYS */;
+/*!40000 ALTER TABLE `file_transformedfile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `macro_transaction`
+--
+
+DROP TABLE IF EXISTS `macro_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `macro_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `macro_transaction`
+--
+
+LOCK TABLES `macro_transaction` WRITE;
+/*!40000 ALTER TABLE `macro_transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `macro_transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `macro_transaction_comment`
+--
+
+DROP TABLE IF EXISTS `macro_transaction_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `macro_transaction_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transactionPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `isDeleted` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_version` (`transactionPHID`,`commentVersion`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `macro_transaction_comment`
+--
+
+LOCK TABLES `macro_transaction_comment` WRITE;
+/*!40000 ALTER TABLE `macro_transaction_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `macro_transaction_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_flag`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_flag` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_flag`;
+
+--
+-- Table structure for table `flag`
+--
+
+DROP TABLE IF EXISTS `flag`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `flag` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ownerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` varchar(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `reasonPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `color` int(10) unsigned NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ownerPHID` (`ownerPHID`,`type`,`objectPHID`),
+  KEY `objectPHID` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `flag`
+--
+
+LOCK TABLES `flag` WRITE;
+/*!40000 ALTER TABLE `flag` DISABLE KEYS */;
+/*!40000 ALTER TABLE `flag` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_harbormaster`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_harbormaster` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_harbormaster`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `harbormaster_object`
+--
+
+DROP TABLE IF EXISTS `harbormaster_object`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `harbormaster_object` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `harbormaster_object`
+--
+
+LOCK TABLES `harbormaster_object` WRITE;
+/*!40000 ALTER TABLE `harbormaster_object` DISABLE KEYS */;
+/*!40000 ALTER TABLE `harbormaster_object` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `harbormaster_scratchtable`
+--
+
+DROP TABLE IF EXISTS `harbormaster_scratchtable`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `harbormaster_scratchtable` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `data` (`data`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `harbormaster_scratchtable`
+--
+
+LOCK TABLES `harbormaster_scratchtable` WRITE;
+/*!40000 ALTER TABLE `harbormaster_scratchtable` DISABLE KEYS */;
+/*!40000 ALTER TABLE `harbormaster_scratchtable` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `lisk_counter`
+--
+
+DROP TABLE IF EXISTS `lisk_counter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lisk_counter` (
+  `counterName` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `counterValue` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`counterName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lisk_counter`
+--
+
+LOCK TABLES `lisk_counter` WRITE;
+/*!40000 ALTER TABLE `lisk_counter` DISABLE KEYS */;
+/*!40000 ALTER TABLE `lisk_counter` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_herald`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_herald` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_herald`;
+
+--
+-- Table structure for table `herald_action`
+--
+
+DROP TABLE IF EXISTS `herald_action`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_action` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ruleID` int(10) unsigned NOT NULL,
+  `action` varchar(255) NOT NULL,
+  `target` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ruleID` (`ruleID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_action`
+--
+
+LOCK TABLES `herald_action` WRITE;
+/*!40000 ALTER TABLE `herald_action` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_action` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `herald_condition`
+--
+
+DROP TABLE IF EXISTS `herald_condition`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_condition` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ruleID` int(10) unsigned NOT NULL,
+  `fieldName` varchar(255) NOT NULL,
+  `fieldCondition` varchar(255) NOT NULL,
+  `value` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ruleID` (`ruleID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_condition`
+--
+
+LOCK TABLES `herald_condition` WRITE;
+/*!40000 ALTER TABLE `herald_condition` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_condition` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `herald_rule`
+--
+
+DROP TABLE IF EXISTS `herald_rule`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_rule` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentType` varchar(255) NOT NULL,
+  `mustMatchAll` tinyint(1) NOT NULL,
+  `configVersion` int(10) unsigned NOT NULL DEFAULT '1',
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `repetitionPolicy` int(10) unsigned DEFAULT NULL,
+  `ruleType` varchar(255) NOT NULL DEFAULT 'global',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `authorPHID` (`authorPHID`,`name`),
+  KEY `IDX_RULE_TYPE` (`ruleType`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_rule`
+--
+
+LOCK TABLES `herald_rule` WRITE;
+/*!40000 ALTER TABLE `herald_rule` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_rule` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `herald_ruleapplied`
+--
+
+DROP TABLE IF EXISTS `herald_ruleapplied`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_ruleapplied` (
+  `ruleID` int(10) unsigned NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`ruleID`,`phid`),
+  KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_ruleapplied`
+--
+
+LOCK TABLES `herald_ruleapplied` WRITE;
+/*!40000 ALTER TABLE `herald_ruleapplied` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_ruleapplied` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `herald_ruleedit`
+--
+
+DROP TABLE IF EXISTS `herald_ruleedit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_ruleedit` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ruleID` int(10) unsigned NOT NULL,
+  `editorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `ruleName` varchar(255) NOT NULL,
+  `action` varchar(32) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `ruleID` (`ruleID`,`dateCreated`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_ruleedit`
+--
+
+LOCK TABLES `herald_ruleedit` WRITE;
+/*!40000 ALTER TABLE `herald_ruleedit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_ruleedit` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `herald_savedheader`
+--
+
+DROP TABLE IF EXISTS `herald_savedheader`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_savedheader` (
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `header` varchar(255) NOT NULL,
+  PRIMARY KEY (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_savedheader`
+--
+
+LOCK TABLES `herald_savedheader` WRITE;
+/*!40000 ALTER TABLE `herald_savedheader` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_savedheader` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `herald_transcript`
+--
+
+DROP TABLE IF EXISTS `herald_transcript`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `herald_transcript` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `time` int(10) unsigned NOT NULL,
+  `host` varchar(255) NOT NULL,
+  `duration` float NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dryRun` tinyint(1) NOT NULL,
+  `objectTranscript` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `ruleTranscripts` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `conditionTranscripts` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `applyTranscripts` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `garbageCollected` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `objectPHID` (`objectPHID`),
+  KEY `garbageCollected` (`garbageCollected`,`time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `herald_transcript`
+--
+
+LOCK TABLES `herald_transcript` WRITE;
+/*!40000 ALTER TABLE `herald_transcript` DISABLE KEYS */;
+/*!40000 ALTER TABLE `herald_transcript` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_maniphest`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_maniphest` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_maniphest`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_savedquery`
+--
+
+DROP TABLE IF EXISTS `maniphest_savedquery`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_savedquery` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `queryKey` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `isDefault` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userPHID` (`userPHID`,`name`),
+  KEY `userPHID_2` (`userPHID`,`isDefault`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_savedquery`
+--
+
+LOCK TABLES `maniphest_savedquery` WRITE;
+/*!40000 ALTER TABLE `maniphest_savedquery` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_savedquery` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_task`
+--
+
+DROP TABLE IF EXISTS `maniphest_task`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_task` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `ownerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `ccPHIDs` text,
+  `attached` longtext NOT NULL,
+  `status` int(10) unsigned NOT NULL,
+  `priority` int(10) unsigned NOT NULL,
+  `title` text NOT NULL,
+  `originalTitle` text NOT NULL,
+  `description` longtext NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `projectPHIDs` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `mailKey` varchar(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `ownerOrdering` varchar(64) DEFAULT NULL,
+  `originalEmailSource` varchar(255) DEFAULT NULL,
+  `subpriority` double NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `priority` (`priority`,`status`),
+  KEY `status` (`status`),
+  KEY `ownerPHID` (`ownerPHID`,`status`),
+  KEY `authorPHID` (`authorPHID`,`status`),
+  KEY `ownerOrdering` (`ownerOrdering`),
+  KEY `priority_2` (`priority`,`subpriority`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_task`
+--
+
+LOCK TABLES `maniphest_task` WRITE;
+/*!40000 ALTER TABLE `maniphest_task` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_task` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_taskauxiliarystorage`
+--
+
+DROP TABLE IF EXISTS `maniphest_taskauxiliarystorage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_taskauxiliarystorage` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `taskPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `taskPHID` (`taskPHID`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_taskauxiliarystorage`
+--
+
+LOCK TABLES `maniphest_taskauxiliarystorage` WRITE;
+/*!40000 ALTER TABLE `maniphest_taskauxiliarystorage` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_taskauxiliarystorage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_taskproject`
+--
+
+DROP TABLE IF EXISTS `maniphest_taskproject`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_taskproject` (
+  `taskPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `projectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`projectPHID`,`taskPHID`),
+  UNIQUE KEY `taskPHID` (`taskPHID`,`projectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_taskproject`
+--
+
+LOCK TABLES `maniphest_taskproject` WRITE;
+/*!40000 ALTER TABLE `maniphest_taskproject` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_taskproject` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_tasksubscriber`
+--
+
+DROP TABLE IF EXISTS `maniphest_tasksubscriber`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_tasksubscriber` (
+  `taskPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `subscriberPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`subscriberPHID`,`taskPHID`),
+  UNIQUE KEY `taskPHID` (`taskPHID`,`subscriberPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_tasksubscriber`
+--
+
+LOCK TABLES `maniphest_tasksubscriber` WRITE;
+/*!40000 ALTER TABLE `maniphest_tasksubscriber` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_tasksubscriber` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_touch`
+--
+
+DROP TABLE IF EXISTS `maniphest_touch`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_touch` (
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `taskID` int(10) unsigned NOT NULL,
+  `touchedAt` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`userPHID`,`taskID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_touch`
+--
+
+LOCK TABLES `maniphest_touch` WRITE;
+/*!40000 ALTER TABLE `maniphest_touch` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_touch` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maniphest_transaction`
+--
+
+DROP TABLE IF EXISTS `maniphest_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `maniphest_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `taskID` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transactionType` varchar(16) NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `comments` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `metadata` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `taskID` (`taskID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maniphest_transaction`
+--
+
+LOCK TABLES `maniphest_transaction` WRITE;
+/*!40000 ALTER TABLE `maniphest_transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `maniphest_transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_meta_data`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_meta_data` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_meta_data`;
+
+--
+-- Table structure for table `patch_status`
+--
+
+DROP TABLE IF EXISTS `patch_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `patch_status` (
+  `patch` varchar(255) NOT NULL,
+  `applied` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`patch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `patch_status`
+--
+
+LOCK TABLES `patch_status` WRITE;
+/*!40000 ALTER TABLE `patch_status` DISABLE KEYS */;
+INSERT INTO `patch_status` VALUES ('phabricator:000.project.sql',1),('phabricator:0000.legacy.sql',1),('phabricator:001.maniphest_projects.sql',1),('phabricator:002.oauth.sql',1),('phabricator:003.more_oauth.sql',1),('phabricator:004.daemonrepos.sql',1),('phabricator:005.workers.sql',1),('phabricator:006.repository.sql',1),('phabricator:007.daemonlog.sql',1),('phabricator:008.repoopt.sql',1),('phabricator:009.repo_summary.sql',1),('phabricator:010.herald.sql',1),('phabricator:011.badcommit.sql',1),('phabricator:012.dropphidtype.sql',1),('phabricator:013.commitdetail.sql',1),('phabricator:014.shortcuts.sql',1),('phabricator:015.preferences.sql',1),('phabricator:016.userrealnameindex.sql',1),('phabricator:017.sessionkeys.sql',1),('phabricator:018.owners.sql',1),('phabricator:019.arcprojects.sql',1),('phabricator:020.pathcapital.sql',1),('phabricator:021.xhpastview.sql',1),('phabricator:022.differentialcommit.sql',1),('phabricator:023.dxkeys.sql',1),('phabricator:024.mlistkeys.sql',1),('phabricator:025.commentopt.sql',1),('phabricator:026.diffpropkey.sql',1),('phabricator:027.metamtakeys.sql',1),('phabricator:028.systemagent.sql',1),('phabricator:029.cursors.sql',1),('phabricator:030.imagemacro.sql',1),('phabricator:031.workerrace.sql',1),('phabricator:032.viewtime.sql',1),('phabricator:033.privtest.sql',1),('phabricator:034.savedheader.sql',1),('phabricator:035.proxyimage.sql',1),('phabricator:036.mailkey.sql',1),('phabricator:037.setuptest.sql',1),('phabricator:038.admin.sql',1),('phabricator:039.userlog.sql',1),('phabricator:040.transform.sql',1),('phabricator:041.heraldrepetition.sql',1),('phabricator:042.commentmetadata.sql',1),('phabricator:043.pastebin.sql',1),('phabricator:044.countdown.sql',1),('phabricator:045.timezone.sql',1),('phabricator:046.conduittoken.sql',1),('phabricator:047.projectstatus.sql',1),('phabricator:048.relationshipkeys.sql',1),('phabricator:049.projectowner.sql',1),('phabricator:050.taskdenormal.sql',1),('phabricator:051.projectfilter.sql',1),('phabricator:052.pastelanguage.sql',1),('phabricator:053.feed.sql',1),('phabricator:054.subscribers.sql',1),('phabricator:055.add_author_to_files.sql',1),('phabricator:056.slowvote.sql',1),('phabricator:057.parsecache.sql',1),('phabricator:058.missingkeys.sql',1),('phabricator:059.engines.php',1),('phabricator:060.phriction.sql',1),('phabricator:061.phrictioncontent.sql',1),('phabricator:062.phrictionmenu.sql',1),('phabricator:063.pasteforks.sql',1),('phabricator:064.subprojects.sql',1),('phabricator:065.sshkeys.sql',1),('phabricator:066.phrictioncontent.sql',1),('phabricator:067.preferences.sql',1),('phabricator:068.maniphestauxiliarystorage.sql',1),('phabricator:069.heraldxscript.sql',1),('phabricator:070.differentialaux.sql',1),('phabricator:071.contentsource.sql',1),('phabricator:072.blamerevert.sql',1),('phabricator:073.reposymbols.sql',1),('phabricator:074.affectedpath.sql',1),('phabricator:075.revisionhash.sql',1),('phabricator:076.indexedlanguages.sql',1),('phabricator:077.originalemail.sql',1),('phabricator:078.nametoken.sql',1),('phabricator:079.nametokenindex.php',1),('phabricator:080.filekeys.sql',1),('phabricator:081.filekeys.php',1),('phabricator:082.xactionkey.sql',1),('phabricator:083.dxviewtime.sql',1),('phabricator:084.pasteauthorkey.sql',1),('phabricator:085.packagecommitrelationship.sql',1),('phabricator:086.formeraffil.sql',1),('phabricator:087.phrictiondelete.sql',1),('phabricator:088.audit.sql',1),('phabricator:089.projectwiki.sql',1),('phabricator:090.forceuniqueprojectnames.php',1),('phabricator:091.uniqueslugkey.sql',1),('phabricator:092.dropgithubnotification.sql',1),('phabricator:093.gitremotes.php',1),('phabricator:094.phrictioncolumn.sql',1),('phabricator:095.directory.sql',1),('phabricator:096.filename.sql',1),('phabricator:097.heraldruletypes.sql',1),('phabricator:098.heraldruletypemigration.php',1),('phabricator:099.drydock.sql',1),('phabricator:100.projectxaction.sql',1),('phabricator:101.heraldruleapplied.sql',1),('phabricator:102.heraldcleanup.php',1),('phabricator:103.heraldedithistory.sql',1),('phabricator:104.searchkey.sql',1),('phabricator:105.mimetype.sql',1),('phabricator:106.chatlog.sql',1),('phabricator:107.oauthserver.sql',1),('phabricator:108.oauthscope.sql',1),('phabricator:109.oauthclientphidkey.sql',1),('phabricator:110.commitaudit.sql',1),('phabricator:111.commitauditmigration.php',1),('phabricator:112.oauthaccesscoderedirecturi.sql',1),('phabricator:113.lastreviewer.sql',1),('phabricator:114.auditrequest.sql',1),('phabricator:115.prepareutf8.sql',1),('phabricator:116.utf8-backup-first-expect-wait.sql',1),('phabricator:117.repositorydescription.php',1),('phabricator:118.auditinline.sql',1),('phabricator:119.filehash.sql',1),('phabricator:120.noop.sql',1),('phabricator:121.drydocklog.sql',1),('phabricator:122.flag.sql',1),('phabricator:123.heraldrulelog.sql',1),('phabricator:124.subpriority.sql',1),('phabricator:125.ipv6.sql',1),('phabricator:126.edges.sql',1),('phabricator:127.userkeybody.sql',1),('phabricator:128.phabricatorcom.sql',1),('phabricator:129.savedquery.sql',1),('phabricator:130.denormalrevisionquery.sql',1),('phabricator:131.migraterevisionquery.php',1),('phabricator:132.phame.sql',1),('phabricator:133.imagemacro.sql',1),('phabricator:134.emptysearch.sql',1),('phabricator:135.datecommitted.sql',1),('phabricator:136.sex.sql',1),('phabricator:137.auditmetadata.sql',1),('phabricator:138.notification.sql',1358377808),('phabricator:20121209.pholioxactions.sql',1358377847),('phabricator:20121209.xmacroadd.sql',1358377849),('phabricator:20121209.xmacromigrate.php',1358377849),('phabricator:20121209.xmacromigratekey.sql',1358377850),('phabricator:20121220.generalcache.sql',1358377851),('phabricator:20121226.config.sql',1358377852),('phabricator:20130101.confxaction.sql',1358377853),('phabricator:20130102.metamtareceivedmailmessageidhash.sql',1358377854),('phabricator:20130103.filemetadata.sql',1358377855),('phabricator:20130111.conpherence.sql',1362136635),('phabricator:20130127.altheraldtranscript.sql',1362136635),('phabricator:20130131.conpherencepics.sql',1362136635),('phabricator:20130201.revisionunsubscribed.php',1362136635),('phabricator:20130201.revisionunsubscribed.sql',1362136635),('phabricator:20130214.chatlogchannel.sql',1362136635),('phabricator:20130214.chatlogchannelid.sql',1362136635),('phabricator:20130214.token.sql',1362136635),('phabricator:20130215.phabricatorfileaddttl.sql',1362136635),('phabricator:20130217.cachettl.sql',1362136635),('phabricator:20130218.longdaemon.sql',1362136635),('phabricator:20130218.updatechannelid.php',1362136635),('phabricator:20130219.commitsummary.sql',1362136635),('phabricator:20130219.commitsummarymig.php',1362136635),('phabricator:20130222.dropchannel.sql',1362136635),('phabricator:20130226.commitkey.sql',1362136635),('phabricator:daemonstatus.sql',1358377823),('phabricator:daemonstatuskey.sql',1358377828),('phabricator:daemontaskarchive.sql',1358377838),('phabricator:db.audit',1),('phabricator:db.cache',1358377804),('phabricator:db.calendar',1358377802),('phabricator:db.chatlog',1),('phabricator:db.conduit',1),('phabricator:db.config',1358377852),('phabricator:db.conpherence',1362136635),('phabricator:db.countdown',1),('phabricator:db.daemon',1),('phabricator:db.differential',1),('phabricator:db.draft',1),('phabricator:db.drydock',1),('phabricator:db.fact',1358377804),('phabricator:db.feed',1),('phabricator:db.file',1),('phabricator:db.flag',1),('phabricator:db.harbormaster',1358377803),('phabricator:db.herald',1),('phabricator:db.maniphest',1),('phabricator:db.metamta',1),('phabricator:db.meta_data',1),('phabricator:db.oauth_server',1),('phabricator:db.owners',1),('phabricator:db.pastebin',1),('phabricator:db.phame',1),('phabricator:db.phid',1),('phabricator:db.pholio',1358377807),('phabricator:db.phriction',1),('phabricator:db.ponder',1358377805),('phabricator:db.project',1),('phabricator:db.repository',1),('phabricator:db.search',1),('phabricator:db.slowvote',1),('phabricator:db.timeline',1),('phabricator:db.token',1362136635),('phabricator:db.user',1),('phabricator:db.worker',1),('phabricator:db.xhpastview',1),('phabricator:db.xhprof',1358377806),('phabricator:differentialbookmarks.sql',1358377817),('phabricator:draft-metadata.sql',1358377832),('phabricator:dropfileproxyimage.sql',1358377843),('phabricator:drydockresoucetype.sql',1358377840),('phabricator:drydocktaskid.sql',1358377839),('phabricator:edgetype.sql',1358377829),('phabricator:emailtable.sql',1358377810),('phabricator:emailtableport.sql',1358377811),('phabricator:emailtableremove.sql',1358377811),('phabricator:fact-raw.sql',1358377825),('phabricator:harbormasterobject.sql',1358377817),('phabricator:holidays.sql',1358377808),('phabricator:ldapinfo.sql',1358377814),('phabricator:liskcounters-task.sql',1358377844),('phabricator:liskcounters.php',1358377842),('phabricator:liskcounters.sql',1358377841),('phabricator:maniphestxcache.sql',1358377819),('phabricator:markupcache.sql',1358377818),('phabricator:migrate-differential-dependencies.php',1358377820),('phabricator:migrate-maniphest-dependencies.php',1358377820),('phabricator:migrate-maniphest-revisions.php',1358377822),('phabricator:migrate-project-edges.php',1358377824),('phabricator:owners-exclude.sql',1358377846),('phabricator:pastepolicy.sql',1358377831),('phabricator:phameblog.sql',1358377821),('phabricator:phamedomain.sql',1358377833),('phabricator:phameoneblog.sql',1358377837),('phabricator:phamepolicy.sql',1358377836),('phabricator:phiddrop.sql',1358377812),('phabricator:pholio.sql',1358377846),('phabricator:policy-project.sql',1358377827),('phabricator:ponder-comments.sql',1358377830),('phabricator:ponder-mailkey-populate.php',1358377835),('phabricator:ponder-mailkey.sql',1358377834),('phabricator:ponder.sql',1358377826),('phabricator:repository-lint.sql',1358377843),('phabricator:statustxt.sql',1358377837),('phabricator:symbolcontexts.sql',1358377823),('phabricator:testdatabase.sql',1358377813),('phabricator:threadtopic.sql',1358377815),('phabricator:userstatus.sql',1358377809),('phabricator:usertranslation.sql',1358377816),('phabricator:xhprof.sql',1358377832);
+/*!40000 ALTER TABLE `patch_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_metamta`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_metamta` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_metamta`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `metamta_mail`
+--
+
+DROP TABLE IF EXISTS `metamta_mail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `metamta_mail` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `parameters` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `message` text,
+  `retryCount` int(10) unsigned NOT NULL,
+  `nextRetry` int(10) unsigned NOT NULL,
+  `relatedPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `status` (`status`,`nextRetry`),
+  KEY `relatedPHID` (`relatedPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `metamta_mail`
+--
+
+LOCK TABLES `metamta_mail` WRITE;
+/*!40000 ALTER TABLE `metamta_mail` DISABLE KEYS */;
+/*!40000 ALTER TABLE `metamta_mail` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `metamta_mailinglist`
+--
+
+DROP TABLE IF EXISTS `metamta_mailinglist`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `metamta_mailinglist` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `uri` varchar(255) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `metamta_mailinglist`
+--
+
+LOCK TABLES `metamta_mailinglist` WRITE;
+/*!40000 ALTER TABLE `metamta_mailinglist` DISABLE KEYS */;
+/*!40000 ALTER TABLE `metamta_mailinglist` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `metamta_receivedmail`
+--
+
+DROP TABLE IF EXISTS `metamta_receivedmail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `metamta_receivedmail` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `headers` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `bodies` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `attachments` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `relatedPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `message` longtext CHARACTER SET utf8 COLLATE utf8_bin,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `messageIDHash` char(12) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `relatedPHID` (`relatedPHID`),
+  KEY `authorPHID` (`authorPHID`),
+  KEY `key_messageIDHash` (`messageIDHash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `metamta_receivedmail`
+--
+
+LOCK TABLES `metamta_receivedmail` WRITE;
+/*!40000 ALTER TABLE `metamta_receivedmail` DISABLE KEYS */;
+/*!40000 ALTER TABLE `metamta_receivedmail` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_oauth_server`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_oauth_server` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_oauth_server`;
+
+--
+-- Table structure for table `oauth_server_oauthclientauthorization`
+--
+
+DROP TABLE IF EXISTS `oauth_server_oauthclientauthorization`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `oauth_server_oauthclientauthorization` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `clientPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `scope` text NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `userPHID` (`userPHID`,`clientPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oauth_server_oauthclientauthorization`
+--
+
+LOCK TABLES `oauth_server_oauthclientauthorization` WRITE;
+/*!40000 ALTER TABLE `oauth_server_oauthclientauthorization` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oauth_server_oauthclientauthorization` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `oauth_server_oauthserveraccesstoken`
+--
+
+DROP TABLE IF EXISTS `oauth_server_oauthserveraccesstoken`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `oauth_server_oauthserveraccesstoken` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `token` varchar(32) NOT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `clientPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oauth_server_oauthserveraccesstoken`
+--
+
+LOCK TABLES `oauth_server_oauthserveraccesstoken` WRITE;
+/*!40000 ALTER TABLE `oauth_server_oauthserveraccesstoken` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oauth_server_oauthserveraccesstoken` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `oauth_server_oauthserverauthorizationcode`
+--
+
+DROP TABLE IF EXISTS `oauth_server_oauthserverauthorizationcode`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `oauth_server_oauthserverauthorizationcode` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `code` varchar(32) NOT NULL,
+  `clientPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `clientSecret` varchar(32) NOT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `redirectURI` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oauth_server_oauthserverauthorizationcode`
+--
+
+LOCK TABLES `oauth_server_oauthserverauthorizationcode` WRITE;
+/*!40000 ALTER TABLE `oauth_server_oauthserverauthorizationcode` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oauth_server_oauthserverauthorizationcode` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `oauth_server_oauthserverclient`
+--
+
+DROP TABLE IF EXISTS `oauth_server_oauthserverclient`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `oauth_server_oauthserverclient` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `secret` varchar(32) NOT NULL,
+  `redirectURI` varchar(255) NOT NULL,
+  `creatorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `creatorPHID` (`creatorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `oauth_server_oauthserverclient`
+--
+
+LOCK TABLES `oauth_server_oauthserverclient` WRITE;
+/*!40000 ALTER TABLE `oauth_server_oauthserverclient` DISABLE KEYS */;
+/*!40000 ALTER TABLE `oauth_server_oauthserverclient` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_owners`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_owners` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_owners`;
+
+--
+-- Table structure for table `owners_owner`
+--
+
+DROP TABLE IF EXISTS `owners_owner`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `owners_owner` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `packageID` int(10) unsigned NOT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `packageID` (`packageID`,`userPHID`),
+  KEY `userPHID` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `owners_owner`
+--
+
+LOCK TABLES `owners_owner` WRITE;
+/*!40000 ALTER TABLE `owners_owner` DISABLE KEYS */;
+/*!40000 ALTER TABLE `owners_owner` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `owners_package`
+--
+
+DROP TABLE IF EXISTS `owners_package`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `owners_package` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `originalName` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `primaryOwnerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `auditingEnabled` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `owners_package`
+--
+
+LOCK TABLES `owners_package` WRITE;
+/*!40000 ALTER TABLE `owners_package` DISABLE KEYS */;
+/*!40000 ALTER TABLE `owners_package` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `owners_path`
+--
+
+DROP TABLE IF EXISTS `owners_path`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `owners_path` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `packageID` int(10) unsigned NOT NULL,
+  `repositoryPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `path` varchar(255) NOT NULL,
+  `excluded` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `packageID` (`packageID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `owners_path`
+--
+
+LOCK TABLES `owners_path` WRITE;
+/*!40000 ALTER TABLE `owners_path` DISABLE KEYS */;
+/*!40000 ALTER TABLE `owners_path` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_pastebin`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_pastebin` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_pastebin`;
+
+--
+-- Table structure for table `pastebin_paste`
+--
+
+DROP TABLE IF EXISTS `pastebin_paste`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pastebin_paste` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `filePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `language` varchar(64) NOT NULL,
+  `parentPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `parentPHID` (`parentPHID`),
+  KEY `authorPHID` (`authorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pastebin_paste`
+--
+
+LOCK TABLES `pastebin_paste` WRITE;
+/*!40000 ALTER TABLE `pastebin_paste` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pastebin_paste` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_phame`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_phame` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_phame`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `phame_blog`
+--
+
+DROP TABLE IF EXISTS `phame_blog`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `phame_blog` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `description` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `domain` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `configData` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `creatorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `joinPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `domain` (`domain`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `phame_blog`
+--
+
+LOCK TABLES `phame_blog` WRITE;
+/*!40000 ALTER TABLE `phame_blog` DISABLE KEYS */;
+/*!40000 ALTER TABLE `phame_blog` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `phame_post`
+--
+
+DROP TABLE IF EXISTS `phame_post`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `phame_post` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `bloggerPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `phameTitle` varchar(64) NOT NULL,
+  `body` longtext,
+  `visibility` int(10) unsigned NOT NULL DEFAULT '0',
+  `configData` longtext,
+  `datePublished` int(10) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `blogPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `phameTitle` (`bloggerPHID`,`phameTitle`),
+  KEY `bloggerPosts` (`bloggerPHID`,`visibility`,`datePublished`,`id`),
+  KEY `instancePosts` (`visibility`,`datePublished`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `phame_post`
+--
+
+LOCK TABLES `phame_post` WRITE;
+/*!40000 ALTER TABLE `phame_post` DISABLE KEYS */;
+/*!40000 ALTER TABLE `phame_post` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_pholio`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_pholio` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_pholio`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pholio_image`
+--
+
+DROP TABLE IF EXISTS `pholio_image`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pholio_image` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `mockID` int(10) unsigned NOT NULL,
+  `filePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `description` longtext NOT NULL,
+  `sequence` int(10) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `mockID` (`mockID`,`sequence`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pholio_image`
+--
+
+LOCK TABLES `pholio_image` WRITE;
+/*!40000 ALTER TABLE `pholio_image` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pholio_image` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pholio_mock`
+--
+
+DROP TABLE IF EXISTS `pholio_mock`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pholio_mock` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `originalName` varchar(128) NOT NULL,
+  `description` longtext NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `coverPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `mailKey` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `authorPHID` (`authorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pholio_mock`
+--
+
+LOCK TABLES `pholio_mock` WRITE;
+/*!40000 ALTER TABLE `pholio_mock` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pholio_mock` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pholio_transaction`
+--
+
+DROP TABLE IF EXISTS `pholio_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pholio_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `transactionType` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  KEY `key_object` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pholio_transaction`
+--
+
+LOCK TABLES `pholio_transaction` WRITE;
+/*!40000 ALTER TABLE `pholio_transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pholio_transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pholio_transaction_comment`
+--
+
+DROP TABLE IF EXISTS `pholio_transaction_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `pholio_transaction_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transactionPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentVersion` int(10) unsigned NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `contentSource` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `isDeleted` tinyint(1) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `mockID` int(10) unsigned DEFAULT NULL,
+  `imageID` int(10) unsigned DEFAULT NULL,
+  `x` int(10) unsigned DEFAULT NULL,
+  `y` int(10) unsigned DEFAULT NULL,
+  `width` int(10) unsigned DEFAULT NULL,
+  `height` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_phid` (`phid`),
+  UNIQUE KEY `key_version` (`transactionPHID`,`commentVersion`),
+  UNIQUE KEY `key_draft` (`authorPHID`,`mockID`,`transactionPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `pholio_transaction_comment`
+--
+
+LOCK TABLES `pholio_transaction_comment` WRITE;
+/*!40000 ALTER TABLE `pholio_transaction_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pholio_transaction_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_phriction`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_phriction` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_phriction`;
+
+--
+-- Table structure for table `phriction_content`
+--
+
+DROP TABLE IF EXISTS `phriction_content`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `phriction_content` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `documentID` int(10) unsigned NOT NULL,
+  `version` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `title` varchar(512) NOT NULL,
+  `slug` varchar(512) NOT NULL,
+  `content` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
+  `changeType` int(10) unsigned NOT NULL DEFAULT '0',
+  `changeRef` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `documentID` (`documentID`,`version`),
+  KEY `authorPHID` (`authorPHID`),
+  KEY `slug` (`slug`(255))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `phriction_content`
+--
+
+LOCK TABLES `phriction_content` WRITE;
+/*!40000 ALTER TABLE `phriction_content` DISABLE KEYS */;
+/*!40000 ALTER TABLE `phriction_content` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `phriction_document`
+--
+
+DROP TABLE IF EXISTS `phriction_document`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `phriction_document` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `slug` varchar(128) NOT NULL,
+  `depth` int(10) unsigned NOT NULL,
+  `contentID` int(10) unsigned DEFAULT NULL,
+  `status` int(10) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `slug` (`slug`),
+  UNIQUE KEY `depth` (`depth`,`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `phriction_document`
+--
+
+LOCK TABLES `phriction_document` WRITE;
+/*!40000 ALTER TABLE `phriction_document` DISABLE KEYS */;
+/*!40000 ALTER TABLE `phriction_document` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_ponder`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_ponder` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_ponder`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ponder_answer`
+--
+
+DROP TABLE IF EXISTS `ponder_answer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ponder_answer` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `questionID` int(10) unsigned NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `voteCount` int(10) NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `content` longtext NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `contentSource` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `questionID` (`questionID`),
+  KEY `authorPHID` (`authorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ponder_answer`
+--
+
+LOCK TABLES `ponder_answer` WRITE;
+/*!40000 ALTER TABLE `ponder_answer` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ponder_answer` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ponder_comment`
+--
+
+DROP TABLE IF EXISTS `ponder_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ponder_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `targetPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `content` longtext NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `authorPHID` (`authorPHID`),
+  KEY `targetPHID` (`targetPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ponder_comment`
+--
+
+LOCK TABLES `ponder_comment` WRITE;
+/*!40000 ALTER TABLE `ponder_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ponder_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `ponder_question`
+--
+
+DROP TABLE IF EXISTS `ponder_question`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `ponder_question` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `voteCount` int(10) NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `content` longtext NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `contentSource` varchar(255) DEFAULT NULL,
+  `heat` float NOT NULL,
+  `answerCount` int(10) unsigned NOT NULL,
+  `mailKey` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `authorPHID` (`authorPHID`),
+  KEY `heat` (`heat`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `ponder_question`
+--
+
+LOCK TABLES `ponder_question` WRITE;
+/*!40000 ALTER TABLE `ponder_question` DISABLE KEYS */;
+/*!40000 ALTER TABLE `ponder_question` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_project`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_project` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_project`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project`
+--
+
+DROP TABLE IF EXISTS `project`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `status` varchar(32) NOT NULL,
+  `subprojectPHIDs` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `phrictionSlug` varchar(128) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `viewPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `editPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `joinPolicy` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `phrictionSlug` (`phrictionSlug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project`
+--
+
+LOCK TABLES `project` WRITE;
+/*!40000 ALTER TABLE `project` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_affiliation`
+--
+
+DROP TABLE IF EXISTS `project_affiliation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_affiliation` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `projectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `role` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `isOwner` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `projectPHID` (`projectPHID`,`userPHID`),
+  KEY `userPHID` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_affiliation`
+--
+
+LOCK TABLES `project_affiliation` WRITE;
+/*!40000 ALTER TABLE `project_affiliation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_affiliation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_profile`
+--
+
+DROP TABLE IF EXISTS `project_profile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_profile` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `projectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `blurb` longtext NOT NULL,
+  `profileImagePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `projectPHID` (`projectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_profile`
+--
+
+LOCK TABLES `project_profile` WRITE;
+/*!40000 ALTER TABLE `project_profile` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_profile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_subproject`
+--
+
+DROP TABLE IF EXISTS `project_subproject`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_subproject` (
+  `projectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `subprojectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`subprojectPHID`,`projectPHID`),
+  UNIQUE KEY `projectPHID` (`projectPHID`,`subprojectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_subproject`
+--
+
+LOCK TABLES `project_subproject` WRITE;
+/*!40000 ALTER TABLE `project_subproject` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_subproject` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_transaction`
+--
+
+DROP TABLE IF EXISTS `project_transaction`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `project_transaction` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `projectID` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `transactionType` varchar(32) NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `projectID` (`projectID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_transaction`
+--
+
+LOCK TABLES `project_transaction` WRITE;
+/*!40000 ALTER TABLE `project_transaction` DISABLE KEYS */;
+/*!40000 ALTER TABLE `project_transaction` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_repository`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_repository` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_repository`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository`
+--
+
+DROP TABLE IF EXISTS `repository`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `callsign` varchar(32) NOT NULL,
+  `versionControlSystem` varchar(32) NOT NULL,
+  `details` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `uuid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `callsign` (`callsign`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository`
+--
+
+LOCK TABLES `repository` WRITE;
+/*!40000 ALTER TABLE `repository` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_arcanistproject`
+--
+
+DROP TABLE IF EXISTS `repository_arcanistproject`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_arcanistproject` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `repositoryID` int(10) unsigned DEFAULT NULL,
+  `symbolIndexLanguages` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `symbolIndexProjects` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_arcanistproject`
+--
+
+LOCK TABLES `repository_arcanistproject` WRITE;
+/*!40000 ALTER TABLE `repository_arcanistproject` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_arcanistproject` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_auditrequest`
+--
+
+DROP TABLE IF EXISTS `repository_auditrequest`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_auditrequest` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `auditorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commitPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `auditStatus` varchar(64) NOT NULL,
+  `auditReasons` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `commitPHID` (`commitPHID`),
+  KEY `auditorPHID` (`auditorPHID`,`auditStatus`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_auditrequest`
+--
+
+LOCK TABLES `repository_auditrequest` WRITE;
+/*!40000 ALTER TABLE `repository_auditrequest` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_auditrequest` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_badcommit`
+--
+
+DROP TABLE IF EXISTS `repository_badcommit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_badcommit` (
+  `fullCommitName` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `description` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`fullCommitName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_badcommit`
+--
+
+LOCK TABLES `repository_badcommit` WRITE;
+/*!40000 ALTER TABLE `repository_badcommit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_badcommit` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_branch`
+--
+
+DROP TABLE IF EXISTS `repository_branch`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_branch` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `repositoryID` int(10) unsigned NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `lintCommit` varchar(40) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `repositoryID` (`repositoryID`,`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_branch`
+--
+
+LOCK TABLES `repository_branch` WRITE;
+/*!40000 ALTER TABLE `repository_branch` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_branch` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_commit`
+--
+
+DROP TABLE IF EXISTS `repository_commit`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_commit` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `repositoryID` int(10) unsigned NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commitIdentifier` varchar(40) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `epoch` int(10) unsigned NOT NULL,
+  `mailKey` varchar(20) NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `auditStatus` int(10) unsigned NOT NULL,
+  `summary` varchar(80) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`),
+  UNIQUE KEY `key_commit_identity` (`commitIdentifier`,`repositoryID`),
+  KEY `repositoryID_2` (`repositoryID`,`epoch`),
+  KEY `authorPHID` (`authorPHID`,`auditStatus`,`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_commit`
+--
+
+LOCK TABLES `repository_commit` WRITE;
+/*!40000 ALTER TABLE `repository_commit` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_commit` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_commitdata`
+--
+
+DROP TABLE IF EXISTS `repository_commitdata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_commitdata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `commitID` int(10) unsigned NOT NULL,
+  `authorName` varchar(255) NOT NULL,
+  `commitMessage` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commitDetails` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `commitID` (`commitID`),
+  KEY `authorName` (`authorName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_commitdata`
+--
+
+LOCK TABLES `repository_commitdata` WRITE;
+/*!40000 ALTER TABLE `repository_commitdata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_commitdata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_filesystem`
+--
+
+DROP TABLE IF EXISTS `repository_filesystem`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_filesystem` (
+  `repositoryID` int(10) unsigned NOT NULL,
+  `parentID` int(10) unsigned NOT NULL,
+  `svnCommit` int(10) unsigned NOT NULL,
+  `pathID` int(10) unsigned NOT NULL,
+  `existed` tinyint(1) NOT NULL,
+  `fileType` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`repositoryID`,`parentID`,`pathID`,`svnCommit`),
+  KEY `repositoryID` (`repositoryID`,`svnCommit`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_filesystem`
+--
+
+LOCK TABLES `repository_filesystem` WRITE;
+/*!40000 ALTER TABLE `repository_filesystem` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_filesystem` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_lintmessage`
+--
+
+DROP TABLE IF EXISTS `repository_lintmessage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_lintmessage` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `branchID` int(10) unsigned NOT NULL,
+  `path` varchar(512) NOT NULL,
+  `line` int(10) unsigned NOT NULL,
+  `code` varchar(32) NOT NULL,
+  `severity` varchar(16) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `branchID` (`branchID`,`path`(64)),
+  KEY `branchID_2` (`branchID`,`code`,`path`(64))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_lintmessage`
+--
+
+LOCK TABLES `repository_lintmessage` WRITE;
+/*!40000 ALTER TABLE `repository_lintmessage` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_lintmessage` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_path`
+--
+
+DROP TABLE IF EXISTS `repository_path`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_path` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `path` varchar(512) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `pathHash` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pathHash` (`pathHash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_path`
+--
+
+LOCK TABLES `repository_path` WRITE;
+/*!40000 ALTER TABLE `repository_path` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_path` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_pathchange`
+--
+
+DROP TABLE IF EXISTS `repository_pathchange`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_pathchange` (
+  `repositoryID` int(10) unsigned NOT NULL,
+  `pathID` int(10) unsigned NOT NULL,
+  `commitID` int(10) unsigned NOT NULL,
+  `targetPathID` int(10) unsigned DEFAULT NULL,
+  `targetCommitID` int(10) unsigned DEFAULT NULL,
+  `changeType` int(10) unsigned NOT NULL,
+  `fileType` int(10) unsigned NOT NULL,
+  `isDirect` tinyint(1) NOT NULL,
+  `commitSequence` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`commitID`,`pathID`),
+  KEY `repositoryID` (`repositoryID`,`pathID`,`commitSequence`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_pathchange`
+--
+
+LOCK TABLES `repository_pathchange` WRITE;
+/*!40000 ALTER TABLE `repository_pathchange` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_pathchange` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_shortcut`
+--
+
+DROP TABLE IF EXISTS `repository_shortcut`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_shortcut` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `href` varchar(255) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `sequence` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_shortcut`
+--
+
+LOCK TABLES `repository_shortcut` WRITE;
+/*!40000 ALTER TABLE `repository_shortcut` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_shortcut` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_summary`
+--
+
+DROP TABLE IF EXISTS `repository_summary`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_summary` (
+  `repositoryID` int(10) unsigned NOT NULL,
+  `size` int(10) unsigned NOT NULL,
+  `lastCommitID` int(10) unsigned NOT NULL,
+  `epoch` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`repositoryID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_summary`
+--
+
+LOCK TABLES `repository_summary` WRITE;
+/*!40000 ALTER TABLE `repository_summary` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_summary` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `repository_symbol`
+--
+
+DROP TABLE IF EXISTS `repository_symbol`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `repository_symbol` (
+  `arcanistProjectID` int(10) unsigned NOT NULL,
+  `symbolContext` varchar(128) NOT NULL DEFAULT '',
+  `symbolName` varchar(128) NOT NULL,
+  `symbolType` varchar(12) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `symbolLanguage` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `pathID` int(10) unsigned NOT NULL,
+  `lineNumber` int(10) unsigned NOT NULL,
+  KEY `symbolName` (`symbolName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `repository_symbol`
+--
+
+LOCK TABLES `repository_symbol` WRITE;
+/*!40000 ALTER TABLE `repository_symbol` DISABLE KEYS */;
+/*!40000 ALTER TABLE `repository_symbol` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_search`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_search` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_search`;
+
+--
+-- Table structure for table `search_document`
+--
+
+DROP TABLE IF EXISTS `search_document`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_document` (
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `documentType` varchar(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `documentTitle` varchar(255) NOT NULL,
+  `documentCreated` int(10) unsigned NOT NULL,
+  `documentModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`phid`),
+  KEY `documentCreated` (`documentCreated`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `search_document`
+--
+
+LOCK TABLES `search_document` WRITE;
+/*!40000 ALTER TABLE `search_document` DISABLE KEYS */;
+INSERT INTO `search_document` VALUES ('PHID-USER-agn7y2uw2pj4nc5nknhe','USER','bob (Bob User)',1362136882,1362136882),('PHID-USER-hncf4pdbrr53lsxn5j6z','USER','alice (Alice User)',1362136859,1362136859),('PHID-USER-n334wwtakshsxeau3qij','USER','phab (Phabricator Role Account)',1362136914,1362136914);
+/*!40000 ALTER TABLE `search_document` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `search_documentfield`
+--
+
+DROP TABLE IF EXISTS `search_documentfield`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_documentfield` (
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `phidType` varchar(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `field` varchar(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `auxPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `corpus` text,
+  KEY `phid` (`phid`),
+  FULLTEXT KEY `corpus` (`corpus`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `search_documentfield`
+--
+
+LOCK TABLES `search_documentfield` WRITE;
+/*!40000 ALTER TABLE `search_documentfield` DISABLE KEYS */;
+INSERT INTO `search_documentfield` VALUES ('PHID-USER-hncf4pdbrr53lsxn5j6z','USER','titl',NULL,'alice (Alice User)'),('PHID-USER-agn7y2uw2pj4nc5nknhe','USER','titl',NULL,'bob (Bob User)'),('PHID-USER-n334wwtakshsxeau3qij','USER','titl',NULL,'phab (Phabricator Role Account)');
+/*!40000 ALTER TABLE `search_documentfield` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `search_documentrelationship`
+--
+
+DROP TABLE IF EXISTS `search_documentrelationship`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_documentrelationship` (
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `relatedPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `relation` varchar(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `relatedType` varchar(4) NOT NULL,
+  `relatedTime` int(10) unsigned NOT NULL,
+  KEY `phid` (`phid`),
+  KEY `relatedPHID` (`relatedPHID`,`relation`),
+  KEY `relation` (`relation`,`relatedPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `search_documentrelationship`
+--
+
+LOCK TABLES `search_documentrelationship` WRITE;
+/*!40000 ALTER TABLE `search_documentrelationship` DISABLE KEYS */;
+INSERT INTO `search_documentrelationship` VALUES ('PHID-USER-hncf4pdbrr53lsxn5j6z','PHID-USER-hncf4pdbrr53lsxn5j6z','open','USER',1362136859),('PHID-USER-agn7y2uw2pj4nc5nknhe','PHID-USER-agn7y2uw2pj4nc5nknhe','open','USER',1362136882),('PHID-USER-n334wwtakshsxeau3qij','PHID-USER-n334wwtakshsxeau3qij','open','USER',1362136914);
+/*!40000 ALTER TABLE `search_documentrelationship` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `search_query`
+--
+
+DROP TABLE IF EXISTS `search_query`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_query` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `query` varchar(255) NOT NULL,
+  `parameters` text NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `queryKey` varchar(12) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `queryKey` (`queryKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `search_query`
+--
+
+LOCK TABLES `search_query` WRITE;
+/*!40000 ALTER TABLE `search_query` DISABLE KEYS */;
+/*!40000 ALTER TABLE `search_query` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_slowvote`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_slowvote` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_slowvote`;
+
+--
+-- Table structure for table `slowvote_choice`
+--
+
+DROP TABLE IF EXISTS `slowvote_choice`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `slowvote_choice` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pollID` int(10) unsigned NOT NULL,
+  `optionID` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `pollID` (`pollID`),
+  KEY `authorPHID` (`authorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `slowvote_choice`
+--
+
+LOCK TABLES `slowvote_choice` WRITE;
+/*!40000 ALTER TABLE `slowvote_choice` DISABLE KEYS */;
+/*!40000 ALTER TABLE `slowvote_choice` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `slowvote_comment`
+--
+
+DROP TABLE IF EXISTS `slowvote_comment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `slowvote_comment` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pollID` int(10) unsigned NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `commentText` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pollID` (`pollID`,`authorPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `slowvote_comment`
+--
+
+LOCK TABLES `slowvote_comment` WRITE;
+/*!40000 ALTER TABLE `slowvote_comment` DISABLE KEYS */;
+/*!40000 ALTER TABLE `slowvote_comment` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `slowvote_option`
+--
+
+DROP TABLE IF EXISTS `slowvote_option`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `slowvote_option` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `pollID` int(10) unsigned NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `pollID` (`pollID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `slowvote_option`
+--
+
+LOCK TABLES `slowvote_option` WRITE;
+/*!40000 ALTER TABLE `slowvote_option` DISABLE KEYS */;
+/*!40000 ALTER TABLE `slowvote_option` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `slowvote_poll`
+--
+
+DROP TABLE IF EXISTS `slowvote_poll`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `slowvote_poll` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `question` varchar(255) NOT NULL,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `responseVisibility` int(10) unsigned NOT NULL,
+  `shuffle` int(10) unsigned NOT NULL,
+  `method` int(10) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `phid` (`phid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `slowvote_poll`
+--
+
+LOCK TABLES `slowvote_poll` WRITE;
+/*!40000 ALTER TABLE `slowvote_poll` DISABLE KEYS */;
+/*!40000 ALTER TABLE `slowvote_poll` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_timeline`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_timeline` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_timeline`;
+
+--
+-- Table structure for table `timeline_cursor`
+--
+
+DROP TABLE IF EXISTS `timeline_cursor`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `timeline_cursor` (
+  `name` varchar(255) NOT NULL,
+  `position` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `timeline_cursor`
+--
+
+LOCK TABLES `timeline_cursor` WRITE;
+/*!40000 ALTER TABLE `timeline_cursor` DISABLE KEYS */;
+/*!40000 ALTER TABLE `timeline_cursor` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `timeline_event`
+--
+
+DROP TABLE IF EXISTS `timeline_event`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `timeline_event` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `type` char(4) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `dataID` (`dataID`),
+  KEY `type` (`type`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `timeline_event`
+--
+
+LOCK TABLES `timeline_event` WRITE;
+/*!40000 ALTER TABLE `timeline_event` DISABLE KEYS */;
+/*!40000 ALTER TABLE `timeline_event` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `timeline_eventdata`
+--
+
+DROP TABLE IF EXISTS `timeline_eventdata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `timeline_eventdata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `eventData` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `timeline_eventdata`
+--
+
+LOCK TABLES `timeline_eventdata` WRITE;
+/*!40000 ALTER TABLE `timeline_eventdata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `timeline_eventdata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_token`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_token` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_token`;
+
+--
+-- Table structure for table `token_count`
+--
+
+DROP TABLE IF EXISTS `token_count`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `token_count` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `tokenCount` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_objectPHID` (`objectPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `token_count`
+--
+
+LOCK TABLES `token_count` WRITE;
+/*!40000 ALTER TABLE `token_count` DISABLE KEYS */;
+/*!40000 ALTER TABLE `token_count` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `token_given`
+--
+
+DROP TABLE IF EXISTS `token_given`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `token_given` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `objectPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `tokenPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key_all` (`objectPHID`,`authorPHID`),
+  KEY `key_author` (`authorPHID`),
+  KEY `key_token` (`tokenPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `token_given`
+--
+
+LOCK TABLES `token_given` WRITE;
+/*!40000 ALTER TABLE `token_given` DISABLE KEYS */;
+/*!40000 ALTER TABLE `token_given` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_user`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_user` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_user`;
+
+--
+-- Table structure for table `edge`
+--
+
+DROP TABLE IF EXISTS `edge`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edge` (
+  `src` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` int(10) unsigned NOT NULL,
+  `dst` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `seq` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`src`,`type`,`dst`),
+  KEY `src` (`src`,`type`,`dateCreated`,`seq`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edge`
+--
+
+LOCK TABLES `edge` WRITE;
+/*!40000 ALTER TABLE `edge` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edge` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `edgedata`
+--
+
+DROP TABLE IF EXISTS `edgedata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `edgedata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `edgedata`
+--
+
+LOCK TABLES `edgedata` WRITE;
+/*!40000 ALTER TABLE `edgedata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `edgedata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `phabricator_session`
+--
+
+DROP TABLE IF EXISTS `phabricator_session`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `phabricator_session` (
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `type` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `sessionKey` varchar(40) NOT NULL,
+  `sessionStart` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`userPHID`,`type`),
+  UNIQUE KEY `sessionKey` (`sessionKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `phabricator_session`
+--
+
+LOCK TABLES `phabricator_session` WRITE;
+/*!40000 ALTER TABLE `phabricator_session` DISABLE KEYS */;
+/*!40000 ALTER TABLE `phabricator_session` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user`
+--
+
+DROP TABLE IF EXISTS `user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `phid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `userName` varchar(64) NOT NULL,
+  `realName` varchar(128) NOT NULL,
+  `sex` char(1) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `translation` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `passwordSalt` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `passwordHash` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `profileImagePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `consoleEnabled` tinyint(1) NOT NULL,
+  `consoleVisible` tinyint(1) NOT NULL,
+  `consoleTab` varchar(64) NOT NULL,
+  `conduitCertificate` varchar(255) NOT NULL,
+  `isSystemAgent` tinyint(1) NOT NULL DEFAULT '0',
+  `isDisabled` tinyint(1) NOT NULL,
+  `isAdmin` tinyint(1) NOT NULL,
+  `timezoneIdentifier` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userName` (`userName`),
+  UNIQUE KEY `phid` (`phid`),
+  KEY `realName` (`realName`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user`
+--
+
+LOCK TABLES `user` WRITE;
+/*!40000 ALTER TABLE `user` DISABLE KEYS */;
+INSERT INTO `user` VALUES (1,'PHID-USER-hncf4pdbrr53lsxn5j6z','alice','Alice User',NULL,NULL,'d6402fa5838061509aa572d59ef0ceb1','49960bde1610e0710149414867804350',1362136859,1362136859,NULL,0,0,'','35yxukrjcltwgzfmgsnj2klc2jbrnzehqz3c36ijxnicwysv3xenxymwz532pyhimpxh7jryynh32su2ajxahd3gp7qshyik2qwf6ntuim2acxvjnko6p2q4mhacpvugqou2wpmyqwj4hkchgc5vh33lur723r4dexy5b3aj35v4v6ffork727ww5qk5yhhcmolbcqg3rxl6qpf53spn4aopneggtb675hmpx3xya3et7jrowzlkl3yw3sktvdu',0,0,0,''),(2,'PHID-USER-agn7y2uw2pj4nc5nknhe','bob','Bob User',NULL,NULL,'231ede74c6d2e8e2835877d227d1a373','458e3664eb3222306627104d0016f56e',1362136882,1362136882,NULL,0,0,'','6wcgqpgbqyeymlmqdhdj2xya75fa5rwttr4k7pf5klqhiiwgeqiuvsr5ulrboscwkqtumravl33qc6in4p2hfnqal4ik3c2r33f3ezdqopl34ae4p2khvepg3bktpl5znsdrxs5jot4pk6vdz7gasod6eksfzb2rmekawftqbaqqbfwcsaoxhc7eglq7awvmpbae6gqejpobyvglobiqw4edr7qcqkfcyffi56hbtqzaj7m2ulqbmftdeltaqad',0,0,0,''),(3,'PHID-USER-n334wwtakshsxeau3qij','phab','Phabricator Role Account',NULL,NULL,'78a68c92141239def868183a8542ffde','704c63452f57c8ab1469789a7cc6c69d',1362136914,1362136914,NULL,0,0,'','xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf',0,0,1,'');
+/*!40000 ALTER TABLE `user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_email`
+--
+
+DROP TABLE IF EXISTS `user_email`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_email` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `address` varchar(128) NOT NULL,
+  `isVerified` tinyint(1) NOT NULL DEFAULT '0',
+  `isPrimary` tinyint(1) NOT NULL DEFAULT '0',
+  `verificationCode` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `address` (`address`),
+  KEY `userPHID` (`userPHID`,`isPrimary`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_email`
+--
+
+LOCK TABLES `user_email` WRITE;
+/*!40000 ALTER TABLE `user_email` DISABLE KEYS */;
+INSERT INTO `user_email` VALUES (1,'PHID-USER-hncf4pdbrr53lsxn5j6z','alice@fake.com',1,1,'5qxqx45sfz2j6uxccjivcw44',1362136859,1362136859),(2,'PHID-USER-agn7y2uw2pj4nc5nknhe','bob@fake.com',1,1,'2md5rieq3gwnc4jynbp5lgnr',1362136882,1362136882),(3,'PHID-USER-n334wwtakshsxeau3qij','phab@fake.com',1,1,'bbzbgjwcu422pc2enyblfjis',1362136914,1362136914);
+/*!40000 ALTER TABLE `user_email` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_ldapinfo`
+--
+
+DROP TABLE IF EXISTS `user_ldapinfo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_ldapinfo` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userID` int(10) unsigned NOT NULL,
+  `ldapUsername` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userID` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_ldapinfo`
+--
+
+LOCK TABLES `user_ldapinfo` WRITE;
+/*!40000 ALTER TABLE `user_ldapinfo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_ldapinfo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_log`
+--
+
+DROP TABLE IF EXISTS `user_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `actorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `action` varchar(64) NOT NULL,
+  `oldValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `newValue` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `details` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `remoteAddr` varchar(45) NOT NULL,
+  `session` varchar(40) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `actorPHID` (`actorPHID`,`dateCreated`),
+  KEY `userPHID` (`userPHID`,`dateCreated`),
+  KEY `action` (`action`,`dateCreated`),
+  KEY `dateCreated` (`dateCreated`),
+  KEY `remoteAddr` (`remoteAddr`,`dateCreated`),
+  KEY `session` (`session`,`dateCreated`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_log`
+--
+
+LOCK TABLES `user_log` WRITE;
+/*!40000 ALTER TABLE `user_log` DISABLE KEYS */;
+INSERT INTO `user_log` VALUES (1,'PHID-USER-hncf4pdbrr53lsxn5j6z','PHID-USER-hncf4pdbrr53lsxn5j6z','create','null','\"alice@fake.com\"','{\"host\":\"lucid32\",\"user_agent\":null}',1362136859,1362136859,'',NULL),(2,'PHID-USER-hncf4pdbrr53lsxn5j6z','PHID-USER-hncf4pdbrr53lsxn5j6z','change-password','null','null','{\"host\":\"lucid32\",\"user_agent\":null}',1362136859,1362136859,'',NULL),(3,'PHID-USER-agn7y2uw2pj4nc5nknhe','PHID-USER-agn7y2uw2pj4nc5nknhe','create','null','\"bob@fake.com\"','{\"host\":\"lucid32\",\"user_agent\":null}',1362136882,1362136882,'',NULL),(4,'PHID-USER-agn7y2uw2pj4nc5nknhe','PHID-USER-agn7y2uw2pj4nc5nknhe','change-password','null','null','{\"host\":\"lucid32\",\"user_agent\":null}',1362136882,1362136882,'',NULL),(5,'PHID-USER-n334wwtakshsxeau3qij','PHID-USER-n334wwtakshsxeau3qij','create','null','\"phab@fake.com\"','{\"host\":\"lucid32\",\"user_agent\":null}',1362136914,1362136914,'',NULL),(6,'PHID-USER-n334wwtakshsxeau3qij','PHID-USER-n334wwtakshsxeau3qij','admin','false','true','{\"host\":\"lucid32\",\"user_agent\":null}',1362136914,1362136914,'',NULL),(7,'PHID-USER-n334wwtakshsxeau3qij','PHID-USER-n334wwtakshsxeau3qij','change-password','null','null','{\"host\":\"lucid32\",\"user_agent\":null}',1362136914,1362136914,'',NULL);
+/*!40000 ALTER TABLE `user_log` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_nametoken`
+--
+
+DROP TABLE IF EXISTS `user_nametoken`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_nametoken` (
+  `token` varchar(255) NOT NULL,
+  `userID` int(10) unsigned NOT NULL,
+  KEY `token` (`token`),
+  KEY `userID` (`userID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_nametoken`
+--
+
+LOCK TABLES `user_nametoken` WRITE;
+/*!40000 ALTER TABLE `user_nametoken` DISABLE KEYS */;
+INSERT INTO `user_nametoken` VALUES ('alice',1),('user',1),('bob',2),('user',2),('phabricator',3),('role',3),('account',3),('phab',3);
+/*!40000 ALTER TABLE `user_nametoken` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_oauthinfo`
+--
+
+DROP TABLE IF EXISTS `user_oauthinfo`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_oauthinfo` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userID` int(10) unsigned NOT NULL,
+  `oauthProvider` varchar(255) NOT NULL,
+  `oauthUID` varchar(255) NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `accountURI` varchar(255) DEFAULT NULL,
+  `accountName` varchar(255) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  `tokenExpires` int(10) unsigned DEFAULT NULL,
+  `tokenScope` varchar(255) DEFAULT NULL,
+  `tokenStatus` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userID` (`userID`,`oauthProvider`),
+  UNIQUE KEY `oauthProvider` (`oauthProvider`,`oauthUID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_oauthinfo`
+--
+
+LOCK TABLES `user_oauthinfo` WRITE;
+/*!40000 ALTER TABLE `user_oauthinfo` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_oauthinfo` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_preferences`
+--
+
+DROP TABLE IF EXISTS `user_preferences`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_preferences` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `preferences` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userPHID` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_preferences`
+--
+
+LOCK TABLES `user_preferences` WRITE;
+/*!40000 ALTER TABLE `user_preferences` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_preferences` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_profile`
+--
+
+DROP TABLE IF EXISTS `user_profile`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_profile` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `blurb` text NOT NULL,
+  `profileImagePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `userPHID` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_profile`
+--
+
+LOCK TABLES `user_profile` WRITE;
+/*!40000 ALTER TABLE `user_profile` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_profile` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_sshkey`
+--
+
+DROP TABLE IF EXISTS `user_sshkey`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_sshkey` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `keyType` varchar(255) DEFAULT NULL,
+  `keyBody` text CHARACTER SET utf8 COLLATE utf8_bin,
+  `keyHash` varchar(32) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `keyComment` varchar(255) DEFAULT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `keyHash` (`keyHash`),
+  KEY `userPHID` (`userPHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_sshkey`
+--
+
+LOCK TABLES `user_sshkey` WRITE;
+/*!40000 ALTER TABLE `user_sshkey` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_sshkey` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `user_status`
+--
+
+DROP TABLE IF EXISTS `user_status`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_status` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `userPHID` varchar(64) NOT NULL,
+  `dateFrom` int(10) unsigned NOT NULL,
+  `dateTo` int(10) unsigned NOT NULL,
+  `status` tinyint(3) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  `description` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userPHID_dateFrom` (`userPHID`,`dateTo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `user_status`
+--
+
+LOCK TABLES `user_status` WRITE;
+/*!40000 ALTER TABLE `user_status` DISABLE KEYS */;
+/*!40000 ALTER TABLE `user_status` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_worker`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_worker` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_worker`;
+
+--
+-- Table structure for table `lisk_counter`
+--
+
+DROP TABLE IF EXISTS `lisk_counter`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lisk_counter` (
+  `counterName` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `counterValue` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`counterName`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `lisk_counter`
+--
+
+LOCK TABLES `lisk_counter` WRITE;
+/*!40000 ALTER TABLE `lisk_counter` DISABLE KEYS */;
+INSERT INTO `lisk_counter` VALUES ('worker_activetask',2);
+/*!40000 ALTER TABLE `lisk_counter` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `worker_activetask`
+--
+
+DROP TABLE IF EXISTS `worker_activetask`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `worker_activetask` (
+  `id` int(10) unsigned NOT NULL,
+  `taskClass` varchar(255) NOT NULL,
+  `leaseOwner` varchar(255) DEFAULT NULL,
+  `leaseExpires` int(10) unsigned DEFAULT NULL,
+  `failureCount` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `dataID` (`dataID`),
+  KEY `taskClass` (`taskClass`),
+  KEY `leaseExpires` (`leaseExpires`),
+  KEY `leaseOwner` (`leaseOwner`(16))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `worker_activetask`
+--
+
+LOCK TABLES `worker_activetask` WRITE;
+/*!40000 ALTER TABLE `worker_activetask` DISABLE KEYS */;
+/*!40000 ALTER TABLE `worker_activetask` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `worker_archivetask`
+--
+
+DROP TABLE IF EXISTS `worker_archivetask`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `worker_archivetask` (
+  `id` int(10) unsigned NOT NULL,
+  `taskClass` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `leaseOwner` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `leaseExpires` int(10) unsigned DEFAULT NULL,
+  `failureCount` int(10) unsigned NOT NULL,
+  `dataID` int(10) unsigned NOT NULL,
+  `result` int(10) unsigned NOT NULL,
+  `duration` bigint(20) unsigned NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `dateCreated` (`dateCreated`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `worker_archivetask`
+--
+
+LOCK TABLES `worker_archivetask` WRITE;
+/*!40000 ALTER TABLE `worker_archivetask` DISABLE KEYS */;
+/*!40000 ALTER TABLE `worker_archivetask` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `worker_taskdata`
+--
+
+DROP TABLE IF EXISTS `worker_taskdata`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `worker_taskdata` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `data` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `worker_taskdata`
+--
+
+LOCK TABLES `worker_taskdata` WRITE;
+/*!40000 ALTER TABLE `worker_taskdata` DISABLE KEYS */;
+/*!40000 ALTER TABLE `worker_taskdata` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_xhpastview`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_xhpastview` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_xhpastview`;
+
+--
+-- Table structure for table `xhpastview_parsetree`
+--
+
+DROP TABLE IF EXISTS `xhpastview_parsetree`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xhpastview_parsetree` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `authorPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `input` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `stdout` longtext CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `dateCreated` int(10) unsigned NOT NULL,
+  `dateModified` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `xhpastview_parsetree`
+--
+
+LOCK TABLES `xhpastview_parsetree` WRITE;
+/*!40000 ALTER TABLE `xhpastview_parsetree` DISABLE KEYS */;
+/*!40000 ALTER TABLE `xhpastview_parsetree` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Current Database: `phabricator_xhprof`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `phabricator_xhprof` /*!40100 DEFAULT CHARACTER SET utf8 */;
+
+USE `phabricator_xhprof`;
+
+--
+-- Table structure for table `xhprof_sample`
+--
+
+DROP TABLE IF EXISTS `xhprof_sample`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xhprof_sample` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `filePHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `sampleRate` int(11) NOT NULL,
+  `usTotal` bigint(20) unsigned NOT NULL,
+  `hostname` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `requestPath` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `controller` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `userPHID` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `dateCreated` bigint(20) unsigned NOT NULL,
+  `dateModified` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `filePHID` (`filePHID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `xhprof_sample`
+--
+
+LOCK TABLES `xhprof_sample` WRITE;
+/*!40000 ALTER TABLE `xhprof_sample` DISABLE KEYS */;
+/*!40000 ALTER TABLE `xhprof_sample` ENABLE KEYS */;
+UNLOCK TABLES;
