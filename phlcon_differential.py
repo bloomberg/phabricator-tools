@@ -39,8 +39,9 @@ def _ensureKeys(d, *keys):
 
 
 def _ensureKeysDefault(dic, default, *keys):
-    """Ensure that the dictionary has the supplied keys, initialiase them with
-    a deepcopy of the supplied 'default' if not.
+    """Ensure that the dictionary has the supplied keys.
+
+    Initialiase them with a deepcopy of the supplied 'default' if not.
 
     :dic: the dictionary to modify
     :default: the default value (will be deep copied)

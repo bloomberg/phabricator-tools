@@ -29,8 +29,9 @@ Revision = collections.namedtuple(
 
 
 def getRangeToHereHashes(clone, start):
-    """Return a list of strings corresponding to commits from 'start' to here,
-    the list begins with the revision closest to but not including 'start'.
+    """Return a list of strings corresponding to commits from 'start' to here.
+
+    The list begins with the revision closest to but not including 'start'.
     Raise a ValueError if any of the returned values are not valid hexadecimal.
 
     :clone: supports 'call("log")' with git log parameters
@@ -47,8 +48,9 @@ def getRangeToHereHashes(clone, start):
 
 
 def getRangeHashes(clone, start, end):
-    """Return a list of strings corresponding to commits from 'start' to 'end',
-    the list begins with the revision closest to but not including 'start'.
+    """Return a list of strings corresponding to commits from 'start' to 'end'.
+
+    The list begins with the revision closest to but not including 'start'.
     Raise a ValueError if any of the returned values are not valid hexadecimal.
 
     :clone: supports 'call("log")' with git log parameters
@@ -66,8 +68,9 @@ def getRangeHashes(clone, start, end):
 
 
 def makeRevisionFromFullMessage(message):
-    """Return a 'phlgit_log__Revision' based on the provided 'message', raise
-    an Exception if the message doesn't parse successfully.
+    """Return a 'phlgit_log__Revision' based on the provided 'message'.
+
+    Raise an Exception if the message doesn't parse successfully.
 
     :message: message from 'git log HEAD^! --format:"%H%n%ae%n%ce%n%s%n%b"'
     :returns: a 'phlgit_log__Revision'
@@ -111,8 +114,8 @@ def makeRevisionsFromHashes(clone, hashes):
 
 
 def getCommittersFromHashes(clone, hashes):
-    """Return a list of strings containing the email addresses of the
-    committers from 'start' to here in the order of closest to 'start' first.
+    """Return string list of the email addresses of the committers in 'hashes'.
+
     Committers will only appear in the list once, at their earliest appearance.
     Raise an exception if the clone does not return a valid FullMessage from
     the commitHash.

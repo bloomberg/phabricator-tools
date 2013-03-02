@@ -16,8 +16,9 @@ QueryResponse = _makeNT(
 
 
 def queryUserFromEmail(conduit, email):
-    """Return a QueryResponse based on the provided emails, if the email
-    does not correspond to a username then return None.
+    """Return a QueryResponse based on the provided emails.
+
+    If the email does not correspond to a username then return None.
 
     :conduit: must support 'call()' like phlsys_conduit
     :email: an email address as a string
@@ -46,8 +47,10 @@ def queryUserFromEmail(conduit, email):
 
 
 def queryUsersFromEmails(conduit, emails):
-    """Return a list of username strings based on the provided emails, if an
-    email does not correspond to a username then None is inserted in its place.
+    """Return a list of username strings based on the provided emails.
+
+    If an email does not correspond to a username then None is inserted in
+    its place.
 
     :conduit: must support 'call()' like phlsys_conduit
     :emails: a list of strings corresponding to user email addresses
@@ -65,8 +68,9 @@ def queryUsersFromEmails(conduit, emails):
 
 
 def queryUsersFromPhids(conduit, phids):
-    """Return a list of QueryResponse based on the provided phids, if a
-    phid does not correspond to a username then raise ValueError.
+    """Return a list of QueryResponse based on the provided phids.
+
+    If a phid does not correspond to a username then raise ValueError.
 
     :conduit: must support 'call()' like phlsys_conduit
     :phids: a list of strings corresponding to user phids
@@ -85,8 +89,9 @@ def queryUsersFromPhids(conduit, phids):
 
 
 def queryUsernamesFromPhids(conduit, phids):
-    """Return a list of username strings based on the provided phids, if a
-    phid does not correspond to a username then raise.
+    """Return a list of username strings based on the provided phids.
+
+    If a phid does not correspond to a username then raise.
 
     :conduit: must support 'call()' like phlsys_conduit
     :phids: a list of strings corresponding to user phids
