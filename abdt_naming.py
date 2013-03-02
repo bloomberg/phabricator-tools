@@ -179,8 +179,8 @@ def makeWorkingBranchFromName(branch_name):
         id=parts[-1])
 
 
-def getWorkingBranches(branchList):
-    """Return a list of WorkingBranch made from strings in 'branchList'.
+def getWorkingBranches(branch_list):
+    """Return a list of WorkingBranch made from strings in 'branch_list'.
 
     Strings that aren't valid working branch names are ignored.
 
@@ -198,17 +198,17 @@ def getWorkingBranches(branchList):
         >>> getWorkingBranches(['invalid'])
         []
 
-    :branchList: list of branch name strings
+    :branch_list: list of branch name strings
     :returns: list of WorkingBranch
 
     """
-    workingBranchList = []
+    working_branch_list = []
     prefix = getWorkingBranchPrefix()
-    for b in branchList:
-        if b.startswith(prefix):
-            workingBranchList.append(
-                makeWorkingBranchFromName(b))
-    return workingBranchList
+    for branch in branch_list:
+        if branch.startswith(prefix):
+            working_branch_list.append(
+                makeWorkingBranchFromName(branch))
+    return working_branch_list
 
 
 class TestNaming(unittest.TestCase):
