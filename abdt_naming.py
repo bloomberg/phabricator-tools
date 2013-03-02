@@ -11,6 +11,10 @@ def getReviewBranchPrefix():
 
 
 def getWorkingBranchPrefix():
+    # this may want to be configurable from the command-line, we'll probably
+    # want to wrap the functions in this module in a class and store the
+    # convention variables per-instance; will get the whole thing working
+    # first and worry about that later.
     return "dev/phab/"
 
 
@@ -19,10 +23,10 @@ def isReviewBranchName(name):
     return (len(name) > len(prefix)) and name.startswith(prefix)
 
 
-def getWithoutPrefix(s, prefix):
-    """Return 's' with 'prefix removed.
+def getWithoutPrefix(string, prefix):
+    """Return 'string' with 'prefix' removed.
 
-    If 's' does not start with 'prefix' then None is returned.
+    If 'string' does not start with 'prefix' then None is returned.
 
     Usage examples:
 
@@ -31,33 +35,41 @@ def getWithoutPrefix(s, prefix):
 
     >>> getWithoutPrefix('dog/cat/', 'mouse/')
 
-    :s: string to operate on
+    :string: string to operate on
     :prefix: string prefix to remove
-    :returns: string representing 's' with 'prefix' removed or None
+    :returns: string representing 'string' with 'prefix' removed or None
 
     """
-    if s.startswith(prefix):
-        return s[len(prefix):]
+    if string.startswith(prefix):
+        return string[len(prefix):]
     return None
 
 
 WorkingBranch = collections.namedtuple(
-    "abdt_naming__WorkingBranch", ["original", "description", "base", "id"])
+    "abdt_naming__WorkingBranch", [
+        "original",
+        "description",
+        "base",
+        "id"])
+
 ReviewBranch = collections.namedtuple(
-    "abdt_naming__ReviewBranch", ["original", "description", "base"])
+    "abdt_naming__ReviewBranch", [
+        "original",
+        "description",
+        "base"])
 
 
-def makeReviewBranchNameFromWorkingBranch(workingBranch):
-    """Return the string review branch name for 'workingBranch'.
+def makeReviewBranchNameFromWorkingBranch(working_branch):
+    """Return the string review branch name for 'working_branch'.
 
-    :workingBranch: a WorkingBranch
-    :returns: the string review branch name for 'workingBranch'
+    :working_branch: a WorkingBranch
+    :returns: the string review branch name for 'working_branch'
 
     """
-    b = getReviewBranchPrefix()
-    b += workingBranch.description
-    b += "/" + workingBranch.base
-    return b
+    branch_name = getReviewBranchPrefix()
+    branch_name += working_branch.description
+    branch_name += "/" + working_branch.base
+    return branch_name
 
 
 def makeReviewBranchName(description, base):
@@ -75,10 +87,10 @@ def makeReviewBranchName(description, base):
     :returns: string name of the review branch
 
     """
-    b = getReviewBranchPrefix()
-    b += description
-    b += "/" + base
-    return b
+    branch_name = getReviewBranchPrefix()
+    branch_name += description
+    branch_name += "/" + base
+    return branch_name
 
 
 def makeWorkingBranchName(description, base, review_id):
@@ -93,16 +105,16 @@ def makeWorkingBranchName(description, base, review_id):
 
     :description: string descriptive name of the branch
     :base: string name of the branch to diff against and land on
-    :id: integer identifier for the review
+    :id: identifier for the review, converted to str() for convenience
     :returns: string name of the working branch
 
     """
-    wb = ""
-    wb += "dev/phab"
-    wb += "/" + description
-    wb += "/" + base
-    wb += "/" + str(review_id)
-    return wb
+    working_branch = ""
+    working_branch += "dev/phab"
+    working_branch += "/" + description
+    working_branch += "/" + base
+    working_branch += "/" + str(review_id)
+    return working_branch
 
 
 def makeReviewBranchFromName(branch_name):
@@ -121,16 +133,18 @@ def makeReviewBranchFromName(branch_name):
     :returns: ReviewBranch or None if invalid
 
     """
-    rb = getWithoutPrefix(branch_name, getReviewBranchPrefix())
-    if not rb:
-        return None
-    rbs = rb.split("/")
-    if len(rbs) < 2:
-        return None
+    suffix = getWithoutPrefix(branch_name, getReviewBranchPrefix())
+    if not suffix:
+        return None  # review branches must start with the prefix
+
+    parts = suffix.split("/")
+    if len(parts) < 2:
+        return None  # suffix should be description/base(/...)
+
     return ReviewBranch(
         original=branch_name,
-        description=rbs[0],
-        base='/'.join(rbs[1:]))
+        description=parts[0],
+        base='/'.join(parts[1:]))
 
 
 def makeWorkingBranchFromName(branch_name):
@@ -150,17 +164,19 @@ def makeWorkingBranchFromName(branch_name):
     :returns: WorkingBranch or None if invalid
 
     """
-    wb = getWithoutPrefix(branch_name, getWorkingBranchPrefix())
-    if not wb:
-        return None
-    wbs = wb.split("/")
-    if len(wbs) < 3:
-        return None
+    suffix = getWithoutPrefix(branch_name, getWorkingBranchPrefix())
+    if not suffix:
+        return None  # review branches must start with the prefix
+
+    parts = suffix.split("/")
+    if len(parts) < 3:
+        return None  # suffix should be description/base(/...)/id
+
     return WorkingBranch(
         original=branch_name,
-        description=wbs[0],
-        base='/'.join(wbs[1:-1]),
-        id=wbs[-1])
+        description=parts[0],
+        base='/'.join(parts[1:-1]),
+        id=parts[-1])
 
 
 def getWorkingBranches(branchList):
