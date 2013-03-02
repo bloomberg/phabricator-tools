@@ -66,8 +66,8 @@ def getRangeHashes(clone, start, end):
 
 
 def makeRevisionFromFullMessage(message):
-    """Return a 'phlgit_log__Revision' based on the provided 'message', raise an
-    Exception if the message doesn't parse successfully.
+    """Return a 'phlgit_log__Revision' based on the provided 'message', raise
+    an Exception if the message doesn't parse successfully.
 
     :message: message from 'git log HEAD^! --format:"%H%n%ae%n%ce%n%s%n%b"'
     :returns: a 'phlgit_log__Revision'
@@ -83,7 +83,7 @@ def makeRevisionFromFullMessage(message):
 
 
 def makeRevisionFromHash(clone, commitHash):
-    """Return a 'phlgit_log__Revision' based on the 'commitHash' from the clone.
+    """Return a 'phlgit_log__Revision' based on 'commitHash' from the clone.
     Raise an exception if the clone does not return a valid FullMessage from
     the commitHash
 
@@ -111,8 +111,8 @@ def makeRevisionsFromHashes(clone, hashes):
 
 
 def getCommittersFromHashes(clone, hashes):
-    """Return a list of strings containing the email addresses of the committers
-    from the 'start' to here in the order of closest to 'start' first.
+    """Return a list of strings containing the email addresses of the
+    committers from 'start' to here in the order of closest to 'start' first.
     Committers will only appear in the list once, at their earliest appearance.
     Raise an exception if the clone does not return a valid FullMessage from
     the commitHash.
