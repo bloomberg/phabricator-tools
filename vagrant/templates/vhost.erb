@@ -1,6 +1,6 @@
 <VirtualHost *>
   ServerName localhost
-  DocumentRoot /home/vagrant/instances/dev/phabricator/webroot
+  DocumentRoot <%= @document_root %>
   RewriteEngine on
   RewriteRule ^/rsrc/(.*)     -                       [L,QSA]
   RewriteRule ^/favicon.ico   -                       [L,QSA]

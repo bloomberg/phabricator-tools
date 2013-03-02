@@ -2,13 +2,16 @@
 
 $apache2_sites = "/etc/apache2/sites"
 $apache2_mods  = "/etc/apache2/mods"
-$dev_dir       = "/home/vagrant/instances/dev"
+$phab_dir      = "/phabricator"
+$dev_dir       = "${phab_dir}/instances/dev"
+$document_root = "${dev_dir}/phabricator/webroot"
 $std_path      = "/usr/bin:/usr/sbin:/bin"
+$http_proxy    = ""
 
 file { 'apt-proxyconfig' :
   path    => '/etc/apt/apt.conf.d/95proxies',
   ensure  => present,
-  content => 'Acquire::http::proxy "http://proxy-lo:80";',
+  content => "Acquire::http::proxy \"${http_proxy}\";",
   notify  => Exec['apt-update'],
 }
 
@@ -39,10 +42,10 @@ class apache2 {
   }
 
   file { 'vhost':
-    path   => '/etc/apache2/conf.d/95-phab.conf',
-    ensure => present,
-    source => "/vagrant/config/95-phab.conf",
-    notify => Service['apache2'],
+    path    => '/etc/apache2/conf.d/95-phab.conf',
+    ensure  => present,
+    content => template("vagrant/vhost.erb"),
+    notify  => Service['apache2'],
   }
 
    define module ( $requires = 'apache2' ) {
@@ -67,15 +70,18 @@ class phabricator {
     # puppet won't create parent directories and will fail if we don't
     # manually specify each of them as separate dependencies
     # it does automatically create them in the correct order though
-    file { "/home/vagrant/instances/dev":
+    file { "/phabricator/instances/dev":
         ensure => directory,
     }
-    file { "/home/vagrant/instances":
+    file { "/phabricator/instances":
+        ensure => directory,
+    }
+    file { "/phabricator":
         ensure => directory,
     }
 
     define phabgitclone ($repo = $title) {
-        $proxy_string = "http_proxy=https://proxy.bloomberg.com:80"
+        $proxy_string = "http_proxy=${http_proxy}"
         $github_string = "http://github.com/facebook"
         exec { "git clone ${github_string}/${repo} ${dev_dir}/${repo}":
             path        => $std_path,
@@ -90,11 +96,17 @@ class phabricator {
 }
 
 class phabricatordb {
-    exec { "mysql < /vagrant/db/initial.db && ${dev_dir}/phabricator/bin/storage upgrade --force":
-        path   => $std_path,
-        unless => "${dev_dir}/phabricator/bin/storage status",
+    file { "initial.db":
+	path   => "${phab_dir}/initial.db",
+	source => "puppet:///modules/vagrant/initial.db",
+	ensure => present,
     }
 
+    exec { "mysql < ${phab_dir}/initial.db && ${dev_dir}/phabricator/bin/storage upgrade --force":
+        path    => $std_path,
+        unless  => "${dev_dir}/phabricator/bin/storage status",
+	require => File["initial.db"],
+    }
 }
 
 # declare our entities
