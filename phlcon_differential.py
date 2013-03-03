@@ -160,7 +160,7 @@ class TestDifferential(unittest.TestCase):
         self.conduit = phlsys_conduit.Conduit(
             phlsys_conduit.Conduit.testUri)
         self.reviewerConduit = phlsys_conduit.Conduit(
-            phlsys_conduit.Conduit.testUri, 'angelos')
+            phlsys_conduit.Conduit.testUri, 'bob')
 
     def testNullQuery(self):
         query(self.conduit)
@@ -169,7 +169,7 @@ class TestDifferential(unittest.TestCase):
         title = "this is the title"
         summary = "this is the summary"
         testPlan = "this is the test plan"
-        reviewers = "angelos"
+        reviewers = "bob"
         message = ""
         message += title + "\n"
         message += "\n"

@@ -31,7 +31,7 @@ def queryUserFromEmail(conduit, email):
         response = conduit.call("user.query", d)
     except phlsys_conduit.ConduitException as e:
         errConduitCore = "ERR-CONDUIT-CORE"
-        noSuchEmail = errConduitCore + ": "
+        noSuchEmail = ""
         noSuchEmail += "Array for %Ls conversion is empty. "
         noSuchEmail += "Query: SELECT * FROM %s WHERE userPHID IN (%Ls) "
         noSuchEmail += "AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo %Q"
@@ -107,47 +107,28 @@ class TestUser(unittest.TestCase):
     def setUp(self):
         self.conduit = phlsys_conduit.Conduit(
             phlsys_conduit.Conduit.testUri)
-        self.angelosEmail = "jevripio@bloomberg.net"
+        self.test_email = "alice@fake.com"
+        self.test_user = "alice"
 
     def testAngelosEmail(self):
-        users = queryUsersFromEmails(self.conduit, [self.angelosEmail])
+        users = queryUsersFromEmails(self.conduit, [self.test_email])
         self.assertEqual(len(users), 1)
-        self.assertEqual(users[0], 'angelos')
+        self.assertEqual(users[0], self.test_user)
 
-        user = queryUserFromEmail(self.conduit, self.angelosEmail)
-        self.assertEqual(user.userName, 'angelos')
+        user = queryUserFromEmail(self.conduit, self.test_email)
+        self.assertEqual(user.userName, self.test_user)
 
         phidUsers = queryUsersFromPhids(self.conduit, [user.phid])
-        self.assertEqual(phidUsers[0].userName, 'angelos')
+        self.assertEqual(phidUsers[0].userName, self.test_user)
 
         phidUsernames = queryUsernamesFromPhids(self.conduit, [user.phid])
-        self.assertEqual(phidUsernames[0], 'angelos')
+        self.assertEqual(phidUsernames[0], self.test_user)
 
     def testAngelosAndNooneEmail(self):
-        emails = [self.angelosEmail, "noone@nowhere.com", "a@b.com"]
+        emails = [self.test_email, "noone@nowhere.com", "a@b.com"]
         users = queryUsersFromEmails(self.conduit, emails)
         self.assertEqual(len(users), 3)
-        self.assertListEqual(users, ['angelos', None, None])
-
-    def testAngelosLilitAndNooneEmail(self):
-        emails = [
-            self.angelosEmail,
-            "noone@nowhere.com",
-            "ldarbinyan@bloomberg.net",
-            "a@b.com"]
-        users = queryUsersFromEmails(self.conduit, emails)
-        self.assertEqual(len(users), 4)
-        self.assertListEqual(users, ['angelos', None, 'lilit', None])
-
-    def testLilitAngelosAndNooneEmail(self):
-        emails = [
-            "ldarbinyan@bloomberg.net",
-            "noone@nowhere.com",
-            self.angelosEmail,
-            "a@b.com"]
-        users = queryUsersFromEmails(self.conduit, emails)
-        self.assertEqual(len(users), 4)
-        self.assertListEqual(users, ['lilit', None, 'angelos', None])
+        self.assertListEqual(users, [self.test_user, None, None])
 
 
 if __name__ == "__main__":
