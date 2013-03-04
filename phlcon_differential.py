@@ -84,9 +84,9 @@ def createRawDiff(conduit, diff):
 
 # XXX: it might be better to narrow the contract of this if the conduit
 #      API is going to keep changing, don't want to fixup based on
-#     changes that don't matter
-def _getDiff(conduit, revisionId=None, diffId=None):
-    d = {"revision_id": revisionId, "diff_id": diffId}
+#      changes that don't matter
+def _getDiff(conduit, revision_id=None, diff_id=None):
+    d = {"revision_id": revision_id, "diff_id": diff_id}
     d = _copyDictNoNones(d)
     response = conduit.call("differential.getdiff", d)
     response["id"] = int(response["id"])
@@ -117,13 +117,13 @@ def query(
     # TODO: typechecking
     d = _copyDictNoNones({'ids': ids})
     response = conduit.call("differential.query", d)
-    queryResponseList = []
+    query_response_list = []
     for r in response:
         _ensureKeys(r, "sourcePath")
         r["id"] = int(r["id"])
         r["status"] = int(r["status"])
-        queryResponseList.append(QueryResponse(**r))
-    return queryResponseList
+        query_response_list.append(QueryResponse(**r))
+    return query_response_list
 
 
 def getRevisionStatus(conduit, id):
@@ -175,18 +175,18 @@ class TestDifferential(unittest.TestCase):
     def testParseCommitMessage(self):
         title = "this is the title"
         summary = "this is the summary"
-        testPlan = "this is the test plan"
+        test_plan = "this is the test plan"
         reviewers = "bob"
         message = ""
         message += title + "\n"
         message += "\n"
         message += summary + "\n"
-        message += "Test Plan: " + testPlan + "\n"
+        message += "Test Plan: " + test_plan + "\n"
         message += "Reviewers: " + reviewers + "\n"
-        parseResponse = parseCommitMessage(self.conduit, message)
-        self.assertEqual(parseResponse.fields["title"], title)
-        self.assertEqual(parseResponse.fields["summary"], summary)
-        self.assertEqual(parseResponse.fields["testPlan"], testPlan)
+        parse_response = parseCommitMessage(self.conduit, message)
+        self.assertEqual(parse_response.fields["title"], title)
+        self.assertEqual(parse_response.fields["summary"], summary)
+        self.assertEqual(parse_response.fields["testPlan"], test_plan)
         # XXX: can't check reviewerPHIDs at this point
 
     def testCreateCloseRawDiffRevision(self):
@@ -220,50 +220,52 @@ index d4711bb..1c634f5 100644
 +another line
 """
 
-        diffResponse = createRawDiff(self.conduit, diff)
+        diff_response = createRawDiff(self.conduit, diff)
 
-        getDiffResponse = _getDiff(self.conduit, diffId=diffResponse.id)
-        self.assertEqual(getDiffResponse.id, diffResponse.id)
+        get_diff_response = _getDiff(self.conduit, diff_id=diff_response.id)
+        self.assertEqual(get_diff_response.id, diff_response.id)
 
-        parseResponse = parseCommitMessage(self.conduit, message)
-        self.assertEqual(len(parseResponse.errors), 0)
+        parse_response = parseCommitMessage(self.conduit, message)
+        self.assertEqual(len(parse_response.errors), 0)
 
-        createResponse = createRevision(
-            self.conduit, diffResponse.id, parseResponse.fields)
+        create_response = createRevision(
+            self.conduit, diff_response.id, parse_response.fields)
 
-        queryResponseList = query(self.conduit, [createResponse.revisionid])
-        self.assertEqual(len(queryResponseList), 1)
-        self.assertEqual(queryResponseList[0].uri, createResponse.uri)
-        self.assertEqual(queryResponseList[0].id, createResponse.revisionid)
-        self.assertEqual(queryResponseList[0].status, REVISION_NEEDS_REVIEW)
+        query_response_list = query(self.conduit, [create_response.revisionid])
+        self.assertEqual(len(query_response_list), 1)
+        self.assertEqual(query_response_list[0].uri, create_response.uri)
+        self.assertEqual(query_response_list[0].id, create_response.revisionid)
+        self.assertEqual(query_response_list[0].status, REVISION_NEEDS_REVIEW)
 
-        diff2Response = createRawDiff(self.conduit, diff2)
+        diff2_response = createRawDiff(self.conduit, diff2)
 
-        updateResponse = updateRevision(
+        update_response = updateRevision(
             self.conduit,
-            createResponse.revisionid, diff2Response.id,
-            parseResponse.fields, "updated with new diff")
-        self.assertEqual(updateResponse.revisionid, createResponse.revisionid)
-        self.assertEqual(updateResponse.uri, createResponse.uri)
+            create_response.revisionid, diff2_response.id,
+            parse_response.fields, "updated with new diff")
+        self.assertEqual(
+            update_response.revisionid, create_response.revisionid)
+        self.assertEqual(update_response.uri, create_response.uri)
 
-        commentResponse = createComment(
-            self.reviewerConduit, createResponse.revisionid, action="accept")
-        self.assertEqual(commentResponse.revisionid, createResponse.revisionid)
-        self.assertEqual(commentResponse.uri, createResponse.uri)
+        comment_response = createComment(
+            self.reviewerConduit, create_response.revisionid, action="accept")
+        self.assertEqual(
+            comment_response.revisionid, create_response.revisionid)
+        self.assertEqual(comment_response.uri, create_response.uri)
 
-        queryResponseList = query(self.conduit, [createResponse.revisionid])
-        self.assertEqual(len(queryResponseList), 1)
-        self.assertEqual(queryResponseList[0].uri, createResponse.uri)
-        self.assertEqual(queryResponseList[0].id, createResponse.revisionid)
-        self.assertEqual(queryResponseList[0].status, REVISION_ACCEPTED)
+        query_response_list = query(self.conduit, [create_response.revisionid])
+        self.assertEqual(len(query_response_list), 1)
+        self.assertEqual(query_response_list[0].uri, create_response.uri)
+        self.assertEqual(query_response_list[0].id, create_response.revisionid)
+        self.assertEqual(query_response_list[0].status, REVISION_ACCEPTED)
 
-        close(self.conduit, createResponse.revisionid)
+        close(self.conduit, create_response.revisionid)
 
-        queryResponseList = query(self.conduit, [createResponse.revisionid])
-        self.assertEqual(len(queryResponseList), 1)
-        self.assertEqual(queryResponseList[0].uri, createResponse.uri)
-        self.assertEqual(queryResponseList[0].id, createResponse.revisionid)
-        self.assertEqual(queryResponseList[0].status, REVISION_CLOSED)
+        query_response_list = query(self.conduit, [create_response.revisionid])
+        self.assertEqual(len(query_response_list), 1)
+        self.assertEqual(query_response_list[0].uri, create_response.uri)
+        self.assertEqual(query_response_list[0].id, create_response.revisionid)
+        self.assertEqual(query_response_list[0].status, REVISION_CLOSED)
 
 if __name__ == "__main__":
     unittest.main()
