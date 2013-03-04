@@ -9,6 +9,8 @@ import unittest
 import urllib
 import urlparse
 
+import phldef_conduit
+
 # TODO: handle re-authentication when the token expires
 # TODO: allow connections without specifying user details where possible
 
@@ -48,19 +50,14 @@ class ConduitException(Exception):
 class Conduit():
 
     # TODO: make this configurable
-    testUri = "http://127.0.0.1/api/"
+    testUri = phldef_conduit.test_uri
 
-    def __init__(self, conduitUri, actAsUser=None):
+    def __init__(self, conduitUri, user, certificate, actAsUser=None):
         self._conduit_uri = conduitUri
         self._act_as_user = actAsUser
         self._timeout = 5
-        self._username = "phab"
-        self._certificate = (
-            "xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7"
-            "ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn"
-            "2vah2uidj6u6hhhxo2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2"
-            "llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3uvot7fxrotwpi3ty"
-            "2b2sa2kvlpf")
+        self._username = user
+        self._certificate = certificate
         self._client = "phlsys_conduit"
         self._client_version = 1
 
@@ -152,7 +149,11 @@ class Conduit():
 class TestConduit(unittest.TestCase):
 
     def setUp(self):
-        self.conduit = Conduit(Conduit.testUri)
+        test_data = phldef_conduit
+        self.conduit = Conduit(
+            test_data.test_uri,
+            test_data.alice.user,
+            test_data.alice.certificate)
 
     def testCanPing(self):
         self.conduit.ping()

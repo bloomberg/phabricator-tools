@@ -4,6 +4,7 @@ import collections
 import copy
 import unittest
 
+import phldef_conduit
 import phlsys_conduit
 
 # from ArcanistRevisionDifferentialStatus.php:
@@ -157,10 +158,16 @@ def close(conduit, revisionId):
 class TestDifferential(unittest.TestCase):
 
     def setUp(self):
+        test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
-            phlsys_conduit.Conduit.testUri)
+            test_data.test_uri,
+            test_data.alice.user,
+            test_data.alice.certificate)
+
         self.reviewerConduit = phlsys_conduit.Conduit(
-            phlsys_conduit.Conduit.testUri, 'bob')
+            test_data.test_uri,
+            test_data.bob.user,
+            test_data.bob.certificate)
 
     def testNullQuery(self):
         query(self.conduit)

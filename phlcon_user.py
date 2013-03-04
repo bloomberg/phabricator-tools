@@ -3,6 +3,7 @@
 import collections
 import unittest
 
+import phldef_conduit
 import phlsys_conduit
 
 
@@ -105,12 +106,15 @@ def queryUsernamesFromPhids(conduit, phids):
 class TestUser(unittest.TestCase):
 
     def setUp(self):
+        test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
-            phlsys_conduit.Conduit.testUri)
+            test_data.test_uri,
+            test_data.alice.user,
+            test_data.alice.certificate)
         self.test_email = "alice@fake.com"
         self.test_user = "alice"
 
-    def testAngelosEmail(self):
+    def testAliceEmail(self):
         users = queryUsersFromEmails(self.conduit, [self.test_email])
         self.assertEqual(len(users), 1)
         self.assertEqual(users[0], self.test_user)
@@ -124,7 +128,7 @@ class TestUser(unittest.TestCase):
         phidUsernames = queryUsernamesFromPhids(self.conduit, [user.phid])
         self.assertEqual(phidUsernames[0], self.test_user)
 
-    def testAngelosAndNooneEmail(self):
+    def testAliceAndNooneEmail(self):
         emails = [self.test_email, "noone@nowhere.com", "a@b.com"]
         users = queryUsersFromEmails(self.conduit, emails)
         self.assertEqual(len(users), 3)
