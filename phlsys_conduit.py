@@ -51,13 +51,18 @@ class Conduit():
     testUri = "http://127.0.0.1/api/"
 
     def __init__(self, conduitUri, actAsUser=None):
-        self._conduitUri = conduitUri
-        self._actAsUser = actAsUser
+        self._conduit_uri = conduitUri
+        self._act_as_user = actAsUser
         self._timeout = 5
         self._username = "phab"
-        self._certificate = "xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf"
+        self._certificate = (
+            "xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7"
+            "ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn"
+            "2vah2uidj6u6hhhxo2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2"
+            "llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3uvot7fxrotwpi3ty"
+            "2b2sa2kvlpf")
         self._client = "phlsys_conduit"
-        self._clientVersion = 1
+        self._client_version = 1
 
         self._authenticate()
 
@@ -68,17 +73,20 @@ class Conduit():
         cls._pathToArc = path
 
     def _authenticate(self):
+
         token = str(int(time.time()))
-        messageDict = {
+        signature = hashlib.sha1(token + self._certificate).hexdigest()
+
+        message_dict = {
             "user": self._username,
-            "host": self._conduitUri,
+            "host": self._conduit_uri,
             "client": self._client,
-            "clientVersion": self._clientVersion,
+            "clientVersion": self._client_version,
             "authToken": token,
-            "authSignature": self._generate_hash(token),
+            "authSignature": signature,
         }
 
-        response = self._communicate("conduit.connect", messageDict)
+        response = self._communicate("conduit.connect", message_dict)
         result = response["result"]
 
         self._conduit = {
@@ -86,14 +94,11 @@ class Conduit():
             'connectionID': result["connectionID"],
         }
 
-        if self._actAsUser:
-            self._conduit["actAsUser"] = self._actAsUser
+        if self._act_as_user:
+            self._conduit["actAsUser"] = self._act_as_user
 
-    def _generate_hash(self, token):
-        return hashlib.sha1(token + self._certificate).hexdigest()
-
-    def _communicate(self, method, messageDict):
-        url = urlparse.urlparse(self._conduitUri)
+    def _communicate(self, method, message_dict):
+        url = urlparse.urlparse(self._conduit_uri)
 
         if url.scheme == 'https':
             conn = httplib.HTTPSConnection(url.netloc, timeout=self._timeout)
@@ -103,11 +108,11 @@ class Conduit():
         path = url.path + method
 
         headers = {
-            'User-Agent': 'python-phabricator/%s' % str(self._clientVersion),
+            'User-Agent': 'python-phabricator/%s' % str(self._client_version),
             'Content-Type': 'application/x-www-form-urlencoded'
         }
 
-        params = json.dumps(messageDict)
+        params = json.dumps(message_dict)
 
         body = urllib.urlencode({
             "params": params,
@@ -126,17 +131,17 @@ class Conduit():
         response = self._communicate(method, param_dict)
 
         error = response["error_code"]
-        errorMessage = response["error_info"]
+        error_message = response["error_info"]
         result = response["result"]
         if error:
             raise ConduitException(
                 method=method,
                 error=error,
-                errormsg=errorMessage,
+                errormsg=error_message,
                 result=result,
                 obj=param_dict,
-                uri=self._conduitUri,
-                actAsUser=self._actAsUser)
+                uri=self._conduit_uri,
+                actAsUser=self._act_as_user)
 
         return result
 
