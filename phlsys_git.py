@@ -5,6 +5,8 @@ import unittest
 
 import phlsys_subprocess
 
+#TODO: add support for user.name and user.email to git clone
+
 
 class GitClone():
 
