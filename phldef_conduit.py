@@ -11,6 +11,8 @@ Account = collections.namedtuple(
     'phlcon_testdata__Account',
     ['user', 'certificate'])
 
+# if using Vagrant, there will be a Phabricator available locally
+# TODO: this should be configurable from the command-line or a config file
 test_uri = "http://127.0.0.1/api/"
 
 alice = Account(user="alice", certificate=(
