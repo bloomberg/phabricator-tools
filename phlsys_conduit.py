@@ -83,8 +83,23 @@ class Conduit():
             "authSignature": signature,
         }
 
-        response = self._communicate("conduit.connect", message_dict)
+        method = "conduit.connect"
+
+        response = self._communicate(method, message_dict)
+
+        error = response["error_code"]
+        error_message = response["error_info"]
         result = response["result"]
+
+        if error:
+            raise ConduitException(
+                method=method,
+                error=error,
+                errormsg=error_message,
+                result=result,
+                obj=message_dict,
+                uri=self._conduit_uri,
+                actAsUser=self._act_as_user)
 
         self._conduit = {
             'sessionKey': result["sessionKey"],
@@ -148,20 +163,35 @@ class Conduit():
 
 class TestConduit(unittest.TestCase):
 
-    def setUp(self):
+    def testCanPing(self):
         test_data = phldef_conduit
         self.conduit = Conduit(
             test_data.test_uri,
             test_data.alice.user,
             test_data.alice.certificate)
+        self.conduit.ping()
 
-    def testCanPing(self):
+    def testCanListReviews(self):
+        test_data = phldef_conduit
+        self.conduit = Conduit(
+            test_data.test_uri,
+            test_data.alice.user,
+            test_data.alice.certificate)
         self.conduit.ping()
         self.conduit.call("differential.query")
 
-        # TODO: test re-authentication when the token expires
-        # TODO: need to test something that requires authentication
+    def testRaisesOnNonAuth(self):
+        test_data = phldef_conduit
+        self.assertRaises(
+            ConduitException,
+            Conduit,
+            test_data.test_uri,
+            "dontcreateausercalledthis",
+            test_data.alice.certificate)
 
+    # TODO: test re-authentication when the token expires
+    # TODO: need to test something that requires authentication
+    # TODO: test raises on bad instanceUri
 
 if __name__ == "__main__":
     unittest.main()
