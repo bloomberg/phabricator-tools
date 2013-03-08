@@ -34,17 +34,10 @@ class apache2 {
       require    => Package["apache2"],
    }
 
-  file { '/var/www':
-    ensure => link,
-    target => "/vagrant",
-    notify => Service['apache2'],
-    force  => true,
-  }
-
   file { 'vhost':
     path    => '/etc/apache2/conf.d/95-phab.conf',
     ensure  => present,
-    content => template("vagrant/vhost.erb"),
+    content => template("phabricator/vhost.erb"),
     notify  => Service['apache2'],
   }
 
@@ -98,7 +91,7 @@ class phabricator {
 class phabricatordb {
     file { "initial.db":
 	path   => "${phab_dir}/initial.db",
-	source => "puppet:///modules/vagrant/initial.db",
+	source => "puppet:///modules/phabricator/initial.db",
 	ensure => present,
     }
 

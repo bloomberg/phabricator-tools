@@ -13,8 +13,9 @@ Vagrant::Config.run do |config|
   config.vm.forward_port 80, 8080
 
   config.vm.provision :puppet, :options => ["--debug", "--verbose"] do |puppet|
-    puppet.options = "--http_proxy_host http://proxy-lo.corp.bloomberg.com"
-    puppet.options = "--http_proxy_port 80"
+    puppet.manifests_path = "puppet"
+    puppet.module_path = "puppet"
+    puppet.manifest_file = "phabricator/manifests/default.pp"
   end
 
   # The url from where the 'config.vm.box' box will be fetched if it
