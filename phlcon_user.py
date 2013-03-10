@@ -111,8 +111,8 @@ class TestUser(unittest.TestCase):
             test_data.test_uri,
             test_data.alice.user,
             test_data.alice.certificate)
-        self.test_email = "alice@fake.com"
-        self.test_user = "alice"
+        self.test_user = phldef_conduit.alice.user
+        self.test_email = phldef_conduit.alice.email
 
     def testAliceEmail(self):
         users = queryUsersFromEmails(self.conduit, [self.test_email])
@@ -129,7 +129,7 @@ class TestUser(unittest.TestCase):
         self.assertEqual(phidUsernames[0], self.test_user)
 
     def testAliceAndNooneEmail(self):
-        emails = [self.test_email, "noone@nowhere.com", "a@b.com"]
+        emails = [self.test_email, "noone@server.invalid", "a@server.invalid"]
         users = queryUsersFromEmails(self.conduit, emails)
         self.assertEqual(len(users), 3)
         self.assertListEqual(users, [self.test_user, None, None])
