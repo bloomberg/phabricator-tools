@@ -69,6 +69,14 @@ class Conduit():
             raise Exception("not a valid file: " + path)
         cls._pathToArc = path
 
+    def setActAsUser(self,  user):
+        self._act_as_user = user
+        self._conduit["actAsUser"] = self._act_as_user
+
+    def clearActAsUser(self):
+        self._act_as_user = None
+        del self._conduit["actAsUser"]
+
     def _authenticate(self):
 
         token = str(int(time.time()))
