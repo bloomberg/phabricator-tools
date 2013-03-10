@@ -1,5 +1,7 @@
 """Wrapper to call Phabricator's Conduit API"""
 
+from contextlib import contextmanager
+import doctest
 import hashlib
 import httplib
 import json
@@ -13,6 +15,57 @@ import phldef_conduit
 
 # TODO: handle re-authentication when the token expires
 # TODO: allow connections without specifying user details where possible
+
+
+@contextmanager
+def actAsUser(conduit, user):
+    """Manage the context of impersonating another user.
+
+    Restore the original actAsUser value when the context expires or if an
+    exception is raised.  The context manager itself is exception neutral.
+
+    Usage Example:
+        impersonate alice
+        >>> conduit = makePhabTestConduit()
+        >>> with actAsUser(conduit, 'alice'):\
+                conduit.call("user.whoami")["userName"]
+        u'alice'
+
+        impersonate bob
+        >>> conduit = makePhabTestConduit()
+        >>> with actAsUser(conduit, 'bob'):\
+                conduit.call("user.whoami")["userName"]
+        u'bob'
+
+        impersonate bob, revert to phab when context expires
+        >>> conduit = makePhabTestConduit()
+        >>> with actAsUser(conduit, 'bob'): pass
+        >>> conduit.call("user.whoami")["userName"]
+        u'phab'
+
+    """
+    prevUser = conduit.getActAsUser()
+    try:
+        conduit.setActAsUser(user)
+        yield conduit
+    finally:
+        if prevUser:
+            conduit.setActAsUser(prevUser)
+        else:
+            conduit.clearActAsUser()
+
+
+def makePhabTestConduit():
+    """Return a new Conduit constructed from phldef_conduit test_uri and phab.
+
+    :returns: a new Conduit constructed from phldef_conduit test_uri and phab
+
+    """
+    test_data = phldef_conduit
+    return Conduit(
+        test_data.test_uri,
+        test_data.phab.user,
+        test_data.phab.certificate)
 
 
 class ConduitException(Exception):
@@ -76,6 +129,9 @@ class Conduit():
     def clearActAsUser(self):
         self._act_as_user = None
         del self._conduit["actAsUser"]
+
+    def getActAsUser(self):
+        return self._act_as_user
 
     def _authenticate(self):
 
@@ -202,6 +258,7 @@ class TestConduit(unittest.TestCase):
     # TODO: test raises on bad instanceUri
 
 if __name__ == "__main__":
+    doctest.testmod()
     unittest.main()
 
 #------------------------------------------------------------------------------
