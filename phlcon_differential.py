@@ -74,7 +74,8 @@ QueryResponse = _makeNT(
     'QueryResponse',
     'authorPHID', 'status', 'phid', 'testPlan', 'title', 'commits',
     'diffs', 'uri', 'ccs', 'dateCreated', 'lineCount', 'branch', 'reviewers',
-    'id', 'statusName', 'hashes', 'summary', 'dateModified', 'sourcePath')
+    'id', 'statusName', 'hashes', 'summary', 'dateModified', 'sourcePath',
+    'auxiliary')
 
 
 def createRawDiff(conduit, diff):
@@ -119,7 +120,7 @@ def query(
     response = conduit.call("differential.query", d)
     query_response_list = []
     for r in response:
-        _ensureKeys(r, "sourcePath")
+        _ensureKeys(r, "sourcePath", "auxiliary")
         r["id"] = int(r["id"])
         r["status"] = int(r["status"])
         query_response_list.append(QueryResponse(**r))
