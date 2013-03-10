@@ -12,6 +12,23 @@ def rawDiffRangeToHere(clone, start):
     return clone.call("diff", start + "...")
 
 
+def rawDiffRange(clone, base, new):
+    """Return a raw diff from the history on 'new' that is not on 'base'.
+
+    Note that commits that are cherry-picked from new to old will still appear
+    in the diff, this function operates using the commit graph only.
+
+    Raise if git returns a non-zero exit code.
+
+    :clone: the clone to operate on
+    :base: the base branch
+    :new: the branch with new commits
+    :returns: a string of the raw diff
+
+    """
+    return clone.call("diff", base + "..." + new)
+
+
 def parseFilenamesFromRawDiff(diff):
     matches = re.findall(
         "^diff --git a/(.*) b/(.*)$",
@@ -55,9 +72,13 @@ class TestDiff(unittest.TestCase):
         self._createCommitNewFile("ONLY_FORK")
         self._createCommitNewFile("ONLY_FORK2")
         rawDiff = rawDiffRangeToHere(self.clone, "master")
+        rawDiff2 = rawDiffRange(self.clone, "master", "fork")
         self.assertEqual(
             set(["ONLY_FORK", "ONLY_FORK2"]),
             parseFilenamesFromRawDiff(rawDiff))
+        self.assertEqual(
+            set(["ONLY_FORK", "ONLY_FORK2"]),
+            parseFilenamesFromRawDiff(rawDiff2))
 
     def tearDown(self):
         self.runCommands("rm -rf " + self.path)
