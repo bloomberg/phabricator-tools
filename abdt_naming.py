@@ -4,6 +4,14 @@ import collections
 import doctest
 import unittest
 
+WB_STATUS_OK = "ok"
+WB_STATUS_BAD_MSG = "badmsg"
+
+WB_DICT_STATUS_DESC = {
+    WB_STATUS_OK:      "ok",
+    WB_STATUS_BAD_MSG: "the commit message failed to parse",
+}
+
 
 def getReviewBranchPrefix():
     # don't see a reason to change this atm
@@ -48,6 +56,7 @@ def getWithoutPrefix(string, prefix):
 WorkingBranch = collections.namedtuple(
     "abdt_naming__WorkingBranch", [
         "full_name",
+        "status",
         "description",
         "base",
         "id"])
@@ -93,15 +102,15 @@ def makeReviewBranchName(description, base):
     return branch_name
 
 
-def makeWorkingBranchName(description, base, review_id):
+def makeWorkingBranchName(status, description, base, review_id):
     """Return the unique string name of the working branch for these params.
 
     Working branches are of the form:
         <working branch prefix>/description/base
 
     Usage example:
-        >>> makeWorkingBranchName('mywork', 'master',  99)
-        'dev/phab/mywork/master/99'
+        >>> makeWorkingBranchName('ok', 'mywork', 'master',  99)
+        'dev/phab/ok/mywork/master/99'
 
     :description: string descriptive name of the branch
     :base: string name of the branch to diff against and land on
@@ -110,7 +119,8 @@ def makeWorkingBranchName(description, base, review_id):
 
     """
     working_branch = ""
-    working_branch += "dev/phab"
+    working_branch += getWorkingBranchPrefix()
+    working_branch += status
     working_branch += "/" + description
     working_branch += "/" + base
     working_branch += "/" + str(review_id)
@@ -151,9 +161,10 @@ def makeWorkingBranchFromName(branch_name):
     """Return the WorkingBranch for 'branch_name' or None if invalid.
 
     Usage example:
-        >>> makeWorkingBranchFromName('dev/phab/mywork/master/99')
+        >>> makeWorkingBranchFromName('dev/phab/ok/mywork/master/99')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__WorkingBranch(full_name='dev/phab/mywork/master/99',
+        abdt_naming__WorkingBranch(full_name='dev/phab/ok/mywork/master/99',
+                                   status='ok',
                                    description='mywork',
                                    base='master',
                                    id='99')
@@ -169,13 +180,14 @@ def makeWorkingBranchFromName(branch_name):
         return None  # review branches must start with the prefix
 
     parts = suffix.split("/")
-    if len(parts) < 3:
-        return None  # suffix should be description/base(/...)/id
+    if len(parts) < 4:
+        return None  # suffix should be status/description/base(/...)/id
 
     return WorkingBranch(
         full_name=branch_name,
-        description=parts[0],
-        base='/'.join(parts[1:-1]),
+        status=parts[0],
+        description=parts[1],
+        base='/'.join(parts[2:-1]),
         id=parts[-1])
 
 
@@ -185,9 +197,10 @@ def getWorkingBranches(branch_list):
     Strings that aren't valid working branch names are ignored.
 
     Usage example:
-        >>> getWorkingBranches(['dev/phab/mywork/master/99'])
+        >>> getWorkingBranches(['dev/phab/ok/mywork/master/99'])
         ... # doctest: +NORMALIZE_WHITESPACE
-        [abdt_naming__WorkingBranch(full_name='dev/phab/mywork/master/99',
+        [abdt_naming__WorkingBranch(full_name='dev/phab/ok/mywork/master/99',
+                                   status='ok',
                                    description='mywork',
                                    base='master',
                                    id='99')]
@@ -233,12 +246,13 @@ class TestNaming(unittest.TestCase):
         self.assertEqual(r.base, "master")
         self.assertFalse(makeWorkingBranchFromName(b))
 
-        b = makeWorkingBranchName("mywork", "master", 1)
+        b = makeWorkingBranchName("ok", "mywork", "master", 1)
         self.assertFalse(isReviewBranchName(b))
         self.assertFalse(makeReviewBranchFromName(b))
         w = makeWorkingBranchFromName(b)
         self.assertTrue(w)
         self.assertEqual(w.full_name, b)
+        self.assertEqual(w.status, "ok")
         self.assertEqual(w.description, "mywork")
         self.assertEqual(w.base, "master")
         self.assertEqual(w.id, "1")

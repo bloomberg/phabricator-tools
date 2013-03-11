@@ -159,7 +159,11 @@ def createDifferentialReview(
         print "- created " + str(review.revisionid)
 
         workingBranch = abdt_naming.makeWorkingBranchName(
-            review_branch.description, review_branch.base, review.revisionid)
+            abdt_naming.WB_STATUS_OK,
+            review_branch.description,
+            review_branch.base,
+            review.revisionid)
+
         print "- pushing working branch: " + workingBranch
         phlgit_push.pushAsymmetrical(
             clone, review_branch.branch, workingBranch, cloneContext.remote)
