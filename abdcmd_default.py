@@ -6,6 +6,7 @@
 import collections
 import unittest
 
+import abdt_exception
 import phlsys_conduit
 import phlsys_fs
 import phlcon_differential
@@ -55,7 +56,7 @@ CloneContext = collections.namedtuple(
         "branches"])
 
 
-class CommitMessageParseException(Exception):
+class CommitMessageParseException(abdt_exception.AbdUserException):
     def __init__(self, errors, fields, digest):
         """Describe failure to create fields suitable for review
 
