@@ -3,12 +3,11 @@
 
 """abd automates the creation and landing of reviews from branches"""
 
-from contextlib import contextmanager
-import os
 import unittest
 #import sys
 
 import phlsys_conduit
+import phlsys_fs
 import phlcon_differential
 import phlcon_user
 import phldef_conduit
@@ -30,16 +29,6 @@ import phlgitu_ref
 #           dev/phab/badname/* -> ignored due to branch name
 #           dev/phab/badmsg/* -> ignored due to improperly formatted msg
 #           dev/phab/badbase/* -> ignored due to missing or invalid base
-
-
-@contextmanager
-def chDirContext(newDir):
-    savedPath = os.getcwd()
-    os.chdir(newDir)
-    try:
-        yield
-    finally:
-        os.chdir(savedPath)
 
 
 def getRemoteName():
@@ -275,7 +264,7 @@ def land(conduit, remote, wb, clone, remoteWorking, remoteBase, branch):
 
 
 def processUpdatedRepo(path, conduit):
-    with chDirContext(path):
+    with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
         remote = phlgit_branch.getRemote(clone, getRemoteName())
         wbList = abdt_naming.getWorkingBranches(remote)
@@ -320,7 +309,7 @@ class TestAbd(unittest.TestCase):
         #TODO: just make a temp dir
         runCommands("rm -rf abd-test")
         runCommands("mkdir abd-test")
-        with chDirContext("abd-test"):
+        with phlsys_fs.chDirContext("abd-test"):
             runCommands(
                 "git --git-dir=devgit init --bare",
                 "git clone --mirror devgit mirror",
@@ -334,7 +323,7 @@ class TestAbd(unittest.TestCase):
                 phldef_conduit.bob.user,
                 phldef_conduit.bob.email)
 
-            with chDirContext("developer"):
+            with phlsys_fs.chDirContext("developer"):
                 self._createCommitNewFile("README", self.reviewer)
 
                 runCommands("git checkout -b ph-review/change/master")
@@ -343,16 +332,16 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push origin master")
                 runCommands("git push -u origin ph-review/change/master")
 
-            with chDirContext("mirror"):
+            with phlsys_fs.chDirContext("mirror"):
                 runCommands("git remote update")
 
-            with chDirContext("phab"):
+            with phlsys_fs.chDirContext("phab"):
                 runCommands("git remote rename origin mirror")
                 runCommands("git remote add origin ../devgit")
                 runCommands("git fetch origin -p")
 
     def test_simpleWorkflow(self):
-        with chDirContext("abd-test"):
+        with phlsys_fs.chDirContext("abd-test"):
             conduit = phlsys_conduit.Conduit(
                 phldef_conduit.test_uri,
                 phldef_conduit.phab.user,
@@ -362,15 +351,15 @@ class TestAbd(unittest.TestCase):
             processUpdatedRepo("phab", conduit)
 
             # update the review with a new revision
-            with chDirContext("developer"):
+            with phlsys_fs.chDirContext("developer"):
                 self._createCommitNewFileNoReviewer("NEWFILE2")
                 runCommands("git push -u origin ph-review/change/master")
-            with chDirContext("phab"):
+            with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
             processUpdatedRepo("phab", conduit)
 
             # accept the review
-            with chDirContext("phab"):
+            with phlsys_fs.chDirContext("phab"):
                 clone = phlsys_git.GitClone(".")
                 branches = phlgit_branch.getRemote(clone, "origin")
             wbList = abdt_naming.getWorkingBranches(branches)
