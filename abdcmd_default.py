@@ -91,11 +91,6 @@ def makeGitWorkingBranch(working_branch, remote):
         remote_branch=makeRemote(working_branch.full_name, remote))
 
 
-def getRemoteName():
-    # not expecting this to ever be different, no magic strings just in case
-    return "origin"
-
-
 def getPrimaryUserFromBranch(clone, conduit, base, branch):
     # TODO: this is broken, we need to raise an error if the committer isn't a
     #       user registered with the Phabricator instance
@@ -339,11 +334,10 @@ def land(conduit, wb, cloneContext, branch):
     # TODO: we probably want to do a better job of cleaning up locally
 
 
-def processUpdatedRepo(path, conduit):
-    remote = getRemoteName()
+def processUpdatedRepo(conduit, path, remote):
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
-        remote_branches = phlgit_branch.getRemote(clone, getRemoteName())
+        remote_branches = phlgit_branch.getRemote(clone, remote)
         cloneContext = CloneContext(clone, remote, remote_branches)
         wbList = abdt_naming.getWorkingBranches(remote_branches)
         makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
@@ -432,7 +426,7 @@ class TestAbd(unittest.TestCase):
                 phldef_conduit.phab.certificate)
 
             # create the review
-            processUpdatedRepo("phab", conduit)
+            processUpdatedRepo(conduit, "phab", "origin")
 
             # update the review with a new revision
             with phlsys_fs.chDirContext("developer"):
@@ -440,7 +434,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
-            processUpdatedRepo("phab", conduit)
+            processUpdatedRepo(conduit, "phab", "origin")
 
             # accept the review
             with phlsys_fs.chDirContext("phab"):
@@ -453,7 +447,7 @@ class TestAbd(unittest.TestCase):
                 phlcon_differential.createComment(
                     conduit, wb.id, action="accept")
 
-            processUpdatedRepo("phab", conduit)
+            processUpdatedRepo(conduit, "phab", "origin")
 
     def tearDown(self):
         #TODO: comment this back in

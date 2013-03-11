@@ -20,7 +20,7 @@ def main():
     print "fetch"
     phlsys_subprocess.runCommands("git fetch -p")
     print "process"
-    abdcmd_default.processUpdatedRepo(".", args.instance)
+    abdcmd_default.processUpdatedRepo(args.instance, ".", "origin")
 
 if __name__ == "__main__":
     sys.exit(main())
