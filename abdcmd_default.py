@@ -55,16 +55,24 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(clone, remote, review_branch, remote_branches, conduit):
+def createReview(conduit, clone, remote, review_branch, remote_branches):
 
+    user, parsed, rawDiff = getReviewParams(
+        conduit, clone, remote, review_branch, remote_branches)
+
+    createDifferentialReview(
+        conduit, user, parsed, clone, remote, review_branch, rawDiff)
+
+
+def getReviewParams(conduit, clone, remote, review_branch, remote_branches):
+    remoteBase = phlgitu_ref.makeRemote(review_branch.base, remote)
+    remoteBranch = phlgitu_ref.makeRemote(review_branch.full_name, remote)
     if review_branch.base not in remote_branches:
         raise Exception("base does not exist:" + review_branch.base)
     if not isBasedOn(review_branch.full_name, review_branch.base):
         raise Exception(
             "'" + review_branch.full_name +
             "' is not based on '" + review_branch.base + "'")
-    remoteBase = phlgitu_ref.makeRemote(review_branch.base, remote)
-    remoteBranch = phlgitu_ref.makeRemote(review_branch.full_name, remote)
     user = getPrimaryUserFromBranch(clone, conduit, remoteBase, remoteBranch)
     print "- author: " + user
 
@@ -74,12 +82,19 @@ def createReview(clone, remote, review_branch, remote_branches, conduit):
         raise Exception(
             "Errors parsing commit messages: " + str(parsed.errors))
 
+    rawDiff = phlgit_diff.rawDiffRange(clone, remoteBase, remoteBranch)
+
+    return user, parsed, rawDiff
+
+
+def createDifferentialReview(
+        conduit, user, parsed, clone, remote, review_branch, rawDiff):
+    remoteBranch = phlgitu_ref.makeRemote(review_branch.full_name, remote)
     phlgit_checkout.newBranchForceBasedOn(
         clone, review_branch.full_name, remoteBranch)
 
     with phlsys_conduit.actAsUser(conduit, user):
         print "- creating diff"
-        rawDiff = phlgit_diff.rawDiffRange(clone, remoteBase, remoteBranch)
         diffid = phlcon_differential.createRawDiff(conduit, rawDiff).id
 
         print "- creating revision"
@@ -277,7 +292,7 @@ def processUpdatedRepo(path, conduit):
                     print "create review for " + b
                     review_branch = abdt_naming.makeReviewBranchFromName(b)
                     createReview(
-                        clone, remote, review_branch, remote_branches, conduit)
+                        conduit, clone, remote, review_branch, remote_branches)
                 else:
                     print "update review for " + b
                     updateReview(clone, b, rbDict[b], remote_branches, conduit)
