@@ -55,6 +55,26 @@ CloneContext = collections.namedtuple(
         "branches"])
 
 
+class CommitMessageParseException(Exception):
+    def __init__(self, errors, fields, digest):
+        """Describe failure to create fields suitable for review
+
+        :errors: errors reported by Phabricator
+        :fields: the resulting fields response (if any)
+        :digest: a digest of the commit messages
+
+        """
+        message = (
+            "abdcmd_default__CommitMessageParseException:\n" +
+            "errors: '" + str(errors) + "'\n" +
+            "fields: '" + str(fields) + "'\n" +
+            "digest: '" + str(digest) + "'\n")
+        super(CommitMessageParseException, self).__init__(message)
+        self.errors = errors
+        self.fields = fields
+        self.digest = digest
+
+
 def makeGitReviewBranch(review_branch, remote):
     """Return a GitReviewBranch based on a abdt_naming.ReviewBranch and remote.
 
@@ -134,8 +154,8 @@ def getReviewParams(conduit, cloneContext, review_branch):
         clone, review_branch.remote_base, review_branch.remote_branch)
     parsed = phlcon_differential.parseCommitMessage(conduit, message)
     if parsed.errors:
-        raise Exception(
-            "Errors parsing commit messages: " + str(parsed.errors))
+        raise CommitMessageParseException(
+            parsed.errors, parsed.fields, message)
 
     rawDiff = phlgit_diff.rawDiffRange(
         clone, review_branch.remote_base, review_branch.remote_branch)
@@ -377,6 +397,11 @@ class TestAbd(unittest.TestCase):
         message += "Reviewers: " + reviewers
         phlsys_subprocess.run("git", "commit", "-a", "-F", "-", stdin=message)
 
+    def _createCommitNewFileNoTestPlan(self, filename, reviewers):
+        runCommands("touch " + filename)
+        runCommands("git add " + filename)
+        self._gitCommitAll("add " + filename, "", reviewers)
+
     def _createCommitNewFile(self, filename, reviewers):
         runCommands("touch " + filename)
         runCommands("git add " + filename)
@@ -395,9 +420,8 @@ class TestAbd(unittest.TestCase):
         with phlsys_fs.chDirContext("abd-test"):
             runCommands(
                 "git --git-dir=devgit init --bare",
-                "git clone --mirror devgit mirror",
                 "git clone devgit developer",
-                "git clone mirror phab",
+                "git clone devgit phab",
             )
 
             devClone = phlsys_git.GitClone("developer")
@@ -409,19 +433,20 @@ class TestAbd(unittest.TestCase):
             with phlsys_fs.chDirContext("developer"):
                 self._createCommitNewFile("README", self.reviewer)
 
-                runCommands("git checkout -b ph-review/change/master")
-                self._createCommitNewFile("NEWFILE", self.reviewer)
-
                 runCommands("git push origin master")
-                runCommands("git push -u origin ph-review/change/master")
-
-            with phlsys_fs.chDirContext("mirror"):
-                runCommands("git remote update")
 
             with phlsys_fs.chDirContext("phab"):
-                runCommands("git remote rename origin mirror")
-                runCommands("git remote add origin ../devgit")
                 runCommands("git fetch origin -p")
+
+    def test_nothingToDo(self):
+        with phlsys_fs.chDirContext("abd-test"):
+            conduit = phlsys_conduit.Conduit(
+                phldef_conduit.test_uri,
+                phldef_conduit.phab.user,
+                phldef_conduit.phab.certificate)
+
+            # nothing to process
+            processUpdatedRepo(conduit, "phab", "origin")
 
     def test_simpleWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
@@ -429,6 +454,18 @@ class TestAbd(unittest.TestCase):
                 phldef_conduit.test_uri,
                 phldef_conduit.phab.user,
                 phldef_conduit.phab.certificate)
+
+            # nothing to process
+            processUpdatedRepo(conduit, "phab", "origin")
+
+            with phlsys_fs.chDirContext("developer"):
+                runCommands("git checkout -b ph-review/change/master")
+                self._createCommitNewFile("NEWFILE", self.reviewer)
+
+                runCommands("git push -u origin ph-review/change/master")
+
+            with phlsys_fs.chDirContext("phab"):
+                runCommands("git fetch origin -p")
 
             # create the review
             processUpdatedRepo(conduit, "phab", "origin")
@@ -439,6 +476,8 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
+
+            # update the review
             processUpdatedRepo(conduit, "phab", "origin")
 
             # accept the review
@@ -454,9 +493,33 @@ class TestAbd(unittest.TestCase):
 
             processUpdatedRepo(conduit, "phab", "origin")
 
+    def test_badMsgWorkflow(self):
+        with phlsys_fs.chDirContext("abd-test"):
+            conduit = phlsys_conduit.Conduit(
+                phldef_conduit.test_uri,
+                phldef_conduit.phab.user,
+                phldef_conduit.phab.certificate)
+
+            # nothing to process
+            processUpdatedRepo(conduit, "phab", "origin")
+
+            with phlsys_fs.chDirContext("developer"):
+                runCommands("git checkout -b ph-review/change/master")
+                self._createCommitNewFileNoTestPlan("NEWFILE", self.reviewer)
+
+                runCommands("git push -u origin ph-review/change/master")
+
+            with phlsys_fs.chDirContext("phab"):
+                runCommands("git fetch origin -p")
+
+            # fail to create the review
+            self.assertRaises(
+                CommitMessageParseException,
+                processUpdatedRepo, conduit, "phab", "origin")
+            #processUpdatedRepo(conduit, "phab", "origin")
+
     def tearDown(self):
-        #TODO: comment this back in
-        #runCommands("rm -rf abd-test")
+        runCommands("rm -rf abd-test")
         pass
 
 
