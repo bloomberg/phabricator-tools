@@ -36,7 +36,7 @@ def getRemoteName():
     return "origin"
 
 
-def getUserFromBranch(clone, conduit, base, branch):
+def getPrimaryUserFromBranch(clone, conduit, base, branch):
     # TODO: this is broken, we need to raise an error if the committer isn't a
     #       user registered with the Phabricator instance
     hashes = phlgit_log.getRangeHashes(clone, base, branch)
@@ -44,7 +44,10 @@ def getUserFromBranch(clone, conduit, base, branch):
     print "- committers: " + str(committers)
     users = phlcon_user.queryUsersFromEmails(conduit, committers)
     print "- users: " + str(users)
-    return users[0]
+    primary_user = users[0]
+    if not primary_user:
+        raise Exception("first committer is not a Phabricator user")
+    return primary_user
 
 
 def isBasedOn(name, base):
@@ -63,7 +66,7 @@ def createReview(branch, remote_branches, conduit):
         raise Exception("'" + branch + "' is not based on '" + rb.base + "'")
     remoteBase = phlgitu_ref.makeRemote(rb.base, remote)
     remoteBranch = phlgitu_ref.makeRemote(branch, remote)
-    user = getUserFromBranch(clone, conduit, remoteBase, remoteBranch)
+    user = getPrimaryUserFromBranch(clone, conduit, remoteBase, remoteBranch)
     print "- author: " + user
 #   if not arc.isValidUser(user):
 #       raise Exception("'" + name + "' is not a user")
@@ -182,7 +185,7 @@ def updateReview(branch, workingBranch, remote_branches, conduit):
 
 def update(conduit, remote, wb, clone, remoteBranch):
     remoteBase = phlgitu_ref.makeRemote(wb.base, remote)
-    user = getUserFromBranch(clone, conduit, remoteBase, remoteBranch)
+    user = getPrimaryUserFromBranch(clone, conduit, remoteBase, remoteBranch)
 
     print "update"
 
@@ -218,7 +221,7 @@ def update(conduit, remote, wb, clone, remoteBranch):
 
 def land(conduit, remote, wb, clone, remoteWorking, remoteBase, branch):
     print "landing " + remoteWorking + " onto " + remoteBase
-    user = getUserFromBranch(clone, conduit, remoteBase, remoteWorking)
+    user = getPrimaryUserFromBranch(clone, conduit, remoteBase, remoteWorking)
     d = phlcon_differential
     with phlsys_conduit.actAsUser(conduit, user):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, remoteBase)
