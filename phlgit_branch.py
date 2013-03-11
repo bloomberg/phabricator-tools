@@ -17,6 +17,16 @@ def isTreeSame(clone, branch, targetBranch):
     return branchTree == targetTree
 
 
+def _gitRevParse(clone, rev):
+    return clone.call('rev-parse', rev)
+
+
+def isIdentical(clone, branch, targetBranch):
+    branchRev = _gitRevParse(clone, branch)
+    targetRev = _gitRevParse(clone, targetBranch)
+    return branchRev == targetRev
+
+
 def _getRefs(clone):
     # the output list is like:
     #     SHA1      Refname
