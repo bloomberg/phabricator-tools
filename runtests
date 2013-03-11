@@ -1,0 +1,12 @@
+# do tests in order of time to execute
+set -e # exit immediately on error
+
+# doctest
+for f in *.py ;
+    do python -m doctest $f ;
+done
+
+flake8 .
+
+# unittest
+python -m unittest discover -p "*.py"
