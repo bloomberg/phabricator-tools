@@ -49,6 +49,12 @@ GitWorkingBranch = collections.namedtuple(
         "remote_base",
         "remote_branch"])
 
+CloneContext = collections.namedtuple(
+    "abdcmd_default__GitClone", [
+        "clone",
+        "remote",
+        "branches"])
+
 
 def makeGitReviewBranch(review_branch, remote):
     """Return a GitReviewBranch based on a abdt_naming.ReviewBranch and remote.
@@ -109,17 +115,18 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(conduit, clone, remote, review_branch, remote_branches):
+def createReview(conduit, cloneContext, review_branch):
 
     user, parsed, rawDiff = getReviewParams(
-        conduit, clone, remote, review_branch, remote_branches)
+        conduit, cloneContext, review_branch)
 
     createDifferentialReview(
-        conduit, user, parsed, clone, remote, review_branch, rawDiff)
+        conduit, user, parsed, cloneContext, review_branch, rawDiff)
 
 
-def getReviewParams(conduit, clone, remote, review_branch, remote_branches):
-    if review_branch.base not in remote_branches:
+def getReviewParams(conduit, cloneContext, review_branch):
+    clone = cloneContext.clone
+    if review_branch.base not in cloneContext.branches:
         raise Exception("base does not exist:" + review_branch.base)
     if not isBasedOn(review_branch.branch, review_branch.base):
         raise Exception(
@@ -143,7 +150,8 @@ def getReviewParams(conduit, clone, remote, review_branch, remote_branches):
 
 
 def createDifferentialReview(
-        conduit, user, parsed, clone, remote, review_branch, rawDiff):
+        conduit, user, parsed, cloneContext, review_branch, rawDiff):
+    clone = cloneContext.clone
     phlgit_checkout.newBranchForceBasedOn(
         clone, review_branch.branch, review_branch.remote_branch)
 
@@ -160,7 +168,7 @@ def createDifferentialReview(
             review_branch.description, review_branch.base, review.revisionid)
         print "- pushing working branch: " + workingBranch
         phlgit_push.pushAsymmetrical(
-            clone, review_branch.branch, workingBranch, remote)
+            clone, review_branch.branch, workingBranch, cloneContext.remote)
 
     print "- commenting on " + str(review.revisionid)
     createMessage = ""
@@ -218,34 +226,35 @@ def updateCommitMessageFields(earlier, later):
         testPlan=testPlan)
 
 
-def updateReview(
-        conduit, clone, remote, reviewBranch, workingBranch, remote_branches):
+def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
     rb = reviewBranch
     wb = workingBranch
 
+    clone = cloneContext.clone
     isBranchIdentical = phlgit_branch.isIdentical
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
-        if wb.base not in remote_branches:
+        if wb.base not in cloneContext.branches:
             raise Exception("base does not exist:" + wb.base)
         if not isBasedOn(rb.remote_branch, wb.remote_base):
             raise Exception(
                 "'" + rb.remote_branch + "' is not based on '" + wb.base + "'")
 
-        update(conduit, remote, wb, clone, rb.remote_branch)
+        update(conduit, wb, cloneContext, rb.remote_branch)
     else:
-        if wb.base not in remote_branches:
+        if wb.base not in cloneContext.branches:
             raise Exception("base does not exist:" + wb.base)
 
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
         if int(status) == d.REVISION_ACCEPTED:
-            land(conduit, remote, wb, clone, reviewBranch.branch)
+            land(conduit, wb, cloneContext, reviewBranch.branch)
             # TODO: we probably want to do a better job of cleaning up locally
         else:
             print "do nothing"
 
 
-def update(conduit, remote, wb, clone, remoteBranch):
+def update(conduit, wb, cloneContext, remoteBranch):
+    clone = cloneContext.clone
     user = getPrimaryUserFromBranch(
         clone, conduit, wb.remote_base, remoteBranch)
 
@@ -271,7 +280,7 @@ def update(conduit, remote, wb, clone, remoteBranch):
             conduit, wb.id, diffid, fields._asdict(), "update")
 
     phlgit_push.pushAsymmetricalForce(
-        clone, remoteBranch, wb.branch, remote)
+        clone, remoteBranch, wb.branch, cloneContext.remote)
 
     print "- commenting on revision " + str(wb.id)
     updateMessage = ""
@@ -281,7 +290,8 @@ def update(conduit, remote, wb, clone, remoteBranch):
         conduit, wb.id, message=updateMessage, silent=True)
 
 
-def land(conduit, remote, wb, clone, branch):
+def land(conduit, wb, cloneContext, branch):
+    clone = cloneContext.clone
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
     user = getPrimaryUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
@@ -308,11 +318,11 @@ def land(conduit, remote, wb, clone, branch):
         squashMessage = phlgit_merge.squash(
             clone, wb.remote_branch, message)
         print "- pushing " + wb.remote_base
-        phlgit_push.push(clone, wb.base, remote)
+        phlgit_push.push(clone, wb.base, cloneContext.remote)
         print "- deleting " + wb.branch
-        phlgit_push.delete(clone, wb.branch, remote)
+        phlgit_push.delete(clone, wb.branch, cloneContext.remote)
         print "- deleting " + branch
-        phlgit_push.delete(clone, branch, remote)
+        phlgit_push.delete(clone, branch, cloneContext.remote)
 
     print "- commenting on revision " + str(wb.id)
     closeMessage = ""
@@ -334,6 +344,7 @@ def processUpdatedRepo(path, conduit):
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
         remote_branches = phlgit_branch.getRemote(clone, getRemoteName())
+        cloneContext = CloneContext(clone, remote, remote_branches)
         wbList = abdt_naming.getWorkingBranches(remote_branches)
         makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
         rbDict = dict((makeRb(wb), wb) for wb in wbList)
@@ -343,16 +354,14 @@ def processUpdatedRepo(path, conduit):
                 review_branch = makeGitReviewBranch(review_branch, remote)
                 if b not in rbDict.keys():
                     print "create review for " + b
-                    createReview(
-                        conduit, clone, remote, review_branch, remote_branches)
+                    createReview(conduit, cloneContext, review_branch)
                 else:
                     print "update review for " + b
                     working_branch = rbDict[b]
                     working_branch = makeGitWorkingBranch(
                         working_branch, remote)
                     updateReview(
-                        conduit, clone, remote, review_branch,
-                        working_branch, remote_branches)
+                        conduit, cloneContext, review_branch, working_branch)
 
 
 def runCommands(*commands):
