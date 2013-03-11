@@ -164,9 +164,9 @@ def updateCommitMessageFields(earlier, later):
         testPlan=testPlan)
 
 
-def updateReview(clone, branch, workingBranch, remote_branches, conduit):
-    wb = abdt_naming.makeWorkingBranchFromName(workingBranch)
-    remote = getRemoteName()
+def updateReview(
+        conduit, clone, remote, branch, workingBranch, remote_branches):
+    wb = workingBranch
     remoteBranch = phlgitu_ref.makeRemote(branch, remote)
     remoteWorking = phlgitu_ref.makeRemote(wb.full_name, remote)
     remoteBase = phlgitu_ref.makeRemote(wb.base, remote)
@@ -181,7 +181,7 @@ def updateReview(clone, branch, workingBranch, remote_branches, conduit):
         update(conduit, remote, wb, clone, remoteBranch)
     else:
         phlgit_checkout.newBranchForceBasedOn(
-            clone, workingBranch, remoteWorking)
+            clone, wb.full_name, remoteWorking)
 
         if wb.base not in remote_branches:
             raise Exception("base does not exist:" + wb.base)
@@ -285,7 +285,7 @@ def processUpdatedRepo(path, conduit):
         remote_branches = phlgit_branch.getRemote(clone, getRemoteName())
         wbList = abdt_naming.getWorkingBranches(remote_branches)
         makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
-        rbDict = dict((makeRb(wb), wb.full_name) for wb in wbList)
+        rbDict = dict((makeRb(wb), wb) for wb in wbList)
         for b in remote_branches:
             if abdt_naming.isReviewBranchName(b):
                 if b not in rbDict.keys():
@@ -295,7 +295,8 @@ def processUpdatedRepo(path, conduit):
                         conduit, clone, remote, review_branch, remote_branches)
                 else:
                     print "update review for " + b
-                    updateReview(clone, b, rbDict[b], remote_branches, conduit)
+                    updateReview(
+                        conduit, clone, remote, b, rbDict[b], remote_branches)
 
 
 def runCommands(*commands):
