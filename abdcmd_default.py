@@ -5,7 +5,6 @@
 
 import collections
 import unittest
-#import sys
 
 import phlsys_conduit
 import phlsys_fs
