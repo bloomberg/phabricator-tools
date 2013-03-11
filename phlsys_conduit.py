@@ -18,28 +18,28 @@ import phldef_conduit
 
 
 @contextmanager
-def actAsUser(conduit, user):
+def actAsUserContext(conduit, user):
     """Manage the context of impersonating another user.
 
-    Restore the original actAsUser value when the context expires or if an
-    exception is raised.  The context manager itself is exception neutral.
+    Restore the original actAsUserContext value when the context expires or if
+    an exception is raised.  The context manager itself is exception neutral.
 
     Usage Example:
         impersonate alice
         >>> conduit = makePhabTestConduit()
-        >>> with actAsUser(conduit, 'alice'):\
+        >>> with actAsUserContext(conduit, 'alice'):\
                 conduit.call("user.whoami")["userName"]
         u'alice'
 
         impersonate bob
         >>> conduit = makePhabTestConduit()
-        >>> with actAsUser(conduit, 'bob'):\
+        >>> with actAsUserContext(conduit, 'bob'):\
                 conduit.call("user.whoami")["userName"]
         u'bob'
 
         impersonate bob, revert to phab when context expires
         >>> conduit = makePhabTestConduit()
-        >>> with actAsUser(conduit, 'bob'): pass
+        >>> with actAsUserContext(conduit, 'bob'): pass
         >>> conduit.call("user.whoami")["userName"]
         u'phab'
 

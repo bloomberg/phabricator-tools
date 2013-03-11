@@ -149,7 +149,7 @@ def createDifferentialReview(
     phlgit_checkout.newBranchForceBasedOn(
         clone, review_branch.branch, review_branch.remote_branch)
 
-    with phlsys_conduit.actAsUser(conduit, user):
+    with phlsys_conduit.actAsUserContext(conduit, user):
         print "- creating diff"
         diffid = phlcon_differential.createRawDiff(conduit, rawDiff).id
 
@@ -264,7 +264,7 @@ def update(conduit, wb, cloneContext, remoteBranch):
     rawDiff = phlgit_diff.rawDiffRange(clone, wb.remote_base, remoteBranch)
 
     d = phlcon_differential
-    with phlsys_conduit.actAsUser(conduit, user):
+    with phlsys_conduit.actAsUserContext(conduit, user):
         diffid = d.createRawDiff(conduit, rawDiff).id
 
         print "- updating revision " + str(wb.id)
@@ -296,7 +296,7 @@ def land(conduit, wb, cloneContext, branch):
     user = getPrimaryUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
     d = phlcon_differential
-    with phlsys_conduit.actAsUser(conduit, user):
+    with phlsys_conduit.actAsUserContext(conduit, user):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
 
         # compose the commit message
@@ -334,7 +334,7 @@ def land(conduit, wb, cloneContext, branch):
     d.createComment(
         conduit, wb.id, message=squashMessage, silent=True)
 
-    with phlsys_conduit.actAsUser(conduit, user):
+    with phlsys_conduit.actAsUserContext(conduit, user):
         d.close(conduit, wb.id)
     # TODO: we probably want to do a better job of cleaning up locally
 
@@ -448,7 +448,7 @@ class TestAbd(unittest.TestCase):
             wbList = abdt_naming.getWorkingBranches(branches)
             self.assertEqual(len(wbList), 1)
             wb = wbList[0]
-            with phlsys_conduit.actAsUser(conduit, self.reviewer):
+            with phlsys_conduit.actAsUserContext(conduit, self.reviewer):
                 phlcon_differential.createComment(
                     conduit, wb.id, action="accept")
 
