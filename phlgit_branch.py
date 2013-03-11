@@ -1,6 +1,22 @@
 """Wrapper around 'git branch'"""
 
 
+def _catFilePretty(clone, objectHash):
+    return clone.call('cat-file', '-p', objectHash)
+
+
+def _getTree(clone, commit):
+    content = _catFilePretty(clone, commit).splitlines()
+    tree = content[0].split("tree ")[1].strip()
+    return tree
+
+
+def isTreeSame(clone, branch, targetBranch):
+    branchTree = _getTree(clone, branch)
+    targetTree = _getTree(clone, targetBranch)
+    return branchTree == targetTree
+
+
 def _getRefs(clone):
     # the output list is like:
     #     SHA1      Refname
