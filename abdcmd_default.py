@@ -55,50 +55,49 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(branch, remote_branches, conduit):
-    remote = getRemoteName()
-    rb = abdt_naming.makeReviewBranchFromName(branch)
+def createReview(clone, remote, review_branch, remote_branches, conduit):
 
-    clone = phlsys_git.GitClone(".")
-    if rb.base not in remote_branches:
-        raise Exception("base does not exist:" + rb.base)
-    if not isBasedOn(branch, rb.base):
-        raise Exception("'" + branch + "' is not based on '" + rb.base + "'")
-    remoteBase = phlgitu_ref.makeRemote(rb.base, remote)
-    remoteBranch = phlgitu_ref.makeRemote(branch, remote)
+    if review_branch.base not in remote_branches:
+        raise Exception("base does not exist:" + review_branch.base)
+    if not isBasedOn(review_branch.full_name, review_branch.base):
+        raise Exception(
+            "'" + review_branch.full_name +
+            "' is not based on '" + review_branch.base + "'")
+    remoteBase = phlgitu_ref.makeRemote(review_branch.base, remote)
+    remoteBranch = phlgitu_ref.makeRemote(review_branch.full_name, remote)
     user = getPrimaryUserFromBranch(clone, conduit, remoteBase, remoteBranch)
     print "- author: " + user
-#   if not arc.isValidUser(user):
-#       raise Exception("'" + name + "' is not a user")
 
-    phlgit_checkout.newBranchForceBasedOn(clone, branch, remoteBranch)
-    d = phlcon_differential
-
-    rawDiff = phlgit_diff.rawDiffRange(clone, remoteBase, remoteBranch)
     message = makeMessageDigest(clone, remoteBase, remoteBranch)
-    parsed = d.parseCommitMessage(conduit, message)
+    parsed = phlcon_differential.parseCommitMessage(conduit, message)
     if parsed.errors:
         raise Exception(
             "Errors parsing commit messages: " + str(parsed.errors))
 
+    phlgit_checkout.newBranchForceBasedOn(
+        clone, review_branch.full_name, remoteBranch)
+
     with phlsys_conduit.actAsUser(conduit, user):
         print "- creating diff"
-        diffid = d.createRawDiff(conduit, rawDiff).id
+        rawDiff = phlgit_diff.rawDiffRange(clone, remoteBase, remoteBranch)
+        diffid = phlcon_differential.createRawDiff(conduit, rawDiff).id
 
         print "- creating revision"
-        review = d.createRevision(conduit, diffid, parsed.fields)
+        review = phlcon_differential.createRevision(
+            conduit, diffid, parsed.fields)
         print "- created " + str(review.revisionid)
 
         workingBranch = abdt_naming.makeWorkingBranchName(
-            rb.description, rb.base, review.revisionid)
+            review_branch.description, review_branch.base, review.revisionid)
         print "- pushing working branch: " + workingBranch
-        phlgit_push.pushAsymmetrical(clone, branch, workingBranch, remote)
+        phlgit_push.pushAsymmetrical(
+            clone, review_branch.full_name, workingBranch, remote)
 
     print "- commenting on " + str(review.revisionid)
     createMessage = ""
-    createMessage += "i created this from " + branch + ".\n"
+    createMessage += "i created this from " + review_branch.full_name + ".\n"
     createMessage += " pushed to " + workingBranch + "."
-    d.createComment(
+    phlcon_differential.createComment(
         conduit, review.revisionid, message=createMessage, silent=True)
 
 
@@ -150,14 +149,12 @@ def updateCommitMessageFields(earlier, later):
         testPlan=testPlan)
 
 
-def updateReview(branch, workingBranch, remote_branches, conduit):
+def updateReview(clone, branch, workingBranch, remote_branches, conduit):
     wb = abdt_naming.makeWorkingBranchFromName(workingBranch)
     remote = getRemoteName()
     remoteBranch = phlgitu_ref.makeRemote(branch, remote)
     remoteWorking = phlgitu_ref.makeRemote(wb.full_name, remote)
     remoteBase = phlgitu_ref.makeRemote(wb.base, remote)
-
-    clone = phlsys_git.GitClone(".")
 
     if not phlgit_branch.isIdentical(clone, remoteBranch, remoteWorking):
         if wb.base not in remote_branches:
@@ -267,20 +264,23 @@ def land(conduit, remote, wb, clone, remoteWorking, remoteBase, branch):
 
 
 def processUpdatedRepo(path, conduit):
+    remote = getRemoteName()
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
-        remote = phlgit_branch.getRemote(clone, getRemoteName())
-        wbList = abdt_naming.getWorkingBranches(remote)
+        remote_branches = phlgit_branch.getRemote(clone, getRemoteName())
+        wbList = abdt_naming.getWorkingBranches(remote_branches)
         makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
         rbDict = dict((makeRb(wb), wb.full_name) for wb in wbList)
-        for b in remote:
+        for b in remote_branches:
             if abdt_naming.isReviewBranchName(b):
                 if b not in rbDict.keys():
                     print "create review for " + b
-                    createReview(b, remote, conduit)
+                    review_branch = abdt_naming.makeReviewBranchFromName(b)
+                    createReview(
+                        clone, remote, review_branch, remote_branches, conduit)
                 else:
                     print "update review for " + b
-                    updateReview(b, rbDict[b], remote, conduit)
+                    updateReview(clone, b, rbDict[b], remote_branches, conduit)
 
 
 def runCommands(*commands):
