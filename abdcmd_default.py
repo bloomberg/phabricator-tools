@@ -183,9 +183,11 @@ def makeMessageDigest(clone, base, branch):
 
 
 def updateCommitMessageFields(earlier, later):
-    """Return an updated 'CommitMessageFields' based on the 'earlier' version
-    being updated by the 'later' version. If the earlier or later are None then
-    the non-None one is returned.
+    """Return an updated 'CommitMessageFields' based on the 'earlier' version.
+
+    Apply the 'later' version as an update to the 'earlier' one.
+
+    If either the earlier or later are None then the non-None one is returned.
 
     :earlier: a phlcon_differential.ParseCommitMessageFields
     :later: a phlcon_differential.ParseCommitMessageFields
