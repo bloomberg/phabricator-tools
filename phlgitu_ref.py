@@ -16,6 +16,17 @@ def makeRemote(ref, remote):
     return str("refs/remotes/" + remote + "/" + ref)
 
 
+def makeLocal(ref):
+    """Return a fully qualified Git reference based on a local name.
+
+    Usage example:
+        >>> makeLocal("mywork")
+        'refs/heads/mywork'
+    """
+    # TODO: check that it isn't already fully qualified
+    return str("refs/heads/" + ref)
+
+
 if __name__ == "__main__":
     doctest.testmod()
 

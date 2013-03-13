@@ -132,11 +132,23 @@ def isBasedOn(name, base):
 
 def createReview(conduit, cloneContext, review_branch):
 
-    user, parsed, rawDiff = getReviewParams(
-        conduit, cloneContext, review_branch)
+    try:
+        user, parsed, rawDiff = getReviewParams(
+            conduit, cloneContext, review_branch)
 
-    createDifferentialReview(
-        conduit, user, parsed, cloneContext, review_branch, rawDiff)
+        createDifferentialReview(
+            conduit, user, parsed, cloneContext, review_branch, rawDiff)
+    except abdt_exception.AbdUserException:
+        # record the branch as bad
+        working_branch_name = abdt_naming.makeWorkingBranchName(
+            "bad", review_branch.description, review_branch.base, "none")
+        phlgit_push.pushAsymmetrical(
+            cloneContext.clone,
+            phlgitu_ref.makeRemote(review_branch.branch, cloneContext.remote),
+            phlgitu_ref.makeLocal(working_branch_name),
+            cloneContext.remote)
+
+        # message the involved users
 
 
 def getReviewParams(conduit, cloneContext, review_branch):
@@ -514,10 +526,15 @@ class TestAbd(unittest.TestCase):
                 runCommands("git fetch origin -p")
 
             # fail to create the review
-            self.assertRaises(
-                CommitMessageParseException,
-                processUpdatedRepo, conduit, "phab", "origin")
+            processUpdatedRepo(conduit, "phab", "origin")
             #processUpdatedRepo(conduit, "phab", "origin")
+
+            with phlsys_fs.chDirContext("phab"):
+                clone = phlsys_git.GitClone(".")
+                branches = phlgit_branch.getRemote(clone, "origin")
+            wbList = abdt_naming.getWorkingBranches(branches)
+            self.assertEqual(len(wbList), 1)
+            self.assertEqual(wbList[0].status, "bad")
 
     def tearDown(self):
         runCommands("rm -rf abd-test")
