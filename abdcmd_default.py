@@ -111,7 +111,7 @@ def makeGitWorkingBranch(working_branch, remote):
         remote_branch=makeRemote(working_branch.full_name, remote))
 
 
-def getPrimaryUserFromBranch(clone, conduit, base, branch):
+def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
     # TODO: this is broken, we need to raise an error if the committer isn't a
     #       user registered with the Phabricator instance
     hashes = phlgit_log.getRangeHashes(clone, base, branch)
@@ -122,7 +122,7 @@ def getPrimaryUserFromBranch(clone, conduit, base, branch):
     primary_user = users[0]
     if not primary_user:
         raise Exception("first committer is not a Phabricator user")
-    return primary_user
+    return primary_user, committers[0]
 
 
 def isBasedOn(name, base):
@@ -132,48 +132,41 @@ def isBasedOn(name, base):
 
 def createReview(conduit, cloneContext, review_branch):
 
-    try:
-        user, parsed, rawDiff = getReviewParams(
-            conduit, cloneContext, review_branch)
+    # try:
+        clone = cloneContext.clone
+        if review_branch.base not in cloneContext.branches:
+            raise Exception("base does not exist:" + review_branch.base)
+        if not isBasedOn(review_branch.branch, review_branch.base):
+            raise Exception(
+                "'" + review_branch.branch +
+                "' is not based on '" + review_branch.base + "'")
+        user, email = getPrimaryUserAndEmailFromBranch(
+            clone, conduit, review_branch.remote_base,
+            review_branch.remote_branch)
+        print "- author: " + user
+
+        message = makeMessageDigest(
+            clone, review_branch.remote_base, review_branch.remote_branch)
+        parsed = phlcon_differential.parseCommitMessage(conduit, message)
+
+        if parsed.errors:
+            # record the branch as bad
+            working_branch_name = abdt_naming.makeWorkingBranchName(
+                "bad", review_branch.description, review_branch.base, "none")
+            phlgit_push.pushAsymmetrical(
+                cloneContext.clone,
+                phlgitu_ref.makeRemote(
+                    review_branch.branch, cloneContext.remote),
+                phlgitu_ref.makeLocal(working_branch_name),
+                cloneContext.remote)
+            # mail the primary user
+            return
+
+        rawDiff = phlgit_diff.rawDiffRange(
+            clone, review_branch.remote_base, review_branch.remote_branch)
 
         createDifferentialReview(
             conduit, user, parsed, cloneContext, review_branch, rawDiff)
-    except abdt_exception.AbdUserException:
-        # record the branch as bad
-        working_branch_name = abdt_naming.makeWorkingBranchName(
-            "bad", review_branch.description, review_branch.base, "none")
-        phlgit_push.pushAsymmetrical(
-            cloneContext.clone,
-            phlgitu_ref.makeRemote(review_branch.branch, cloneContext.remote),
-            phlgitu_ref.makeLocal(working_branch_name),
-            cloneContext.remote)
-
-        # message the involved users
-
-
-def getReviewParams(conduit, cloneContext, review_branch):
-    clone = cloneContext.clone
-    if review_branch.base not in cloneContext.branches:
-        raise Exception("base does not exist:" + review_branch.base)
-    if not isBasedOn(review_branch.branch, review_branch.base):
-        raise Exception(
-            "'" + review_branch.branch +
-            "' is not based on '" + review_branch.base + "'")
-    user = getPrimaryUserFromBranch(
-        clone, conduit, review_branch.remote_base, review_branch.remote_branch)
-    print "- author: " + user
-
-    message = makeMessageDigest(
-        clone, review_branch.remote_base, review_branch.remote_branch)
-    parsed = phlcon_differential.parseCommitMessage(conduit, message)
-    if parsed.errors:
-        raise CommitMessageParseException(
-            parsed.errors, parsed.fields, message)
-
-    rawDiff = phlgit_diff.rawDiffRange(
-        clone, review_branch.remote_base, review_branch.remote_branch)
-
-    return user, parsed, rawDiff
 
 
 def createDifferentialReview(
@@ -288,7 +281,7 @@ def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
 
 def update(conduit, wb, cloneContext, remoteBranch):
     clone = cloneContext.clone
-    user = getPrimaryUserFromBranch(
+    user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, remoteBranch)
 
     print "update"
@@ -326,7 +319,7 @@ def update(conduit, wb, cloneContext, remoteBranch):
 def land(conduit, wb, cloneContext, branch):
     clone = cloneContext.clone
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
-    user = getPrimaryUserFromBranch(
+    user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):
