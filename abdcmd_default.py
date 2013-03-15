@@ -7,22 +7,22 @@ import collections
 import unittest
 
 import abdt_exception
-import phlsys_conduit
-import phlsys_fs
+import abdt_naming
 import phlcon_differential
 import phlcon_user
 import phldef_conduit
-import abdt_naming
-import phlsys_subprocess
-import phlsys_git
 import phlgit_branch
 import phlgit_checkout
 import phlgit_config
 import phlgit_diff
-import phlgit_push
-import phlgit_merge
 import phlgit_log
+import phlgit_merge
+import phlgit_push
 import phlgitu_ref
+import phlsys_conduit
+import phlsys_fs
+import phlsys_git
+import phlsys_subprocess
 
 #TODO: refactor this crazy mess
 #TODO: support storing branches by status
