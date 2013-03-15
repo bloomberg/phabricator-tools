@@ -130,7 +130,14 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(conduit, cloneContext, review_branch):
+class FakeMailer(object):
+    def send(self, to, subject, message):
+        print "to: " + to
+        print "subject: " + subject
+        print "message: " + message
+
+
+def createReview(conduit, cloneContext, mailer, review_branch):
 
     # try:
         clone = cloneContext.clone
@@ -160,6 +167,11 @@ def createReview(conduit, cloneContext, review_branch):
                 phlgitu_ref.makeLocal(working_branch_name),
                 cloneContext.remote)
             # mail the primary user
+            message = review_branch.branch + "' is badly named"
+            mailer.send(
+                to=email,
+                subject="Invalid review branch",
+                message=message)
             return
 
         rawDiff = phlgit_diff.rawDiffRange(
@@ -366,6 +378,7 @@ def land(conduit, wb, cloneContext, branch):
 
 
 def processUpdatedRepo(conduit, path, remote):
+    mailer = FakeMailer()
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
         remote_branches = phlgit_branch.getRemote(clone, remote)
@@ -379,7 +392,7 @@ def processUpdatedRepo(conduit, path, remote):
                 review_branch = makeGitReviewBranch(review_branch, remote)
                 if b not in rbDict.keys():
                     print "create review for " + b
-                    createReview(conduit, cloneContext, review_branch)
+                    createReview(conduit, cloneContext, mailer, review_branch)
                 else:
                     print "update review for " + b
                     working_branch = rbDict[b]
