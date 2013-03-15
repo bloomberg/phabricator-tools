@@ -6,6 +6,8 @@
 import collections
 import unittest
 
+import abdmail_mailer
+import abdmail_printsender
 import abdt_exception
 import abdt_naming
 import phlcon_differential
@@ -130,13 +132,6 @@ def isBasedOn(name, base):
     return True
 
 
-class FakeMailer(object):
-    def send(self, to, subject, message):
-        print "to: " + to
-        print "subject: " + subject
-        print "message: " + message
-
-
 def createReview(conduit, cloneContext, mailer, review_branch):
 
     # try:
@@ -168,10 +163,7 @@ def createReview(conduit, cloneContext, mailer, review_branch):
                 cloneContext.remote)
             # mail the primary user
             message = review_branch.branch + "' is badly named"
-            mailer.send(
-                to=email,
-                subject="Invalid review branch",
-                message=message)
+            mailer.badBranchName(email, review_branch)
             return
 
         rawDiff = phlgit_diff.rawDiffRange(
@@ -378,7 +370,11 @@ def land(conduit, wb, cloneContext, branch):
 
 
 def processUpdatedRepo(conduit, path, remote):
-    mailer = FakeMailer()
+    print_sender = abdmail_printsender.MailSender("phab@server.test")
+    mailer = abdmail_mailer.Mailer(
+        print_sender,
+        ["admin@server.test"],
+        "http://server.fake/testrepo.git")
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
         remote_branches = phlgit_branch.getRemote(clone, remote)
