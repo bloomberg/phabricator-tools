@@ -576,7 +576,7 @@ class TestAbd(unittest.TestCase):
         wbList = abdt_naming.getWorkingBranches(branches)
         numBadBranches = 0
         for wb in wbList:
-            if wb.status.startswith(abdt_naming.WB_STATUS_PREFIX_BAD):
+            if abdt_naming.isStatusBad(wb):
                 numBadBranches += 1
         return numBadBranches
 

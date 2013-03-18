@@ -31,6 +31,16 @@ def getWorkingBranchPrefix():
     return "dev/phab/"
 
 
+def isStatusBad(working_branch):
+    """Return True if the status of 'working_branch' is bad.
+
+    :working_branch: a WorkingBranch
+    :returns: True if the branch is bad
+
+    """
+    return working_branch.status.startswith(WB_STATUS_PREFIX_BAD)
+
+
 def isReviewBranchName(name):
     prefix = getReviewBranchPrefix()
     return (len(name) > len(prefix)) and name.startswith(prefix)
