@@ -528,12 +528,18 @@ class TestAbd(unittest.TestCase):
             processUpdatedRepo(conduit, "phab", "origin")
             #processUpdatedRepo(conduit, "phab", "origin")
 
-            with phlsys_fs.chDirContext("phab"):
-                clone = phlsys_git.GitClone(".")
-                branches = phlgit_branch.getRemote(clone, "origin")
-            wbList = abdt_naming.getWorkingBranches(branches)
-            self.assertEqual(len(wbList), 1)
-            self.assertEqual(wbList[0].status, "bad")
+            self.assertEqual(self.countPhabBadWorkingBranches(), 1)
+
+    def countPhabBadWorkingBranches(self):
+        with phlsys_fs.chDirContext("phab"):
+            clone = phlsys_git.GitClone(".")
+            branches = phlgit_branch.getRemote(clone, "origin")
+        wbList = abdt_naming.getWorkingBranches(branches)
+        numBadBranches = 0
+        for wb in wbList:
+            if wb.status == "bad":
+                numBadBranches += 1
+        return numBadBranches
 
     def test_badBaseWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
@@ -557,12 +563,7 @@ class TestAbd(unittest.TestCase):
                 abdt_exception.AbdUserException,
                 processUpdatedRepo, conduit, "phab", "origin")
 
-            # with phlsys_fs.chDirContext("phab"):
-            #     clone = phlsys_git.GitClone(".")
-            #     branches = phlgit_branch.getRemote(clone, "origin")
-            # wbList = abdt_naming.getWorkingBranches(branches)
-            # self.assertEqual(len(wbList), 1)
-            # self.assertEqual(wbList[0].status, "bad")
+            #self.assertEqual(self.countPhabBadWorkingBranches(), 1)
 
     def tearDown(self):
         runCommands("rm -rf abd-test")
