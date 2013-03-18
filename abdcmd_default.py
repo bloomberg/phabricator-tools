@@ -495,6 +495,24 @@ class TestAbd(unittest.TestCase):
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
 
+    def _countPhabWorkingBranches(self):
+        with phlsys_fs.chDirContext("phab"):
+            clone = phlsys_git.GitClone(".")
+            branches = phlgit_branch.getRemote(clone, "origin")
+        wbList = abdt_naming.getWorkingBranches(branches)
+        return len(wbList)
+
+    def _countPhabBadWorkingBranches(self):
+        with phlsys_fs.chDirContext("phab"):
+            clone = phlsys_git.GitClone(".")
+            branches = phlgit_branch.getRemote(clone, "origin")
+        wbList = abdt_naming.getWorkingBranches(branches)
+        numBadBranches = 0
+        for wb in wbList:
+            if abdt_naming.isStatusBad(wb):
+                numBadBranches += 1
+        return numBadBranches
+
     def test_nothingToDo(self):
         with phlsys_fs.chDirContext("abd-test"):
             conduit = phlsys_conduit.Conduit(
@@ -549,7 +567,7 @@ class TestAbd(unittest.TestCase):
                     conduit, wb.id, action="accept")
 
             processUpdatedRepo(conduit, "phab", "origin")
-            self.assertEqual(self.countPhabWorkingBranches(), 0)
+            self.assertEqual(self._countPhabWorkingBranches(), 0)
 
     def test_badMsgWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
@@ -572,7 +590,7 @@ class TestAbd(unittest.TestCase):
 
             # fail to create the review
             processUpdatedRepo(conduit, "phab", "origin")
-            self.assertEqual(self.countPhabBadWorkingBranches(), 1)
+            self.assertEqual(self._countPhabBadWorkingBranches(), 1)
 
             with phlsys_fs.chDirContext("developer"):
                 self._createCommitNewFileRaw(
@@ -583,7 +601,7 @@ class TestAbd(unittest.TestCase):
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
             processUpdatedRepo(conduit, "phab", "origin")
-            self.assertEqual(self.countPhabBadWorkingBranches(), 0)
+            self.assertEqual(self._countPhabBadWorkingBranches(), 0)
 
             # accept the review
             with phlsys_fs.chDirContext("phab"):
@@ -600,25 +618,7 @@ class TestAbd(unittest.TestCase):
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
             processUpdatedRepo(conduit, "phab", "origin")
-            self.assertEqual(self.countPhabWorkingBranches(), 0)
-
-    def countPhabWorkingBranches(self):
-        with phlsys_fs.chDirContext("phab"):
-            clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.getRemote(clone, "origin")
-        wbList = abdt_naming.getWorkingBranches(branches)
-        return len(wbList)
-
-    def countPhabBadWorkingBranches(self):
-        with phlsys_fs.chDirContext("phab"):
-            clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.getRemote(clone, "origin")
-        wbList = abdt_naming.getWorkingBranches(branches)
-        numBadBranches = 0
-        for wb in wbList:
-            if abdt_naming.isStatusBad(wb):
-                numBadBranches += 1
-        return numBadBranches
+            self.assertEqual(self._countPhabWorkingBranches(), 0)
 
     def test_badBaseWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
