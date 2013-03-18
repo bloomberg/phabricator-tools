@@ -45,6 +45,7 @@ GitReviewBranch = collections.namedtuple(
 GitWorkingBranch = collections.namedtuple(
     "abdcmd_default__GitWorkingBranch", [
         "branch",
+        "status",
         "description",
         "base",
         "id",
@@ -133,6 +134,7 @@ def makeGitWorkingBranch(working_branch, remote):
     makeRemote = phlgitu_ref.makeRemote
     return GitWorkingBranch(
         branch=working_branch.full_name,
+        status=working_branch.status,
         description=working_branch.description,
         base=working_branch.base,
         id=working_branch.id,
