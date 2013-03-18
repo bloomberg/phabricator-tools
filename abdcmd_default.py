@@ -25,6 +25,7 @@ import phlsys_git
 import phlsys_subprocess
 import abdt_gittypes
 import abdt_messagefields
+import abdt_commitmessage
 
 
 #TODO: split into appropriate modules
@@ -127,40 +128,6 @@ def makeMessageDigest(clone, base, branch):
     return message
 
 
-def makeMessage(title, summary, test_plan, reviewers):
-    """Return string commit message.
-
-    :title: string title of the commit (single line)
-    :summary: string summary of the commit
-    :reviewers: list of string reviewers
-    :test_plan: string of the test plan
-    :returns: string commit message
-
-    """
-    message = ""
-
-    extra_fields = False  # the title will have a carriage return only if True
-
-    if summary and summary.strip():
-        extra_fields = True
-        message += "\n" + summary
-    if test_plan and test_plan.strip():
-        extra_fields = True
-        message += "\n" + "Test Plan:"
-        message += "\n" + test_plan
-    if reviewers:
-        extra_fields = True
-        message += "\n" + "Reviewers:"
-        message += "\n" + ' '.join(reviewers)
-
-    if extra_fields:
-        message = title + "\n" + message
-    else:
-        message = title
-
-    return message
-
-
 def makeMessageFromFields(conduit, fields):
     """Return a string message generated from the supplied 'fields'.
 
@@ -170,7 +137,7 @@ def makeMessageFromFields(conduit, fields):
     """
     user_names = phlcon_user.queryUsernamesFromPhids(
         conduit, fields.reviewerPHIDs)
-    return makeMessage(
+    return abdt_commitmessage.make(
         fields.title, fields.summary, fields.testPlan, user_names)
 
 
@@ -275,7 +242,7 @@ def land(conduit, wb, gitContext, branch):
         info = d.query(conduit, [wb.id])[0]
         userNames = phlcon_user.queryUsernamesFromPhids(
             conduit, info.reviewers)
-        message = makeMessage(
+        message = abdt_commitmessage.make(
             info.title, info.summary, info.testPlan, userNames)
         message += "\nDifferential Revision: " + info.uri
 
@@ -404,7 +371,7 @@ class TestAbd(unittest.TestCase):
 
     def _gitCommitAll(self, subject, testPlan, reviewer):
         reviewers = [reviewer] if reviewer else None
-        message = makeMessage(subject, None, testPlan, reviewers)
+        message = abdt_commitmessage.make(subject, None, testPlan, reviewers)
         phlsys_subprocess.run("git", "commit", "-a", "-F", "-", stdin=message)
 
     def _createCommitNewFileRaw(self, filename, testPlan=None, reviewer=None):
