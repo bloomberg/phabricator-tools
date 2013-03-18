@@ -166,6 +166,40 @@ def updateCommitMessageFields(earlier, later):
         testPlan=testPlan)
 
 
+def makeMessage(title, summary, test_plan, reviewers):
+    """Return string commit message.
+
+    :title: string title of the commit (single line)
+    :summary: string summary of the commit
+    :reviewers: list of string reviewers
+    :test_plan: string of the test plan
+    :returns: string commit message
+
+    """
+    message = ""
+
+    extra_fields = False  # the title will have a carriage return only if True
+
+    if summary and summary.strip():
+        extra_fields = True
+        message += "\n" + summary
+    if test_plan and test_plan.strip():
+        extra_fields = True
+        message += "\n" + "Test Plan:"
+        message += "\n" + test_plan
+    if reviewers:
+        extra_fields = True
+        message += "\n" + "Reviewers:"
+        message += "\n" + ' '.join(reviewers)
+
+    if extra_fields:
+        message = title + "\n" + message
+    else:
+        message = title
+
+    return message
+
+
 def makeMessageFromFields(conduit, fields):
     """Return a string message generated from the supplied 'fields'.
 
@@ -173,17 +207,10 @@ def makeMessageFromFields(conduit, fields):
     :returns: a string message
 
     """
-    message = fields.title
-    message += "\n"
-    message += "\n" + fields.summary
-    message += "\n" + "Reviewers:"
     user_names = phlcon_user.queryUsernamesFromPhids(
         conduit, fields.reviewerPHIDs)
-    user_names = ' '.join(user_names)
-    message += "\n" + user_names
-    message += "\n" + "Test Plan:"
-    message += "\n" + fields.testPlan
-    return message
+    return makeMessage(
+        fields.title, fields.summary, fields.testPlan, user_names)
 
 
 def updateReview(conduit, gitContext, reviewBranch, workingBranch):
@@ -285,18 +312,10 @@ def land(conduit, wb, gitContext, branch):
 
         # compose the commit message
         info = d.query(conduit, [wb.id])[0]
-        message = ""
-        message += info.title
-        if info.summary.strip():
-            message += "\n"
-            message += "\n" + info.summary
-        message += "\n"
-        message += "\nTest plan:"
-        message += "\n" + info.testPlan
-        message += "\n"
         userNames = phlcon_user.queryUsernamesFromPhids(
             conduit, info.reviewers)
-        message += "\nReviewers: " + ','.join(userNames)
+        message = makeMessage(
+            info.title, info.summary, info.testPlan, userNames)
         message += "\nDifferential Revision: " + info.uri
 
         squashMessage = phlgit_merge.squash(
@@ -422,24 +441,20 @@ def runCommands(*commands):
 # TODO: break this down
 class TestAbd(unittest.TestCase):
 
-    def _gitCommitAll(self, subject, testPlan, reviewers):
-        message = ""
-        message += subject + "\n\n"
-        if testPlan:
-            message += "Test Plan: " + testPlan + "\n"
-        if reviewers:
-            message += "Reviewers: " + reviewers
+    def _gitCommitAll(self, subject, testPlan, reviewer):
+        reviewers = [reviewer] if reviewer else None
+        message = makeMessage(subject, None, testPlan, reviewers)
         phlsys_subprocess.run("git", "commit", "-a", "-F", "-", stdin=message)
 
-    def _createCommitNewFileRaw(self, filename, testPlan=None, reviewers=None):
+    def _createCommitNewFileRaw(self, filename, testPlan=None, reviewer=None):
         runCommands("touch " + filename)
         runCommands("git add " + filename)
-        self._gitCommitAll("add " + filename, testPlan, reviewers)
+        self._gitCommitAll("add " + filename, testPlan, reviewer)
 
-    def _createCommitNewFile(self, filename, reviewers):
+    def _createCommitNewFile(self, filename, reviewer):
         runCommands("touch " + filename)
         runCommands("git add " + filename)
-        self._gitCommitAll("add " + filename, "test plan", reviewers)
+        self._gitCommitAll("add " + filename, "test plan", reviewer)
 
     def setUp(self):
         self.reviewer = phldef_conduit.alice.user
@@ -554,7 +569,7 @@ class TestAbd(unittest.TestCase):
             with phlsys_fs.chDirContext("developer"):
                 runCommands("git checkout -b ph-review/change/master")
                 self._createCommitNewFileRaw(
-                    "NEWFILE", reviewers=self.reviewer)
+                    "NEWFILE", reviewer=self.reviewer)
                 runCommands("git push -u origin ph-review/change/master")
 
             with phlsys_fs.chDirContext("phab"):
@@ -594,7 +609,7 @@ class TestAbd(unittest.TestCase):
             with phlsys_fs.chDirContext("developer"):
                 runCommands("git reset origin/master --hard")
                 self._createCommitNewFileRaw(
-                    "NEWFILE", reviewers=self.reviewer)
+                    "NEWFILE", reviewer=self.reviewer)
                 runCommands(
                     "git push -u origin ph-review/change/master --force")
 
