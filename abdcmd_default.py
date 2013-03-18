@@ -161,8 +161,6 @@ def makeWorkingBranchWithStatus(working_branch, status):
 
 
 def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
-    # TODO: this is broken, we need to raise an error if the committer isn't a
-    #       user registered with the Phabricator instance
     hashes = phlgit_log.getRangeHashes(clone, base, branch)
     committers = phlgit_log.getCommittersFromHashes(clone, hashes)
     print "- committers: " + str(committers)
@@ -314,7 +312,7 @@ def makeMessageFromFields(conduit, fields):
     user_names = phlcon_user.queryUsernamesFromPhids(
         conduit, fields.reviewerPHIDs)
     user_names = ' '.join(user_names)
-    message += "\n" + user_names  # TODO: convert PHIDs to users
+    message += "\n" + user_names
     message += "\n" + "Test Plan:"
     message += "\n" + fields.testPlan
     return message
