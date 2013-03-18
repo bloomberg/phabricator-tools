@@ -48,8 +48,8 @@ GitWorkingBranch = collections.namedtuple(
         "remote_base",
         "remote_branch"])
 
-CloneContext = collections.namedtuple(
-    "abdcmd_default__GitClone", [
+GitContext = collections.namedtuple(
+    "abdcmd_default__GitContext", [
         "clone",
         "remote",
         "branches"])
@@ -129,9 +129,9 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(conduit, cloneContext, review_branch):
-    clone = cloneContext.clone
-    verifyReviewBranchBase(cloneContext, review_branch)
+def createReview(conduit, gitContext, review_branch):
+    clone = gitContext.clone
+    verifyReviewBranchBase(gitContext, review_branch)
 
     user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, review_branch.remote_base,
@@ -154,11 +154,11 @@ def createReview(conduit, cloneContext, review_branch):
         clone, review_branch.remote_base, review_branch.remote_branch)
 
     createDifferentialReview(
-        conduit, user, parsed, cloneContext, review_branch, rawDiff)
+        conduit, user, parsed, gitContext, review_branch, rawDiff)
 
 
-def verifyReviewBranchBase(cloneContext, review_branch):
-    if review_branch.base not in cloneContext.branches:
+def verifyReviewBranchBase(gitContext, review_branch):
+    if review_branch.base not in gitContext.branches:
         raise abdt_exception.AbdUserException(
             "base does not exist:" + review_branch.base)
     if not isBasedOn(review_branch.branch, review_branch.base):
@@ -168,8 +168,8 @@ def verifyReviewBranchBase(cloneContext, review_branch):
 
 
 def createDifferentialReview(
-        conduit, user, parsed, cloneContext, review_branch, rawDiff):
-    clone = cloneContext.clone
+        conduit, user, parsed, gitContext, review_branch, rawDiff):
+    clone = gitContext.clone
     phlgit_checkout.newBranchForceBasedOn(
         clone, review_branch.branch, review_branch.remote_branch)
 
@@ -190,7 +190,7 @@ def createDifferentialReview(
 
         print "- pushing working branch: " + workingBranch
         phlgit_push.pushAsymmetrical(
-            clone, review_branch.branch, workingBranch, cloneContext.remote)
+            clone, review_branch.branch, workingBranch, gitContext.remote)
 
     print "- commenting on " + str(review.revisionid)
     createMessage = ""
@@ -270,27 +270,27 @@ def makeMessageFromFields(conduit, fields):
     return message
 
 
-def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
+def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     rb = reviewBranch
     wb = workingBranch
 
-    clone = cloneContext.clone
+    clone = gitContext.clone
     isBranchIdentical = phlgit_branch.isIdentical
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
-        verifyReviewBranchBase(cloneContext, reviewBranch)
+        verifyReviewBranchBase(gitContext, reviewBranch)
         if workingBranch.status == abdt_naming.WB_STATUS_BAD_PREREVIEW:
             print "delete bad working branch"
             phlgit_push.delete(
-                clone, workingBranch.branch, cloneContext.remote)
-            createReview(conduit, cloneContext, reviewBranch)
+                clone, workingBranch.branch, gitContext.remote)
+            createReview(conduit, gitContext, reviewBranch)
         else:
-            updateInReview(conduit, wb, cloneContext, rb)
+            updateInReview(conduit, wb, gitContext, rb)
     elif not abdt_naming.isStatusBad(workingBranch):
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
         if int(status) == d.REVISION_ACCEPTED:
-            verifyReviewBranchBase(cloneContext, reviewBranch)
-            land(conduit, wb, cloneContext, reviewBranch.branch)
+            verifyReviewBranchBase(gitContext, reviewBranch)
+            land(conduit, wb, gitContext, reviewBranch.branch)
             # TODO: we probably want to do a better job of cleaning up locally
         else:
             print "do nothing"
@@ -317,9 +317,9 @@ def getFieldsFromCommitHashes(conduit, clone, hashes):
     return d.parseCommitMessage(conduit, message)
 
 
-def updateInReview(conduit, wb, cloneContext, review_branch):
+def updateInReview(conduit, wb, gitContext, review_branch):
     remoteBranch = review_branch.remote_branch
-    clone = cloneContext.clone
+    clone = gitContext.clone
     user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, remoteBranch)
 
@@ -345,7 +345,7 @@ def updateInReview(conduit, wb, cloneContext, review_branch):
             conduit, wb.id, diffid, parsed.fields, "update")
 
     pushWorkingBranchStatus(
-        cloneContext,
+        gitContext,
         review_branch,
         wb,
         abdt_naming.WB_STATUS_OK)
@@ -358,8 +358,8 @@ def updateInReview(conduit, wb, cloneContext, review_branch):
         conduit, wb.id, message=updateMessage, silent=True)
 
 
-def land(conduit, wb, cloneContext, branch):
-    clone = cloneContext.clone
+def land(conduit, wb, gitContext, branch):
+    clone = gitContext.clone
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
     user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
@@ -386,11 +386,11 @@ def land(conduit, wb, cloneContext, branch):
         squashMessage = phlgit_merge.squash(
             clone, wb.remote_branch, message)
         print "- pushing " + wb.remote_base
-        phlgit_push.push(clone, wb.base, cloneContext.remote)
+        phlgit_push.push(clone, wb.base, gitContext.remote)
         print "- deleting " + wb.branch
-        phlgit_push.delete(clone, wb.branch, cloneContext.remote)
+        phlgit_push.delete(clone, wb.branch, gitContext.remote)
         print "- deleting " + branch
-        phlgit_push.delete(clone, branch, cloneContext.remote)
+        phlgit_push.delete(clone, branch, gitContext.remote)
 
     print "- commenting on revision " + str(wb.id)
     closeMessage = ""
@@ -407,22 +407,22 @@ def land(conduit, wb, cloneContext, branch):
     # TODO: we probably want to do a better job of cleaning up locally
 
 
-def pushBadPreReviewWorkingBranch(cloneContext, review_branch):
+def pushBadPreReviewWorkingBranch(gitContext, review_branch):
     working_branch_name = abdt_naming.makeWorkingBranchName(
         abdt_naming.WB_STATUS_BAD_PREREVIEW,
         review_branch.description, review_branch.base, "none")
     phlgit_push.pushAsymmetrical(
-        cloneContext.clone,
+        gitContext.clone,
         phlgitu_ref.makeRemote(
-            review_branch.branch, cloneContext.remote),
+            review_branch.branch, gitContext.remote),
         phlgitu_ref.makeLocal(working_branch_name),
-        cloneContext.remote)
+        gitContext.remote)
 
 
 def pushWorkingBranchStatus(
-        cloneContext, review_branch, working_branch, status):
-    clone = cloneContext.clone
-    remote = cloneContext.remote
+        gitContext, review_branch, working_branch, status):
+    clone = gitContext.clone
+    remote = gitContext.remote
     old_branch = working_branch.branch
 
     working_branch = makeWorkingBranchWithStatus(working_branch, status)
@@ -443,9 +443,9 @@ def pushWorkingBranchStatus(
             remote)
 
 
-def pushBadInReviewWorkingBranch(cloneContext, review_branch, working_branch):
+def pushBadInReviewWorkingBranch(gitContext, review_branch, working_branch):
     pushWorkingBranchStatus(
-        cloneContext,
+        gitContext,
         review_branch,
         working_branch,
         abdt_naming.WB_STATUS_BAD_INREVIEW)
@@ -460,7 +460,7 @@ def processUpdatedRepo(conduit, path, remote):
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
         remote_branches = phlgit_branch.getRemote(clone, remote)
-        cloneContext = CloneContext(clone, remote, remote_branches)
+        gitContext = GitContext(clone, remote, remote_branches)
         wbList = abdt_naming.getWorkingBranches(remote_branches)
         makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
         rbDict = dict((makeRb(wb), wb) for wb in wbList)
@@ -473,10 +473,10 @@ def processUpdatedRepo(conduit, path, remote):
                     print "create review for " + b
                     try:
                         createReview(
-                            conduit, cloneContext, review_branch)
+                            conduit, gitContext, review_branch)
                     except abdte.InitialCommitMessageParseException as e:
                         pushBadPreReviewWorkingBranch(
-                            cloneContext, review_branch)
+                            gitContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
                 else:
                     print "update review for " + b
@@ -485,15 +485,15 @@ def processUpdatedRepo(conduit, path, remote):
                         working_branch, remote)
                     try:
                         updateReview(
-                            conduit, cloneContext,
+                            conduit, gitContext,
                             review_branch, working_branch)
                     except abdte.InitialCommitMessageParseException as e:
                         pushBadPreReviewWorkingBranch(
-                            cloneContext, review_branch)
+                            gitContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
                     except abdte.CommitMessageParseException as e:
                         pushBadInReviewWorkingBranch(
-                            cloneContext, review_branch, working_branch)
+                            gitContext, review_branch, working_branch)
                         # TODO: update the review with a message
 
 
