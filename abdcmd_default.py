@@ -55,27 +55,6 @@ CloneContext = collections.namedtuple(
         "branches"])
 
 
-class CommitMessageParseException(abdt_exception.AbdUserException):
-
-    def __init__(self, errors, fields, digest):
-        """Describe failure to create fields suitable for review.
-
-        :errors: errors reported by Phabricator
-        :fields: the resulting fields response (if any)
-        :digest: a digest of the commit messages
-
-        """
-        message = (
-            "abdcmd_default__CommitMessageParseException:\n" +
-            "errors: '" + str(errors) + "'\n" +
-            "fields: '" + str(fields) + "'\n" +
-            "digest: '" + str(digest) + "'\n")
-        super(CommitMessageParseException, self).__init__(message)
-        self._errors = errors
-        self._fields = fields
-        self._digest = digest
-
-
 def makeGitReviewBranch(review_branch, remote):
     """Return a GitReviewBranch based on a abdt_naming.ReviewBranch and remote.
 
@@ -357,7 +336,7 @@ def updateInReview(conduit, wb, cloneContext, review_branch):
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
         parsed = getFieldsFromCommitHashes(conduit, clone, hashes)
         if parsed.errors:
-            raise CommitMessageParseException(
+            raise abdt_exception.CommitMessageParseException(
                 errors=parsed.errors,
                 fields=parsed.fields,
                 digest=makeMessageDigest(clone, wb.remote_base, remoteBranch))
@@ -512,7 +491,7 @@ def processUpdatedRepo(conduit, path, remote):
                         pushBadPreReviewWorkingBranch(
                             cloneContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
-                    except CommitMessageParseException as e:
+                    except abdte.CommitMessageParseException as e:
                         pushBadInReviewWorkingBranch(
                             cloneContext, review_branch, working_branch)
                         # TODO: update the review with a message

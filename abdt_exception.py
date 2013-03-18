@@ -70,6 +70,27 @@ class InitialCommitMessageParseException(AbdUserException):
         return self._email
 
 
+class CommitMessageParseException(AbdUserException):
+
+    def __init__(self, errors, fields, digest):
+        """Describe failure to create fields suitable for review.
+
+        :errors: errors reported by Phabricator
+        :fields: the resulting fields response (if any)
+        :digest: a digest of the commit messages
+
+        """
+        message = (
+            "abdcmd_default__CommitMessageParseException:\n" +
+            "errors: '" + str(errors) + "'\n" +
+            "fields: '" + str(fields) + "'\n" +
+            "digest: '" + str(digest) + "'\n")
+        super(CommitMessageParseException, self).__init__(message)
+        self._errors = errors
+        self._fields = fields
+        self._digest = digest
+
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #
