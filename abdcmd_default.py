@@ -149,7 +149,8 @@ def createReview(conduit, cloneContext, mailer, review_branch):
     if parsed.errors:
         # record the branch as bad
         working_branch_name = abdt_naming.makeWorkingBranchName(
-            "bad", review_branch.description, review_branch.base, "none")
+            abdt_naming.WB_STATUS_BAD_PREREVIEW,
+            review_branch.description, review_branch.base, "none")
         phlgit_push.pushAsymmetrical(
             cloneContext.clone,
             phlgitu_ref.makeRemote(
@@ -267,13 +268,14 @@ def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
 
     clone = cloneContext.clone
     isBranchIdentical = phlgit_branch.isIdentical
-    verifyReviewBranchBase(cloneContext, reviewBranch)
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
+        verifyReviewBranchBase(cloneContext, reviewBranch)
         update(conduit, wb, cloneContext, rb.remote_branch)
     else:
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
         if int(status) == d.REVISION_ACCEPTED:
+            verifyReviewBranchBase(cloneContext, reviewBranch)
             land(conduit, wb, cloneContext, reviewBranch.branch)
             # TODO: we probably want to do a better job of cleaning up locally
         else:
@@ -526,7 +528,6 @@ class TestAbd(unittest.TestCase):
 
             # fail to create the review
             processUpdatedRepo(conduit, "phab", "origin")
-            #processUpdatedRepo(conduit, "phab", "origin")
 
             self.assertEqual(self.countPhabBadWorkingBranches(), 1)
 
@@ -537,7 +538,7 @@ class TestAbd(unittest.TestCase):
         wbList = abdt_naming.getWorkingBranches(branches)
         numBadBranches = 0
         for wb in wbList:
-            if wb.status == "bad":
+            if wb.status.startswith(abdt_naming.WB_STATUS_PREFIX_BAD):
                 numBadBranches += 1
         return numBadBranches
 
