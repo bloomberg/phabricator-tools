@@ -522,15 +522,11 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # update the review ok
-            print
-            print "update the review ok"
-            print "--------------------"
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
             processUpdatedRepo(conduit, "phab", "origin")
             self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 0)
-            print
 
             # accept the review
             with phlsys_fs.chDirContext("phab"):
