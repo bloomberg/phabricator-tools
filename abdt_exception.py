@@ -42,6 +42,34 @@ class AbdSystemException(Exception):
             str(message) + "\n")
         super(AbdSystemException, self).__init__(message)
 
+
+class InitialCommitMessageParseException(AbdUserException):
+    def __init__(self, email, errors, fields, digest):
+        """Failure to create suitable message fields before there is a review.
+
+        :email: email address of the user that created the review
+        :errors: errors reported by Phabricator
+        :fields: the resulting fields response (if any)
+        :digest: a digest of the commit messages
+
+        """
+        message = (
+            "abdcmd_default__CommitMessageParseException:\n" +
+            "email: '" + str(email) + "'\n" +
+            "errors: '" + str(errors) + "'\n" +
+            "fields: '" + str(fields) + "'\n" +
+            "digest: '" + str(digest) + "'\n")
+        super(InitialCommitMessageParseException, self).__init__(message)
+        self._email = email
+        self._errors = errors
+        self._fields = fields
+        self._digest = digest
+
+    @property
+    def email(self):
+        return self._email
+
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

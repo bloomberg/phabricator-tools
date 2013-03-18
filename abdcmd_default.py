@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 """abd automates the creation and landing of reviews from branches"""
-
 import collections
 import unittest
 
@@ -57,6 +56,7 @@ CloneContext = collections.namedtuple(
 
 
 class CommitMessageParseException(abdt_exception.AbdUserException):
+
     def __init__(self, errors, fields, digest):
         """Describe failure to create fields suitable for review.
 
@@ -74,33 +74,6 @@ class CommitMessageParseException(abdt_exception.AbdUserException):
         self._errors = errors
         self._fields = fields
         self._digest = digest
-
-
-class InitialCommitMessageParseException(abdt_exception.AbdUserException):
-    def __init__(self, email, errors, fields, digest):
-        """Failure to create suitable message fields before there is a review.
-
-        :email: email address of the user that created the review
-        :errors: errors reported by Phabricator
-        :fields: the resulting fields response (if any)
-        :digest: a digest of the commit messages
-
-        """
-        message = (
-            "abdcmd_default__CommitMessageParseException:\n" +
-            "email: '" + str(email) + "'\n" +
-            "errors: '" + str(errors) + "'\n" +
-            "fields: '" + str(fields) + "'\n" +
-            "digest: '" + str(digest) + "'\n")
-        super(InitialCommitMessageParseException, self).__init__(message)
-        self._email = email
-        self._errors = errors
-        self._fields = fields
-        self._digest = digest
-
-    @property
-    def email(self):
-        return self._email
 
 
 def makeGitReviewBranch(review_branch, remote):
@@ -191,7 +164,7 @@ def createReview(conduit, cloneContext, review_branch):
         clone, review_branch.remote_base, review_branch.remote_branch)
     parsed = getFieldsFromCommitHashes(conduit, clone, hashes)
     if parsed.errors:
-        raise InitialCommitMessageParseException(
+        raise abdt_exception.InitialCommitMessageParseException(
             email,
             errors=parsed.errors,
             fields=parsed.fields,
@@ -516,12 +489,13 @@ def processUpdatedRepo(conduit, path, remote):
             if abdt_naming.isReviewBranchName(b):
                 review_branch = abdt_naming.makeReviewBranchFromName(b)
                 review_branch = makeGitReviewBranch(review_branch, remote)
+                abdte = abdt_exception
                 if b not in rbDict.keys():
                     print "create review for " + b
                     try:
                         createReview(
                             conduit, cloneContext, review_branch)
-                    except InitialCommitMessageParseException as e:
+                    except abdte.InitialCommitMessageParseException as e:
                         pushBadPreReviewWorkingBranch(
                             cloneContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
@@ -534,7 +508,7 @@ def processUpdatedRepo(conduit, path, remote):
                         updateReview(
                             conduit, cloneContext,
                             review_branch, working_branch)
-                    except InitialCommitMessageParseException as e:
+                    except abdte.InitialCommitMessageParseException as e:
                         pushBadPreReviewWorkingBranch(
                             cloneContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
