@@ -13,8 +13,16 @@ def push(clone, branch, remoteName):
     clone.call('push', remoteName, branch)
 
 
-def delete(clone, branch, remoteName):
-    clone.call('push', remoteName, ":" + branch)
+def delete(clone, branch, remote):
+    """Delete 'branch' from the specified remote.
+
+    :clone: supports call()
+    :branch: string name of the branch
+    :remote: string name of the remote
+    :returns: None
+
+    """
+    clone.call('push', remote, ":" + branch)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
