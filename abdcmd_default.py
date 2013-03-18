@@ -189,15 +189,16 @@ def createReview(conduit, cloneContext, review_branch):
 
     print "- author: " + user
 
-    # TODO: parse each message individually and collect all the fields
-    # TODO: convert from fields back to commit message to check for errors
-    message = makeMessageDigest(
+    hashes = phlgit_log.getRangeHashes(
         clone, review_branch.remote_base, review_branch.remote_branch)
-    parsed = phlcon_differential.parseCommitMessage(conduit, message)
-
+    parsed = getFieldsFromCommitHashes(conduit, clone, hashes)
     if parsed.errors:
         raise InitialCommitMessageParseException(
-            email, errors=parsed.errors, fields=parsed.fields, digest=message)
+            email,
+            errors=parsed.errors,
+            fields=parsed.fields,
+            digest=makeMessageDigest(
+                clone, review_branch.remote_base, review_branch.remote_branch))
 
     rawDiff = phlgit_diff.rawDiffRange(
         clone, review_branch.remote_base, review_branch.remote_branch)
@@ -345,6 +346,27 @@ def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
             print "do nothing"
 
 
+def getFieldsFromCommitHashes(conduit, clone, hashes):
+    """Return a ParseCommitMessageResponse based on the commit messages.
+
+    :conduit: supports call()
+    :clone: supports call()
+    :hashes: list of the commit hashes to examine
+    :returns: a phlcon_differential.ParseCommitMessageResponse
+
+    """
+    d = phlcon_differential
+    revisions = phlgit_log.makeRevisionsFromHashes(clone, hashes)
+    fields = None
+    for r in revisions:
+        p = d.parseCommitMessage(
+            conduit, r.subject + "\n\n" + r.message)
+        f = phlcon_differential.ParseCommitMessageFields(**p.fields)
+        fields = updateCommitMessageFields(fields, f)
+    message = makeMessageFromFields(conduit, fields)
+    return d.parseCommitMessage(conduit, message)
+
+
 def updateInReview(conduit, wb, cloneContext, review_branch):
     remoteBranch = review_branch.remote_branch
     clone = cloneContext.clone
@@ -362,22 +384,12 @@ def updateInReview(conduit, wb, cloneContext, review_branch):
 
         print "- updating revision " + str(wb.id)
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
-
-        # get message fields from the messages
-        revisions = phlgit_log.makeRevisionsFromHashes(clone, hashes)
-        fields = None
-        for r in revisions:
-            p = d.parseCommitMessage(
-                conduit, r.subject + "\n\n" + r.message)
-            f = phlcon_differential.ParseCommitMessageFields(**p.fields)
-            fields = updateCommitMessageFields(fields, f)
-        message = makeMessageFromFields(conduit, fields)
-        parsed = d.parseCommitMessage(conduit, message)
+        parsed = getFieldsFromCommitHashes(conduit, clone, hashes)
         if parsed.errors:
             raise CommitMessageParseException(
                 errors=parsed.errors,
                 fields=parsed.fields,
-                digest=message)
+                digest=makeMessageDigest(clone, wb.remote_base, remoteBranch))
 
         d.updateRevision(
             conduit, wb.id, diffid, parsed.fields, "update")
