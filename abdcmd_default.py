@@ -60,7 +60,7 @@ CloneContext = collections.namedtuple(
 
 class CommitMessageParseException(abdt_exception.AbdUserException):
     def __init__(self, errors, fields, digest):
-        """Describe failure to create fields suitable for review
+        """Describe failure to create fields suitable for review.
 
         :errors: errors reported by Phabricator
         :fields: the resulting fields response (if any)
@@ -73,9 +73,36 @@ class CommitMessageParseException(abdt_exception.AbdUserException):
             "fields: '" + str(fields) + "'\n" +
             "digest: '" + str(digest) + "'\n")
         super(CommitMessageParseException, self).__init__(message)
-        self.errors = errors
-        self.fields = fields
-        self.digest = digest
+        self._errors = errors
+        self._fields = fields
+        self._digest = digest
+
+
+class InitialCommitMessageParseException(abdt_exception.AbdUserException):
+    def __init__(self, email, errors, fields, digest):
+        """Failure to create suitable message fields before there is a review.
+
+        :email: email address of the user that created the review
+        :errors: errors reported by Phabricator
+        :fields: the resulting fields response (if any)
+        :digest: a digest of the commit messages
+
+        """
+        message = (
+            "abdcmd_default__CommitMessageParseException:\n" +
+            "email: '" + str(email) + "'\n" +
+            "errors: '" + str(errors) + "'\n" +
+            "fields: '" + str(fields) + "'\n" +
+            "digest: '" + str(digest) + "'\n")
+        super(InitialCommitMessageParseException, self).__init__(message)
+        self._email = email
+        self._errors = errors
+        self._fields = fields
+        self._digest = digest
+
+    @property
+    def email(self):
+        return self._email
 
 
 def makeGitReviewBranch(review_branch, remote):
@@ -147,20 +174,8 @@ def createReview(conduit, cloneContext, mailer, review_branch):
     parsed = phlcon_differential.parseCommitMessage(conduit, message)
 
     if parsed.errors:
-        # record the branch as bad
-        working_branch_name = abdt_naming.makeWorkingBranchName(
-            abdt_naming.WB_STATUS_BAD_PREREVIEW,
-            review_branch.description, review_branch.base, "none")
-        phlgit_push.pushAsymmetrical(
-            cloneContext.clone,
-            phlgitu_ref.makeRemote(
-                review_branch.branch, cloneContext.remote),
-            phlgitu_ref.makeLocal(working_branch_name),
-            cloneContext.remote)
-        # mail the primary user
-        message = review_branch.branch + "' is badly named"
-        mailer.badBranchName(email, review_branch)
-        return
+        raise InitialCommitMessageParseException(
+            email, errors=parsed.errors, fields=parsed.fields, digest=message)
 
     rawDiff = phlgit_diff.rawDiffRange(
         clone, review_branch.remote_base, review_branch.remote_branch)
@@ -368,6 +383,18 @@ def land(conduit, wb, cloneContext, branch):
     # TODO: we probably want to do a better job of cleaning up locally
 
 
+def pushBadPreReviewWorkingBranch(cloneContext, review_branch):
+    working_branch_name = abdt_naming.makeWorkingBranchName(
+        abdt_naming.WB_STATUS_BAD_PREREVIEW,
+        review_branch.description, review_branch.base, "none")
+    phlgit_push.pushAsymmetrical(
+        cloneContext.clone,
+        phlgitu_ref.makeRemote(
+            review_branch.branch, cloneContext.remote),
+        phlgitu_ref.makeLocal(working_branch_name),
+        cloneContext.remote)
+
+
 def processUpdatedRepo(conduit, path, remote):
     print_sender = abdmail_printsender.MailSender("phab@server.test")
     mailer = abdmail_mailer.Mailer(
@@ -387,7 +414,16 @@ def processUpdatedRepo(conduit, path, remote):
                 review_branch = makeGitReviewBranch(review_branch, remote)
                 if b not in rbDict.keys():
                     print "create review for " + b
-                    createReview(conduit, cloneContext, mailer, review_branch)
+                    try:
+                        createReview(
+                            conduit, cloneContext, mailer, review_branch)
+                    except InitialCommitMessageParseException as e:
+                        # record the branch as bad
+                        pushBadPreReviewWorkingBranch(
+                            cloneContext, review_branch)
+                        # mail the primary user
+                        mailer.badBranchName(e.email, review_branch)
+                        return
                 else:
                     print "update review for " + b
                     working_branch = rbDict[b]
