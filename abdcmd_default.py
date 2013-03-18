@@ -134,15 +134,12 @@ def isBasedOn(name, base):
 
 def createReview(conduit, cloneContext, mailer, review_branch):
     clone = cloneContext.clone
-    if review_branch.base not in cloneContext.branches:
-        raise Exception("base does not exist:" + review_branch.base)
-    if not isBasedOn(review_branch.branch, review_branch.base):
-        raise Exception(
-            "'" + review_branch.branch +
-            "' is not based on '" + review_branch.base + "'")
+    verifyReviewBranchBase(cloneContext, review_branch)
+
     user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, review_branch.remote_base,
         review_branch.remote_branch)
+
     print "- author: " + user
 
     message = makeMessageDigest(
@@ -169,6 +166,16 @@ def createReview(conduit, cloneContext, mailer, review_branch):
 
     createDifferentialReview(
         conduit, user, parsed, cloneContext, review_branch, rawDiff)
+
+
+def verifyReviewBranchBase(cloneContext, review_branch):
+    if review_branch.base not in cloneContext.branches:
+        raise abdt_exception.AbdUserException(
+            "base does not exist:" + review_branch.base)
+    if not isBasedOn(review_branch.branch, review_branch.base):
+        raise abdt_exception.AbdUserException(
+            "'" + review_branch.branch +
+            "' is not based on '" + review_branch.base + "'")
 
 
 def createDifferentialReview(
@@ -260,18 +267,10 @@ def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
 
     clone = cloneContext.clone
     isBranchIdentical = phlgit_branch.isIdentical
+    verifyReviewBranchBase(cloneContext, reviewBranch)
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
-        if wb.base not in cloneContext.branches:
-            raise Exception("base does not exist:" + wb.base)
-        if not isBasedOn(rb.remote_branch, wb.remote_base):
-            raise Exception(
-                "'" + rb.remote_branch + "' is not based on '" + wb.base + "'")
-
         update(conduit, wb, cloneContext, rb.remote_branch)
     else:
-        if wb.base not in cloneContext.branches:
-            raise Exception("base does not exist:" + wb.base)
-
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
         if int(status) == d.REVISION_ACCEPTED:
@@ -535,6 +534,35 @@ class TestAbd(unittest.TestCase):
             wbList = abdt_naming.getWorkingBranches(branches)
             self.assertEqual(len(wbList), 1)
             self.assertEqual(wbList[0].status, "bad")
+
+    def test_badBaseWorkflow(self):
+        with phlsys_fs.chDirContext("abd-test"):
+            conduit = phlsys_conduit.Conduit(
+                phldef_conduit.test_uri,
+                phldef_conduit.phab.user,
+                phldef_conduit.phab.certificate)
+
+            with phlsys_fs.chDirContext("developer"):
+                runCommands("git checkout -b ph-review/change/blaster")
+                self._createCommitNewFileNoTestPlan("NEWFILE", self.reviewer)
+
+                runCommands("git push -u origin ph-review/change/blaster")
+
+            with phlsys_fs.chDirContext("phab"):
+                runCommands("git fetch origin -p")
+
+            # fail to create the review
+            #processUpdatedRepo(conduit, "phab", "origin")
+            self.assertRaises(
+                abdt_exception.AbdUserException,
+                processUpdatedRepo, conduit, "phab", "origin")
+
+            # with phlsys_fs.chDirContext("phab"):
+            #     clone = phlsys_git.GitClone(".")
+            #     branches = phlgit_branch.getRemote(clone, "origin")
+            # wbList = abdt_naming.getWorkingBranches(branches)
+            # self.assertEqual(len(wbList), 1)
+            # self.assertEqual(wbList[0].status, "bad")
 
     def tearDown(self):
         runCommands("rm -rf abd-test")
