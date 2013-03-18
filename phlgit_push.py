@@ -13,6 +13,24 @@ def push(clone, branch, remoteName):
     clone.call('push', remoteName, branch)
 
 
+def moveAsymmetrical(clone, local_branch, old_remote, new_remote, remote):
+    """Delete 'old_remote', push 'local_branch' to 'new_remote' on 'remote'.
+
+    :clone: supports call()
+    :local_branch: the local reference to push
+    :old_remote: the old reference on the remote to delete
+    :new_remote: the new reference on the remote to push to
+    :remote: the name of the remote to push to
+    :returns: None
+
+    """
+    clone.call(
+        'push',
+        remote,
+        local_branch + ":" + new_remote,
+        ":" + old_remote)
+
+
 def delete(clone, branch, remote):
     """Delete 'branch' from the specified remote.
 

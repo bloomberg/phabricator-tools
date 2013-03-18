@@ -26,12 +26,7 @@ import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 
-#TODO: refactor this crazy mess
-#TODO: support storing branches by status
-#      e.g. dev/phab/active/* -> currently watched
-#           dev/phab/badname/* -> ignored due to branch name
-#           dev/phab/badmsg/* -> ignored due to improperly formatted msg
-#           dev/phab/badbase/* -> ignored due to missing or invalid base
+#TODO: split into appropriate modules
 
 
 GitReviewBranch = collections.namedtuple(
@@ -281,6 +276,26 @@ def updateCommitMessageFields(earlier, later):
         testPlan=testPlan)
 
 
+def makeMessageFromFields(conduit, fields):
+    """Return a string message generated from the supplied 'fields'.
+
+    :fields: a phlcon_differential.ParseCommitMessageFields
+    :returns: a string message
+
+    """
+    message = fields.title
+    message += "\n"
+    message += "\n" + fields.summary
+    message += "\n" + "Reviewers:"
+    user_names = phlcon_user.queryUsernamesFromPhids(
+        conduit, fields.reviewerPHIDs)
+    user_names = ' '.join(user_names)
+    message += "\n" + user_names  # TODO: convert PHIDs to users
+    message += "\n" + "Test Plan:"
+    message += "\n" + fields.testPlan
+    return message
+
+
 def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
     rb = reviewBranch
     wb = workingBranch
@@ -295,7 +310,7 @@ def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
                 clone, workingBranch.branch, cloneContext.remote)
             createReview(conduit, cloneContext, reviewBranch)
         else:
-            updateInReview(conduit, wb, cloneContext, rb.remote_branch)
+            updateInReview(conduit, wb, cloneContext, rb)
     elif not abdt_naming.isStatusBad(workingBranch):
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
@@ -307,7 +322,8 @@ def updateReview(conduit, cloneContext, reviewBranch, workingBranch):
             print "do nothing"
 
 
-def updateInReview(conduit, wb, cloneContext, remoteBranch):
+def updateInReview(conduit, wb, cloneContext, review_branch):
+    remoteBranch = review_branch.remote_branch
     clone = cloneContext.clone
     user, email = getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, remoteBranch)
@@ -323,6 +339,8 @@ def updateInReview(conduit, wb, cloneContext, remoteBranch):
 
         print "- updating revision " + str(wb.id)
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
+
+        # get message fields from the messages
         revisions = phlgit_log.makeRevisionsFromHashes(clone, hashes)
         fields = None
         for r in revisions:
@@ -330,11 +348,22 @@ def updateInReview(conduit, wb, cloneContext, remoteBranch):
                 conduit, r.subject + "\n\n" + r.message)
             f = phlcon_differential.ParseCommitMessageFields(**p.fields)
             fields = updateCommitMessageFields(fields, f)
-        d.updateRevision(
-            conduit, wb.id, diffid, fields._asdict(), "update")
+        message = makeMessageFromFields(conduit, fields)
+        parsed = d.parseCommitMessage(conduit, message)
+        if parsed.errors:
+            raise CommitMessageParseException(
+                errors=parsed.errors,
+                fields=parsed.fields,
+                digest=message)
 
-    phlgit_push.pushAsymmetricalForce(
-        clone, remoteBranch, wb.branch, cloneContext.remote)
+        d.updateRevision(
+            conduit, wb.id, diffid, parsed.fields, "update")
+
+    pushWorkingBranchStatus(
+        cloneContext,
+        review_branch,
+        wb,
+        abdt_naming.WB_STATUS_OK)
 
     print "- commenting on revision " + str(wb.id)
     updateMessage = ""
@@ -405,6 +434,45 @@ def pushBadPreReviewWorkingBranch(cloneContext, review_branch):
         cloneContext.remote)
 
 
+def pushWorkingBranchStatus(
+        cloneContext, review_branch, working_branch, status):
+    clone = cloneContext.clone
+    remote = cloneContext.remote
+    old_branch = working_branch.branch
+
+    # TODO: extract a helper function for this
+    working_branch = abdt_naming.makeWorkingBranchName(
+        base=working_branch.base,
+        status=status,
+        description=working_branch.description,
+        review_id=working_branch.id)
+    working_branch = abdt_naming.makeWorkingBranchFromName(working_branch)
+    working_branch = makeGitWorkingBranch(working_branch, remote)
+
+    new_branch = working_branch.branch
+    if old_branch == new_branch:
+        phlgit_push.pushAsymmetricalForce(
+            clone,
+            review_branch.remote_branch,
+            phlgitu_ref.makeLocal(new_branch),
+            remote)
+    else:
+        phlgit_push.moveAsymmetrical(
+            clone,
+            review_branch.remote_branch,
+            phlgitu_ref.makeLocal(old_branch),
+            phlgitu_ref.makeLocal(new_branch),
+            remote)
+
+
+def pushBadInReviewWorkingBranch(cloneContext, review_branch, working_branch):
+    pushWorkingBranchStatus(
+        cloneContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_BAD_INREVIEW)
+
+
 def processUpdatedRepo(conduit, path, remote):
     print_sender = abdmail_printsender.MailSender("phab@server.test")
     mailer = abdmail_mailer.Mailer(
@@ -428,19 +496,26 @@ def processUpdatedRepo(conduit, path, remote):
                         createReview(
                             conduit, cloneContext, review_branch)
                     except InitialCommitMessageParseException as e:
-                        # record the branch as bad
                         pushBadPreReviewWorkingBranch(
                             cloneContext, review_branch)
-                        # mail the primary user
                         mailer.badBranchName(e.email, review_branch)
-                        return
                 else:
                     print "update review for " + b
                     working_branch = rbDict[b]
                     working_branch = makeGitWorkingBranch(
                         working_branch, remote)
-                    updateReview(
-                        conduit, cloneContext, review_branch, working_branch)
+                    try:
+                        updateReview(
+                            conduit, cloneContext,
+                            review_branch, working_branch)
+                    except InitialCommitMessageParseException as e:
+                        pushBadPreReviewWorkingBranch(
+                            cloneContext, review_branch)
+                        mailer.badBranchName(e.email, review_branch)
+                    except CommitMessageParseException as e:
+                        pushBadInReviewWorkingBranch(
+                            cloneContext, review_branch, working_branch)
+                        # TODO: update the review with a message
 
 
 def runCommands(*commands):
@@ -590,18 +665,65 @@ class TestAbd(unittest.TestCase):
 
             # fail to create the review
             processUpdatedRepo(conduit, "phab", "origin")
+            self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 1)
 
+            # make a new commit with another bad message
+            with phlsys_fs.chDirContext("developer"):
+                self._createCommitNewFileRaw("NEWFILE2")
+                runCommands("git push -u origin ph-review/change/master")
+
+            # fail to create the review again
+            with phlsys_fs.chDirContext("phab"):
+                runCommands("git fetch origin -p")
+            processUpdatedRepo(conduit, "phab", "origin")
+            self.assertEqual(self._countPhabWorkingBranches(), 1)
+            self.assertEqual(self._countPhabBadWorkingBranches(), 1)
+
+            # make a new commit with good message
             with phlsys_fs.chDirContext("developer"):
                 self._createCommitNewFileRaw(
-                    "NEWFILE2", testPlan="test plan")
+                    "NEWFILE3", testPlan="test plan")
                 runCommands("git push -u origin ph-review/change/master")
 
             # create the review ok
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
             processUpdatedRepo(conduit, "phab", "origin")
+            self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 0)
+
+            # rewrite history with a bad message
+            with phlsys_fs.chDirContext("developer"):
+                runCommands("git reset origin/master --hard")
+                self._createCommitNewFileRaw(
+                    "NEWFILE", reviewers=self.reviewer)
+                runCommands(
+                    "git push -u origin ph-review/change/master --force")
+
+            # fail to update the review
+            with phlsys_fs.chDirContext("phab"):
+                runCommands("git fetch origin -p")
+            processUpdatedRepo(conduit, "phab", "origin")
+            self.assertEqual(self._countPhabWorkingBranches(), 1)
+            self.assertEqual(self._countPhabBadWorkingBranches(), 1)
+
+            # make a new commit with good message
+            with phlsys_fs.chDirContext("developer"):
+                self._createCommitNewFileRaw(
+                    "NEWFILE2", testPlan="test plan")
+                runCommands("git push -u origin ph-review/change/master")
+
+            # update the review ok
+            print
+            print "update the review ok"
+            print "--------------------"
+            with phlsys_fs.chDirContext("phab"):
+                runCommands("git fetch origin -p")
+            processUpdatedRepo(conduit, "phab", "origin")
+            self.assertEqual(self._countPhabWorkingBranches(), 1)
+            self.assertEqual(self._countPhabBadWorkingBranches(), 0)
+            print
 
             # accept the review
             with phlsys_fs.chDirContext("phab"):
