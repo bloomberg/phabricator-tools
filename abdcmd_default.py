@@ -133,44 +133,42 @@ def isBasedOn(name, base):
 
 
 def createReview(conduit, cloneContext, mailer, review_branch):
+    clone = cloneContext.clone
+    if review_branch.base not in cloneContext.branches:
+        raise Exception("base does not exist:" + review_branch.base)
+    if not isBasedOn(review_branch.branch, review_branch.base):
+        raise Exception(
+            "'" + review_branch.branch +
+            "' is not based on '" + review_branch.base + "'")
+    user, email = getPrimaryUserAndEmailFromBranch(
+        clone, conduit, review_branch.remote_base,
+        review_branch.remote_branch)
+    print "- author: " + user
 
-    # try:
-        clone = cloneContext.clone
-        if review_branch.base not in cloneContext.branches:
-            raise Exception("base does not exist:" + review_branch.base)
-        if not isBasedOn(review_branch.branch, review_branch.base):
-            raise Exception(
-                "'" + review_branch.branch +
-                "' is not based on '" + review_branch.base + "'")
-        user, email = getPrimaryUserAndEmailFromBranch(
-            clone, conduit, review_branch.remote_base,
-            review_branch.remote_branch)
-        print "- author: " + user
+    message = makeMessageDigest(
+        clone, review_branch.remote_base, review_branch.remote_branch)
+    parsed = phlcon_differential.parseCommitMessage(conduit, message)
 
-        message = makeMessageDigest(
-            clone, review_branch.remote_base, review_branch.remote_branch)
-        parsed = phlcon_differential.parseCommitMessage(conduit, message)
+    if parsed.errors:
+        # record the branch as bad
+        working_branch_name = abdt_naming.makeWorkingBranchName(
+            "bad", review_branch.description, review_branch.base, "none")
+        phlgit_push.pushAsymmetrical(
+            cloneContext.clone,
+            phlgitu_ref.makeRemote(
+                review_branch.branch, cloneContext.remote),
+            phlgitu_ref.makeLocal(working_branch_name),
+            cloneContext.remote)
+        # mail the primary user
+        message = review_branch.branch + "' is badly named"
+        mailer.badBranchName(email, review_branch)
+        return
 
-        if parsed.errors:
-            # record the branch as bad
-            working_branch_name = abdt_naming.makeWorkingBranchName(
-                "bad", review_branch.description, review_branch.base, "none")
-            phlgit_push.pushAsymmetrical(
-                cloneContext.clone,
-                phlgitu_ref.makeRemote(
-                    review_branch.branch, cloneContext.remote),
-                phlgitu_ref.makeLocal(working_branch_name),
-                cloneContext.remote)
-            # mail the primary user
-            message = review_branch.branch + "' is badly named"
-            mailer.badBranchName(email, review_branch)
-            return
+    rawDiff = phlgit_diff.rawDiffRange(
+        clone, review_branch.remote_base, review_branch.remote_branch)
 
-        rawDiff = phlgit_diff.rawDiffRange(
-            clone, review_branch.remote_base, review_branch.remote_branch)
-
-        createDifferentialReview(
-            conduit, user, parsed, cloneContext, review_branch, rawDiff)
+    createDifferentialReview(
+        conduit, user, parsed, cloneContext, review_branch, rawDiff)
 
 
 def createDifferentialReview(
