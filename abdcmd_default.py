@@ -34,6 +34,7 @@ GitReviewBranch = collections.namedtuple(
         "branch",
         "description",
         "base",
+        "remote",
         "remote_base",
         "remote_branch"])
 
@@ -44,6 +45,7 @@ GitWorkingBranch = collections.namedtuple(
         "description",
         "base",
         "id",
+        "remote",
         "remote_base",
         "remote_branch"])
 
@@ -114,6 +116,7 @@ def makeGitReviewBranch(review_branch, remote):
         branch=review_branch.full_name,
         description=review_branch.description,
         base=review_branch.base,
+        remote=remote,
         remote_base=makeRemote(review_branch.base, remote),
         remote_branch=makeRemote(review_branch.full_name, remote))
 
@@ -133,8 +136,28 @@ def makeGitWorkingBranch(working_branch, remote):
         description=working_branch.description,
         base=working_branch.base,
         id=working_branch.id,
+        remote=remote,
         remote_base=makeRemote(working_branch.base, remote),
         remote_branch=makeRemote(working_branch.full_name, remote))
+
+
+def makeWorkingBranchWithStatus(working_branch, status):
+    """Return an abdcmd_default__GitWorkingBranch based on branch and status.
+
+    :working_branch: an abdcmd_default__GitWorkingBranch to base on
+    :status: the new string status
+    :returns: an abdcmd_default__GitWorkingBranch
+
+    """
+    remote = working_branch.remote
+    working_branch = abdt_naming.makeWorkingBranchName(
+        base=working_branch.base,
+        status=status,
+        description=working_branch.description,
+        review_id=working_branch.id)
+    working_branch = abdt_naming.makeWorkingBranchFromName(working_branch)
+    working_branch = makeGitWorkingBranch(working_branch, remote)
+    return working_branch
 
 
 def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
@@ -440,14 +463,7 @@ def pushWorkingBranchStatus(
     remote = cloneContext.remote
     old_branch = working_branch.branch
 
-    # TODO: extract a helper function for this
-    working_branch = abdt_naming.makeWorkingBranchName(
-        base=working_branch.base,
-        status=status,
-        description=working_branch.description,
-        review_id=working_branch.id)
-    working_branch = abdt_naming.makeWorkingBranchFromName(working_branch)
-    working_branch = makeGitWorkingBranch(working_branch, remote)
+    working_branch = makeWorkingBranchWithStatus(working_branch, status)
 
     new_branch = working_branch.branch
     if old_branch == new_branch:
