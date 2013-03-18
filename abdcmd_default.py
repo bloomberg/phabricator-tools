@@ -24,6 +24,8 @@ import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 import abdt_gittypes
+import abdt_messagefields
+
 
 #TODO: split into appropriate modules
 
@@ -125,47 +127,6 @@ def makeMessageDigest(clone, base, branch):
     return message
 
 
-def updateCommitMessageFields(earlier, later):
-    """Return an updated 'CommitMessageFields' based on the 'earlier' version.
-
-    Apply the 'later' version as an update to the 'earlier' one.
-
-    If either the earlier or later are None then the non-None one is returned.
-
-    :earlier: a phlcon_differential.ParseCommitMessageFields
-    :later: a phlcon_differential.ParseCommitMessageFields
-    :returns: the updated phlcon_differential.ParseCommitMessageFields
-
-    """
-    ParseCommitMessageFields = phlcon_differential.ParseCommitMessageFields
-
-    if earlier is None and later is not None:
-        assert(isinstance(later, ParseCommitMessageFields))
-        return later
-
-    if earlier is not None and later is None:
-        assert(isinstance(earlier, ParseCommitMessageFields))
-        return earlier
-
-    assert(isinstance(earlier, ParseCommitMessageFields))
-    assert(isinstance(later, ParseCommitMessageFields))
-    title = earlier.title
-    summary = earlier.summary
-    if later.summary:
-        summary += "\n" + later.summary
-    reviewers = set(earlier.reviewerPHIDs)
-    reviewers |= set(later.reviewerPHIDs)
-    reviewers = list(reviewers)
-    testPlan = earlier.testPlan
-    if later.testPlan:
-        testPlan += "\n" + later.testPlan
-    return ParseCommitMessageFields(
-        title=title,
-        summary=summary,
-        reviewerPHIDs=reviewers,
-        testPlan=testPlan)
-
-
 def makeMessage(title, summary, test_plan, reviewers):
     """Return string commit message.
 
@@ -255,7 +216,7 @@ def getFieldsFromCommitHashes(conduit, clone, hashes):
         p = d.parseCommitMessage(
             conduit, r.subject + "\n\n" + r.message)
         f = phlcon_differential.ParseCommitMessageFields(**p.fields)
-        fields = updateCommitMessageFields(fields, f)
+        fields = abdt_messagefields.update(fields, f)
     message = makeMessageFromFields(conduit, fields)
     return d.parseCommitMessage(conduit, message)
 
