@@ -24,8 +24,8 @@ import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 import abdt_gittypes
-import abdt_messagefields
 import abdt_commitmessage
+import abdt_conduitgit
 
 
 #TODO: split into appropriate modules
@@ -60,7 +60,7 @@ def createReview(conduit, gitContext, review_branch):
 
     hashes = phlgit_log.getRangeHashes(
         clone, review_branch.remote_base, review_branch.remote_branch)
-    parsed = getFieldsFromCommitHashes(conduit, clone, hashes)
+    parsed = abdt_conduitgit.getFieldsFromCommitHashes(conduit, clone, hashes)
     if parsed.errors:
         raise abdt_exception.InitialCommitMessageParseException(
             email,
@@ -128,19 +128,6 @@ def makeMessageDigest(clone, base, branch):
     return message
 
 
-def makeMessageFromFields(conduit, fields):
-    """Return a string message generated from the supplied 'fields'.
-
-    :fields: a phlcon_differential.ParseCommitMessageFields
-    :returns: a string message
-
-    """
-    user_names = phlcon_user.queryUsernamesFromPhids(
-        conduit, fields.reviewerPHIDs)
-    return abdt_commitmessage.make(
-        fields.title, fields.summary, fields.testPlan, user_names)
-
-
 def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     rb = reviewBranch
     wb = workingBranch
@@ -167,27 +154,6 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
             print "do nothing"
 
 
-def getFieldsFromCommitHashes(conduit, clone, hashes):
-    """Return a ParseCommitMessageResponse based on the commit messages.
-
-    :conduit: supports call()
-    :clone: supports call()
-    :hashes: list of the commit hashes to examine
-    :returns: a phlcon_differential.ParseCommitMessageResponse
-
-    """
-    d = phlcon_differential
-    revisions = phlgit_log.makeRevisionsFromHashes(clone, hashes)
-    fields = None
-    for r in revisions:
-        p = d.parseCommitMessage(
-            conduit, r.subject + "\n\n" + r.message)
-        f = phlcon_differential.ParseCommitMessageFields(**p.fields)
-        fields = abdt_messagefields.update(fields, f)
-    message = makeMessageFromFields(conduit, fields)
-    return d.parseCommitMessage(conduit, message)
-
-
 def updateInReview(conduit, wb, gitContext, review_branch):
     remoteBranch = review_branch.remote_branch
     clone = gitContext.clone
@@ -205,7 +171,8 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 
         print "- updating revision " + str(wb.id)
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
-        parsed = getFieldsFromCommitHashes(conduit, clone, hashes)
+        parsed = abdt_conduitgit.getFieldsFromCommitHashes(
+            conduit, clone, hashes)
         if parsed.errors:
             raise abdt_exception.CommitMessageParseException(
                 errors=parsed.errors,
