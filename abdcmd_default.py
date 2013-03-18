@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 """abd automates the creation and landing of reviews from branches"""
-import collections
 import unittest
 
 import abdmail_mailer
@@ -24,92 +23,9 @@ import phlsys_conduit
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
+import abdt_gittypes
 
 #TODO: split into appropriate modules
-
-
-GitReviewBranch = collections.namedtuple(
-    "abdcmd_default__GitReviewBranch", [
-        "branch",
-        "description",
-        "base",
-        "remote",
-        "remote_base",
-        "remote_branch"])
-
-GitWorkingBranch = collections.namedtuple(
-    "abdcmd_default__GitWorkingBranch", [
-        "branch",
-        "status",
-        "description",
-        "base",
-        "id",
-        "remote",
-        "remote_base",
-        "remote_branch"])
-
-GitContext = collections.namedtuple(
-    "abdcmd_default__GitContext", [
-        "clone",
-        "remote",
-        "branches"])
-
-
-def makeGitReviewBranch(review_branch, remote):
-    """Return a GitReviewBranch based on a abdt_naming.ReviewBranch and remote.
-
-    :review_branch: an abdt_naming.ReviewBranch to base this on
-    :remote: the name of the remote to use
-    :returns: a GitReviewBranch
-
-    """
-    makeRemote = phlgitu_ref.makeRemote
-    return GitReviewBranch(
-        branch=review_branch.full_name,
-        description=review_branch.description,
-        base=review_branch.base,
-        remote=remote,
-        remote_base=makeRemote(review_branch.base, remote),
-        remote_branch=makeRemote(review_branch.full_name, remote))
-
-
-def makeGitWorkingBranch(working_branch, remote):
-    """Return GitWorkingBranch based on a abdt_naming.WorkingBranch and remote.
-
-    :working_branch: an abdt_naming.WorkingBranch to base this on
-    :remote: the name of the remote to use
-    :returns: a GitWorkingBranch
-
-    """
-    makeRemote = phlgitu_ref.makeRemote
-    return GitWorkingBranch(
-        branch=working_branch.full_name,
-        status=working_branch.status,
-        description=working_branch.description,
-        base=working_branch.base,
-        id=working_branch.id,
-        remote=remote,
-        remote_base=makeRemote(working_branch.base, remote),
-        remote_branch=makeRemote(working_branch.full_name, remote))
-
-
-def makeWorkingBranchWithStatus(working_branch, status):
-    """Return an abdcmd_default__GitWorkingBranch based on branch and status.
-
-    :working_branch: an abdcmd_default__GitWorkingBranch to base on
-    :status: the new string status
-    :returns: an abdcmd_default__GitWorkingBranch
-
-    """
-    remote = working_branch.remote
-    working_branch = abdt_naming.makeWorkingBranchName(
-        base=working_branch.base,
-        status=status,
-        description=working_branch.description,
-        review_id=working_branch.id)
-    working_branch = abdt_naming.makeWorkingBranchFromName(working_branch)
-    working_branch = makeGitWorkingBranch(working_branch, remote)
-    return working_branch
 
 
 def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
@@ -425,7 +341,8 @@ def pushWorkingBranchStatus(
     remote = gitContext.remote
     old_branch = working_branch.branch
 
-    working_branch = makeWorkingBranchWithStatus(working_branch, status)
+    working_branch = abdt_gittypes.makeWorkingBranchWithStatus(
+        working_branch, status)
 
     new_branch = working_branch.branch
     if old_branch == new_branch:
@@ -460,14 +377,15 @@ def processUpdatedRepo(conduit, path, remote):
     with phlsys_fs.chDirContext(path):
         clone = phlsys_git.GitClone(".")
         remote_branches = phlgit_branch.getRemote(clone, remote)
-        gitContext = GitContext(clone, remote, remote_branches)
+        gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
         wbList = abdt_naming.getWorkingBranches(remote_branches)
         makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
         rbDict = dict((makeRb(wb), wb) for wb in wbList)
         for b in remote_branches:
             if abdt_naming.isReviewBranchName(b):
                 review_branch = abdt_naming.makeReviewBranchFromName(b)
-                review_branch = makeGitReviewBranch(review_branch, remote)
+                review_branch = abdt_gittypes.makeGitReviewBranch(
+                    review_branch, remote)
                 abdte = abdt_exception
                 if b not in rbDict.keys():
                     print "create review for " + b
@@ -481,7 +399,7 @@ def processUpdatedRepo(conduit, path, remote):
                 else:
                     print "update review for " + b
                     working_branch = rbDict[b]
-                    working_branch = makeGitWorkingBranch(
+                    working_branch = abdt_gittypes.makeGitWorkingBranch(
                         working_branch, remote)
                     try:
                         updateReview(
