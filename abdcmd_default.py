@@ -405,6 +405,18 @@ class TestAbd(unittest.TestCase):
             runCommands("git fetch origin -p")
         processUpdatedRepo(self.conduit, "phab", "origin")
 
+    def _acceptTheOnlyReview(self):
+        # accept the review
+        with phlsys_fs.chDirContext("phab"):
+            clone = phlsys_git.GitClone(".")
+            branches = phlgit_branch.getRemote(clone, "origin")
+        wbList = abdt_naming.getWorkingBranches(branches)
+        self.assertEqual(len(wbList), 1)
+        wb = wbList[0]
+        with phlsys_conduit.actAsUserContext(self.conduit, self.reviewer):
+            phlcon_differential.createComment(
+                self.conduit, wb.id, action="accept")
+
     def test_nothingToDo(self):
         with phlsys_fs.chDirContext("abd-test"):
             # nothing to process
@@ -433,15 +445,7 @@ class TestAbd(unittest.TestCase):
             self._phabUpdate()
 
             # accept the review
-            with phlsys_fs.chDirContext("phab"):
-                clone = phlsys_git.GitClone(".")
-                branches = phlgit_branch.getRemote(clone, "origin")
-            wbList = abdt_naming.getWorkingBranches(branches)
-            self.assertEqual(len(wbList), 1)
-            wb = wbList[0]
-            with phlsys_conduit.actAsUserContext(self.conduit, self.reviewer):
-                phlcon_differential.createComment(
-                    self.conduit, wb.id, action="accept")
+            self._acceptTheOnlyReview()
 
             processUpdatedRepo(self.conduit, "phab", "origin")
             self.assertEqual(self._countPhabWorkingBranches(), 0)
@@ -508,15 +512,7 @@ class TestAbd(unittest.TestCase):
             self.assertEqual(self._countPhabBadWorkingBranches(), 0)
 
             # accept the review
-            with phlsys_fs.chDirContext("phab"):
-                clone = phlsys_git.GitClone(".")
-                branches = phlgit_branch.getRemote(clone, "origin")
-            wbList = abdt_naming.getWorkingBranches(branches)
-            self.assertEqual(len(wbList), 1)
-            wb = wbList[0]
-            with phlsys_conduit.actAsUserContext(self.conduit, self.reviewer):
-                phlcon_differential.createComment(
-                    self.conduit, wb.id, action="accept")
+            self._acceptTheOnlyReview()
 
             # land the revision
             self._phabUpdate()
