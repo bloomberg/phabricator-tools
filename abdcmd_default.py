@@ -219,6 +219,53 @@ def land(conduit, wb, gitContext, branch):
     # TODO: we probably want to do a better job of cleaning up locally
 
 
+def processUpdatedBranch(
+        mailer, conduit, gitContext, review_branch, working_branch):
+    abdte = abdt_exception
+    if working_branch is None:
+        print "create review for " + review_branch.branch
+        try:
+            createReview(
+                conduit, gitContext, review_branch)
+        except abdte.AbdUserException as e:
+            abdt_workingbranch.pushBadPreReview(
+                gitContext, review_branch)
+            mailer.userException(e.message, review_branch)
+        except abdte.InitialCommitMessageParseException as e:
+            abdt_workingbranch.pushBadPreReview(
+                gitContext, review_branch)
+            mailer.badBranchName(e.email, review_branch)
+    else:
+        if abdt_naming.isStatusBadPreReview(working_branch):
+            print "try again to create review for " + review_branch.branch
+            try:
+                phlgit_push.delete(
+                    gitContext.clone,
+                    working_branch.branch,
+                    gitContext.remote)
+                createReview(conduit, gitContext, review_branch)
+            except abdte.InitialCommitMessageParseException as e:
+                abdt_workingbranch.pushBadPreReview(
+                    gitContext, review_branch)
+                mailer.badBranchName(e.email, review_branch)
+            except abdte.AbdUserException as e:
+                abdt_workingbranch.pushBadPreReview(
+                    gitContext, review_branch)
+                mailer.userException(e.message, review_branch)
+        else:
+            print "update review for " + review_branch.branch
+            try:
+                updateReview(
+                    conduit, gitContext,
+                    review_branch, working_branch)
+            except abdte.InitialCommitMessageParseException as e:
+                raise e
+            except abdte.CommitMessageParseException as e:
+                abdt_workingbranch.pushBadInReview(
+                    gitContext, review_branch, working_branch)
+                # TODO: update the review with a message
+
+
 def processUpdatedRepo(conduit, path, remote):
     print_sender = abdmail_printsender.MailSender("phab@server.test")
     mailer = abdmail_mailer.Mailer(
@@ -236,52 +283,13 @@ def processUpdatedRepo(conduit, path, remote):
             review_branch = abdt_naming.makeReviewBranchFromName(b)
             review_branch = abdt_gittypes.makeGitReviewBranch(
                 review_branch, remote)
-            abdte = abdt_exception
-            if b not in rbDict.keys():
-                print "create review for " + b
-                try:
-                    createReview(
-                        conduit, gitContext, review_branch)
-                except abdte.AbdUserException as e:
-                    abdt_workingbranch.pushBadPreReview(
-                        gitContext, review_branch)
-                    mailer.userException(e.message, review_branch)
-                except abdte.InitialCommitMessageParseException as e:
-                    abdt_workingbranch.pushBadPreReview(
-                        gitContext, review_branch)
-                    mailer.badBranchName(e.email, review_branch)
-            else:
+            working_branch = None
+            if b in rbDict.keys():
                 working_branch = rbDict[b]
                 working_branch = abdt_gittypes.makeGitWorkingBranch(
                     working_branch, remote)
-                if abdt_naming.isStatusBadPreReview(working_branch):
-                    print "try again to create review for " + b
-                    try:
-                        phlgit_push.delete(
-                            clone,
-                            working_branch.branch,
-                            gitContext.remote)
-                        createReview(conduit, gitContext, review_branch)
-                    except abdte.InitialCommitMessageParseException as e:
-                        abdt_workingbranch.pushBadPreReview(
-                            gitContext, review_branch)
-                        mailer.badBranchName(e.email, review_branch)
-                    except abdte.AbdUserException as e:
-                        abdt_workingbranch.pushBadPreReview(
-                            gitContext, review_branch)
-                        mailer.userException(e.message, review_branch)
-                else:
-                    print "update review for " + b
-                    try:
-                        updateReview(
-                            conduit, gitContext,
-                            review_branch, working_branch)
-                    except abdte.InitialCommitMessageParseException as e:
-                        raise e
-                    except abdte.CommitMessageParseException as e:
-                        abdt_workingbranch.pushBadInReview(
-                            gitContext, review_branch, working_branch)
-                        # TODO: update the review with a message
+            processUpdatedBranch(
+                mailer, conduit, gitContext, review_branch, working_branch)
 
 
 def runCommands(*commands):
