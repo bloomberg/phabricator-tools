@@ -230,7 +230,7 @@ def processUpdatedBranch(
             createReview(conduit, gitContext, review_branch)
         except abdte.InitialCommitMessageParseException as e:
             abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-            mailer.badBranchName(e.email, review_branch)
+            mailer.initialCommitMessageParseException(e, review_branch.branch)
         except abdte.AbdUserException as e:
             abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
             mailer.userException(e.message, review_branch)
@@ -246,7 +246,8 @@ def processUpdatedBranch(
                 createReview(conduit, gitContext, review_branch)
             except abdte.InitialCommitMessageParseException as e:
                 abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-                mailer.badBranchName(e.email, review_branch)
+                mailer.initialCommitMessageParseException(
+                    e, review_branch.branch)
             except abdte.AbdUserException as e:
                 abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
                 mailer.userException(e.message, review_branch)

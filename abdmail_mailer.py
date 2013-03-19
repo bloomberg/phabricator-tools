@@ -28,6 +28,20 @@ class Mailer(object):
             subject="user exception",
             message=msg)
 
+    def initialCommitMessageParseException(self, e, branch_name):
+        subject = ""
+        subject += self._repository_name + ": "
+        subject += branch_name + ": "
+        subject += "missing info"
+        msg = ""
+        msg += "in repository: " + self._repository_name
+        msg += "\nerror when processing branch: " + str(branch_name)
+        msg += "\n" + e.message
+        self._mail_sender.send(
+            to=[e.email],
+            subject="bad review branch",
+            message=str(branch_name))
+
     def badBranchName(self, owner, branch_name):
         self._mail_sender.send(
             to=[owner],
