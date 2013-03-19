@@ -400,6 +400,11 @@ class TestAbd(unittest.TestCase):
                 numBadBranches += 1
         return numBadBranches
 
+    def _phabUpdate(self):
+        with phlsys_fs.chDirContext("phab"):
+            runCommands("git fetch origin -p")
+        processUpdatedRepo(self.conduit, "phab", "origin")
+
     def test_nothingToDo(self):
         with phlsys_fs.chDirContext("abd-test"):
             # nothing to process
@@ -416,21 +421,16 @@ class TestAbd(unittest.TestCase):
 
                 runCommands("git push -u origin ph-review/change/master")
 
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-
             # create the review
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
 
             # update the review with a new revision
             with phlsys_fs.chDirContext("developer"):
                 self._createCommitNewFileRaw("NEWFILE2")
                 runCommands("git push -u origin ph-review/change/master")
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
 
             # update the review
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
 
             # accept the review
             with phlsys_fs.chDirContext("phab"):
@@ -457,11 +457,8 @@ class TestAbd(unittest.TestCase):
                     "NEWFILE", reviewer=self.reviewer)
                 runCommands("git push -u origin ph-review/change/master")
 
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-
             # fail to create the review
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
             self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 1)
 
@@ -471,9 +468,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # fail to create the review again
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
             self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 1)
 
@@ -484,9 +479,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # create the review ok
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
             self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 0)
 
@@ -499,9 +492,7 @@ class TestAbd(unittest.TestCase):
                     "git push -u origin ph-review/change/master --force")
 
             # fail to update the review
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
             self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 1)
 
@@ -512,9 +503,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # update the review ok
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
             self.assertEqual(self._countPhabWorkingBranches(), 1)
             self.assertEqual(self._countPhabBadWorkingBranches(), 0)
 
@@ -530,9 +519,7 @@ class TestAbd(unittest.TestCase):
                     self.conduit, wb.id, action="accept")
 
             # land the revision
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-            processUpdatedRepo(self.conduit, "phab", "origin")
+            self._phabUpdate()
             self.assertEqual(self._countPhabWorkingBranches(), 0)
 
     def test_badBaseWorkflow(self):
