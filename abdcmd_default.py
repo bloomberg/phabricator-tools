@@ -323,6 +323,7 @@ class TestAbd(unittest.TestCase):
 
     def setUp(self):
         self.reviewer = phldef_conduit.alice.user
+        self.author_account = phldef_conduit.bob
         #TODO: just make a temp dir
         runCommands("rm -rf abd-test")
         runCommands("mkdir abd-test")
@@ -334,7 +335,7 @@ class TestAbd(unittest.TestCase):
             "git clone devgit phab",
         )
 
-        self._devSetAuthorAccount(phldef_conduit.bob)
+        self._devSetAuthorAccount(self.author_account)
 
         with phlsys_fs.chDirContext("developer"):
             self._createCommitNewFile("README", self.reviewer)
@@ -459,8 +460,32 @@ class TestAbd(unittest.TestCase):
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devResetBranchToMaster("ph-review/change/master")
-        self._devSetAuthorAccount(phldef_conduit.bob)
+        self._devSetAuthorAccount(self.author_account)
         self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
+    def test_abandonedWorkflow(self):
+        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+
+        # abandon the review
+        with phlsys_fs.chDirContext("phab"):
+            clone = phlsys_git.GitClone(".")
+            branches = phlgit_branch.getRemote(clone, "origin")
+        wbList = abdt_naming.getWorkingBranches(branches)
+        self.assertEqual(len(wbList), 1)
+        wb = wbList[0]
+        with phlsys_conduit.actAsUserContext(
+                self.conduit, self.author_account.user):
+            phlcon_differential.createComment(
+                self.conduit, wb.id, action="abandon")
+        print "** abandoned review " + str(wb.id)
+
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
