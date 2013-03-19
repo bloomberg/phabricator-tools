@@ -225,64 +225,63 @@ def processUpdatedRepo(conduit, path, remote):
         print_sender,
         ["admin@server.test"],
         "http://server.fake/testrepo.git")
-    with phlsys_fs.chDirContext(path):
-        clone = phlsys_git.GitClone(".")
-        remote_branches = phlgit_branch.getRemote(clone, remote)
-        gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
-        wbList = abdt_naming.getWorkingBranches(remote_branches)
-        makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
-        rbDict = dict((makeRb(wb), wb) for wb in wbList)
-        for b in remote_branches:
-            if abdt_naming.isReviewBranchName(b):
-                review_branch = abdt_naming.makeReviewBranchFromName(b)
-                review_branch = abdt_gittypes.makeGitReviewBranch(
-                    review_branch, remote)
-                abdte = abdt_exception
-                if b not in rbDict.keys():
-                    print "create review for " + b
+    clone = phlsys_git.GitClone(path)
+    remote_branches = phlgit_branch.getRemote(clone, remote)
+    gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
+    wbList = abdt_naming.getWorkingBranches(remote_branches)
+    makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
+    rbDict = dict((makeRb(wb), wb) for wb in wbList)
+    for b in remote_branches:
+        if abdt_naming.isReviewBranchName(b):
+            review_branch = abdt_naming.makeReviewBranchFromName(b)
+            review_branch = abdt_gittypes.makeGitReviewBranch(
+                review_branch, remote)
+            abdte = abdt_exception
+            if b not in rbDict.keys():
+                print "create review for " + b
+                try:
+                    createReview(
+                        conduit, gitContext, review_branch)
+                except abdte.AbdUserException as e:
+                    abdt_workingbranch.pushBadPreReview(
+                        gitContext, review_branch)
+                    mailer.userException(e.message, review_branch)
+                except abdte.InitialCommitMessageParseException as e:
+                    abdt_workingbranch.pushBadPreReview(
+                        gitContext, review_branch)
+                    mailer.badBranchName(e.email, review_branch)
+            else:
+                working_branch = rbDict[b]
+                working_branch = abdt_gittypes.makeGitWorkingBranch(
+                    working_branch, remote)
+                if abdt_naming.isStatusBadPreReview(working_branch):
+                    print "try again to create review for " + b
                     try:
-                        createReview(
-                            conduit, gitContext, review_branch)
-                    except abdte.AbdUserException as e:
-                        abdt_workingbranch.pushBadPreReview(
-                            gitContext, review_branch)
-                        mailer.userException(e.message, review_branch)
+                        phlgit_push.delete(
+                            clone,
+                            working_branch.branch,
+                            gitContext.remote)
+                        createReview(conduit, gitContext, review_branch)
                     except abdte.InitialCommitMessageParseException as e:
                         abdt_workingbranch.pushBadPreReview(
                             gitContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
+                    except abdte.AbdUserException as e:
+                        abdt_workingbranch.pushBadPreReview(
+                            gitContext, review_branch)
+                        mailer.userException(e.message, review_branch)
                 else:
-                    working_branch = rbDict[b]
-                    working_branch = abdt_gittypes.makeGitWorkingBranch(
-                        working_branch, remote)
-                    if abdt_naming.isStatusBadPreReview(working_branch):
-                        print "try again to create review for " + b
-                        try:
-                            phlgit_push.delete(
-                                clone,
-                                working_branch.branch,
-                                gitContext.remote)
-                            createReview(conduit, gitContext, review_branch)
-                        except abdte.InitialCommitMessageParseException as e:
-                            abdt_workingbranch.pushBadPreReview(
-                                gitContext, review_branch)
-                            mailer.badBranchName(e.email, review_branch)
-                        except abdte.AbdUserException as e:
-                            abdt_workingbranch.pushBadPreReview(
-                                gitContext, review_branch)
-                            mailer.userException(e.message, review_branch)
-                    else:
-                        print "update review for " + b
-                        try:
-                            updateReview(
-                                conduit, gitContext,
-                                review_branch, working_branch)
-                        except abdte.InitialCommitMessageParseException as e:
-                            raise e
-                        except abdte.CommitMessageParseException as e:
-                            abdt_workingbranch.pushBadInReview(
-                                gitContext, review_branch, working_branch)
-                            # TODO: update the review with a message
+                    print "update review for " + b
+                    try:
+                        updateReview(
+                            conduit, gitContext,
+                            review_branch, working_branch)
+                    except abdte.InitialCommitMessageParseException as e:
+                        raise e
+                    except abdte.CommitMessageParseException as e:
+                        abdt_workingbranch.pushBadInReview(
+                            gitContext, review_branch, working_branch)
+                        # TODO: update the review with a message
 
 
 def runCommands(*commands):
