@@ -124,13 +124,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     isBranchIdentical = phlgit_branch.isIdentical
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
         verifyReviewBranchBase(gitContext, reviewBranch)
-        if workingBranch.status == abdt_naming.WB_STATUS_BAD_PREREVIEW:
-            print "delete bad working branch"
-            phlgit_push.delete(
-                clone, workingBranch.branch, gitContext.remote)
-            createReview(conduit, gitContext, reviewBranch)
-        else:
-            updateInReview(conduit, wb, gitContext, rb)
+        updateInReview(conduit, wb, gitContext, rb)
     elif not abdt_naming.isStatusBad(workingBranch):
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
@@ -249,27 +243,46 @@ def processUpdatedRepo(conduit, path, remote):
                     try:
                         createReview(
                             conduit, gitContext, review_branch)
+                    except abdte.AbdUserException as e:
+                        abdt_workingbranch.pushBadPreReview(
+                            gitContext, review_branch)
+                        mailer.userException(e.message, review_branch)
                     except abdte.InitialCommitMessageParseException as e:
                         abdt_workingbranch.pushBadPreReview(
                             gitContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
                 else:
-                    print "update review for " + b
                     working_branch = rbDict[b]
                     working_branch = abdt_gittypes.makeGitWorkingBranch(
                         working_branch, remote)
-                    try:
-                        updateReview(
-                            conduit, gitContext,
-                            review_branch, working_branch)
-                    except abdte.InitialCommitMessageParseException as e:
-                        abdt_workingbranch.pushBadPreReview(
-                            gitContext, review_branch)
-                        mailer.badBranchName(e.email, review_branch)
-                    except abdte.CommitMessageParseException as e:
-                        abdt_workingbranch.pushBadInReview(
-                            gitContext, review_branch, working_branch)
-                        # TODO: update the review with a message
+                    if abdt_naming.isStatusBadPreReview(working_branch):
+                        print "try again to create review for " + b
+                        try:
+                            phlgit_push.delete(
+                                clone,
+                                working_branch.branch,
+                                gitContext.remote)
+                            createReview(conduit, gitContext, review_branch)
+                        except abdte.InitialCommitMessageParseException as e:
+                            abdt_workingbranch.pushBadPreReview(
+                                gitContext, review_branch)
+                            mailer.badBranchName(e.email, review_branch)
+                        except abdte.AbdUserException as e:
+                            abdt_workingbranch.pushBadPreReview(
+                                gitContext, review_branch)
+                            mailer.userException(e.message, review_branch)
+                    else:
+                        print "update review for " + b
+                        try:
+                            updateReview(
+                                conduit, gitContext,
+                                review_branch, working_branch)
+                        except abdte.InitialCommitMessageParseException as e:
+                            raise e
+                        except abdte.CommitMessageParseException as e:
+                            abdt_workingbranch.pushBadInReview(
+                                gitContext, review_branch, working_branch)
+                            # TODO: update the review with a message
 
 
 def runCommands(*commands):
@@ -429,17 +442,8 @@ class TestAbd(unittest.TestCase):
         with phlsys_fs.chDirContext("abd-test"):
             self._devCheckoutPushNewBranch("ph-review/change/blaster")
             self._devPushNewFile("NEWFILE", has_plan=False)
-
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
-
-            # fail to create the review
-            #processUpdatedRepo(self.conduit, "phab", "origin")
-            self.assertRaises(
-                abdt_exception.AbdUserException,
-                processUpdatedRepo, self.conduit, "phab", "origin")
-
-            #self.assertEqual(self.countPhabBadWorkingBranches(), 1)
+            self._phabUpdateWithExpectations(total=1, bad=1)
+            # TODO: add recovery test
 
     def tearDown(self):
         runCommands("rm -rf abd-test")

@@ -9,17 +9,24 @@ class Mailer(object):
         """Initialise, simply store the supplied parameters.
 
         :mail_sender: supports send(to, cc, subject, message)
-        :admin_emails: who to notify when there are no appropriate users
+        :admin_emails: list of string, who to tell when no appropriate users
         :repository_name: the repository that is in context
 
         """
         self._mail_sender = mail_sender
+        assert not isinstance(admin_emails, basestring), "admin_emails string"
         self._admin_emails = admin_emails
         self._repository_name = repository_name
 
+    def userException(self, message, branch_name):
+        self._mail_sender.send(
+            to=self._admin_emails,
+            subject="user exception",
+            message=branch_name)
+
     def badBranchName(self, owner, branch_name):
         self._mail_sender.send(
-            to=owner,
+            to=[owner],
             subject="bad review branch",
             message=branch_name)
 

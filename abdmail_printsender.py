@@ -16,12 +16,14 @@ class MailSender(object):
         self._from_email = from_email
 
     def send(self, to, subject, message, cc=None):
+        assert not isinstance(to, basestring), "'to' is string"
         msg = MIMEText("message")
         msg['subject'] = subject
         msg['from'] = self._from_email
-        msg['to'] = to
+        msg['to'] = ', '.join(to)
         if cc:
-            msg['cc'] = cc
+            assert not isinstance(cc, basestring), "cc is string"
+            msg['cc'] = ', '.join(cc)
         print "-----"
         print msg.as_string()
         print "-----"
