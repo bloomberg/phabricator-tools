@@ -19,16 +19,20 @@ class Mailer(object):
         self._repository_name = repository_name
 
     def userException(self, message, branch_name):
+        msg = ""
+        msg += "in repository: " + self._repository_name
+        msg += "\nerror when processing branch: " + str(branch_name)
+        msg += "\n" + message
         self._mail_sender.send(
             to=self._admin_emails,
             subject="user exception",
-            message=branch_name)
+            message=msg)
 
     def badBranchName(self, owner, branch_name):
         self._mail_sender.send(
             to=[owner],
             subject="bad review branch",
-            message=branch_name)
+            message=str(branch_name))
 
 
 #------------------------------------------------------------------------------

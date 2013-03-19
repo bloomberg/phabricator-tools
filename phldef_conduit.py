@@ -34,6 +34,14 @@ phab = Account(user="phab", email="phab@server.test", certificate=(
     "llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3uvot7fxrotwpi3ty"
     "2b2sa2kvlpf"))
 
+# a user that definitely won't be registered, useful for testing
+notauser = Account(user="#:)-", email="notauser@server.invalid", certificate=(
+    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    "ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    "eeeeeeeeeee"))
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

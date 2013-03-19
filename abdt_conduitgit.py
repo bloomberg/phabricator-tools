@@ -5,6 +5,7 @@ import phlgit_log
 
 import abdt_commitmessage
 import abdt_messagefields
+import abdt_exception
 
 
 def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
@@ -15,7 +16,8 @@ def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
     print "- users: " + str(users)
     primary_user = users[0]
     if not primary_user:
-        raise Exception("first committer is not a Phabricator user")
+        raise abdt_exception.AbdUserException(
+            "first committer is not a Phabricator user")
     return primary_user, committers[0]
 
 

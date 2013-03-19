@@ -17,7 +17,7 @@ class MailSender(object):
 
     def send(self, to, subject, message, cc=None):
         assert not isinstance(to, basestring), "'to' is string"
-        msg = MIMEText("message")
+        msg = MIMEText(message)
         msg['subject'] = subject
         msg['from'] = self._from_email
         msg['to'] = ', '.join(to)
