@@ -402,7 +402,7 @@ class TestAbd(unittest.TestCase):
             self._createCommitNewFileRaw(filename, plan, reviewer)
             runCommands("git push")
 
-    def _acceptTheOnlyReview(self):
+    def _actOnTheOnlyReview(self, user, action):
         # accept the review
         with phlsys_fs.chDirContext("phab"):
             clone = phlsys_git.GitClone(".")
@@ -410,9 +410,12 @@ class TestAbd(unittest.TestCase):
         wbList = abdt_naming.getWorkingBranches(branches)
         self.assertEqual(len(wbList), 1)
         wb = wbList[0]
-        with phlsys_conduit.actAsUserContext(self.conduit, self.reviewer):
+        with phlsys_conduit.actAsUserContext(self.conduit, user):
             phlcon_differential.createComment(
-                self.conduit, wb.id, action="accept")
+                self.conduit, wb.id, action=action)
+
+    def _acceptTheOnlyReview(self):
+        self._actOnTheOnlyReview(self.reviewer, "accept")
 
     def test_nothingToDo(self):
         # nothing to process
@@ -470,20 +473,7 @@ class TestAbd(unittest.TestCase):
         self._devCheckoutPushNewBranch("ph-review/change/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
-
-        # abandon the review
-        with phlsys_fs.chDirContext("phab"):
-            clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.getRemote(clone, "origin")
-        wbList = abdt_naming.getWorkingBranches(branches)
-        self.assertEqual(len(wbList), 1)
-        wb = wbList[0]
-        with phlsys_conduit.actAsUserContext(
-                self.conduit, self.author_account.user):
-            phlcon_differential.createComment(
-                self.conduit, wb.id, action="abandon")
-        print "** abandoned review " + str(wb.id)
-
+        self._actOnTheOnlyReview(self.author_account.user, "abandon")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=0)
