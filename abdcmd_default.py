@@ -233,7 +233,7 @@ def processUpdatedBranch(
             mailer.initialCommitMessageParseException(e, review_branch.branch)
         except abdte.AbdUserException as e:
             abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-            mailer.userException(e.message, review_branch)
+            mailer.userException(e.message, review_branch.branch)
     else:
         commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
@@ -250,7 +250,7 @@ def processUpdatedBranch(
                     e, review_branch.branch)
             except abdte.AbdUserException as e:
                 abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-                mailer.userException(e.message, review_branch)
+                mailer.userException(e.message, review_branch.branch)
         else:
             print "update review for " + review_branch.branch
             try:

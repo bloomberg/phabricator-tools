@@ -35,18 +35,18 @@ class Mailer(object):
         subject += "missing info"
         msg = ""
         msg += "in repository: " + self._repository_name
-        msg += "\nerror when processing branch: " + str(branch_name)
+        msg += "\nerror when processing branch: " + branch_name
         msg += "\n" + e.message
         self._mail_sender.send(
             to=[e.email],
             subject="bad review branch",
-            message=str(branch_name))
+            message=branch_name)
 
     def badBranchName(self, owner, branch_name):
         self._mail_sender.send(
             to=[owner],
             subject="bad review branch",
-            message=str(branch_name))
+            message=branch_name)
 
 
 #------------------------------------------------------------------------------
