@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 """abd automates the creation and landing of reviews from branches"""
+import os
 import unittest
 
 import abdmail_mailer
@@ -319,31 +320,32 @@ class TestAbd(unittest.TestCase):
         #TODO: just make a temp dir
         runCommands("rm -rf abd-test")
         runCommands("mkdir abd-test")
-        with phlsys_fs.chDirContext("abd-test"):
-            runCommands(
-                "git --git-dir=devgit init --bare",
-                "git clone devgit developer",
-                "git clone devgit phab",
-            )
+        self._saved_path = os.getcwd()
+        os.chdir("abd-test")
+        runCommands(
+            "git --git-dir=devgit init --bare",
+            "git clone devgit developer",
+            "git clone devgit phab",
+        )
 
-            devClone = phlsys_git.GitClone("developer")
-            phlgit_config.setUsernameEmail(
-                devClone,
-                phldef_conduit.bob.user,
-                phldef_conduit.bob.email)
+        devClone = phlsys_git.GitClone("developer")
+        phlgit_config.setUsernameEmail(
+            devClone,
+            phldef_conduit.bob.user,
+            phldef_conduit.bob.email)
 
-            with phlsys_fs.chDirContext("developer"):
-                self._createCommitNewFile("README", self.reviewer)
+        with phlsys_fs.chDirContext("developer"):
+            self._createCommitNewFile("README", self.reviewer)
 
-                runCommands("git push origin master")
+            runCommands("git push origin master")
 
-            with phlsys_fs.chDirContext("phab"):
-                runCommands("git fetch origin -p")
+        with phlsys_fs.chDirContext("phab"):
+            runCommands("git fetch origin -p")
 
-            self.conduit = phlsys_conduit.Conduit(
-                phldef_conduit.test_uri,
-                phldef_conduit.phab.user,
-                phldef_conduit.phab.certificate)
+        self.conduit = phlsys_conduit.Conduit(
+            phldef_conduit.test_uri,
+            phldef_conduit.phab.user,
+            phldef_conduit.phab.certificate)
 
     def _countPhabWorkingBranches(self):
         with phlsys_fs.chDirContext("phab"):
@@ -402,57 +404,48 @@ class TestAbd(unittest.TestCase):
                 self.conduit, wb.id, action="accept")
 
     def test_nothingToDo(self):
-        with phlsys_fs.chDirContext("abd-test"):
-            # nothing to process
-            processUpdatedRepo(self.conduit, "phab", "origin")
+        # nothing to process
+        processUpdatedRepo(self.conduit, "phab", "origin")
 
     def test_simpleWorkflow(self):
-        with phlsys_fs.chDirContext("abd-test"):
-            # nothing to process
-            processUpdatedRepo(self.conduit, "phab", "origin")
-
-            self._devCheckoutPushNewBranch("ph-review/change/master")
-            self._devPushNewFile("NEWFILE")
-            self._phabUpdateWithExpectations(total=1, bad=0)
-            self._devPushNewFile("NEWFILE2")
-            self._phabUpdateWithExpectations(total=1, bad=0)
-            self._acceptTheOnlyReview()
-            self._phabUpdateWithExpectations(total=0, bad=0)
+        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._devPushNewFile("NEWFILE2")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badMsgWorkflow(self):
-        with phlsys_fs.chDirContext("abd-test"):
-            # nothing to process
-            processUpdatedRepo(self.conduit, "phab", "origin")
+        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devPushNewFile("NEWFILE", has_plan=False)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        self._devPushNewFile("NEWFILE2", has_plan=False)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        self._devPushNewFile("NEWFILE3")
+        self._phabUpdateWithExpectations(total=1, bad=0)
 
-            self._devCheckoutPushNewBranch("ph-review/change/master")
-            self._devPushNewFile("NEWFILE", has_plan=False)
-            self._phabUpdateWithExpectations(total=1, bad=1)
-            self._devPushNewFile("NEWFILE2", has_plan=False)
-            self._phabUpdateWithExpectations(total=1, bad=1)
-            self._devPushNewFile("NEWFILE3")
-            self._phabUpdateWithExpectations(total=1, bad=0)
+        # reset the history
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git reset origin/master --hard")
+            runCommands(
+                "git push -u origin ph-review/change/master --force")
 
-            # reset the history
-            with phlsys_fs.chDirContext("developer"):
-                runCommands("git reset origin/master --hard")
-                runCommands(
-                    "git push -u origin ph-review/change/master --force")
-
-            self._devPushNewFile("NEWFILE", has_plan=False)
-            self._phabUpdateWithExpectations(total=1, bad=1)
-            self._devPushNewFile("NEWFILE2")
-            self._phabUpdateWithExpectations(total=1, bad=0)
-            self._acceptTheOnlyReview()
-            self._phabUpdateWithExpectations(total=0, bad=0)
+        self._devPushNewFile("NEWFILE", has_plan=False)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        self._devPushNewFile("NEWFILE2")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badBaseWorkflow(self):
-        with phlsys_fs.chDirContext("abd-test"):
-            self._devCheckoutPushNewBranch("ph-review/change/blaster")
-            self._devPushNewFile("NEWFILE", has_plan=False)
-            self._phabUpdateWithExpectations(total=1, bad=1)
-            # TODO: add recovery test
+        self._devCheckoutPushNewBranch("ph-review/change/blaster")
+        self._devPushNewFile("NEWFILE", has_plan=False)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        # TODO: add recovery test
 
     def tearDown(self):
+        os.chdir(self._saved_path)
         runCommands("rm -rf abd-test")
         pass
 
