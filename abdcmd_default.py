@@ -226,15 +226,12 @@ def processUpdatedBranch(
     if working_branch is None:
         print "create review for " + review_branch.branch
         try:
-            createReview(
-                conduit, gitContext, review_branch)
+            createReview(conduit, gitContext, review_branch)
         except abdte.InitialCommitMessageParseException as e:
-            abdt_workingbranch.pushBadPreReview(
-                gitContext, review_branch)
+            abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
             mailer.badBranchName(e.email, review_branch)
         except abdte.AbdUserException as e:
-            abdt_workingbranch.pushBadPreReview(
-                gitContext, review_branch)
+            abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
             mailer.userException(e.message, review_branch)
     else:
         if abdt_naming.isStatusBadPreReview(working_branch):
@@ -246,19 +243,19 @@ def processUpdatedBranch(
                     gitContext.remote)
                 createReview(conduit, gitContext, review_branch)
             except abdte.InitialCommitMessageParseException as e:
-                abdt_workingbranch.pushBadPreReview(
-                    gitContext, review_branch)
+                abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
                 mailer.badBranchName(e.email, review_branch)
             except abdte.AbdUserException as e:
-                abdt_workingbranch.pushBadPreReview(
-                    gitContext, review_branch)
+                abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
                 mailer.userException(e.message, review_branch)
         else:
             print "update review for " + review_branch.branch
             try:
                 updateReview(
-                    conduit, gitContext,
-                    review_branch, working_branch)
+                    conduit,
+                    gitContext,
+                    review_branch,
+                    working_branch)
             except abdte.InitialCommitMessageParseException as e:
                 raise e
             except abdte.CommitMessageParseException as e:
