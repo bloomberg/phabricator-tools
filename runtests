@@ -9,7 +9,12 @@ done
 flake8 .
 
 # unittest
-python -m unittest discover -p "*.py"
+# sudo apt-get install python-nose or use the commented-out version
+nosetests *.py
+#python -m unittest discover -p "*.py"
+
+# N.B. can easily run individual tests with nose like so:
+# nosetests abdcmd_default:TestAbd.test_abandonedWorkflow
 
 # copyright
 git grep -L "Copyright (C) 2012 Bloomberg L.P." *.py
