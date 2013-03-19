@@ -414,6 +414,18 @@ class TestAbd(unittest.TestCase):
         if bad is not None:
             self.assertEqual(self._countPhabBadWorkingBranches(), bad)
 
+    def _devCheckoutPushNewBranch(self, branch):
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git checkout -b " + branch)
+            runCommands("git push -u origin " + branch)
+
+    def _devPushNewFile(self, filename, has_reviewer=True, has_plan=True):
+        with phlsys_fs.chDirContext("developer"):
+            reviewer = self.reviewer if has_reviewer else None
+            plan = "testplan" if has_plan else None
+            self._createCommitNewFileRaw(filename, plan, reviewer)
+            runCommands("git push")
+
     def _acceptTheOnlyReview(self):
         # accept the review
         with phlsys_fs.chDirContext("phab"):
@@ -436,26 +448,12 @@ class TestAbd(unittest.TestCase):
             # nothing to process
             processUpdatedRepo(self.conduit, "phab", "origin")
 
-            with phlsys_fs.chDirContext("developer"):
-                runCommands("git checkout -b ph-review/change/master")
-                self._createCommitNewFile("NEWFILE", self.reviewer)
-
-                runCommands("git push -u origin ph-review/change/master")
-
-            # create the review
+            self._devCheckoutPushNewBranch("ph-review/change/master")
+            self._devPushNewFile("NEWFILE")
             self._phabUpdateWithExpectations(total=1, bad=0)
-
-            # update the review with a new revision
-            with phlsys_fs.chDirContext("developer"):
-                self._createCommitNewFileRaw("NEWFILE2")
-                runCommands("git push -u origin ph-review/change/master")
-
-            # update the review
+            self._devPushNewFile("NEWFILE2")
             self._phabUpdateWithExpectations(total=1, bad=0)
-
-            # accept the review
             self._acceptTheOnlyReview()
-
             self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badMsgWorkflow(self):
@@ -463,64 +461,31 @@ class TestAbd(unittest.TestCase):
             # nothing to process
             processUpdatedRepo(self.conduit, "phab", "origin")
 
-            with phlsys_fs.chDirContext("developer"):
-                runCommands("git checkout -b ph-review/change/master")
-                self._createCommitNewFileRaw(
-                    "NEWFILE", reviewer=self.reviewer)
-                runCommands("git push -u origin ph-review/change/master")
-
-            # fail to create the review
+            self._devCheckoutPushNewBranch("ph-review/change/master")
+            self._devPushNewFile("NEWFILE", has_plan=False)
             self._phabUpdateWithExpectations(total=1, bad=1)
-
-            # make a new commit with another bad message
-            with phlsys_fs.chDirContext("developer"):
-                self._createCommitNewFileRaw("NEWFILE2")
-                runCommands("git push -u origin ph-review/change/master")
-
-            # fail to create the review again
+            self._devPushNewFile("NEWFILE2", has_plan=False)
             self._phabUpdateWithExpectations(total=1, bad=1)
-
-            # make a new commit with good message
-            with phlsys_fs.chDirContext("developer"):
-                self._createCommitNewFileRaw(
-                    "NEWFILE3", testPlan="test plan")
-                runCommands("git push -u origin ph-review/change/master")
-
-            # create the review ok
+            self._devPushNewFile("NEWFILE3")
             self._phabUpdateWithExpectations(total=1, bad=0)
 
-            # rewrite history with a bad message
+            # reset the history
             with phlsys_fs.chDirContext("developer"):
                 runCommands("git reset origin/master --hard")
-                self._createCommitNewFileRaw(
-                    "NEWFILE", reviewer=self.reviewer)
                 runCommands(
                     "git push -u origin ph-review/change/master --force")
 
-            # fail to update the review
+            self._devPushNewFile("NEWFILE", has_plan=False)
             self._phabUpdateWithExpectations(total=1, bad=1)
-
-            # make a new commit with good message
-            with phlsys_fs.chDirContext("developer"):
-                self._createCommitNewFileRaw(
-                    "NEWFILE2", testPlan="test plan")
-                runCommands("git push -u origin ph-review/change/master")
-
-            # update the review ok
+            self._devPushNewFile("NEWFILE2")
             self._phabUpdateWithExpectations(total=1, bad=0)
-
-            # accept the review
             self._acceptTheOnlyReview()
-
-            # land the revision
             self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badBaseWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
-            with phlsys_fs.chDirContext("developer"):
-                runCommands("git checkout -b ph-review/change/blaster")
-                self._createCommitNewFile("NEWFILE", self.reviewer)
-                runCommands("git push -u origin ph-review/change/blaster")
+            self._devCheckoutPushNewBranch("ph-review/change/blaster")
+            self._devPushNewFile("NEWFILE", has_plan=False)
 
             with phlsys_fs.chDirContext("phab"):
                 runCommands("git fetch origin -p")
