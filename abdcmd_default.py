@@ -278,6 +278,12 @@ def processUpdatedRepo(conduit, path, remote):
     wbList = abdt_naming.getWorkingBranches(remote_branches)
     makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
     rbDict = dict((makeRb(wb), wb) for wb in wbList)
+    for wb in wbList:
+        rb = makeRb(wb)
+        if rb not in remote_branches:
+            print "delete orphaned branch: " + wb.full_name
+            phlgit_push.delete(clone, wb.full_name, remote)
+            # TODO: update the associated revision if there is one
     for b in remote_branches:
         if abdt_naming.isReviewBranchName(b):
             review_branch = abdt_naming.makeReviewBranchFromName(b)
@@ -441,7 +447,12 @@ class TestAbd(unittest.TestCase):
         self._devCheckoutPushNewBranch("ph-review/change/blaster")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
-        # TODO: add recovery test
+
+        # delete the bad branch
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git push origin :ph-review/change/blaster")
+
+        self._phabUpdateWithExpectations(total=0, bad=0)
 
     def tearDown(self):
         os.chdir(self._saved_path)
