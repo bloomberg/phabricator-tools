@@ -281,8 +281,8 @@ def processUpdatedRepo(conduit, path, remote):
     for wb in wbList:
         rb = makeRb(wb)
         if rb not in remote_branches:
-            print "delete orphaned branch: " + wb.full_name
-            phlgit_push.delete(clone, wb.full_name, remote)
+            print "delete orphaned branch: " + wb.branch
+            phlgit_push.delete(clone, wb.branch, remote)
             # TODO: update the associated revision if there is one
     for b in remote_branches:
         if abdt_naming.isReviewBranchName(b):

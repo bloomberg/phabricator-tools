@@ -80,7 +80,7 @@ def getWithoutPrefix(string, prefix):
 
 WorkingBranch = collections.namedtuple(
     "abdt_naming__WorkingBranch", [
-        "full_name",
+        "branch",
         "status",
         "description",
         "base",
@@ -88,7 +88,7 @@ WorkingBranch = collections.namedtuple(
 
 ReviewBranch = collections.namedtuple(
     "abdt_naming__ReviewBranch", [
-        "full_name",
+        "branch",
         "description",
         "base"])
 
@@ -158,7 +158,7 @@ def makeReviewBranchFromName(branch_name):
     Usage example:
         >>> makeReviewBranchFromName('ph-review/mywork/master')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__ReviewBranch(full_name='ph-review/mywork/master',
+        abdt_naming__ReviewBranch(branch='ph-review/mywork/master',
                                   description='mywork',
                                   base='master')
 
@@ -177,7 +177,7 @@ def makeReviewBranchFromName(branch_name):
         return None  # suffix should be description/base(/...)
 
     return ReviewBranch(
-        full_name=branch_name,
+        branch=branch_name,
         description=parts[0],
         base='/'.join(parts[1:]))
 
@@ -188,7 +188,7 @@ def makeWorkingBranchFromName(branch_name):
     Usage example:
         >>> makeWorkingBranchFromName('dev/phab/ok/mywork/master/99')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__WorkingBranch(full_name='dev/phab/ok/mywork/master/99',
+        abdt_naming__WorkingBranch(branch='dev/phab/ok/mywork/master/99',
                                    status='ok',
                                    description='mywork',
                                    base='master',
@@ -209,7 +209,7 @@ def makeWorkingBranchFromName(branch_name):
         return None  # suffix should be status/description/base(/...)/id
 
     return WorkingBranch(
-        full_name=branch_name,
+        branch=branch_name,
         status=parts[0],
         description=parts[1],
         base='/'.join(parts[2:-1]),
@@ -224,7 +224,7 @@ def getWorkingBranches(branch_list):
     Usage example:
         >>> getWorkingBranches(['dev/phab/ok/mywork/master/99'])
         ... # doctest: +NORMALIZE_WHITESPACE
-        [abdt_naming__WorkingBranch(full_name='dev/phab/ok/mywork/master/99',
+        [abdt_naming__WorkingBranch(branch='dev/phab/ok/mywork/master/99',
                                    status='ok',
                                    description='mywork',
                                    base='master',
@@ -266,7 +266,7 @@ class TestNaming(unittest.TestCase):
         self.assertTrue(isReviewBranchName(b))
         r = makeReviewBranchFromName(b)
         self.assertTrue(r)
-        self.assertEqual(r.full_name, b)
+        self.assertEqual(r.branch, b)
         self.assertEqual(r.description, "mywork")
         self.assertEqual(r.base, "master")
         self.assertFalse(makeWorkingBranchFromName(b))
@@ -276,7 +276,7 @@ class TestNaming(unittest.TestCase):
         self.assertFalse(makeReviewBranchFromName(b))
         w = makeWorkingBranchFromName(b)
         self.assertTrue(w)
-        self.assertEqual(w.full_name, b)
+        self.assertEqual(w.branch, b)
         self.assertEqual(w.status, "ok")
         self.assertEqual(w.description, "mywork")
         self.assertEqual(w.base, "master")

@@ -63,14 +63,14 @@ def makeGitWorkingBranch(working_branch, remote):
     """
     makeRemote = phlgitu_ref.makeRemote
     return GitWorkingBranch(
-        branch=working_branch.full_name,
+        branch=working_branch.branch,
         status=working_branch.status,
         description=working_branch.description,
         base=working_branch.base,
         id=working_branch.id,
         remote=remote,
         remote_base=makeRemote(working_branch.base, remote),
-        remote_branch=makeRemote(working_branch.full_name, remote))
+        remote_branch=makeRemote(working_branch.branch, remote))
 
 
 def makeGitReviewBranch(review_branch, remote):
@@ -83,12 +83,12 @@ def makeGitReviewBranch(review_branch, remote):
     """
     makeRemote = phlgitu_ref.makeRemote
     return GitReviewBranch(
-        branch=review_branch.full_name,
+        branch=review_branch.branch,
         description=review_branch.description,
         base=review_branch.base,
         remote=remote,
         remote_base=makeRemote(review_branch.base, remote),
-        remote_branch=makeRemote(review_branch.full_name, remote))
+        remote_branch=makeRemote(review_branch.branch, remote))
 
 
 #------------------------------------------------------------------------------
