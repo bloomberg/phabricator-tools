@@ -228,14 +228,14 @@ def processUpdatedBranch(
         try:
             createReview(
                 conduit, gitContext, review_branch)
-        except abdte.AbdUserException as e:
-            abdt_workingbranch.pushBadPreReview(
-                gitContext, review_branch)
-            mailer.userException(e.message, review_branch)
         except abdte.InitialCommitMessageParseException as e:
             abdt_workingbranch.pushBadPreReview(
                 gitContext, review_branch)
             mailer.badBranchName(e.email, review_branch)
+        except abdte.AbdUserException as e:
+            abdt_workingbranch.pushBadPreReview(
+                gitContext, review_branch)
+            mailer.userException(e.message, review_branch)
     else:
         if abdt_naming.isStatusBadPreReview(working_branch):
             print "try again to create review for " + review_branch.branch
