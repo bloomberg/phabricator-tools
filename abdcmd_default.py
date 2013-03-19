@@ -18,7 +18,6 @@ import phlgit_diff
 import phlgit_log
 import phlgit_merge
 import phlgit_push
-import phlgitu_ref
 import phlsys_conduit
 import phlsys_fs
 import phlsys_git
@@ -26,6 +25,7 @@ import phlsys_subprocess
 import abdt_gittypes
 import abdt_commitmessage
 import abdt_conduitgit
+import abdt_workingbranch
 
 
 #TODO: split into appropriate modules
@@ -182,7 +182,7 @@ def updateInReview(conduit, wb, gitContext, review_branch):
         d.updateRevision(
             conduit, wb.id, diffid, parsed.fields, "update")
 
-    pushWorkingBranchStatus(
+    abdt_workingbranch.pushStatus(
         gitContext,
         review_branch,
         wb,
@@ -237,51 +237,6 @@ def land(conduit, wb, gitContext, branch):
     # TODO: we probably want to do a better job of cleaning up locally
 
 
-def pushBadPreReviewWorkingBranch(gitContext, review_branch):
-    working_branch_name = abdt_naming.makeWorkingBranchName(
-        abdt_naming.WB_STATUS_BAD_PREREVIEW,
-        review_branch.description, review_branch.base, "none")
-    phlgit_push.pushAsymmetrical(
-        gitContext.clone,
-        phlgitu_ref.makeRemote(
-            review_branch.branch, gitContext.remote),
-        phlgitu_ref.makeLocal(working_branch_name),
-        gitContext.remote)
-
-
-def pushWorkingBranchStatus(
-        gitContext, review_branch, working_branch, status):
-    clone = gitContext.clone
-    remote = gitContext.remote
-    old_branch = working_branch.branch
-
-    working_branch = abdt_gittypes.makeWorkingBranchWithStatus(
-        working_branch, status)
-
-    new_branch = working_branch.branch
-    if old_branch == new_branch:
-        phlgit_push.pushAsymmetricalForce(
-            clone,
-            review_branch.remote_branch,
-            phlgitu_ref.makeLocal(new_branch),
-            remote)
-    else:
-        phlgit_push.moveAsymmetrical(
-            clone,
-            review_branch.remote_branch,
-            phlgitu_ref.makeLocal(old_branch),
-            phlgitu_ref.makeLocal(new_branch),
-            remote)
-
-
-def pushBadInReviewWorkingBranch(gitContext, review_branch, working_branch):
-    pushWorkingBranchStatus(
-        gitContext,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_BAD_INREVIEW)
-
-
 def processUpdatedRepo(conduit, path, remote):
     print_sender = abdmail_printsender.MailSender("phab@server.test")
     mailer = abdmail_mailer.Mailer(
@@ -307,7 +262,7 @@ def processUpdatedRepo(conduit, path, remote):
                         createReview(
                             conduit, gitContext, review_branch)
                     except abdte.InitialCommitMessageParseException as e:
-                        pushBadPreReviewWorkingBranch(
+                        abdt_workingbranch.pushBadPreReview(
                             gitContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
                 else:
@@ -320,11 +275,11 @@ def processUpdatedRepo(conduit, path, remote):
                             conduit, gitContext,
                             review_branch, working_branch)
                     except abdte.InitialCommitMessageParseException as e:
-                        pushBadPreReviewWorkingBranch(
+                        abdt_workingbranch.pushBadPreReview(
                             gitContext, review_branch)
                         mailer.badBranchName(e.email, review_branch)
                     except abdte.CommitMessageParseException as e:
-                        pushBadInReviewWorkingBranch(
+                        abdt_workingbranch.pushBadInReview(
                             gitContext, review_branch, working_branch)
                         # TODO: update the review with a message
 
