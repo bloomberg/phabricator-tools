@@ -405,6 +405,15 @@ class TestAbd(unittest.TestCase):
             runCommands("git fetch origin -p")
         processUpdatedRepo(self.conduit, "phab", "origin")
 
+    def _phabUpdateWithExpectations(self, total=None, bad=None):
+        with phlsys_fs.chDirContext("phab"):
+            runCommands("git fetch origin -p")
+        processUpdatedRepo(self.conduit, "phab", "origin")
+        if total is not None:
+            self.assertEqual(self._countPhabWorkingBranches(), total)
+        if bad is not None:
+            self.assertEqual(self._countPhabBadWorkingBranches(), bad)
+
     def _acceptTheOnlyReview(self):
         # accept the review
         with phlsys_fs.chDirContext("phab"):
@@ -434,7 +443,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # create the review
-            self._phabUpdate()
+            self._phabUpdateWithExpectations(total=1, bad=0)
 
             # update the review with a new revision
             with phlsys_fs.chDirContext("developer"):
@@ -442,13 +451,12 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # update the review
-            self._phabUpdate()
+            self._phabUpdateWithExpectations(total=1, bad=0)
 
             # accept the review
             self._acceptTheOnlyReview()
 
-            processUpdatedRepo(self.conduit, "phab", "origin")
-            self.assertEqual(self._countPhabWorkingBranches(), 0)
+            self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badMsgWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
@@ -462,9 +470,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # fail to create the review
-            self._phabUpdate()
-            self.assertEqual(self._countPhabWorkingBranches(), 1)
-            self.assertEqual(self._countPhabBadWorkingBranches(), 1)
+            self._phabUpdateWithExpectations(total=1, bad=1)
 
             # make a new commit with another bad message
             with phlsys_fs.chDirContext("developer"):
@@ -472,9 +478,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # fail to create the review again
-            self._phabUpdate()
-            self.assertEqual(self._countPhabWorkingBranches(), 1)
-            self.assertEqual(self._countPhabBadWorkingBranches(), 1)
+            self._phabUpdateWithExpectations(total=1, bad=1)
 
             # make a new commit with good message
             with phlsys_fs.chDirContext("developer"):
@@ -483,9 +487,7 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # create the review ok
-            self._phabUpdate()
-            self.assertEqual(self._countPhabWorkingBranches(), 1)
-            self.assertEqual(self._countPhabBadWorkingBranches(), 0)
+            self._phabUpdateWithExpectations(total=1, bad=0)
 
             # rewrite history with a bad message
             with phlsys_fs.chDirContext("developer"):
@@ -496,9 +498,7 @@ class TestAbd(unittest.TestCase):
                     "git push -u origin ph-review/change/master --force")
 
             # fail to update the review
-            self._phabUpdate()
-            self.assertEqual(self._countPhabWorkingBranches(), 1)
-            self.assertEqual(self._countPhabBadWorkingBranches(), 1)
+            self._phabUpdateWithExpectations(total=1, bad=1)
 
             # make a new commit with good message
             with phlsys_fs.chDirContext("developer"):
@@ -507,16 +507,13 @@ class TestAbd(unittest.TestCase):
                 runCommands("git push -u origin ph-review/change/master")
 
             # update the review ok
-            self._phabUpdate()
-            self.assertEqual(self._countPhabWorkingBranches(), 1)
-            self.assertEqual(self._countPhabBadWorkingBranches(), 0)
+            self._phabUpdateWithExpectations(total=1, bad=0)
 
             # accept the review
             self._acceptTheOnlyReview()
 
             # land the revision
-            self._phabUpdate()
-            self.assertEqual(self._countPhabWorkingBranches(), 0)
+            self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badBaseWorkflow(self):
         with phlsys_fs.chDirContext("abd-test"):
