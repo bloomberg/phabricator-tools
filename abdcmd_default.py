@@ -7,6 +7,7 @@ import unittest
 
 import abdmail_mailer
 import abdmail_printsender
+import abdcmnt_commenter
 import abdt_exception
 import abdt_naming
 import phlcon_differential
@@ -234,6 +235,7 @@ def processUpdatedBranch(
             abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
             mailer.userException(e.message, review_branch)
     else:
+        commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
             print "try again to create review for " + review_branch.branch
             try:
@@ -261,7 +263,7 @@ def processUpdatedBranch(
             except abdte.CommitMessageParseException as e:
                 abdt_workingbranch.pushBadInReview(
                     gitContext, review_branch, working_branch)
-                # TODO: update the review with a message
+                commenter.commitMessageParseException(e)
 
 
 def processUpdatedRepo(conduit, path, remote):

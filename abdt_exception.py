@@ -60,14 +60,10 @@ class InitialCommitMessageParseException(AbdUserException):
             "fields: '" + str(fields) + "'\n" +
             "digest: '" + str(digest) + "'\n")
         super(InitialCommitMessageParseException, self).__init__(message)
-        self._email = email
-        self._errors = errors
-        self._fields = fields
-        self._digest = digest
-
-    @property
-    def email(self):
-        return self._email
+        self.email = email
+        self.errors = errors
+        self.fields = fields
+        self.digest = digest
 
 
 class CommitMessageParseException(AbdUserException):
@@ -86,9 +82,9 @@ class CommitMessageParseException(AbdUserException):
             "fields: '" + str(fields) + "'\n" +
             "digest: '" + str(digest) + "'\n")
         super(CommitMessageParseException, self).__init__(message)
-        self._errors = errors
-        self._fields = fields
-        self._digest = digest
+        self.errors = errors
+        self.fields = fields
+        self.digest = digest
 
 
 #------------------------------------------------------------------------------
