@@ -31,18 +31,6 @@ import abdt_workingbranch
 #TODO: split into appropriate modules
 
 
-def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
-    hashes = phlgit_log.getRangeHashes(clone, base, branch)
-    committers = phlgit_log.getCommittersFromHashes(clone, hashes)
-    print "- committers: " + str(committers)
-    users = phlcon_user.queryUsersFromEmails(conduit, committers)
-    print "- users: " + str(users)
-    primary_user = users[0]
-    if not primary_user:
-        raise Exception("first committer is not a Phabricator user")
-    return primary_user, committers[0]
-
-
 def isBasedOn(name, base):
     #TODO: actually do this
     return True
@@ -52,7 +40,7 @@ def createReview(conduit, gitContext, review_branch):
     clone = gitContext.clone
     verifyReviewBranchBase(gitContext, review_branch)
 
-    user, email = getPrimaryUserAndEmailFromBranch(
+    user, email = abdt_conduitgit.getPrimaryUserAndEmailFromBranch(
         clone, conduit, review_branch.remote_base,
         review_branch.remote_branch)
 
@@ -157,7 +145,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
 def updateInReview(conduit, wb, gitContext, review_branch):
     remoteBranch = review_branch.remote_branch
     clone = gitContext.clone
-    user, email = getPrimaryUserAndEmailFromBranch(
+    user, email = abdt_conduitgit.getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, remoteBranch)
 
     print "updateInReview"
@@ -199,7 +187,7 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 def land(conduit, wb, gitContext, branch):
     clone = gitContext.clone
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
-    user, email = getPrimaryUserAndEmailFromBranch(
+    user, email = abdt_conduitgit.getPrimaryUserAndEmailFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):
