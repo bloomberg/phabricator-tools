@@ -334,15 +334,10 @@ class TestAbd(unittest.TestCase):
             "git clone devgit phab",
         )
 
-        devClone = phlsys_git.GitClone("developer")
-        phlgit_config.setUsernameEmail(
-            devClone,
-            phldef_conduit.bob.user,
-            phldef_conduit.bob.email)
+        self._devSetAuthorAccount(phldef_conduit.bob)
 
         with phlsys_fs.chDirContext("developer"):
             self._createCommitNewFile("README", self.reviewer)
-
             runCommands("git push origin master")
 
         with phlsys_fs.chDirContext("phab"):
@@ -384,6 +379,15 @@ class TestAbd(unittest.TestCase):
             self.assertEqual(self._countPhabWorkingBranches(), total)
         if bad is not None:
             self.assertEqual(self._countPhabBadWorkingBranches(), bad)
+
+    def _devSetAuthorAccount(self, account):
+        devClone = phlsys_git.GitClone("developer")
+        phlgit_config.setUsernameEmail(devClone, account.user, account.email)
+
+    def _devResetBranchToMaster(self, branch):
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git reset origin/master --hard")
+            runCommands("git push -u origin " + branch + " --force")
 
     def _devCheckoutPushNewBranch(self, branch):
         with phlsys_fs.chDirContext("developer"):
@@ -430,13 +434,7 @@ class TestAbd(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devPushNewFile("NEWFILE3")
         self._phabUpdateWithExpectations(total=1, bad=0)
-
-        # reset the history
-        with phlsys_fs.chDirContext("developer"):
-            runCommands("git reset origin/master --hard")
-            runCommands(
-                "git push -u origin ph-review/change/master --force")
-
+        self._devResetBranchToMaster("ph-review/change/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devPushNewFile("NEWFILE2")
@@ -456,30 +454,12 @@ class TestAbd(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badAuthorWorkflow(self):
-        devClone = phlsys_git.GitClone("developer")
-
-        # set an invalid author
-        phlgit_config.setUsernameEmail(
-            devClone,
-            phldef_conduit.notauser.user,
-            phldef_conduit.notauser.email)
-
+        self._devSetAuthorAccount(phldef_conduit.notauser)
         self._devCheckoutPushNewBranch("ph-review/change/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=1)
-
-        # reset the history
-        with phlsys_fs.chDirContext("developer"):
-            runCommands("git reset origin/master --hard")
-            runCommands(
-                "git push -u origin ph-review/change/master --force")
-
-        # set a valid author
-        phlgit_config.setUsernameEmail(
-            devClone,
-            phldef_conduit.bob.user,
-            phldef_conduit.bob.email)
-
+        self._devResetBranchToMaster("ph-review/change/master")
+        self._devSetAuthorAccount(phldef_conduit.bob)
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
