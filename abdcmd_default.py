@@ -471,6 +471,13 @@ class TestAbd(unittest.TestCase):
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
 
+    def test_noReviewerWorkflow(self):
+        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devPushNewFile("NEWFILE", has_reviewer=False)
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
     def test_badBaseWorkflow(self):
         self._devCheckoutPushNewBranch("ph-review/change/blaster")
         self._devPushNewFile("NEWFILE", has_plan=False)
@@ -483,7 +490,6 @@ class TestAbd(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     # TODO: test_notBasedWorkflow
-    # TODO: test_noReviewerWorkflow
 
     def test_badAuthorWorkflow(self):
         self._devSetAuthorAccount(phldef_conduit.notauser)
