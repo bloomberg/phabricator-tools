@@ -87,6 +87,20 @@ class CommitMessageParseException(AbdUserException):
         self.digest = digest
 
 
+class LandingException(AbdUserException):
+
+    def __init__(self, message):
+        """Describe failure to land a review.
+
+        :message: any available error message
+
+        """
+        new_message = (
+            "abdcmd_default__CommitMessageParseException:\n" +
+            "message: '" + str(message) + "'")
+        super(LandingException, self).__init__(new_message)
+
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

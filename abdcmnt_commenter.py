@@ -41,6 +41,34 @@ class Commenter(object):
         phlcon_differential.createComment(
             self._conduit, self._revision_id, message)
 
+    def landingException(self, e):
+        message = "failed to land revision, see below."
+        message += "\n"
+
+        message += "\nerrors:"
+        message += "\n"
+        message += "\n  lang=text"
+        for line in str(e).splitlines():
+            message += "\n  " + line
+        message += "\n"
+
+        phlcon_differential.createComment(
+            self._conduit, self._revision_id, message)
+
+    def userException(self, e):
+        message = "failed to update revision, see below."
+        message += "\n"
+
+        message += "\nerrors:"
+        message += "\n"
+        message += "\n  lang=text"
+        for line in str(e).splitlines():
+            message += "\n  " + line
+        message += "\n"
+
+        phlcon_differential.createComment(
+            self._conduit, self._revision_id, message)
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

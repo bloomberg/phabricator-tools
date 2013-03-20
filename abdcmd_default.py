@@ -3,6 +3,7 @@
 
 """abd automates the creation and landing of reviews from branches"""
 import os
+import subprocess
 import unittest
 
 import abdmail_mailer
@@ -125,6 +126,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     clone = gitContext.clone
     isBranchIdentical = phlgit_branch.isIdentical
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
+        print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
         updateInReview(conduit, wb, gitContext, rb)
     elif not abdt_naming.isStatusBad(workingBranch):
@@ -136,6 +138,8 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
             # TODO: we probably want to do a better job of cleaning up locally
         else:
             print "do nothing"
+    else:
+        print "do nothing - no changes and branch is bad"
 
 
 def updateInReview(conduit, wb, gitContext, review_branch):
@@ -197,8 +201,13 @@ def land(conduit, wb, gitContext, branch):
             info.title, info.summary, info.testPlan, userNames)
         message += "\nDifferential Revision: " + info.uri
 
-        squashMessage = phlgit_merge.squash(
-            clone, wb.remote_branch, message)
+        try:
+            squashMessage = phlgit_merge.squash(
+                clone, wb.remote_branch, message)
+        except subprocess.CalledProcessError as e:
+            clone.call("reset", "--hard")  # fix the working copy
+            raise abdt_exception.LandingException(str(e) + "\n" + e.output)
+
         print "- pushing " + wb.remote_base
         phlgit_push.push(clone, wb.base, gitContext.remote)
         print "- deleting " + wb.branch
@@ -260,11 +269,23 @@ def processUpdatedBranch(
                     review_branch,
                     working_branch)
             except abdte.InitialCommitMessageParseException as e:
+                print "initial commit message parse exception"
                 raise e
             except abdte.CommitMessageParseException as e:
+                print "commit message parse exception"
                 abdt_workingbranch.pushBadInReview(
                     gitContext, review_branch, working_branch)
                 commenter.commitMessageParseException(e)
+            except abdte.LandingException as e:
+                print "landing exception"
+                abdt_workingbranch.pushBadInReview(
+                    gitContext, review_branch, working_branch)
+                commenter.landingException(e)
+            except abdte.AbdUserException as e:
+                print "user exception"
+                abdt_workingbranch.pushBadInReview(
+                    gitContext, review_branch, working_branch)
+                commenter.userException(e)
 
 
 def processUpdatedRepo(conduit, path, remote):
@@ -311,8 +332,10 @@ class TestAbd(unittest.TestCase):
         message = abdt_commitmessage.make(subject, None, testPlan, reviewers)
         phlsys_subprocess.run("git", "commit", "-a", "-F", "-", stdin=message)
 
-    def _createCommitNewFileRaw(self, filename, testPlan=None, reviewer=None):
-        runCommands("touch " + filename)
+    def _createCommitNewFileRaw(
+            self, filename, testPlan=None, reviewer=None, contents=""):
+        with open(filename, "w") as f:
+            f.write(contents)
         runCommands("git add " + filename)
         self._gitCommitAll("add " + filename, testPlan, reviewer)
 
@@ -395,11 +418,12 @@ class TestAbd(unittest.TestCase):
             runCommands("git checkout -b " + branch)
             runCommands("git push -u origin " + branch)
 
-    def _devPushNewFile(self, filename, has_reviewer=True, has_plan=True):
+    def _devPushNewFile(
+            self, filename, has_reviewer=True, has_plan=True, contents=""):
         with phlsys_fs.chDirContext("developer"):
             reviewer = self.reviewer if has_reviewer else None
             plan = "testplan" if has_plan else None
-            self._createCommitNewFileRaw(filename, plan, reviewer)
+            self._createCommitNewFileRaw(filename, plan, reviewer, contents)
             runCommands("git push")
 
     def _actOnTheOnlyReview(self, user, action):
@@ -482,9 +506,68 @@ class TestAbd(unittest.TestCase):
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
 
+    def test_emptyMergeWorkflow(self):
+        self._devCheckoutPushNewBranch("temp/change/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
+        # move back to master and land a conflicting change
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git checkout master")
+        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
+        # move back to original and try to push and land
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git checkout temp/change/master")
+        self._devCheckoutPushNewBranch("ph-review/change2/master")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=1, bad=1)
+
+        # 'resolve' by abandoning our change
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git push origin :ph-review/change2/master")
+
+    def test_mergeConflictWorkflow(self):
+        self._devCheckoutPushNewBranch("temp/change/master")
+        self._devPushNewFile("NEWFILE", contents="hello")
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
+        # move back to master and land a conflicting change
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git checkout master")
+        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devPushNewFile("NEWFILE", contents="goodbye")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
+        # move back to original and try to push and land
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git checkout temp/change/master")
+        self._devCheckoutPushNewBranch("ph-review/change2/master")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=1, bad=1)
+
+        # 'resolve' by forcing our change through
+        print "force our change"
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git fetch -p")
+            runCommands("git merge origin/master -s ours")
+            runCommands("git push origin ph-review/change2/master")
+        print "update again"
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        print "update last time"
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
     def tearDown(self):
         os.chdir(self._saved_path)
-        runCommands("rm -rf abd-test")
+        #runCommands("rm -rf abd-test")
         pass
 
 
