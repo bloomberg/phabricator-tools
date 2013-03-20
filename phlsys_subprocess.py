@@ -45,21 +45,25 @@ def run(*args, **kwargs):
     stdin = kwargs.pop("stdin", None)
     assert not kwargs
     cmd = args
-    p = subprocess.Popen(
-        cmd,
-        cwd=workingDir,
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    out, err = p.communicate(input=stdin)
+    try:
+        p = subprocess.Popen(
+            cmd,
+            cwd=workingDir,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        out, err = p.communicate(input=stdin)
+    except OSError as e:
+        sys.stderr.write("OSError: unable to locate command: {0}\n".format(" ".join(cmd)))
+        raise
     if (p.returncode != 0):
-        sys.stderr.write("cmd: " + str(cmd))
+        error_msg = "cmd: {0}\n".format(" ".join(cmd))
         if workingDir:
-            sys.stderr.write("workingDir: " + workingDir)
+            error_msg += "workingDir: {0}\n".format(workingDir)
         if stdin:
-            sys.stderr.write("stdin: " + stdin)
-        sys.stderr.write("out:" + out)
-        sys.stderr.write("err:" + err)
+            error_msg += "stdin: {0}\n".format(stdin)
+        error_msg += "out: {0}\nerr: {1}\n".format(out, err)
+        sys.stderr.write(error_msg)
         raise subprocess.CalledProcessError(p.returncode, cmd, out)
     return RunResult(stdout=out, stderr=err)
 
