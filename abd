@@ -7,20 +7,40 @@ import argparse
 import sys
 
 import abdcmd_default
+import abdmail_printsender
+import abdmail_mailer
+import phlsys_conduit
 import phlsys_subprocess
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Phabricator Instance tool")
+        description="Arcanist Branch Daemon")
 
-    parser.add_argument('instance', type=str)
+    parser.add_argument('--instance-uri', type=str)
+    parser.add_argument('--abd-user', type=str)
+    parser.add_argument('--abd-certificate', type=str)
+    parser.add_argument('--abd-email', type=str)
+    parser.add_argument('--admin-email', type=str)
+    parser.add_argument('--repo-description', type=str)
     args = parser.parse_args()
+
+    print args
+    print_sender = abdmail_printsender.MailSender(args.abd_email)
+    mailer = abdmail_mailer.Mailer(
+        print_sender,
+        [args.admin_email],
+        args.repo_description)
+
+    conduit = phlsys_conduit.Conduit(
+        args.instance_uri,
+        args.abd_user,
+        args.abd_certificate)
 
     print "fetch"
     phlsys_subprocess.runCommands("git fetch -p")
     print "process"
-    abdcmd_default.processUpdatedRepo(args.instance, ".", "origin")
+    abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
 
 if __name__ == "__main__":
     sys.exit(main())

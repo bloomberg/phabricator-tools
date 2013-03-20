@@ -288,12 +288,7 @@ def processUpdatedBranch(
                 commenter.userException(e)
 
 
-def processUpdatedRepo(conduit, path, remote):
-    print_sender = abdmail_printsender.MailSender("phab@server.test")
-    mailer = abdmail_mailer.Mailer(
-        print_sender,
-        ["admin@server.test"],
-        "http://server.fake/testrepo.git")
+def processUpdatedRepo(conduit, path, remote, mailer):
     clone = phlsys_git.GitClone(path)
     remote_branches = phlgit_branch.getRemote(clone, remote)
     gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
@@ -372,6 +367,12 @@ class TestAbd(unittest.TestCase):
             phldef_conduit.phab.user,
             phldef_conduit.phab.certificate)
 
+        print_sender = abdmail_printsender.MailSender("phab@server.test")
+        self.mailer = abdmail_mailer.Mailer(
+            print_sender,
+            ["admin@server.test"],
+            "http://server.fake/testrepo.git")
+
     def _countPhabWorkingBranches(self):
         with phlsys_fs.chDirContext("phab"):
             clone = phlsys_git.GitClone(".")
@@ -393,12 +394,12 @@ class TestAbd(unittest.TestCase):
     def _phabUpdate(self):
         with phlsys_fs.chDirContext("phab"):
             runCommands("git fetch origin -p")
-        processUpdatedRepo(self.conduit, "phab", "origin")
+        processUpdatedRepo(self.conduit, "phab", "origin", self.mailer)
 
     def _phabUpdateWithExpectations(self, total=None, bad=None):
         with phlsys_fs.chDirContext("phab"):
             runCommands("git fetch origin -p")
-        processUpdatedRepo(self.conduit, "phab", "origin")
+        processUpdatedRepo(self.conduit, "phab", "origin", self.mailer)
         if total is not None:
             self.assertEqual(self._countPhabWorkingBranches(), total)
         if bad is not None:
@@ -443,7 +444,7 @@ class TestAbd(unittest.TestCase):
 
     def test_nothingToDo(self):
         # nothing to process
-        processUpdatedRepo(self.conduit, "phab", "origin")
+        processUpdatedRepo(self.conduit, "phab", "origin", self.mailer)
 
     def test_simpleWorkflow(self):
         self._devCheckoutPushNewBranch("ph-review/change/master")
@@ -482,6 +483,7 @@ class TestAbd(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     # TODO: test_notBasedWorkflow
+    # TODO: test_noReviewerWorkflow
 
     def test_badAuthorWorkflow(self):
         self._devSetAuthorAccount(phldef_conduit.notauser)

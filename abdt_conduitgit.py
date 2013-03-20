@@ -49,8 +49,10 @@ def makeMessageFromFields(conduit, fields):
     :returns: a string message
 
     """
-    user_names = phlcon_user.queryUsernamesFromPhids(
-        conduit, fields.reviewerPHIDs)
+    user_names = None
+    if fields.reviewerPHIDs:
+        user_names = phlcon_user.queryUsernamesFromPhids(
+            conduit, fields.reviewerPHIDs)
     return abdt_commitmessage.make(
         fields.title, fields.summary, fields.testPlan, user_names)
 
