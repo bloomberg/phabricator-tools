@@ -17,15 +17,16 @@ def main():
     parser = argparse.ArgumentParser(
         description="Arcanist Branch Daemon")
 
-    parser.add_argument('--instance-uri', type=str)
-    parser.add_argument('--abd-user', type=str)
-    parser.add_argument('--abd-certificate', type=str)
-    parser.add_argument('--abd-email', type=str)
-    parser.add_argument('--admin-email', type=str)
-    parser.add_argument('--repo-description', type=str)
+    # TODO: add help messages
+    parser.add_argument('--instance-uri', type=str, required=True)
+    parser.add_argument('--abd-user', type=str, required=True)
+    parser.add_argument('--abd-certificate', type=str, required=True)
+    parser.add_argument('--abd-email', type=str, required=True)
+    parser.add_argument('--admin-email', type=str, required=True)
+    parser.add_argument('--repo-description', type=str, required=True)
+    parser.add_argument('--https-proxy', type=str)
     args = parser.parse_args()
 
-    print args
     print_sender = abdmail_printsender.MailSender(args.abd_email)
     mailer = abdmail_mailer.Mailer(
         print_sender,
@@ -35,7 +36,8 @@ def main():
     conduit = phlsys_conduit.Conduit(
         args.instance_uri,
         args.abd_user,
-        args.abd_certificate)
+        args.abd_certificate,
+        https_proxy=args.https_proxy)
 
     print "fetch"
     phlsys_subprocess.runCommands("git fetch -p")

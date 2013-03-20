@@ -3,13 +3,12 @@
 from contextlib import contextmanager
 import doctest
 import hashlib
-import httplib
 import json
 import os
 import time
 import unittest
 import urllib
-import urlparse
+import urllib2
 
 import phldef_conduit
 
@@ -105,7 +104,14 @@ class Conduit():
     # TODO: make this configurable
     testUri = phldef_conduit.test_uri
 
-    def __init__(self, conduitUri, user, certificate, actAsUser=None):
+    def __init__(
+            self,
+            conduitUri,
+            user,
+            certificate,
+            actAsUser=None,
+            http_proxy=None,
+            https_proxy=None):
         self._conduit_uri = conduitUri
         self._act_as_user = actAsUser
         self._timeout = 5
@@ -113,6 +119,8 @@ class Conduit():
         self._certificate = certificate
         self._client = "phlsys_conduit"
         self._client_version = 1
+        self._http_proxy = http_proxy
+        self._https_proxy = https_proxy
 
         self._authenticate()
 
@@ -174,19 +182,7 @@ class Conduit():
             self._conduit["actAsUser"] = self._act_as_user
 
     def _communicate(self, method, message_dict):
-        url = urlparse.urlparse(self._conduit_uri)
-
-        if url.scheme == 'https':
-            conn = httplib.HTTPSConnection(url.netloc, timeout=self._timeout)
-        else:
-            conn = httplib.HTTPConnection(url.netloc, timeout=self._timeout)
-
-        path = url.path + method
-
-        headers = {
-            'User-Agent': 'python-phabricator/%s' % str(self._client_version),
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
+        path = self._conduit_uri + method
 
         params = json.dumps(message_dict)
 
@@ -195,10 +191,18 @@ class Conduit():
             "output": "json",
         })
 
-        # TODO: Use HTTP "method" from interfaces.json
-        conn.request('POST', path, body, headers)
-        response = conn.getresponse()
-        data = response.read()
+        if self._https_proxy or self._http_proxy:
+            proxy = {}
+            if self._https_proxy:
+                proxy['https'] = self._https_proxy
+            if self._http_proxy:
+                proxy['http'] = self._http_proxy
+            proxy_handler = urllib2.ProxyHandler(proxy)
+            opener = urllib2.build_opener(proxy_handler)
+            data = opener.open(path, body).read()
+        else:
+            data = urllib2.urlopen(path, body).read()
+
         return json.loads(data)
 
     def call(self, method, param_dict_in=None):
@@ -256,6 +260,7 @@ class TestConduit(unittest.TestCase):
     # TODO: test re-authentication when the token expires
     # TODO: need to test something that requires authentication
     # TODO: test raises on bad instanceUri
+    # TODO: test instanceUri without trailing slash
 
 if __name__ == "__main__":
     doctest.testmod()
