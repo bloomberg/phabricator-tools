@@ -14,13 +14,14 @@ def _makeSection(section_name, content):
     return section
 
 
-def make(title, summary, test_plan, reviewers):
+def make(title, summary, test_plan, reviewers, differential_revision=None):
     """Return string commit message.
 
     :title: string title of the commit (single line)
     :summary: string summary of the commit
-    :reviewers: list of string reviewers
     :test_plan: string of the test plan
+    :reviewers: list of string reviewers
+    :differential_revision: URI to the associated revision
     :returns: string commit message
 
     """
@@ -28,18 +29,28 @@ def make(title, summary, test_plan, reviewers):
 
     if summary and summary.strip():
         message += "\n\n" + summary
+
+    compact = False
+
     if test_plan and test_plan.strip():
         test_section = _makeSection("Test Plan", test_plan)
+        compact = len(test_section.splitlines()) == 1
         message += "\n\n" + test_section
+
     if reviewers:
         reviewers_content = ' '.join(reviewers)
-        reviewers_section = _makeSection("Reviewers", reviewers_content)
-        if test_plan and len(test_section.splitlines()) == 1:
+        review_section = _makeSection("Reviewers", reviewers_content)
+        if compact:
             # we can keep the test plan and reviewers together if both
             # are only using a single line each
-            message += "\n" + reviewers_section
+            message += "\n" + review_section
         else:
-            message += "\n\n" + reviewers_section
+            message += "\n\n" + review_section
+        compact = len(review_section.splitlines()) == 1
+
+    if differential_revision:
+        message += "\n" if not compact else ""
+        message += "\nDifferential Revision: " + differential_revision
 
     return message
 
@@ -110,6 +121,49 @@ class TestCommitMessage(unittest.TestCase):
             """
         self.assertSequenceEqual(self._stripLines(emsg), msg)
 
+    def testMultilineTestPlanReviewersRevision(self):
+        multiline_plan = "my test plan\ngoes over\na few lines"
+        msg = make("title", None, multiline_plan, ["reviewer"], "uri")
+        emsg = """
+            title
+
+            Test Plan:
+            """ + multiline_plan + """
+
+            Reviewers: reviewer
+            Differential Revision: uri
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testMultilineTestPlanMultilineReviewersRevision(self):
+        multiline_plan = "my test plan\ngoes over\na few lines"
+        msg = make("title", None, multiline_plan, ["reviewer"] * 7, "uri")
+        emsg = """
+            title
+
+            Test Plan:
+            """ + multiline_plan + """
+
+            Reviewers:
+            reviewer reviewer reviewer reviewer reviewer reviewer reviewer
+
+            Differential Revision: uri
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testTestPlanMultilineReviewersRevision(self):
+        msg = make("title", None, "plan", ["reviewer"] * 7, "uri")
+        emsg = """
+            title
+
+            Test Plan: plan
+            Reviewers:
+            reviewer reviewer reviewer reviewer reviewer reviewer reviewer
+
+            Differential Revision: uri
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
     def testCompactReviewers(self):
         msg = make("title", None, "plan", ["reviewer"])
         emsg = """
@@ -121,7 +175,7 @@ class TestCommitMessage(unittest.TestCase):
         self.assertSequenceEqual(self._stripLines(emsg), msg)
 
     def testAllTogether(self):
-        msg = make("title", "summary", "plan", ["reviewer"])
+        msg = make("title", "summary", "plan", ["reviewer"], "url")
         emsg = """
             title
 
@@ -129,6 +183,7 @@ class TestCommitMessage(unittest.TestCase):
 
             Test Plan: plan
             Reviewers: reviewer
+            Differential Revision: url
             """
         self.assertSequenceEqual(self._stripLines(emsg), msg)
 

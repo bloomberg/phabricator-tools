@@ -198,8 +198,7 @@ def land(conduit, wb, gitContext, branch):
         userNames = phlcon_user.queryUsernamesFromPhids(
             conduit, info.reviewers)
         message = abdt_commitmessage.make(
-            info.title, info.summary, info.testPlan, userNames)
-        message += "\nDifferential Revision: " + info.uri
+            info.title, info.summary, info.testPlan, userNames, info.uri)
 
         try:
             with phlsys_fs.nostd():
