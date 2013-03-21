@@ -2,7 +2,7 @@
 import unittest
 import subprocess
 
-import utils
+import phlsys_fs
 from phlsys_subprocess import (run,
                                runCommands,
                                RunResult)
@@ -26,7 +26,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
 
     def test_invalid_cmd(self):
         "Passing invalid command - catch OSError"
-        with utils.nostd() as stderr:
+        with phlsys_fs.nostd() as stderr:
             self.assertRaises(OSError, run, "invalidcmd")
             self.assertTrue("OSError" in stderr.out)
 
@@ -38,7 +38,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
 
     def test_invalid_return_code(self):
         "Passing command returns non zero exit status"
-        with utils.nostd() as stderr:
+        with phlsys_fs.nostd() as stderr:
             cmd = "time"
             self.assertRaises(subprocess.CalledProcessError, run, cmd)
             self.assertTrue(cmd in stderr.out)
@@ -61,7 +61,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
 
     def test_invalid_return_code_run_commands(self):
         "Passing incorrect commands returns non zero exit status"
-        with utils.nostd() as stderr:
+        with phlsys_fs.nostd() as stderr:
             cmd = "time"
             self.assertRaises(subprocess.CalledProcessError, runCommands, cmd)
             self.assertTrue(cmd in stderr.out)
