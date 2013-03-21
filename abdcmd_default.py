@@ -203,8 +203,12 @@ def land(conduit, wb, gitContext, branch):
         message += "\nDifferential Revision: " + info.uri
 
         try:
-            squashMessage = phlgit_merge.squash(
-                clone, wb.remote_branch, message, name + " <" + email + ">")
+            with phlsys_fs.nostd():
+                squashMessage = phlgit_merge.squash(
+                    clone,
+                    wb.remote_branch,
+                    message,
+                    name + " <" + email + ">")
         except subprocess.CalledProcessError as e:
             clone.call("reset", "--hard")  # fix the working copy
             raise abdt_exception.LandingException(str(e) + "\n" + e.output)
