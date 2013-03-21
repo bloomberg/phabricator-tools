@@ -1,5 +1,18 @@
 """Operations on git commit message strings."""
 
+import unittest
+
+
+def _makeSection(section_name, content):
+    wrap_len = 72
+    line = section_name + ": " + content
+    if len(line.splitlines()) == 1 and len(line) < wrap_len:
+        section = line
+    else:
+        section = section_name + ":\n"
+        section += content
+    return section
+
 
 def make(title, summary, test_plan, reviewers):
     """Return string commit message.
@@ -11,28 +24,113 @@ def make(title, summary, test_plan, reviewers):
     :returns: string commit message
 
     """
-    message = ""
-
-    extra_fields = False  # the title will have a carriage return only if True
+    message = title
 
     if summary and summary.strip():
-        extra_fields = True
-        message += "\n" + summary
+        message += "\n\n" + summary
     if test_plan and test_plan.strip():
-        extra_fields = True
-        message += "\n" + "Test Plan:"
-        message += "\n" + test_plan
+        test_section = _makeSection("Test Plan", test_plan)
+        message += "\n\n" + test_section
     if reviewers:
-        extra_fields = True
-        message += "\n" + "Reviewers:"
-        message += "\n" + ' '.join(reviewers)
-
-    if extra_fields:
-        message = title + "\n" + message
-    else:
-        message = title
+        reviewers_content = ' '.join(reviewers)
+        reviewers_section = _makeSection("Reviewers", reviewers_content)
+        if test_plan and len(test_section.splitlines()) == 1:
+            # we can keep the test plan and reviewers together if both
+            # are only using a single line each
+            message += "\n" + reviewers_section
+        else:
+            message += "\n\n" + reviewers_section
 
     return message
+
+
+class TestCommitMessage(unittest.TestCase):
+
+    # TODO: this belongs in a string helper module
+    def _stripLines(self, s):
+        s = s.strip()
+        s = [l.strip() for l in s.splitlines()]
+        return '\n'.join(s)
+
+    def testJustTitle(self):
+        msg = make("title", None, None, None)
+        self.assertSequenceEqual("title", msg)
+
+    def testSummary(self):
+        msg = make("title", "summary", None, None)
+        self.assertSequenceEqual("title\n\nsummary", msg)
+
+    def testTitleMultilineSummary(self):
+        msg = make("title", "summary\nsummary2", None, None)
+        self.assertSequenceEqual("title\n\nsummary\nsummary2", msg)
+
+    def testTitleMultilineSummaryTestPlan(self):
+        msg = make("title", "summary\nsummary2", "plan", None)
+        emsg = """
+            title
+
+            summary
+            summary2
+
+            Test Plan: plan
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testLongTestPlanLine(self):
+        long_plan = "this is a long plan that is certainly too long to fit" * 2
+        long_plan = long_plan * 2
+        msg = make("title", None, long_plan, None)
+        emsg = """
+            title
+
+            Test Plan:
+            """ + long_plan
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testMultilineTestPlan(self):
+        multiline_plan = "my test plan\ngoes over\na few lines"
+        msg = make("title", None, multiline_plan, None)
+        emsg = """
+            title
+
+            Test Plan:
+            """ + multiline_plan
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testMultilineTestPlanReviewers(self):
+        multiline_plan = "my test plan\ngoes over\na few lines"
+        msg = make("title", None, multiline_plan, ["reviewer"])
+        emsg = """
+            title
+
+            Test Plan:
+            """ + multiline_plan + """
+
+            Reviewers: reviewer
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testCompactReviewers(self):
+        msg = make("title", None, "plan", ["reviewer"])
+        emsg = """
+            title
+
+            Test Plan: plan
+            Reviewers: reviewer
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
+
+    def testAllTogether(self):
+        msg = make("title", "summary", "plan", ["reviewer"])
+        emsg = """
+            title
+
+            summary
+
+            Test Plan: plan
+            Reviewers: reviewer
+            """
+        self.assertSequenceEqual(self._stripLines(emsg), msg)
 
 
 #------------------------------------------------------------------------------

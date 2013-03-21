@@ -194,7 +194,6 @@ def land(conduit, wb, gitContext, branch):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
 
         # compose the commit message
-        # TODO: format the message nicer
         info = d.query(conduit, [wb.id])[0]
         userNames = phlcon_user.queryUsernamesFromPhids(
             conduit, info.reviewers)
