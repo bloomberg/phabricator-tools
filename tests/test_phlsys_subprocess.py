@@ -2,7 +2,6 @@
 import unittest
 import subprocess
 
-import env
 import utils
 from phlsys_subprocess import (run,
                                runCommands,
