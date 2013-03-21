@@ -53,8 +53,9 @@ def run(*args, **kwargs):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
         out, err = p.communicate(input=stdin)
-    except OSError as e:
-        sys.stderr.write("OSError: unable to locate command: {0}\n".format(" ".join(cmd)))
+    except OSError:
+        sys.stderr.write(
+            "OSError: unable to locate command: {0}\n".format(" ".join(cmd)))
         raise
     if (p.returncode != 0):
         error_msg = "cmd: {0}\n".format(" ".join(cmd))

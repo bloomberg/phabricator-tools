@@ -21,6 +21,7 @@ def nostd(err=True):
         yield sys.stdout
         sys.stdout = savestd
 
+
 @contextlib.contextmanager
 def tmpfile(tmp_dir=None, suffix=''):
     "Create & remove tmp file"
@@ -28,4 +29,3 @@ def tmpfile(tmp_dir=None, suffix=''):
     tmp_file = tempfile.NamedTemporaryFile(dir=dir, suffix=suffix)
     yield tmp_file
     tmp_file.close()
-
