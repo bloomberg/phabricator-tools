@@ -42,9 +42,46 @@ def getRangeToHereHashes(clone, start):
     hashes = clone.call("log", start + "..", "--format=%H").split()
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
-            "phlgit_log__getRangeToHereHashes() invalid hashes\n" + hashes)
+            "phlgit_log__getRangeToHereHashes() invalid hashes\n"
+            + str(hashes))
     hashes.reverse()
     return hashes
+
+
+def getLastNCommitHashes(clone, n):
+    """Return a list of strings corresponding to the last commits.
+
+    The list begins with the oldest revision.
+    Raise a ValueError if any of the returned values are not valid hexadecimal.
+    Raise an Exception if less values than expected are returned.
+
+    :clone: supports 'call("log")' with git log parameters
+    :returns: a string corresponding to the last commit ('HEAD')
+
+    """
+    assert n >= 0
+    hashes = clone.call("log", "HEAD", "-n", str(n), "--format=%H").split()
+    if len(hashes) < n:
+        raise ValueError(
+            "less hashes than expected\n" + str(hashes))
+    if not all(c in string.hexdigits for s in hashes for c in s):
+        raise ValueError(
+            "phlgit_log__getLastNCommitHashes() invalid hashes\n"
+            + str(hashes))
+    hashes.reverse()
+    return hashes
+
+
+def getLastCommitHash(clone):
+    """Return a string corresponding to the last commit ('HEAD').
+
+    Raise a ValueError if the returned value is not valid hexadecimal.
+
+    :clone: supports 'call("log")' with git log parameters
+    :returns: a string corresponding to the last commit ('HEAD')
+
+    """
+    return getLastNCommitHashes(clone, 1)[0]
 
 
 def getRangeHashes(clone, start, end):
@@ -62,7 +99,7 @@ def getRangeHashes(clone, start, end):
     hashes = clone.call("log", start + ".." + end, "--format=%H").split()
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
-            "phlgit_log__getRangeHashes() invalid hashes\n" + hashes)
+            "phlgit_log__getRangeHashes() invalid hashes\n" + str(hashes))
     hashes.reverse()
     return hashes
 
@@ -175,12 +212,40 @@ class TestLog(unittest.TestCase):
                 "commit", "-a", "-m", message,
                 "--author", self.author)
 
+#     def testNoCommits(self):
+#         hashes = getRangeToHereHashes(self.clone, "HEAD")
+#         self.assertIsNotNone(hashes)
+#         self.assertTrue(not hashes)
+#         self.assertIsInstance(hashes, list)
+#         head = getLastCommitHash(self.clone)
+#         self.assertIsNone(head)
+#         head2 = getLastNCommitHashes(self.clone, 1)
+#         self.assertIsNotNone(head2)
+#         self.assertEqual(head, head2[0])
+
     def testOneCommit(self):
         self._createCommitNewFile("README")
         hashes = getRangeToHereHashes(self.clone, "HEAD")
         self.assertIsNotNone(hashes)
         self.assertTrue(not hashes)
         self.assertIsInstance(hashes, list)
+        head = getLastCommitHash(self.clone)
+        self.assertIsNotNone(head)
+        head2 = getLastNCommitHashes(self.clone, 1)
+        self.assertIsNotNone(head2)
+        self.assertEqual(head, head2[0])
+        self.assertListEqual(getLastNCommitHashes(self.clone, 0), [])
+        self.assertRaises(ValueError, getLastNCommitHashes, self.clone, 2)
+
+    def testTwoCommits(self):
+        self._createCommitNewFile("README")
+        self._createCommitNewFile("README2")
+        head = getLastCommitHash(self.clone)
+        self.assertIsNotNone(head)
+        hashes = getLastNCommitHashes(self.clone, 2)
+        self.assertIsNotNone(hashes)
+        self.assertEqual(head, hashes[-1])
+        self.assertListEqual(hashes, hashes)
 
     def testSimpleFork(self):
         self._createCommitNewFile("README")
