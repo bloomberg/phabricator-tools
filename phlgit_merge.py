@@ -1,9 +1,14 @@
 """Wrapper around 'git merge'"""
 
 
-def squash(clone, source, message):
+def squash(clone, source, message, author=None):
     clone.call("merge", "--squash", source)
-    return clone.call("commit", "-m", message)
+    result = ""
+    if author:
+        result = clone.call("commit", "-m", message, "--author", author)
+    else:
+        result = clone.call("commit", "-m", message)
+    return result
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

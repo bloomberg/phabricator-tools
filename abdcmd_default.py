@@ -43,7 +43,7 @@ def createReview(conduit, gitContext, review_branch):
     clone = gitContext.clone
     verifyReviewBranchBase(gitContext, review_branch)
 
-    user, email = abdt_conduitgit.getPrimaryUserAndEmailFromBranch(
+    name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, review_branch.remote_base,
         review_branch.remote_branch)
 
@@ -145,7 +145,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
 def updateInReview(conduit, wb, gitContext, review_branch):
     remoteBranch = review_branch.remote_branch
     clone = gitContext.clone
-    user, email = abdt_conduitgit.getPrimaryUserAndEmailFromBranch(
+    name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, wb.remote_base, remoteBranch)
 
     print "updateInReview"
@@ -187,13 +187,14 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 def land(conduit, wb, gitContext, branch):
     clone = gitContext.clone
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
-    user, email = abdt_conduitgit.getPrimaryUserAndEmailFromBranch(
+    name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
 
         # compose the commit message
+        # TODO: format the message nicer
         info = d.query(conduit, [wb.id])[0]
         userNames = phlcon_user.queryUsernamesFromPhids(
             conduit, info.reviewers)
@@ -203,7 +204,7 @@ def land(conduit, wb, gitContext, branch):
 
         try:
             squashMessage = phlgit_merge.squash(
-                clone, wb.remote_branch, message)
+                clone, wb.remote_branch, message, name + " <" + email + ">")
         except subprocess.CalledProcessError as e:
             clone.call("reset", "--hard")  # fix the working copy
             raise abdt_exception.LandingException(str(e) + "\n" + e.output)
@@ -354,6 +355,7 @@ class TestAbd(unittest.TestCase):
         )
 
         self._devSetAuthorAccount(self.author_account)
+        self._phabSetAuthorAccount(phldef_conduit.phab)
 
         with phlsys_fs.chDirContext("developer"):
             self._createCommitNewFile("README", self.reviewer)
@@ -409,6 +411,10 @@ class TestAbd(unittest.TestCase):
         devClone = phlsys_git.GitClone("developer")
         phlgit_config.setUsernameEmail(devClone, account.user, account.email)
 
+    def _phabSetAuthorAccount(self, account):
+        devClone = phlsys_git.GitClone("phab")
+        phlgit_config.setUsernameEmail(devClone, account.user, account.email)
+
     def _devResetBranchToMaster(self, branch):
         with phlsys_fs.chDirContext("developer"):
             runCommands("git reset origin/master --hard")
@@ -455,6 +461,18 @@ class TestAbd(unittest.TestCase):
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
 
+        # check the author on master
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git fetch -p", "git checkout master")
+            clone = phlsys_git.GitClone(".")
+            head = phlgit_log.getLastCommitHash(clone)
+            authors = phlgit_log.getAuthorNamesEmailsFromHashes(clone, [head])
+            author = authors[0]
+            name = author[0]
+            email = author[1]
+            self.assertEqual(self.author_account.user, name)
+            self.assertEqual(self.author_account.email, email)
+
     def test_badMsgWorkflow(self):
         self._devCheckoutPushNewBranch("ph-review/change/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
@@ -490,6 +508,7 @@ class TestAbd(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     # TODO: test_notBasedWorkflow
+    # TODO: test_noCommitWorkflow
 
     def test_badAuthorWorkflow(self):
         self._devSetAuthorAccount(phldef_conduit.notauser)

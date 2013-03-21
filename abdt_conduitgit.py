@@ -8,17 +8,16 @@ import abdt_messagefields
 import abdt_exception
 
 
-def getPrimaryUserAndEmailFromBranch(clone, conduit, base, branch):
-    hashes = phlgit_log.getRangeHashes(clone, base, branch)
-    committers = phlgit_log.getCommittersFromHashes(clone, hashes)
-    print "- committers: " + str(committers)
-    users = phlcon_user.queryUsersFromEmails(conduit, committers)
-    print "- users: " + str(users)
-    primary_user = users[0]
-    if not primary_user:
+def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
+    commit = phlgit_log.getRangeHashes(clone, base, branch)[0]
+    committer = phlgit_log.getAuthorNamesEmailsFromHashes(clone, [commit])[0]
+    name = committer[0]
+    email = committer[1]
+    user = phlcon_user.queryUsersFromEmails(conduit, [email])[0]
+    if not user:
         raise abdt_exception.AbdUserException(
             "first committer is not a Phabricator user")
-    return primary_user, committers[0]
+    return name, email, user
 
 
 def getFieldsFromCommitHashes(conduit, clone, hashes):

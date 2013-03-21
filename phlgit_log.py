@@ -11,21 +11,22 @@ import phlsys_subprocess
 """NamedTuple to represent a git revision.
 
 :hash:the sha1 associated with this revision
-:author:the email address of the original author
-:committer:the email address of the committer
+:author_email:the email address of the original author
+:author_name:the name of the original author
+:committer_email:the email address of the committer
+:committer_name:the name of the committer
 :subject:the first line of the commit message
 :message:any subsequent lines of the commit message, empty string if none
 
 """
 Revision = collections.namedtuple(
-    "phlgit_log__Revision",
-    ['hash', 'author', 'committer', 'subject', 'message'])
-
-    # What it does
-    # What it returns
-    # Essential behaviour
-    # Undefined behaviour
-    # Note that ...
+    "phlgit_log__Revision", [
+        'hash',
+        'author_email', 'author_name',
+        'committer_email', 'committer_name',
+        'subject',
+        'message'
+    ])
 
 
 def getRangeToHereHashes(clone, start):
@@ -109,17 +110,19 @@ def makeRevisionFromFullMessage(message):
 
     Raise an Exception if the message doesn't parse successfully.
 
-    :message: message from 'git log HEAD^! --format:"%H%n%ae%n%ce%n%s%n%b"'
+    :message: from 'git log HEAD^! --format:"%H%n%ae%n%an%n%ce%n%cn%n%s%n%b"'
     :returns: a 'phlgit_log__Revision'
 
     """
     lines = message.splitlines()
     return Revision(
         hash=lines[0],
-        author=lines[1],
-        committer=lines[2],
-        subject=lines[3],
-        message='\n'.join(lines[4:]))
+        author_email=lines[1],
+        author_name=lines[2],
+        committer_email=lines[3],
+        committer_name=lines[4],
+        subject=lines[5],
+        message='\n'.join(lines[6:]))
 
 
 def makeRevisionFromHash(clone, commitHash):
@@ -132,7 +135,7 @@ def makeRevisionFromHash(clone, commitHash):
     :returns: a 'phlgit_log__Revision' based on the 'commitHash'
 
     """
-    fmt = "%H%n%ae%n%ce%n%s%n%b"
+    fmt = "%H%n%ae%n%an%n%ce%n%cn%n%s%n%b"
     fullMessage = clone.call("log", commitHash + "^!", "--format=" + fmt)
     revision = makeRevisionFromFullMessage(fullMessage)
     return revision
@@ -150,10 +153,14 @@ def makeRevisionsFromHashes(clone, hashes):
     return [makeRevisionFromHash(clone, h) for h in hashes]
 
 
-def getCommittersFromHashes(clone, hashes):
-    """Return string list of the email addresses of the committers in 'hashes'.
+def getAuthorNamesEmailsFromHashes(clone, hashes):
+    """Return list of (name, email) of the committers in 'hashes'.
 
-    Committers will only appear in the list once, at their earliest appearance.
+    Authors will only appear in the list once, at their earliest appearance.
+    The email address is considered as the unique key for each author, so
+    someone appearing multiple times with different names but the same email
+    will only appear once in the list.
+
     Raise an exception if the clone does not return a valid FullMessage from
     the commitHash.
 
@@ -163,13 +170,14 @@ def getCommittersFromHashes(clone, hashes):
 
     """
     revisions = makeRevisionsFromHashes(clone, hashes)
-    observedAuthors = set()
+    observedEmails = set()
     uniqueAuthors = []
     for r in revisions:
-        author = r.author
-        if author not in observedAuthors:
-            observedAuthors.add(author)
-            uniqueAuthors.append(author)
+        email = r.author_email
+        name = r.author_name
+        if email not in observedEmails:
+            observedEmails.add(email)
+            uniqueAuthors.append((name, email))
     return uniqueAuthors
 
 
@@ -265,15 +273,15 @@ class TestLog(unittest.TestCase):
         self.assertListEqual(hashes, hashes2)
         r0 = makeRevisionFromHash(self.clone, hashes[0])
         self.assertEqual(r0.subject, "ONLY_FORK")
-        self.assertEqual(r0.message.strip(), "BODY\nBODY")
+        self.assertEqual(r0.message, "BODY\nBODY\n")
         r1 = makeRevisionFromHash(self.clone, hashes[1])
         self.assertEqual(r1.subject, "ONLY_FORK2")
         self.assertIsNotNone(r1.message)
         self.assertIsInstance(r1.message, str)
 
-        committers = getCommittersFromHashes(self.clone, hashes)
+        committers = getAuthorNamesEmailsFromHashes(self.clone, hashes)
         self.assertEqual(len(committers), 1)
-        self.assertEqual(committers[0], self.authorEmail)
+        self.assertEqual(committers[0], (self.authorName, self.authorEmail))
 
     def tearDown(self):
         self.runCommands("rm -rf " + self.path)
