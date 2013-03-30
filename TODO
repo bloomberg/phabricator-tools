@@ -1,0 +1,16 @@
+** repo admin
+    * make TODO list
+    * filter-branch phi out of history (will bring back when ready)
+    + doc TODO format
+*** abd 1.0
+    + help items for command-line params 
+    ++ proper diff creation
+    ++ try hooking up a linter
+    ++ config file support
+    ++ .arconfig file support
+++ arcy app
+    + list initial features
+    + break into tasks
+-- conduit app
+    - list initial features
+    - break into tasks
