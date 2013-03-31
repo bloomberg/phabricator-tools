@@ -83,6 +83,70 @@ def createRawDiff(conduit, diff):
     return CreateRawDiffResponse(**response)
 
 
+def createDiff(
+        conduit,
+        changes_dict,
+        source_machine,
+        source_path,
+        branch,
+        source_control_system,  # svn or git
+        source_control_path,
+        source_control_base_revision,
+        lint_status,
+        unit_status,
+        bookmark=None,
+        parent_revision_id=None,
+        creation_method=None,
+        author_phid=None,
+        arcanist_project=None,
+        repository_uuid=None):
+    """@todo: Docstring for createDiff
+
+    :conduit: conduit to operate on
+    :changes_dict: changes response, 'changes' field of GetDiffResponse
+    :source_machine: string name of submitting machine
+    :source_path: string @todo
+    :branch: string name of the branch this change is being submitted from
+    :source_control_system: string? svn or git
+    :source_control_path: @todo
+    :source_control_base_revision: @todo
+    :lint_status: string? none, skip, okay, warn, fail, postponed
+    :unit_status: string? none, skip, okay, warn, fail, postponed
+    :bookmark: optional string bookmark (mercurial term?)
+    :parent_revision_id: @todo
+    :creation_method: @todo
+    :author_phid: optional string phid of the author
+    :arcanist_project: optional string human context for the change
+    :repository_uuid: @todo
+    :returns: @todo
+
+    Perhaps the best reference for this function is in the Phabricator source
+    code itself.
+    .../differential/conduit/ConduitAPI_differential_creatediff_Method.php
+
+    """
+    d = {
+        "changes": changes_dict,
+        "sourceMachine": source_machine,
+        "sourcePath": source_path,
+        "branch": branch,
+        "sourceControlSystem": source_control_system,
+        "sourceControlPath": source_control_path,
+        "sourceControlBaseRevision": source_control_base_revision,
+        "lintStatus": lint_status,
+        "unitStatus": unit_status,
+        "bookmark": bookmark,
+        "parentRevisionID": parent_revision_id,
+        "creationMethod": creation_method,
+        "authorPHID": author_phid,
+        "arcanistProject": arcanist_project,
+        "repositoryUUID": repository_uuid,
+    }
+    d = _copyDictNoNones(d)
+    response = conduit.call("differential.creatediff", d)
+    return response
+
+
 # XXX: it might be better to narrow the contract of this if the conduit
 #      API is going to keep changing, don't want to fixup based on
 #      changes that don't matter
@@ -267,6 +331,53 @@ index d4711bb..1c634f5 100644
         self.assertEqual(query_response_list[0].uri, create_response.uri)
         self.assertEqual(query_response_list[0].id, create_response.revisionid)
         self.assertEqual(query_response_list[0].status, REVISION_CLOSED)
+
+    def testCreateDiffRevision(self):
+        diff = """
+diff --git a/readme b/readme
+index d4711bb..ee5b241 100644
+--- a/readme
++++ b/readme
+@@ -1,3 +1,4 @@ and one more!!
+ -- and one last(?) one
+ alaric!
+ local stuff!
++manual conduit submission
+"""
+        message = """
+add a line to README
+
+Test Plan: I proof-read it and it looked ok
+"""
+        raw_diff_response = createRawDiff(self.conduit, diff)
+        get_diff_response = _getDiff(
+            self.conduit,
+            diff_id=raw_diff_response.id)
+
+        diff_response = createDiff(
+            self.conduit,
+            changes_dict=get_diff_response.changes,
+            source_machine="test_machine",
+            source_path="source_path",
+            branch="branch",
+            source_control_system="git",  # svn or git
+            source_control_path="control_path",
+            source_control_base_revision="0",
+            lint_status="none",
+            unit_status="none",
+            bookmark=None,
+            parent_revision_id=None,
+            creation_method="arcanist daemon",
+            author_phid=None,
+            arcanist_project="project",
+            repository_uuid=None)
+
+        parse_response = parseCommitMessage(self.conduit, message)
+        self.assertEqual(len(parse_response.errors), 0)
+
+        # rely on createRevision to raise if we get anything seriously wrong
+        createRevision(
+            self.conduit, diff_response["diffid"], parse_response.fields)
 
 if __name__ == "__main__":
     unittest.main()
