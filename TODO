@@ -5,7 +5,10 @@
 *** abd 1.0
     + help items for command-line params 
     ++ proper diff creation
+        (Angelos) + wrap differential.creatediff in a new helper func
+        + wrap result of differential.creatediff in a namedtuple
     ++ try hooking up a linter
+        + investigate "arc:lint" property of diffs for lint info
     ++ config file support
     ++ .arconfig file support
 ++ arcy app
