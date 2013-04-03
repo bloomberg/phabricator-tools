@@ -5,6 +5,7 @@
 
 import argparse
 import sys
+import time
 
 import abdcmd_default
 import abdmail_printsender
@@ -25,6 +26,7 @@ def main():
     parser.add_argument('--admin-email', type=str, required=True)
     parser.add_argument('--repo-description', type=str, required=True)
     parser.add_argument('--https-proxy', type=str)
+    parser.add_argument('--sleep-duration-secs', type=int, default=60)
     args = parser.parse_args()
 
     print_sender = abdmail_printsender.MailSender(args.abd_email)
@@ -39,10 +41,21 @@ def main():
         args.abd_certificate,
         https_proxy=args.https_proxy)
 
-    print "fetch"
-    phlsys_subprocess.runCommands("git fetch -p")
-    print "process"
-    abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
+    while True:
+        print "fetch"
+        phlsys_subprocess.runCommands("git fetch -p")
+        print "process"
+        abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
+        sleep_remaining = args.sleep_duration_secs
+        while sleep_remaining > 0:
+            sys.stdout.write("\rsleep (" + str(sleep_remaining) + " seconds) ")
+            sys.stdout.flush()
+            time.sleep(1)
+            sleep_remaining -= 1
+        sys.stdout.write(
+            "\rslept " + str(args.sleep_duration_secs) + " seconds  \n")
+        sys.stdout.flush()
+
 
 if __name__ == "__main__":
     sys.exit(main())
