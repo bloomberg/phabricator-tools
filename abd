@@ -23,7 +23,7 @@ class ConsoleOutput(object):
     def display(self, s):
         sys.stdout.write("\r" + " " * len(self.last_output))
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.last_output = now + " - " + s
+        self.last_output = "(" + now + ") " + s
         sys.stdout.write("\r" + self.last_output)
         sys.stdout.flush()
 
@@ -49,16 +49,20 @@ def main():
         [args.admin_email],
         args.repo_description)
 
-    conduit = phlsys_conduit.Conduit(
-        args.instance_uri,
-        args.abd_user,
-        args.abd_certificate,
-        https_proxy=args.https_proxy)
 
     out = ConsoleOutput()
     while True:
         out.display("fetch: ")
         phlsys_subprocess.runCommands("git fetch -p")
+
+        # XXX: until conduit refreshes the connection, we'll suffer from
+        #      timeouts; reduce the probability of this by using a new
+        #      conduit each time.
+        conduit = phlsys_conduit.Conduit(
+            args.instance_uri,
+            args.abd_user,
+            args.abd_certificate,
+            https_proxy=args.https_proxy)
 
         out.display("process: ")
         abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
