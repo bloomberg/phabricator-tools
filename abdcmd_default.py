@@ -61,7 +61,7 @@ def createReview(conduit, gitContext, review_branch):
                 clone, review_branch.remote_base, review_branch.remote_branch))
 
     rawDiff = phlgit_diff.rawDiffRange(
-        clone, review_branch.remote_base, review_branch.remote_branch)
+        clone, review_branch.remote_base, review_branch.remote_branch, 1000)
 
     createDifferentialReview(
         conduit, user, parsed, gitContext, review_branch, rawDiff)
@@ -151,7 +151,8 @@ def updateInReview(conduit, wb, gitContext, review_branch):
     print "updateInReview"
 
     print "- creating diff"
-    rawDiff = phlgit_diff.rawDiffRange(clone, wb.remote_base, remoteBranch)
+    rawDiff = phlgit_diff.rawDiffRange(
+        clone, wb.remote_base, remoteBranch, 1000)
 
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):

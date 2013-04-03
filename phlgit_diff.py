@@ -12,7 +12,7 @@ def rawDiffRangeToHere(clone, start):
     return clone.call("diff", start + "...")
 
 
-def rawDiffRange(clone, base, new):
+def rawDiffRange(clone, base, new, context_lines=None):
     """Return a raw diff from the history on 'new' that is not on 'base'.
 
     Note that commits that are cherry-picked from new to old will still appear
@@ -26,7 +26,12 @@ def rawDiffRange(clone, base, new):
     :returns: a string of the raw diff
 
     """
-    return clone.call("diff", base + "..." + new)
+    if context_lines:
+        result = clone.call(
+            "diff", base + "..." + new, "--unified=" + str(context_lines))
+    else:
+        result = clone.call("diff", base + "..." + new)
+    return result
 
 
 def parseFilenamesFromRawDiff(diff):
@@ -73,12 +78,16 @@ class TestDiff(unittest.TestCase):
         self._createCommitNewFile("ONLY_FORK2")
         rawDiff = rawDiffRangeToHere(self.clone, "master")
         rawDiff2 = rawDiffRange(self.clone, "master", "fork")
+        rawDiff3 = rawDiffRange(self.clone, "master", "fork", 1000)
         self.assertEqual(
             set(["ONLY_FORK", "ONLY_FORK2"]),
             parseFilenamesFromRawDiff(rawDiff))
         self.assertEqual(
             set(["ONLY_FORK", "ONLY_FORK2"]),
             parseFilenamesFromRawDiff(rawDiff2))
+        self.assertEqual(
+            set(["ONLY_FORK", "ONLY_FORK2"]),
+            parseFilenamesFromRawDiff(rawDiff3))
 
     def tearDown(self):
         self.runCommands("rm -rf " + self.path)
