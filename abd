@@ -4,6 +4,7 @@
 """abd automates the creation and landing of reviews from branches"""
 
 import argparse
+import datetime
 import sys
 import time
 
@@ -12,6 +13,19 @@ import abdmail_printsender
 import abdmail_mailer
 import phlsys_conduit
 import phlsys_subprocess
+
+
+class ConsoleOutput(object):
+
+    def __init__(self):
+        self.last_output = ""
+
+    def display(self, s):
+        sys.stdout.write("\r" + " " * len(self.last_output))
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.last_output = now + " - " + s
+        sys.stdout.write("\r" + self.last_output)
+        sys.stdout.flush()
 
 
 def main():
@@ -41,20 +55,19 @@ def main():
         args.abd_certificate,
         https_proxy=args.https_proxy)
 
+    out = ConsoleOutput()
     while True:
-        print "fetch"
+        out.display("fetch: ")
         phlsys_subprocess.runCommands("git fetch -p")
-        print "process"
+
+        out.display("process: ")
         abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
+
         sleep_remaining = args.sleep_duration_secs
         while sleep_remaining > 0:
-            sys.stdout.write("\rsleep (" + str(sleep_remaining) + " seconds) ")
-            sys.stdout.flush()
+            out.display("sleep (" + str(sleep_remaining) + " seconds) ")
             time.sleep(1)
             sleep_remaining -= 1
-        sys.stdout.write(
-            "\rslept " + str(args.sleep_duration_secs) + " seconds  \n")
-        sys.stdout.flush()
 
 
 if __name__ == "__main__":
