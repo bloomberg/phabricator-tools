@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""abd automates the creation and landing of reviews from branches"""
+"""Arcyd automates the creation and landing of reviews from branches"""
 
 import argparse
 import datetime
@@ -30,20 +30,20 @@ class ConsoleOutput(object):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Arcanist Branch Daemon")
+        description="Arcyd - arcanist branch daemon")
 
     # TODO: add help messages
     parser.add_argument('--instance-uri', type=str, required=True)
-    parser.add_argument('--abd-user', type=str, required=True)
-    parser.add_argument('--abd-certificate', type=str, required=True)
-    parser.add_argument('--abd-email', type=str, required=True)
+    parser.add_argument('--arcyd-user', type=str, required=True)
+    parser.add_argument('--arcyd-certificate', type=str, required=True)
+    parser.add_argument('--arcyd-email', type=str, required=True)
     parser.add_argument('--admin-email', type=str, required=True)
     parser.add_argument('--repo-description', type=str, required=True)
     parser.add_argument('--https-proxy', type=str)
     parser.add_argument('--sleep-duration-secs', type=int, default=60)
     args = parser.parse_args()
 
-    print_sender = abdmail_printsender.MailSender(args.abd_email)
+    print_sender = abdmail_printsender.MailSender(args.arcyd_email)
     mailer = abdmail_mailer.Mailer(
         print_sender,
         [args.admin_email],
@@ -60,8 +60,8 @@ def main():
         #      conduit each time.
         conduit = phlsys_conduit.Conduit(
             args.instance_uri,
-            args.abd_user,
-            args.abd_certificate,
+            args.arcyd_user,
+            args.arcyd_certificate,
             https_proxy=args.https_proxy)
 
         out.display("process: ")
