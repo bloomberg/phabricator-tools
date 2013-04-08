@@ -29,26 +29,113 @@ class ConsoleOutput(object):
 
 
 def main():
+
+    description = str("""
+Arcyd - an arcanist branch daemon
+
+Intended to make it easy for large teams to start using Differential without
+individual contributors needing to install and configure Arcanist.
+
+Individual contributors are still free to use Arcanist if they wish, Arcyd
+provides a zero-config layer over Git to get them started.
+
+Arcyd does the following:
+- watches for specially named branches and automatically creates revisions
+- automatically updates revisions when the branch changes
+- automatically lands revisions when they are approved
+
+minimal user workflow:
+    $ git checkout feature/mywork
+    ~ commit some work on the branch ~
+    $ git push origin feature/mywork:ph-review/mywork/master
+
+    .. Arcyd see's the 'ph-review' branch and creates a review ..
+    .. Reviewer accepts the change ..
+    .. Arcyd squashes the 'ph-review' branch onto master and deletes it ..
+        """)
+
+    epilog = str("""
+usage example:
+    Using the example accounts baked into the 'phabricator-tools'
+    vagrant/puppet installation. (see ./README)
+
+    $ arcyd
+    --instance-uri https://127.0.0.1/api/ \\
+    --arcyd-user phab \\
+    --arcyd-certificate ntvymp7ezaeysbzgzhrn7udf5t5hz3426ynlgtrhzuww3yuuksk7sh\
+dhicxxfh37ccvlufn6o7v744dlrw4vwkohbktclxaac7akb7yynzoiaqzqyexmoouimdeqfioxzxn5\
+czivjtdyvflcv7i7ubxdee2yjikg52sd76ydy5wg5rhkbffipkvzr2ju324ztyzkilb56ibofnvwlw\
+lenr2vs3a3hk4246kptcvdvp2qmhkwomphpu224kqrh3d \\
+    --arcyd-email phab-role-account@server.example \\
+    --admin-email admin@server.example \\
+    --repo-description http://server.example/repo.git \\
+    --sleep-duration 60
+
+    """)
+
     parser = argparse.ArgumentParser(
-        description="Arcyd - arcanist branch daemon")
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=description,
+        epilog=epilog)
 
     # TODO: add help messages
-    parser.add_argument('--instance-uri', type=str, required=True)
-    parser.add_argument('--arcyd-user', type=str, required=True)
-    parser.add_argument('--arcyd-certificate', type=str, required=True)
-    parser.add_argument('--arcyd-email', type=str, required=True)
-    parser.add_argument('--admin-email', type=str, required=True)
-    parser.add_argument('--repo-description', type=str, required=True)
-    parser.add_argument('--https-proxy', type=str)
-    parser.add_argument('--sleep-duration-secs', type=int, default=60)
+    parser.add_argument(
+        '--instance-uri',
+        metavar="URI",
+        type=str,
+        required=True,
+        help="instance to connect to, e.g. http://127.0.0.1")
+    parser.add_argument(
+        '--arcyd-user',
+        metavar="USER",
+        type=str,
+        required=True,
+        help="username for Arcyd to use")
+    parser.add_argument(
+        '--arcyd-cert',
+        metavar="CERT",
+        type=str,
+        required=True,
+        help="Phabricator Conduit API certificate to use, this is the value "
+             "that you will find in your user account in Phabricator at: "
+             "http://your.server.example/settings/panel/conduit/. "
+             "It can also be found in ~/.arcrc.")
+    parser.add_argument(
+        '--arcyd-email',
+        metavar="FROM",
+        type=str,
+        required=True,
+        help="email address for Arcyd to send mails from")
+    parser.add_argument(
+        '--admin-email',
+        metavar="TO",
+        type=str,
+        required=True,
+        help="email address to send important system events to")
+    parser.add_argument(
+        '--repo-desc',
+        metavar="DESC",
+        type=str,
+        required=True,
+        help="description to use in emails")
+    parser.add_argument(
+        '--https-proxy',
+        metavar="PROXY",
+        type=str,
+        help="proxy to use, if necessary")
+    parser.add_argument(
+        '--sleep-secs',
+        metavar="TIME",
+        type=int,
+        default=60,
+        help="time to wait between fetches")
     args = parser.parse_args()
 
     print_sender = abdmail_printsender.MailSender(args.arcyd_email)
     mailer = abdmail_mailer.Mailer(
         print_sender,
         [args.admin_email],
-        args.repo_description)
-
+        args.repo_desc)
 
     out = ConsoleOutput()
     while True:
@@ -61,13 +148,13 @@ def main():
         conduit = phlsys_conduit.Conduit(
             args.instance_uri,
             args.arcyd_user,
-            args.arcyd_certificate,
+            args.arcyd_cert,
             https_proxy=args.https_proxy)
 
         out.display("process: ")
         abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
 
-        sleep_remaining = args.sleep_duration_secs
+        sleep_remaining = args.sleep_secs
         while sleep_remaining > 0:
             out.display("sleep (" + str(sleep_remaining) + " seconds) ")
             time.sleep(1)
