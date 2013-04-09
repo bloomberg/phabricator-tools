@@ -57,68 +57,68 @@ All pre-installed users have the password set to 'password'
 
 ## Directory Layout
 
-*./arcyd*
-    The 'Arcyd' application
+  *./arcyd*
+      The 'Arcyd' application
 
-*./arcyd_test/*
-    A testbed for the Arcyd application to run in,
-    setup with 'make_test_repos.sh' and run
-        'run_arcyd_single.sh'
-    or  'run_arcyd_multi.sh'
-    to try arcyd out in the test instance.
+  *./arcyd_test/*
+      A testbed for the Arcyd application to run in,
+      setup with 'make_test_repos.sh' and run
+          'run_arcyd_single.sh'
+      or  'run_arcyd_multi.sh'
+      to try arcyd out in the test instance.
 
-*./LICENSE*
+  *./LICENSE*
 
-*./runtests*
-    Convenience script to run the test suite
+  *./runtests*
+      Convenience script to run the test suite
 
-*./TODO*
+  *./TODO*
 
-*./vagrant*
-    All the 'instant Phabricator' artifacts may be found here.
+  *./vagrant*
+      All the 'instant Phabricator' artifacts may be found here.
 
-*./*
-    To simplify usage, all the Python source is in the root directory;
-    this is so that the modules do not need to be added to the PYTHONPATH
-    in order to be discovered, they run out of the box.
+  *./*
+      To simplify usage, all the Python source is in the root directory;
+      this is so that the modules do not need to be added to the PYTHONPATH
+      in order to be discovered, they run out of the box.
 
-    The python modules are divided into 'package groups' which are in turn
-    divided into 'packages'
+      The python modules are divided into 'package groups' which are in turn
+      divided into 'packages'
 
-    ./abd*
-        The 'abd' package group contains the Arcyd-specific code and may be
-        renamed to 'arc' later.
+      ./abd*
+          The 'abd' package group contains the Arcyd-specific code and may be
+          renamed to 'arc' later.
 
-        ./abdcmd_*
-            Implemenation of Arcyd subcommands
+          ./abdcmd_*
+              Implemenation of Arcyd subcommands
 
-        ./abdcmnt_*
-            Format and submit event-related comments to differential revisions
+          ./abdcmnt_*
+              Format and submit event-related comments to Differential reviews
 
-        ./abdmail_*
-            Format and submit event-related emails to people
+          ./abdmail_*
+              Format and submit event-related emails to people
 
-        ./abdt_*
-            General shared types and conventions
+          ./abdt_*
+              General shared types and conventions
 
-    ./phl*
-        The 'phl' package group contains the code which can be considered
-        re-usable as a 'PHabricator Library'.
+      ./phl*
+          The 'phl' package group contains the code which can be considered
+          re-usable as a 'PHabricator Library'.
 
-        ./phlcon_*
-            Thin wrappers around Phabricator Conduit APIs
+          ./phlcon_*
+              Thin wrappers around Phabricator Conduit APIs
 
-        ./phldef_*
-            Predefined data and constants
+          ./phldef_*
+              Predefined data and constants
 
-        ./phlgit_*
-            Thin wrappers around Git subcommands
+          ./phlgit_*
+              Thin wrappers around Git subcommands
 
-        ./phlgitu_*
-            High-level Git utilities
+          ./phlgitu_*
+              High-level Git utilities
 
-        ./phlsys_*
-            Wrappers around interaction with the operating system
+          ./phlsys_*
+              Wrappers around interaction with the operating system
 
 ## Contacts
 
