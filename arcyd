@@ -12,6 +12,7 @@ import abdcmd_default
 import abdmail_printsender
 import abdmail_mailer
 import phlsys_conduit
+import phlsys_fs
 import phlsys_subprocess
 
 
@@ -133,8 +134,9 @@ class Single(object):
             [args.admin_email],
             args.repo_desc)
 
-        out.display("fetch (" + args.repo_desc + "): ")
-        phlsys_subprocess.runCommands("git fetch -p")
+        with phlsys_fs.chDirContext(args.repo_path):
+            out.display("fetch (" + args.repo_desc + "): ")
+            phlsys_subprocess.runCommands("git fetch -p")
 
         # XXX: until conduit refreshes the connection, we'll suffer from
         #      timeouts; reduce the probability of this by using a new
@@ -146,7 +148,8 @@ class Single(object):
             https_proxy=args.https_proxy)
 
         out.display("process (" + args.repo_desc + "): ")
-        abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
+        abdcmd_default.processUpdatedRepo(
+            conduit, args.repo_path, "origin", mailer)
 
 
 # TODO: this belongs in a file of its own
