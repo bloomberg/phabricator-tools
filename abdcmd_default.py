@@ -595,6 +595,23 @@ class TestAbd(unittest.TestCase):
         print "update last time"
         self._phabUpdateWithExpectations(total=0, bad=0)
 
+    def test_changeAlreadyMergedOnBase(self):
+        self._devCheckoutPushNewBranch("landing_branch")
+        self._devPushNewFile("NEWFILE")
+        self._devCheckoutPushNewBranch("ph-review/change/landing_branch")
+        self._phabUpdateWithExpectations(total=1, bad=1)
+
+        # reset the landing branch back to master to resolve
+        print "force our change"
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git checkout landing_branch")
+            runCommands("git reset origin/master --hard")
+            runCommands("git push origin landing_branch --force")
+
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
     def tearDown(self):
         os.chdir(self._saved_path)
         #runCommands("rm -rf abd-test")

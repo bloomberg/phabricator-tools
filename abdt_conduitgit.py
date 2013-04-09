@@ -9,7 +9,10 @@ import abdt_exception
 
 
 def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
-    commit = phlgit_log.getRangeHashes(clone, base, branch)[0]
+    hashes = phlgit_log.getRangeHashes(clone, base, branch)
+    if not hashes:
+        raise abdt_exception.AbdUserException("no history to diff")
+    commit = hashes[0]
     committer = phlgit_log.getAuthorNamesEmailsFromHashes(clone, [commit])[0]
     name = committer[0]
     email = committer[1]
