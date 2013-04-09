@@ -561,6 +561,7 @@ class TestAbd(unittest.TestCase):
         # 'resolve' by abandoning our change
         with phlsys_fs.chDirContext("developer"):
             runCommands("git push origin :ph-review/change2/master")
+        self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_mergeConflictWorkflow(self):
         self._devCheckoutPushNewBranch("temp/change/master")
@@ -602,7 +603,6 @@ class TestAbd(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # reset the landing branch back to master to resolve
-        print "force our change"
         with phlsys_fs.chDirContext("developer"):
             runCommands("git checkout landing_branch")
             runCommands("git reset origin/master --hard")
