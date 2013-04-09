@@ -60,6 +60,13 @@ All pre-installed users have the password set to 'password'
 *./arcyd*
     The 'Arcyd' application
 
+*./arcyd_test/*
+    A testbed for the Arcyd application to run in,
+    setup with 'make_test_repos.sh' and run
+        'run_arcyd_single.sh'
+    or  'run_arcyd_multi.sh'
+    to try arcyd out in the test instance.
+
 *./LICENSE*
 
 *./runtests*

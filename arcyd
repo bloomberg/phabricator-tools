@@ -28,8 +28,175 @@ class ConsoleOutput(object):
         sys.stdout.flush()
 
 
-def main():
+def setupParser(name, module, subparsers):
+    doc = module.__doc__
+    docSubject = doc.splitlines()[0]
+    docEpilog = '\n'.join(doc.splitlines()[1:])
+    parser = subparsers.add_parser(
+        name,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        help=docSubject,
+        description=docSubject,
+        epilog=docEpilog,
+        fromfile_prefix_chars=module.getFromfilePrefixChars())
+    module.setupParser(parser)
+    parser.set_defaults(func=module.process)
 
+
+# TODO: this belongs in a file of its own
+class Single(object):
+    """watch a single repository"""
+
+    @staticmethod
+    def getFromfilePrefixChars():
+        return '@'
+
+    @staticmethod
+    def setupParser(parser):
+        # TODO: add help messages
+        parser.add_argument(
+            '--instance-uri',
+            metavar="URI",
+            type=str,
+            required=True,
+            help="instance to connect to, e.g. http://127.0.0.1")
+        parser.add_argument(
+            '--arcyd-user',
+            metavar="USER",
+            type=str,
+            required=True,
+            help="username for Arcyd to use")
+        parser.add_argument(
+            '--arcyd-cert',
+            metavar="CERT",
+            type=str,
+            required=True,
+            help="Phabricator Conduit API certificate to use, this is the "
+            "value that you will find in your user account in Phabricator "
+            "at: http://your.server.example/settings/panel/conduit/. "
+            "It can also be found in ~/.arcrc.")
+        parser.add_argument(
+            '--arcyd-email',
+            metavar="FROM",
+            type=str,
+            required=True,
+            help="email address for Arcyd to send mails from")
+        parser.add_argument(
+            '--admin-email',
+            metavar="TO",
+            type=str,
+            required=True,
+            help="email address to send important system events to")
+        parser.add_argument(
+            '--repo-desc',
+            metavar="DESC",
+            type=str,
+            required=True,
+            help="description to use in emails")
+        parser.add_argument(
+            '--repo-path',
+            metavar="PATH",
+            type=str,
+            required=True,
+            help="path to the repository on disk")
+        parser.add_argument(
+            '--https-proxy',
+            metavar="PROXY",
+            type=str,
+            help="proxy to use, if necessary")
+        parser.add_argument(
+            '--sleep-secs',
+            metavar="TIME",
+            type=int,
+            default=60,
+            help="time to wait between fetches")
+
+    @staticmethod
+    def process(args):
+        out = ConsoleOutput()
+
+        while True:
+            Single.run_once(args, out)
+
+            sleep_remaining = args.sleep_secs
+            while sleep_remaining > 0:
+                out.display("sleep (" + str(sleep_remaining) + " seconds) ")
+                time.sleep(1)
+                sleep_remaining -= 1
+
+    # TODO: this belongs in a file of its own
+    @staticmethod
+    def run_once(args, out):
+        print_sender = abdmail_printsender.MailSender(args.arcyd_email)
+        mailer = abdmail_mailer.Mailer(
+            print_sender,
+            [args.admin_email],
+            args.repo_desc)
+
+        out.display("fetch (" + args.repo_desc + "): ")
+        phlsys_subprocess.runCommands("git fetch -p")
+
+        # XXX: until conduit refreshes the connection, we'll suffer from
+        #      timeouts; reduce the probability of this by using a new
+        #      conduit each time.
+        conduit = phlsys_conduit.Conduit(
+            args.instance_uri,
+            args.arcyd_user,
+            args.arcyd_cert,
+            https_proxy=args.https_proxy)
+
+        out.display("process (" + args.repo_desc + "): ")
+        abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
+
+
+# TODO: this belongs in a file of its own
+class Multi(object):
+    """watch multiple repositories"""
+
+    @staticmethod
+    def getFromfilePrefixChars():
+        return None
+
+    @staticmethod
+    def setupParser(parser):
+        parser.add_argument(
+            '--repo-configs',
+            metavar="N",
+            action='append',
+            nargs='+',
+            type=str,
+            help="files to load configuration from, prefix with @")
+        parser.add_argument(
+            '--sleep-secs',
+            metavar="TIME",
+            type=int,
+            default=60,
+            help="time to wait between runs through the list")
+
+    @staticmethod
+    def process(args):
+        repos = list()
+        for repo in args.repo_configs:
+            parser = argparse.ArgumentParser(
+                fromfile_prefix_chars=Single.getFromfilePrefixChars())
+            Single.setupParser(parser)
+            repo_args = parser.parse_args(repo)
+            repos.append(repo_args)
+
+        out = ConsoleOutput()
+
+        while True:
+            for repo in repos:
+                Single.run_once(repo, out)
+
+            sleep_remaining = args.sleep_secs
+            while sleep_remaining > 0:
+                out.display("sleep (" + str(sleep_remaining) + " seconds) ")
+                time.sleep(1)
+                sleep_remaining -= 1
+
+
+def main():
     description = str("""
 Arcyd - an arcanist branch daemon
 
@@ -59,106 +226,67 @@ usage example:
     Using the example accounts baked into the 'phabricator-tools'
     vagrant/puppet installation. (see ./README)
 
-    $ arcyd
+    $ arcyd single
     --instance-uri https://127.0.0.1/api/ \\
     --arcyd-user phab \\
-    --arcyd-certificate ntvymp7ezaeysbzgzhrn7udf5t5hz3426ynlgtrhzuww3yuuksk7sh\
-dhicxxfh37ccvlufn6o7v744dlrw4vwkohbktclxaac7akb7yynzoiaqzqyexmoouimdeqfioxzxn5\
-czivjtdyvflcv7i7ubxdee2yjikg52sd76ydy5wg5rhkbffipkvzr2ju324ztyzkilb56ibofnvwlw\
-lenr2vs3a3hk4246kptcvdvp2qmhkwomphpu224kqrh3d \\
+    --arcyd-cert xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7\
+ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo\
+2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5\
+rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     --arcyd-email phab-role-account@server.example \\
     --admin-email admin@server.example \\
-    --repo-description http://server.example/repo.git \\
+    --repo-desc http://server.example/repo.git \\
     --sleep-duration 60
 
+    You can also split the configuration across multiple files and combine them
+    on the command-line or have them inherit from eachother.
+
+    in localinstance.cfg:
+        --instance-uri
+        https://127.0.0.1/api/
+        --arcyd-user
+        phab
+        --arcyd-cert
+        <<paste-certificate-here>>
+
+    in email.cfg:
+        --arcyd-email
+        phab-role-account@server.example
+        --admin-email
+        admin@server.example
+
+    in repo1.cfg:
+        --repo-desc
+        http://server.example/repo.git
+        --repo-path
+        /path/to/repo
+
+    to run arcyd:
+    $ arcyd single @localinstance.cfg @email.cfg @repo1.cfg
+
+    or you can use inheritance, e.g. in repo2.cfg:
+        @localinstance.cfg
+        @email.cfg
+        --repo-desc
+        http://server.example/repo2.git
+        --repo-path
+        /path/to/repo
+
+    to run arcyd:
+    $ arcyd single @repo2.cfg
     """)
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=description,
         epilog=epilog)
+    subparsers = parser.add_subparsers()
 
-    # TODO: add help messages
-    parser.add_argument(
-        '--instance-uri',
-        metavar="URI",
-        type=str,
-        required=True,
-        help="instance to connect to, e.g. http://127.0.0.1")
-    parser.add_argument(
-        '--arcyd-user',
-        metavar="USER",
-        type=str,
-        required=True,
-        help="username for Arcyd to use")
-    parser.add_argument(
-        '--arcyd-cert',
-        metavar="CERT",
-        type=str,
-        required=True,
-        help="Phabricator Conduit API certificate to use, this is the value "
-             "that you will find in your user account in Phabricator at: "
-             "http://your.server.example/settings/panel/conduit/. "
-             "It can also be found in ~/.arcrc.")
-    parser.add_argument(
-        '--arcyd-email',
-        metavar="FROM",
-        type=str,
-        required=True,
-        help="email address for Arcyd to send mails from")
-    parser.add_argument(
-        '--admin-email',
-        metavar="TO",
-        type=str,
-        required=True,
-        help="email address to send important system events to")
-    parser.add_argument(
-        '--repo-desc',
-        metavar="DESC",
-        type=str,
-        required=True,
-        help="description to use in emails")
-    parser.add_argument(
-        '--https-proxy',
-        metavar="PROXY",
-        type=str,
-        help="proxy to use, if necessary")
-    parser.add_argument(
-        '--sleep-secs',
-        metavar="TIME",
-        type=int,
-        default=60,
-        help="time to wait between fetches")
+    setupParser("single", Single, subparsers)
+    setupParser("multi", Multi, subparsers)
+
     args = parser.parse_args()
-
-    print_sender = abdmail_printsender.MailSender(args.arcyd_email)
-    mailer = abdmail_mailer.Mailer(
-        print_sender,
-        [args.admin_email],
-        args.repo_desc)
-
-    out = ConsoleOutput()
-    while True:
-        out.display("fetch: ")
-        phlsys_subprocess.runCommands("git fetch -p")
-
-        # XXX: until conduit refreshes the connection, we'll suffer from
-        #      timeouts; reduce the probability of this by using a new
-        #      conduit each time.
-        conduit = phlsys_conduit.Conduit(
-            args.instance_uri,
-            args.arcyd_user,
-            args.arcyd_cert,
-            https_proxy=args.https_proxy)
-
-        out.display("process: ")
-        abdcmd_default.processUpdatedRepo(conduit, ".", "origin", mailer)
-
-        sleep_remaining = args.sleep_secs
-        while sleep_remaining > 0:
-            out.display("sleep (" + str(sleep_remaining) + " seconds) ")
-            time.sleep(1)
-            sleep_remaining -= 1
+    args.func(args)
 
 
 if __name__ == "__main__":
