@@ -43,6 +43,29 @@ class AbdSystemException(Exception):
         super(AbdSystemException, self).__init__(message)
 
 
+# TODO: add BadBranchNameException
+# TODO: add UnrelatedBaseException
+# TODO: add EmptyDiffException
+# TODO: add NotPhabricatorUserException
+
+
+class MissingBaseException(AbdUserException):
+    def __init__(self, review_branch_name, base_name):
+        """Branch which the review branch is based on does not exist.
+
+        :review_branch_name: name of the branch being reviewed
+        :base_name: name of the missing base branch
+
+        """
+        message = (
+            "abdcmd_default__MissingBaseException:\n" +
+            "review_branch_name: '" + str(review_branch_name) + "'\n" +
+            "base_name: '" + str(base_name) + "'\n")
+        super(MissingBaseException, self).__init__(message)
+        self.review_branch_name = review_branch_name
+        self.base_name = base_name
+
+
 class InitialCommitMessageParseException(AbdUserException):
     def __init__(self, email, errors, fields, digest):
         """Failure to create suitable message fields before there is a review.

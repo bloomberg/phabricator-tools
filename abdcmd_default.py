@@ -69,8 +69,8 @@ def createReview(conduit, gitContext, review_branch):
 
 def verifyReviewBranchBase(gitContext, review_branch):
     if review_branch.base not in gitContext.branches:
-        raise abdt_exception.AbdUserException(
-            "base does not exist:" + review_branch.base)
+        raise abdt_exception.MissingBaseException(
+            review_branch.branch, review_branch.base)
     if not isBasedOn(review_branch.branch, review_branch.base):
         raise abdt_exception.AbdUserException(
             "'" + review_branch.branch +
