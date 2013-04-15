@@ -1,3 +1,5 @@
+"""Test suite for abdi_processrepo."""
+
 import os
 import unittest
 import abdmail_mailer
@@ -20,7 +22,7 @@ def runCommands(*commands):
     phlsys_subprocess.runCommands(*commands)
 
 
-class TestAbd(unittest.TestCase):
+class Test(unittest.TestCase):
 
     def _gitCommitAll(self, subject, testPlan, reviewer):
         reviewers = [reviewer] if reviewer else None
@@ -326,8 +328,7 @@ class TestAbd(unittest.TestCase):
 
     def tearDown(self):
         os.chdir(self._saved_path)
-        #runCommands("rm -rf abd-test")
-        pass
+        runCommands("rm -rf abd-test")
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
