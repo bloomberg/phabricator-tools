@@ -17,7 +17,7 @@ class AbdBaseException(Exception):
         super(AbdBaseException, self).__init__(message)
 
 
-class AbdUserException(Exception):
+class AbdUserException(AbdBaseException):
     def __init__(self, message):
         """Base for abd user-triggered exceptions to inherit from.
 
@@ -30,7 +30,7 @@ class AbdUserException(Exception):
         super(AbdUserException, self).__init__(message)
 
 
-class AbdSystemException(Exception):
+class AbdSystemException(AbdBaseException):
     def __init__(self, message):
         """Base for abd system-triggered exceptions to inherit from.
 
@@ -58,7 +58,7 @@ class MissingBaseException(AbdUserException):
 
         """
         message = (
-            "abdcmd_default__MissingBaseException:\n" +
+            "abdt_exception__MissingBaseException:\n" +
             "review_branch_name: '" + str(review_branch_name) + "'\n" +
             "base_name: '" + str(base_name) + "'\n")
         super(MissingBaseException, self).__init__(message)
@@ -77,7 +77,7 @@ class InitialCommitMessageParseException(AbdUserException):
 
         """
         message = (
-            "abdcmd_default__CommitMessageParseException:\n" +
+            "abdt_exception__InitialCommitMessageParseException:\n" +
             "email: '" + str(email) + "'\n" +
             "errors: '" + str(errors) + "'\n" +
             "fields: '" + str(fields) + "'\n" +
@@ -100,7 +100,7 @@ class CommitMessageParseException(AbdUserException):
 
         """
         message = (
-            "abdcmd_default__CommitMessageParseException:\n" +
+            "abdt_exception__CommitMessageParseException:\n" +
             "errors: '" + str(errors) + "'\n" +
             "fields: '" + str(fields) + "'\n" +
             "digest: '" + str(digest) + "'\n")
@@ -119,7 +119,7 @@ class LandingException(AbdUserException):
 
         """
         new_message = (
-            "abdcmd_default__CommitMessageParseException:\n" +
+            "abdt_exception__CommitMessageParseException:\n" +
             "message: '" + str(message) + "'")
         super(LandingException, self).__init__(new_message)
 
