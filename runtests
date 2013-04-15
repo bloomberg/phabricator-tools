@@ -10,7 +10,7 @@ flake8 .
 
 # unittest
 # sudo apt-get install python-nose or use the commented-out version
-nosetests *.py
+nosetests *.py --with-doctest
 #python -m unittest discover -p "*.py"
 
 # N.B. can easily run individual tests with nose like so:
