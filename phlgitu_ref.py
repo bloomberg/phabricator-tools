@@ -1,7 +1,5 @@
 """Utilities for working with git refs."""
 
-import doctest
-
 
 def makeRemote(ref, remote):
     """Return a Git reference based on a local name and a remote name.
@@ -27,8 +25,16 @@ def makeLocal(ref):
     return str("refs/heads/" + ref)
 
 
-if __name__ == "__main__":
-    doctest.testmod()
+def parseRefHash(clone, ref):
+    """Return string of the ref's commit hash if valid, else None.
+
+    :clone: supports call()
+    :ref: the reference to parse
+    :returns: string of the ref's commit hash if valid, else None.
+
+    """
+    commit = clone.call("rev-parse", "--revs-only", ref)
+    return commit if commit else None
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
