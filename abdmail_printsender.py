@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import types
 from email.mime.text import MIMEText
 
 
@@ -16,13 +17,13 @@ class MailSender(object):
         self._from_email = from_email
 
     def send(self, to, subject, message, cc=None):
-        assert not isinstance(to, basestring), "'to' is string"
+        assert not isinstance(to, types.StringTypes), "'to' is string"
         msg = MIMEText(message)
         msg['subject'] = subject
         msg['from'] = self._from_email
         msg['to'] = ', '.join(to)
         if cc:
-            assert not isinstance(cc, basestring), "cc is string"
+            assert not isinstance(cc, types.StringTypes), "cc is string"
             msg['cc'] = ', '.join(cc)
         print "-----"
         print msg.as_string()

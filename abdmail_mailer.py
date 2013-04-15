@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import types
+
 
 class Mailer(object):
     """Send mails to interested parties about pre-specified conditions."""
@@ -14,7 +16,8 @@ class Mailer(object):
 
         """
         self._mail_sender = mail_sender
-        assert not isinstance(admin_emails, basestring), "admin_emails string"
+        assert not isinstance(
+            admin_emails, types.StringTypes), "admin_emails string"
         self._admin_emails = admin_emails
         self._repository_name = repository_name
 
