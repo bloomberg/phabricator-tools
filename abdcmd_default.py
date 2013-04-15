@@ -314,6 +314,10 @@ def processUpdatedRepo(conduit, path, remote, mailer):
     for b in remote_branches:
         if abdt_naming.isReviewBranchPrefixed(b):
             review_branch = abdt_naming.makeReviewBranchFromName(b)
+            if review_branch is None:
+                # TODO: handle this case properly
+                continue
+
             review_branch = abdt_gittypes.makeGitReviewBranch(
                 review_branch, remote)
             working_branch = None
@@ -513,6 +517,19 @@ class TestAbd(unittest.TestCase):
         # delete the bad branch
         with phlsys_fs.chDirContext("developer"):
             runCommands("git push origin :ph-review/change/blaster")
+
+        self._phabUpdateWithExpectations(total=0, bad=0)
+
+    def test_noBaseWorkflow(self):
+        self._devCheckoutPushNewBranch("ph-review/change")
+        self._devPushNewFile("NEWFILE", has_plan=False)
+
+        # TODO: handle no base properly
+        #self._phabUpdateWithExpectations(total=1, bad=1)
+
+        # delete the bad branch
+        with phlsys_fs.chDirContext("developer"):
+            runCommands("git push origin :ph-review/change")
 
         self._phabUpdateWithExpectations(total=0, bad=0)
 

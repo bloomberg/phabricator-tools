@@ -6,12 +6,14 @@ import unittest
 
 WB_STATUS_OK = "ok"
 WB_STATUS_PREFIX_BAD = "bad_"
+WB_STATUS_BAD_NAME = WB_STATUS_PREFIX_BAD + "name"
 WB_STATUS_BAD_PREREVIEW = WB_STATUS_PREFIX_BAD + "prerev"
 WB_STATUS_BAD_INREVIEW = WB_STATUS_PREFIX_BAD + "inrev"
 WB_STATUS_BAD_LAND = WB_STATUS_PREFIX_BAD + "land"
 
 WB_DICT_STATUS_DESC = {
     WB_STATUS_OK:            "ok",
+    WB_STATUS_BAD_NAME:      "branch name is invalid",
     WB_STATUS_BAD_PREREVIEW: "didn't manage to create a review",
     WB_STATUS_BAD_INREVIEW:  "bad update during review",
     WB_STATUS_BAD_LAND:      "didn't manage to land the change",
