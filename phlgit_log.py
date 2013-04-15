@@ -60,17 +60,7 @@ def getLastNCommitHashes(clone, n):
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
-    assert n >= 0
-    hashes = clone.call("log", "HEAD", "-n", str(n), "--format=%H").split()
-    if len(hashes) < n:
-        raise ValueError(
-            "less hashes than expected\n" + str(hashes))
-    if not all(c in string.hexdigits for s in hashes for c in s):
-        raise ValueError(
-            "phlgit_log__getLastNCommitHashes() invalid hashes\n"
-            + str(hashes))
-    hashes.reverse()
-    return hashes
+    return getLastNCommitHashesFromRef(clone, n, 'HEAD')
 
 
 def getLastCommitHash(clone):
@@ -82,7 +72,42 @@ def getLastCommitHash(clone):
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
-    return getLastNCommitHashes(clone, 1)[0]
+    return getLastCommitHashFromRef(clone, 'HEAD')
+
+
+def getLastNCommitHashesFromRef(clone, n, ref):
+    """Return a list of strings corresponding to the last 'n' commits at 'ref'.
+
+    The list begins with the oldest revision.
+    Raise a ValueError if any of the returned values are not valid hexadecimal.
+    Raise an Exception if less values than expected are returned.
+
+    :clone: supports 'call("log")' with git log parameters
+    :returns: a string corresponding to the last commit ('HEAD')
+
+    """
+    assert n >= 0
+    hashes = clone.call("log", ref, "-n", str(n), "--format=%H").split()
+    if len(hashes) < n:
+        raise ValueError(
+            "less hashes than expected\n" + str(hashes))
+    if not all(c in string.hexdigits for s in hashes for c in s):
+        raise ValueError(
+            "phlgit_log__getLastNCommitHashesFromRef() invalid hashes\n"
+            + str(hashes))
+    hashes.reverse()
+    return hashes
+
+
+def getLastCommitHashFromRef(clone, ref):
+    """Return a string corresponding to the commit referred to by 'ref'.
+
+    :clone: supports 'call("log")' with git log parameters
+    :ref: a reference that log will understand
+    :returns: a string corresponding to the commit referred to by 'ref'
+
+    """
+    return getLastNCommitHashesFromRef(clone, 1, ref)[0]
 
 
 def getRangeHashes(clone, start, end):
@@ -97,6 +122,8 @@ def getRangeHashes(clone, start, end):
     :returns: a list of strings corresponding to commits from 'start' to 'end'.
 
     """
+    assert clone.call("rev-parse", "--revs-only", start)
+    assert clone.call("rev-parse", "--revs-only", end)
     hashes = clone.call("log", start + ".." + end, "--format=%H").split()
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
