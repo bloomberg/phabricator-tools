@@ -292,6 +292,15 @@ def processUpdatedBranch(
                 commenter.userException(e)
 
 
+def processOrphanedBranches(clone, remote, wbList, remote_branches):
+    for wb in wbList:
+        rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(wb)
+        if rb not in remote_branches:
+            print "delete orphaned branch: " + wb.branch
+            phlgit_push.delete(clone, wb.branch, remote)
+            # TODO: update the associated revision if there is one
+
+
 def processUpdatedRepo(conduit, path, remote, mailer):
     clone = phlsys_git.GitClone(path)
     remote_branches = phlgit_branch.getRemote(clone, remote)
@@ -299,12 +308,9 @@ def processUpdatedRepo(conduit, path, remote, mailer):
     wbList = abdt_naming.getWorkingBranches(remote_branches)
     makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
     rbDict = dict((makeRb(wb), wb) for wb in wbList)
-    for wb in wbList:
-        rb = makeRb(wb)
-        if rb not in remote_branches:
-            print "delete orphaned branch: " + wb.branch
-            phlgit_push.delete(clone, wb.branch, remote)
-            # TODO: update the associated revision if there is one
+
+    processOrphanedBranches(clone, remote, wbList, remote_branches)
+
     for b in remote_branches:
         if abdt_naming.isReviewBranchName(b):
             review_branch = abdt_naming.makeReviewBranchFromName(b)
