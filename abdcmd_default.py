@@ -312,7 +312,7 @@ def processUpdatedRepo(conduit, path, remote, mailer):
     processOrphanedBranches(clone, remote, wbList, remote_branches)
 
     for b in remote_branches:
-        if abdt_naming.isReviewBranchName(b):
+        if abdt_naming.isReviewBranchPrefixed(b):
             review_branch = abdt_naming.makeReviewBranchFromName(b)
             review_branch = abdt_gittypes.makeGitReviewBranch(
                 review_branch, remote)

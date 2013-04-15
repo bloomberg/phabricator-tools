@@ -51,7 +51,7 @@ def isStatusBadPreReview(working_branch):
     return working_branch.status == WB_STATUS_BAD_PREREVIEW
 
 
-def isReviewBranchName(name):
+def isReviewBranchPrefixed(name):
     prefix = getReviewBranchPrefix()
     return (len(name) > len(prefix)) and name.startswith(prefix)
 
@@ -253,17 +253,17 @@ class TestNaming(unittest.TestCase):
 
     def test(self):
         b = "invalidreviewname"
-        self.assertFalse(isReviewBranchName(b))
+        self.assertFalse(isReviewBranchPrefixed(b))
         self.assertFalse(makeReviewBranchFromName(b))
         self.assertFalse(makeWorkingBranchFromName(b))
 
         b = getReviewBranchPrefix()
-        self.assertFalse(isReviewBranchName(b))
+        self.assertFalse(isReviewBranchPrefixed(b))
         self.assertFalse(makeReviewBranchFromName(b))
         self.assertFalse(makeWorkingBranchFromName(b))
 
         b = makeReviewBranchName("mywork", "master")
-        self.assertTrue(isReviewBranchName(b))
+        self.assertTrue(isReviewBranchPrefixed(b))
         r = makeReviewBranchFromName(b)
         self.assertTrue(r)
         self.assertEqual(r.branch, b)
@@ -272,7 +272,7 @@ class TestNaming(unittest.TestCase):
         self.assertFalse(makeWorkingBranchFromName(b))
 
         b = makeWorkingBranchName("ok", "mywork", "master", 1)
-        self.assertFalse(isReviewBranchName(b))
+        self.assertFalse(isReviewBranchPrefixed(b))
         self.assertFalse(makeReviewBranchFromName(b))
         w = makeWorkingBranchFromName(b)
         self.assertTrue(w)
