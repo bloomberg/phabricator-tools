@@ -95,11 +95,14 @@ All pre-installed users have the password set to 'password'
           ./abdcmnt_*
               Format and submit event-related comments to Differential reviews
 
+          ./abdti_*
+              High-level Arcyd implementation details
+
           ./abdmail_*
               Format and submit event-related emails to people
 
           ./abdt_*
-              General shared types and conventions
+              General shared types, conventions and tools
 
       ./phl*
           The 'phl' package group contains the code which can be considered
