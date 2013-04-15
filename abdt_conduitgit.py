@@ -1,7 +1,9 @@
 """Operations combining conduit with git."""
+
 import phlcon_differential
 import phlcon_user
 import phlgit_log
+import phlgitu_ref
 
 import abdt_commitmessage
 import abdt_messagefields
@@ -21,6 +23,24 @@ def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
         raise abdt_exception.AbdUserException(
             "first committer is not a Phabricator user")
     return name, email, user
+
+
+def getAnyUserFromBranch(clone, conduit, base, branch):
+    if phlgitu_ref.parseRefHash(clone, base) is None:
+        hashes = phlgit_log.getLastNCommitHashesFromRef(clone, 1, branch)
+    else:
+        hashes = phlgit_log.getRangeHashes(clone, base, branch)
+
+    if not hashes:
+        hashes = phlgit_log.getLastNCommitHashesFromRef(clone, 1, branch)
+    committers = phlgit_log.getAuthorNamesEmailsFromHashes(clone, hashes)
+    emails = [committer[1] for committer in committers]
+    users = phlcon_user.queryUsersFromEmails(conduit, emails)
+    for user in users:
+        if user:
+            return user
+    raise abdt_exception.AbdUserException(
+        "no users on branch!")
 
 
 def getFieldsFromCommitHashes(conduit, clone, hashes):

@@ -17,6 +17,17 @@ import phlsys_git
 import phlsys_subprocess
 import abdi_processrepo
 
+# factors affecting a review:
+#  age of the revisions
+#  editing the review page
+#  new revisions on the review branch
+#  rewriting history on the review branch
+#  author names
+#  author accounts
+#  base branch
+#  availability of the git repo
+#  availability of the phabricator instance
+
 
 def runCommands(*commands):
     phlsys_subprocess.runCommands(*commands)
@@ -100,15 +111,24 @@ class Test(unittest.TestCase):
         abdi_processrepo.processUpdatedRepo(
             self.conduit, "phab", "origin", self.mailer)
 
-    def _phabUpdateWithExpectations(self, total=None, bad=None):
-        with phlsys_fs.chDirContext("phab"):
-            runCommands("git fetch origin -p")
+    def _phabUpdateWithExpectationsHelper(self, total=None, bad=None):
         abdi_processrepo.processUpdatedRepo(
             self.conduit, "phab", "origin", self.mailer)
         if total is not None:
             self.assertEqual(self._countPhabWorkingBranches(), total)
         if bad is not None:
             self.assertEqual(self._countPhabBadWorkingBranches(), bad)
+
+    def _phabUpdateWithExpectations(self, total=None, bad=None):
+        with phlsys_fs.chDirContext("phab"):
+            runCommands("git fetch origin -p")
+
+        # multiple updates should have the same result if we are
+        # not fetching and assuming the data in Phabricator
+        # doesn't change.
+        self._phabUpdateWithExpectationsHelper(total, bad)
+        self._phabUpdateWithExpectationsHelper(total, bad)
+        self._phabUpdateWithExpectationsHelper(total, bad)
 
     def _devSetAuthorAccount(self, account):
         devClone = phlsys_git.GitClone("developer")
@@ -306,8 +326,6 @@ class Test(unittest.TestCase):
             runCommands("git merge origin/master -s ours")
             runCommands("git push origin ph-review/change2/master")
         print "update again"
-        self._phabUpdateWithExpectations(total=1, bad=0)
-        print "update last time"
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_changeAlreadyMergedOnBase(self):

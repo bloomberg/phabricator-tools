@@ -20,9 +20,9 @@ import phlsys_fs
 import phlsys_git
 import abdt_gittypes
 import abdt_commitmessage
+import abdt_conduit
 import abdt_conduitgit
 import abdt_workingbranch
-
 
 #TODO: split into appropriate modules
 
@@ -121,8 +121,21 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
         print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
-        updateInReview(conduit, wb, gitContext, rb)
-    elif not abdt_naming.isStatusBad(workingBranch):
+        wb = updateInReview(conduit, wb, gitContext, rb)
+    elif abdt_naming.isStatusBad(wb):
+        d = phlcon_differential
+        status = d.getRevisionStatus(conduit, wb.id)
+        # TODO: make the bad landing state explicit with the branch state
+        # don't try to update bad landing branches
+        if int(status) != d.REVISION_ACCEPTED:
+            try:
+                print "try updating bad branch"
+                verifyReviewBranchBase(gitContext, reviewBranch)
+                updateInReview(conduit, wb, gitContext, rb)
+            except abdt_exception.AbdUserException:
+                print "still bad"
+
+    if not abdt_naming.isStatusBad(wb):
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
         if int(status) == d.REVISION_ACCEPTED:
@@ -131,8 +144,6 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
             # TODO: we probably want to do a better job of cleaning up locally
         else:
             print "do nothing"
-    else:
-        print "do nothing - no changes and branch is bad"
 
 
 def updateInReview(conduit, wb, gitContext, review_branch):
@@ -149,6 +160,7 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):
+        # TODO: create the diff after fields, it's more expensive to retry
         diffid = d.createRawDiff(conduit, rawDiff).id
 
         print "- updating revision " + str(wb.id)
@@ -164,7 +176,7 @@ def updateInReview(conduit, wb, gitContext, review_branch):
         d.updateRevision(
             conduit, wb.id, diffid, parsed.fields, "update")
 
-    abdt_workingbranch.pushStatus(
+    wb = abdt_workingbranch.pushStatus(
         gitContext,
         review_branch,
         wb,
@@ -172,10 +184,12 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 
     print "- commenting on revision " + str(wb.id)
     updateMessage = ""
-    updateMessage += "i updated this from " + wb.branch + ".\n"
+    updateMessage += "i updated this from " + review_branch.branch + ".\n"
     updateMessage += "pushed to " + wb.branch + "."
     d.createComment(
         conduit, wb.id, message=updateMessage, silent=True)
+
+    return wb
 
 
 def land(conduit, wb, gitContext, branch):
@@ -234,12 +248,28 @@ def processUpdatedBranch(
         print "create review for " + review_branch.branch
         try:
             createReview(conduit, gitContext, review_branch)
-        except abdte.InitialCommitMessageParseException as e:
-            abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-            mailer.initialCommitMessageParseException(e, review_branch.branch)
         except abdte.AbdUserException as e:
-            abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-            mailer.userException(e.message, review_branch.branch)
+            try:
+                user = abdt_conduitgit.getAnyUserFromBranch(
+                    gitContext.clone,
+                    conduit,
+                    review_branch.remote_base,
+                    review_branch.remote_branch)
+                reviewid = abdt_conduit.createEmptyRevision(conduit, user)
+                wb = abdt_gittypes.makeGitWorkingBranchFromParts(
+                    abdt_naming.WB_STATUS_BAD_INREVIEW,
+                    review_branch.description,
+                    review_branch.base,
+                    reviewid,
+                    gitContext.remote)
+                commenter = abdcmnt_commenter.Commenter(
+                    conduit, reviewid)
+                commenter.exception(e)
+                abdt_workingbranch.pushBadInReview(
+                    gitContext, review_branch, wb)
+            except abdte.AbdUserException as e:
+                abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
+                mailer.userException("oops", review_branch.branch)
     else:
         commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
@@ -279,6 +309,9 @@ def processUpdatedBranch(
                     gitContext, review_branch, working_branch)
                 commenter.landingException(e)
             except abdte.AbdUserException as e:
+                # TODO: commenter can differentiate exceptions itself now
+                #       may as well not differentiate here, except for
+                #       landingException
                 print "user exception"
                 abdt_workingbranch.pushBadInReview(
                     gitContext, review_branch, working_branch)

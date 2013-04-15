@@ -1,5 +1,7 @@
 import phlcon_differential
 
+import abdt_exception
+
 
 class Commenter(object):
     """Make pre-defined comments on Differential revisions."""
@@ -13,6 +15,19 @@ class Commenter(object):
         """
         self._conduit = conduit
         self._revision_id = revision_id
+
+    def exception(self, e):
+        if isinstance(e, abdt_exception.AbdBaseException):
+            if isinstance(e, abdt_exception.CommitMessageParseException):
+                self.commitMessageParseException(e)
+            elif isinstance(e, abdt_exception.LandingException):
+                self.landingException(e)
+            else:
+                self.userException(e)
+        else:
+            message = "unhandled exception: " + str(e)
+            phlcon_differential.createComment(
+                self._conduit, self._revision_id, message)
 
     def commitMessageParseException(self, e):
         message = "failed to update revision, see below."

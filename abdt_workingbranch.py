@@ -35,6 +35,8 @@ def pushStatus(gitContext, review_branch, working_branch, status):
             phlgitu_ref.makeLocal(new_branch),
             remote)
 
+    return working_branch
+
 
 def pushBadPreReview(gitContext, review_branch):
     working_branch_name = abdt_naming.makeWorkingBranchName(

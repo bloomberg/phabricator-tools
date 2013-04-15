@@ -73,6 +73,19 @@ def makeGitWorkingBranch(working_branch, remote):
         remote_branch=makeRemote(working_branch.branch, remote))
 
 
+def makeGitWorkingBranchFromParts(
+        status, description, base, review_id, remote):
+    """Return a GitReviewBranch based on the supplied parts."""
+    working_branch = abdt_naming.makeWorkingBranchName(
+        base=base,
+        status=status,
+        description=description,
+        review_id=review_id)
+    working_branch = abdt_naming.makeWorkingBranchFromName(working_branch)
+    working_branch = makeGitWorkingBranch(working_branch, remote)
+    return working_branch
+
+
 def makeGitReviewBranch(review_branch, remote):
     """Return a GitReviewBranch based on a abdt_naming.ReviewBranch and remote.
 
