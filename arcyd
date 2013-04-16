@@ -8,9 +8,9 @@ import datetime
 import sys
 import time
 
-import abdcmd_default
-import abdmail_printsender
+import abdi_processrepo
 import abdmail_mailer
+import abdmail_printsender
 import phlsys_conduit
 import phlsys_fs
 import phlsys_subprocess
@@ -148,7 +148,7 @@ class Single(object):
             https_proxy=args.https_proxy)
 
         out.display("process (" + args.repo_desc + "): ")
-        abdcmd_default.processUpdatedRepo(
+        abdi_processrepo.processUpdatedRepo(
             conduit, args.repo_path, "origin", mailer)
 
 
