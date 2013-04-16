@@ -1,127 +1,55 @@
 # phabricator-tools
 
-Tools and daemons for administering lots of Phabricator instances and
-integrating them with other tools.
+*Tools and daemons for administering lots of Phabricator instances and
+integrating them with other tools*
 
-## Content
+[Phabricator](http://phabricator.org/) is an awesome, open-source application for communicating
+and collaborating with other software developers within an enterprise.
 
-** Arcyd **
-Arcanist-git-branch-daemon (WIP), enables simple workflows without using
-arcanist directly:
+Many enterprises may be big enough such that it makes sense to have
+an instance of Phabricator per area of responsiblity or product being
+worked on; for example you may have one Phabricator for your website
+and one for each of your major products.
 
-  $ git checkout -b feature/mywork
-  .. do work and commit ..
-  $ git push origin feature/mywork:ph-review/mywork/master
-  .. daemon creates a review based on commit comments ..
-  .. reviewer appoves ..
-  .. daemon merges to master ..
+This project aims to complement Phabricator by making installation,
+administration and interoperation easier.  At some point it will
+hopefully be merged with Phabricator-actual.
 
-See arcyd.remarkup for more information.
+The first tool to be provided is *Arcyd*, see below.
 
-** phi ** (planned)
-A command-line tool for working with lots of Phabricator instances,
-e.g.
+## Arcyd
+This is a daemon which watches git repositories and automatically creates reviews and lands them when accepted.
 
-  $ phi new myinstance
+Here is an example of someone working with a repository which is watched by Arcyd:
 
-Creates a new Phabricator webfront for 'myinstance' in the instances/
-directory, initialised the db, starts the daemons.
+    $ git checkout -b feature/mywork
+    .. do work and commit ..
+    $ git push origin feature/mywork:ph-review/mywork/master
+    .. daemon creates a review based on commit comments ..
+    .. the reviewer appoves ..
+    .. Arcyd merges the changes to master ..
 
-(TODO: need to doc directory layout separately)
-
-** gnd ** (planned)
-Git-notes-daemon
-Pull data from Differential revisions into 'refs/notes/differential' for
-individual git repos.  Uses the review URIs embedded in commit messages to
-retreive the data.
+(TODO: paste existing doc here)
 
 ## Phabricator Developer setup instructions
 
-*To install locally in Linux (tested on Lubuntu 12.10):*
+**To install locally in a clean Linux VM (tested on Lubuntu 12.10):**
 
-$ sudo puppet apply vagrant/puppet/phabricator/manifests/default.pp \
-    --modulepath vagrant/puppet
+1. `$ sudo puppet apply vagrant/puppet/phabricator/manifests/default.pp --modulepath vagrant/puppet`
+2. Point a web-browser at 'http://127.0.0.1' to login to your new Phabricator instance
 
-*To create a local VM serving up Phabricator on Windows:*
+**To create a local VM serving up Phabricator on Windows:**
 
-Install VirtualBox, Vagrant
-
-$ ./vagrant-up.sh
+1. Install [VirtualBox](https://www.virtualbox.org/)
+2. Install [Vagrant](http://www.vagrantup.com/)
+3. ```$ ./vagrant-up.sh```
 (should take about 10 mins to download the base image)
+4. Point a web-browser at 'http://127.0.0.1:8080' to login to your new Phabricator instance
 
-When that's done, point a web-browser at 'http://127.0.0.1:8080'
-to login to your new Phabricator instance.
+**Pre-installed Users**
 
-Pre-installed Users: "alice", "bob", "phab" (administrator)
-All pre-installed users have the password set to 'password'
-
-## Directory Layout
-
-  *./arcyd*
-      The 'Arcyd' application
-
-  *./arcyd_test/*
-      A testbed for the Arcyd application to run in,
-      setup with 'make_test_repos.sh' and run
-          'run_arcyd_single.sh'
-      or  'run_arcyd_multi.sh'
-      to try arcyd out in the test instance.
-
-  *./LICENSE*
-
-  *./runtests*
-      Convenience script to run the test suite
-
-  *./TODO*
-
-  *./vagrant*
-      All the 'instant Phabricator' artifacts may be found here.
-
-  *./*
-      To simplify usage, all the Python source is in the root directory;
-      this is so that the modules do not need to be added to the PYTHONPATH
-      in order to be discovered, they run out of the box.
-
-      The python modules are divided into 'package groups' which are in turn
-      divided into 'packages'
-
-      ./abd*
-          The 'abd' package group contains the Arcyd-specific code and may be
-          renamed to 'arc' later.
-
-          ./abdcmd_*
-              Implemenation of Arcyd subcommands
-
-          ./abdcmnt_*
-              Format and submit event-related comments to Differential reviews
-
-          ./abdti_*
-              High-level Arcyd implementation details
-
-          ./abdmail_*
-              Format and submit event-related emails to people
-
-          ./abdt_*
-              General shared types, conventions and tools
-
-      ./phl*
-          The 'phl' package group contains the code which can be considered
-          re-usable as a 'PHabricator Library'.
-
-          ./phlcon_*
-              Thin wrappers around Phabricator Conduit APIs
-
-          ./phldef_*
-              Predefined data and constants
-
-          ./phlgit_*
-              Thin wrappers around Git subcommands
-
-          ./phlgitu_*
-              High-level Git utilities
-
-          ./phlsys_*
-              Wrappers around interaction with the operating system
+`alice`, `bob`, `phab` (administrator)
+All pre-installed users have the password set to `password`
 
 ## Contacts
 
