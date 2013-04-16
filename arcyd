@@ -4,7 +4,6 @@
 """Arcyd automates the creation and landing of reviews from branches"""
 
 import argparse
-import datetime
 import platform
 import sys
 import time
@@ -17,20 +16,8 @@ import phlmail_format
 import phlsys_conduit
 import phlsys_fs
 import phlsys_sendmail
+import phlsys_statusline
 import phlsys_subprocess
-
-
-class ConsoleOutput(object):
-
-    def __init__(self):
-        self.last_output = ""
-
-    def display(self, s):
-        sys.stdout.write("\r" + " " * len(self.last_output))
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.last_output = "(" + now + ") " + s
-        sys.stdout.write("\r" + self.last_output)
-        sys.stdout.flush()
 
 
 def setupParser(name, module, subparsers):
@@ -118,7 +105,7 @@ class Single(object):
 
     @staticmethod
     def process(args):
-        out = ConsoleOutput()
+        out = phlsys_statusline.StatusLine()
 
         while True:
             Single.run_once(args, out)
@@ -190,7 +177,7 @@ class Multi(object):
             repo_args = parser.parse_args(repo)
             repos.append(repo_args)
 
-        out = ConsoleOutput()
+        out = phlsys_statusline.StatusLine()
 
         while True:
             for repo in repos:
