@@ -159,8 +159,6 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):
-        # TODO: create the diff after fields, it's more expensive to retry
-        diffid = d.createRawDiff(conduit, rawDiff).id
 
         print "- updating revision " + str(wb.id)
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
@@ -171,6 +169,8 @@ def updateInReview(conduit, wb, gitContext, review_branch):
                 errors=parsed.errors,
                 fields=parsed.fields,
                 digest=makeMessageDigest(clone, wb.remote_base, remoteBranch))
+
+        diffid = d.createRawDiff(conduit, rawDiff).id
 
         d.updateRevision(
             conduit, wb.id, diffid, parsed.fields, "update")
