@@ -1,37 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""Arcyd automates the creation and landing of reviews from branches"""
-
-import argparse
-import platform
-import sys
-import traceback
-
-import abdcmd_single
-import abdcmd_multi
-import phlmail_format
-import phlsys_sendmail
-
-
-def setupParser(name, module, subparsers):
-    doc = module.__doc__
-    docSubject = doc.splitlines()[0]
-    docEpilog = '\n'.join(doc.splitlines()[1:])
-    parser = subparsers.add_parser(
-        name,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        help=docSubject,
-        description=docSubject,
-        epilog=docEpilog,
-        fromfile_prefix_chars=module.getFromfilePrefixChars())
-    module.setupParser(parser)
-    parser.set_defaults(func=module.process)
-
-
-def main():
-    description = str("""
-Arcyd - an arcanist branch daemon
+"""Arcyd - daemon to watch git repos, create and land reviews automatically.
 
 Intended to make it easy for large teams to start using Differential without
 individual contributors needing to install and configure Arcanist.
@@ -52,9 +22,9 @@ minimal user workflow:
     .. Arcyd see's the 'ph-review' branch and creates a review ..
     .. Reviewer accepts the change ..
     .. Arcyd squashes the 'ph-review' branch onto master and deletes it ..
-        """)
+"""
 
-    epilog = str("""
+_USAGE_EXAMPLES = """
 usage example:
     Using the example accounts baked into the 'phabricator-tools'
     vagrant/puppet installation. (see ./README)
@@ -116,12 +86,39 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     --system-admin-email systemadmin@server.test \\
     --sendmail-binary sendmail \\
     single @localinstance.cfg @email.cfg @repo1.cfg
-    """)
+    """
 
+import argparse
+import platform
+import sys
+import traceback
+
+import abdcmd_single
+import abdcmd_multi
+import phlmail_format
+import phlsys_sendmail
+
+
+def setupParser(name, module, subparsers):
+    doc = module.__doc__
+    docSubject = doc.splitlines()[0]
+    docEpilog = '\n'.join(doc.splitlines()[1:])
+    parser = subparsers.add_parser(
+        name,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        help=docSubject,
+        description=docSubject,
+        epilog=docEpilog,
+        fromfile_prefix_chars=module.getFromfilePrefixChars())
+    module.setupParser(parser)
+    parser.set_defaults(func=module.process)
+
+
+def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=description,
-        epilog=epilog)
+        description=__doc__,
+        epilog=_USAGE_EXAMPLES)
 
     parser.add_argument(
         '--sys-admin-emails',
