@@ -290,24 +290,16 @@ def processUpdatedBranch(
                     gitContext,
                     review_branch,
                     working_branch)
-            except abdte.CommitMessageParseException as e:
-                print "commit message parse exception"
-                abdt_workingbranch.pushBadInReview(
-                    gitContext, review_branch, working_branch)
-                commenter.commitMessageParseException(e)
             except abdte.LandingException as e:
                 print "landing exception"
-                abdt_workingbranch.pushBadInReview(
+                abdt_workingbranch.pushBadLand(
                     gitContext, review_branch, working_branch)
-                commenter.landingException(e)
+                commenter.exception(e)
             except abdte.AbdUserException as e:
-                # TODO: commenter can differentiate exceptions itself now
-                #       may as well not differentiate here, except for
-                #       landingException
                 print "user exception"
                 abdt_workingbranch.pushBadInReview(
                     gitContext, review_branch, working_branch)
-                commenter.userException(e)
+                commenter.exception(e)
 
 
 def processOrphanedBranches(clone, remote, wbList, remote_branches):

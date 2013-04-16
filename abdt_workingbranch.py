@@ -4,14 +4,6 @@ import phlgitu_ref
 import abdt_gittypes
 
 
-def pushBadInReview(gitContext, review_branch, working_branch):
-    pushStatus(
-        gitContext,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_BAD_INREVIEW)
-
-
 def pushStatus(gitContext, review_branch, working_branch, status):
     clone = gitContext.clone
     remote = gitContext.remote
@@ -50,6 +42,20 @@ def pushBadPreReview(gitContext, review_branch):
         gitContext.remote)
 
 
+def pushBadInReview(gitContext, review_branch, working_branch):
+    pushStatus(
+        gitContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_BAD_INREVIEW)
+
+
+def pushBadLand(gitContext, review_branch, working_branch):
+    pushStatus(
+        gitContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_BAD_LAND)
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

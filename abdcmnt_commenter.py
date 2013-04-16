@@ -19,17 +19,17 @@ class Commenter(object):
     def exception(self, e):
         if isinstance(e, abdt_exception.AbdBaseException):
             if isinstance(e, abdt_exception.CommitMessageParseException):
-                self.commitMessageParseException(e)
+                self._commitMessageParseException(e)
             elif isinstance(e, abdt_exception.LandingException):
-                self.landingException(e)
+                self._landingException(e)
             else:
-                self.userException(e)
+                self._userException(e)
         else:
             message = "unhandled exception: " + str(e)
             phlcon_differential.createComment(
                 self._conduit, self._revision_id, message)
 
-    def commitMessageParseException(self, e):
+    def _commitMessageParseException(self, e):
         message = "failed to update revision, see below."
         message += "\n"
 
@@ -56,7 +56,7 @@ class Commenter(object):
         phlcon_differential.createComment(
             self._conduit, self._revision_id, message)
 
-    def landingException(self, e):
+    def _landingException(self, e):
         message = "failed to land revision, see below."
         message += "\n"
 
@@ -70,7 +70,7 @@ class Commenter(object):
         phlcon_differential.createComment(
             self._conduit, self._revision_id, message)
 
-    def userException(self, e):
+    def _userException(self, e):
         message = "failed to update revision, see below."
         message += "\n"
 
