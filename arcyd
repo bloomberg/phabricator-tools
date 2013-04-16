@@ -5,14 +5,18 @@
 
 import argparse
 import datetime
+import platform
 import sys
 import time
+import traceback
 
 import abdi_processrepo
 import abdmail_mailer
 import abdmail_printsender
+import phlmail_format
 import phlsys_conduit
 import phlsys_fs
+import phlsys_sendmail
 import phlsys_subprocess
 
 
@@ -229,7 +233,10 @@ usage example:
     Using the example accounts baked into the 'phabricator-tools'
     vagrant/puppet installation. (see ./README)
 
-    $ arcyd single
+    $ arcyd
+    --system-admin-email systemadmin@server.test \\
+    --sendmail-binary sendmail \\
+    single \\
     --instance-uri https://127.0.0.1/api/ \\
     --arcyd-user phab \\
     --arcyd-cert xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7\
@@ -265,7 +272,10 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
         /path/to/repo
 
     to run arcyd:
-    $ arcyd single @localinstance.cfg @email.cfg @repo1.cfg
+    $ arcyd
+    --system-admin-email systemadmin@server.test \\
+    --sendmail-binary sendmail \\
+    single @localinstance.cfg @email.cfg @repo1.cfg
 
     or you can use inheritance, e.g. in repo2.cfg:
         @localinstance.cfg
@@ -276,20 +286,61 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
         /path/to/repo
 
     to run arcyd:
-    $ arcyd single @repo2.cfg
+    $ arcyd
+    --system-admin-email systemadmin@server.test \\
+    --sendmail-binary sendmail \\
+    single @localinstance.cfg @email.cfg @repo1.cfg
     """)
 
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=description,
         epilog=epilog)
+
+    parser.add_argument(
+        '--sys-admin-emails',
+        metavar="EMAIL",
+        nargs="+",
+        type=str,
+        required=True,
+        help="email addresses to send important system events to")
+
+    parser.add_argument(
+        '--sendmail-binary',
+        metavar="PROGRAM",
+        type=str,
+        default="sendmail",
+        required=True,
+        help="program to send the mail with (e.g. sendmail)")
+
     subparsers = parser.add_subparsers()
 
     setupParser("single", Single, subparsers)
     setupParser("multi", Multi, subparsers)
 
     args = parser.parse_args()
-    args.func(args)
+
+    sendmail = phlsys_sendmail.Sendmail(args.sendmail_binary)
+    uname = str(platform.uname())
+    sender = "arcyd@" + platform.node()
+
+    mime = phlmail_format.Text(
+        subject="arcyd started",
+        message=uname,
+        from_address=sender,
+        to_addresses=args.sys_admin_emails)
+    sendmail.send(mime)
+
+    try:
+        args.func(args)
+    except Exception:
+        message = uname + "\n" + traceback.format_exc()
+        mime = phlmail_format.Text(
+            subject="arcyd stopped with exception",
+            message=message,
+            from_address=sender,
+            to_addresses=args.sys_admin_emails)
+        sendmail.send(mime)
 
 
 if __name__ == "__main__":
