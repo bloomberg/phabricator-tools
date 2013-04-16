@@ -9,15 +9,10 @@ import sys
 import time
 import traceback
 
-import abdi_processrepo
-import abdmail_mailer
-import abdmail_printsender
+import abdi_processargs
 import phlmail_format
-import phlsys_conduit
-import phlsys_fs
 import phlsys_sendmail
 import phlsys_statusline
-import phlsys_subprocess
 
 
 def setupParser(name, module, subparsers):
@@ -119,28 +114,7 @@ class Single(object):
     # TODO: this belongs in a file of its own
     @staticmethod
     def run_once(args, out):
-        print_sender = abdmail_printsender.MailSender(args.arcyd_email)
-        mailer = abdmail_mailer.Mailer(
-            print_sender,
-            [args.admin_email],
-            args.repo_desc)
-
-        with phlsys_fs.chDirContext(args.repo_path):
-            out.display("fetch (" + args.repo_desc + "): ")
-            phlsys_subprocess.runCommands("git fetch -p")
-
-        # XXX: until conduit refreshes the connection, we'll suffer from
-        #      timeouts; reduce the probability of this by using a new
-        #      conduit each time.
-        conduit = phlsys_conduit.Conduit(
-            args.instance_uri,
-            args.arcyd_user,
-            args.arcyd_cert,
-            https_proxy=args.https_proxy)
-
-        out.display("process (" + args.repo_desc + "): ")
-        abdi_processrepo.processUpdatedRepo(
-            conduit, args.repo_path, "origin", mailer)
+        return abdi_processargs.run_once(args, out)
 
 
 # TODO: this belongs in a file of its own
