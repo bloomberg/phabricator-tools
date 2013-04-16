@@ -46,8 +46,7 @@ def createReview(conduit, gitContext, review_branch):
         clone, review_branch.remote_base, review_branch.remote_branch)
     parsed = abdt_conduitgit.getFieldsFromCommitHashes(conduit, clone, hashes)
     if parsed.errors:
-        raise abdt_exception.InitialCommitMessageParseException(
-            email,
+        raise abdt_exception.CommitMessageParseException(
             errors=parsed.errors,
             fields=parsed.fields,
             digest=makeMessageDigest(
@@ -269,7 +268,7 @@ def processUpdatedBranch(
                     gitContext, review_branch, wb)
             except abdte.AbdUserException as e:
                 abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-                mailer.userException("oops", review_branch.branch)
+                mailer.userException(e.message, review_branch.branch)
     else:
         commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
@@ -280,10 +279,6 @@ def processUpdatedBranch(
                     working_branch.branch,
                     gitContext.remote)
                 createReview(conduit, gitContext, review_branch)
-            except abdte.InitialCommitMessageParseException as e:
-                abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-                mailer.initialCommitMessageParseException(
-                    e, review_branch.branch)
             except abdte.AbdUserException as e:
                 abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
                 mailer.userException(e.message, review_branch.branch)
@@ -295,9 +290,6 @@ def processUpdatedBranch(
                     gitContext,
                     review_branch,
                     working_branch)
-            except abdte.InitialCommitMessageParseException as e:
-                print "initial commit message parse exception"
-                raise e
             except abdte.CommitMessageParseException as e:
                 print "commit message parse exception"
                 abdt_workingbranch.pushBadInReview(

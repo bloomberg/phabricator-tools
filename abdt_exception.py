@@ -66,29 +66,6 @@ class MissingBaseException(AbdUserException):
         self.base_name = base_name
 
 
-class InitialCommitMessageParseException(AbdUserException):
-    def __init__(self, email, errors, fields, digest):
-        """Failure to create suitable message fields before there is a review.
-
-        :email: email address of the user that created the review
-        :errors: errors reported by Phabricator
-        :fields: the resulting fields response (if any)
-        :digest: a digest of the commit messages
-
-        """
-        message = (
-            "abdt_exception__InitialCommitMessageParseException:\n" +
-            "email: '" + str(email) + "'\n" +
-            "errors: '" + str(errors) + "'\n" +
-            "fields: '" + str(fields) + "'\n" +
-            "digest: '" + str(digest) + "'\n")
-        super(InitialCommitMessageParseException, self).__init__(message)
-        self.email = email
-        self.errors = errors
-        self.fields = fields
-        self.digest = digest
-
-
 class CommitMessageParseException(AbdUserException):
 
     def __init__(self, errors, fields, digest):
