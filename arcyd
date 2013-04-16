@@ -6,13 +6,12 @@
 import argparse
 import platform
 import sys
-import time
 import traceback
 
-import abdi_processargs
+import abdcmd_single
+import abdcmd_multi
 import phlmail_format
 import phlsys_sendmail
-import phlsys_statusline
 
 
 def setupParser(name, module, subparsers):
@@ -28,140 +27,6 @@ def setupParser(name, module, subparsers):
         fromfile_prefix_chars=module.getFromfilePrefixChars())
     module.setupParser(parser)
     parser.set_defaults(func=module.process)
-
-
-# TODO: this belongs in a file of its own
-class Single(object):
-    """watch a single repository"""
-
-    @staticmethod
-    def getFromfilePrefixChars():
-        return '@'
-
-    @staticmethod
-    def setupParser(parser):
-        # TODO: add help messages
-        parser.add_argument(
-            '--instance-uri',
-            metavar="URI",
-            type=str,
-            required=True,
-            help="instance to connect to, e.g. http://127.0.0.1")
-        parser.add_argument(
-            '--arcyd-user',
-            metavar="USER",
-            type=str,
-            required=True,
-            help="username for Arcyd to use")
-        parser.add_argument(
-            '--arcyd-cert',
-            metavar="CERT",
-            type=str,
-            required=True,
-            help="Phabricator Conduit API certificate to use, this is the "
-            "value that you will find in your user account in Phabricator "
-            "at: http://your.server.example/settings/panel/conduit/. "
-            "It can also be found in ~/.arcrc.")
-        parser.add_argument(
-            '--arcyd-email',
-            metavar="FROM",
-            type=str,
-            required=True,
-            help="email address for Arcyd to send mails from")
-        parser.add_argument(
-            '--admin-email',
-            metavar="TO",
-            type=str,
-            required=True,
-            help="email address to send important system events to")
-        parser.add_argument(
-            '--repo-desc',
-            metavar="DESC",
-            type=str,
-            required=True,
-            help="description to use in emails")
-        parser.add_argument(
-            '--repo-path',
-            metavar="PATH",
-            type=str,
-            required=True,
-            help="path to the repository on disk")
-        parser.add_argument(
-            '--https-proxy',
-            metavar="PROXY",
-            type=str,
-            help="proxy to use, if necessary")
-        parser.add_argument(
-            '--sleep-secs',
-            metavar="TIME",
-            type=int,
-            default=60,
-            help="time to wait between fetches")
-
-    @staticmethod
-    def process(args):
-        out = phlsys_statusline.StatusLine()
-
-        while True:
-            Single.run_once(args, out)
-
-            sleep_remaining = args.sleep_secs
-            while sleep_remaining > 0:
-                out.display("sleep (" + str(sleep_remaining) + " seconds) ")
-                time.sleep(1)
-                sleep_remaining -= 1
-
-    # TODO: this belongs in a file of its own
-    @staticmethod
-    def run_once(args, out):
-        return abdi_processargs.run_once(args, out)
-
-
-# TODO: this belongs in a file of its own
-class Multi(object):
-    """watch multiple repositories"""
-
-    @staticmethod
-    def getFromfilePrefixChars():
-        return None
-
-    @staticmethod
-    def setupParser(parser):
-        parser.add_argument(
-            '--repo-configs',
-            metavar="N",
-            action='append',
-            nargs='+',
-            type=str,
-            help="files to load configuration from, prefix with @")
-        parser.add_argument(
-            '--sleep-secs',
-            metavar="TIME",
-            type=int,
-            default=60,
-            help="time to wait between runs through the list")
-
-    @staticmethod
-    def process(args):
-        repos = list()
-        for repo in args.repo_configs:
-            parser = argparse.ArgumentParser(
-                fromfile_prefix_chars=Single.getFromfilePrefixChars())
-            Single.setupParser(parser)
-            repo_args = parser.parse_args(repo)
-            repos.append(repo_args)
-
-        out = phlsys_statusline.StatusLine()
-
-        while True:
-            for repo in repos:
-                Single.run_once(repo, out)
-
-            sleep_remaining = args.sleep_secs
-            while sleep_remaining > 0:
-                out.display("sleep (" + str(sleep_remaining) + " seconds) ")
-                time.sleep(1)
-                sleep_remaining -= 1
 
 
 def main():
@@ -276,8 +141,8 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
 
     subparsers = parser.add_subparsers()
 
-    setupParser("single", Single, subparsers)
-    setupParser("multi", Multi, subparsers)
+    setupParser("single", abdcmd_single, subparsers)
+    setupParser("multi", abdcmd_multi, subparsers)
 
     args = parser.parse_args()
 
