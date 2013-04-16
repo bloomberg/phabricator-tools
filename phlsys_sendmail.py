@@ -1,24 +1,24 @@
-#!/usr/bin/env python
-# encoding: utf-8
+"""A simple wrapper to call sendmail-like binary"""
 
-import phlmail_format
+import phlsys_subprocess
 
 
-class MailSender(object):
-    """A mail sender that just prints the mails to the console."""
+class Sendmail():
+    def __init__(self, binary=None):
+        """Simply copy the supplied parameters and store in the object.
 
-    def __init__(self, from_email):
-        """Setup to print email to the console from 'from_email'.
+        :binary: the binary to execute, 'sendmail' if None
 
-        :from_email: the address to send from
+        Note that other binaries that are sendmail-compatabile, like
+        'catchmail' can be used here instead.
 
         """
-        self._from_email = from_email
+        self._binary = binary if binary is not None else 'sendmail'
 
-    def send(self, to, subject, message, cc=None):
-        print "-----"
-        print phlmail_format.Text(subject, message, self._from_email, to, cc)
-        print "-----"
+    #def call(*args, stdin=None): <-- supported in Python 3
+    def send(self, stdin):
+        result = phlsys_subprocess.run(self._binary, stdin=stdin)
+        return result.stdout
 
 
 #------------------------------------------------------------------------------

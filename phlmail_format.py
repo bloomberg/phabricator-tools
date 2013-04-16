@@ -1,24 +1,32 @@
-#!/usr/bin/env python
-# encoding: utf-8
+"""Format valid mime-text suitable for piping into sendmail."""
 
-import phlmail_format
+import types
+from email.mime.text import MIMEText
+
+# TODO: add support for multipart, including html etc.
 
 
-class MailSender(object):
-    """A mail sender that just prints the mails to the console."""
+# XXX: not really sure we can support bcc in the header so leave it off for now
+def Text(subject, message, from_address, to_addresses, cc_addresses=None):
+    """@todo: Docstring for Text
 
-    def __init__(self, from_email):
-        """Setup to print email to the console from 'from_email'.
+    :subject: the string subject line for the message
+    :message: the string body of the message
+    :from_address: the string email address we are sending from
+    :to_addresses: the list of string email addresses we are sending to
+    :cc_addresses: the list of string email addresses we are ccing to
+    :returns: @todo
 
-        :from_email: the address to send from
-
-        """
-        self._from_email = from_email
-
-    def send(self, to, subject, message, cc=None):
-        print "-----"
-        print phlmail_format.Text(subject, message, self._from_email, to, cc)
-        print "-----"
+    """
+    assert not isinstance(to_addresses, types.StringTypes), "'to' is string"
+    msg = MIMEText(message)
+    msg['subject'] = subject
+    msg['from'] = from_address
+    msg['to'] = ', '.join(to_addresses)
+    if cc_addresses:
+        assert not isinstance(cc_addresses, types.StringTypes), "cc is string"
+        msg['cc'] = ', '.join(cc_addresses)
+    return msg.as_string()
 
 
 #------------------------------------------------------------------------------

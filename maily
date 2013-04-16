@@ -1,0 +1,113 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+"""Maily is a simple wrapper around sendmail."""
+
+import argparse
+import sys
+
+import phlmail_format
+import phlsys_sendmail
+
+
+def main():
+    description = str("""
+Maily - a sendmail wrapper
+
+Intended primarily to test our sendmail integration, this can also be used
+as a very simple wrapper around sendmail.
+    """)
+
+    epilog = str("""
+usage example:
+    $ ./maily \\
+        --from me@server.example \\
+        --to you@server.example \\
+        --subject "my subject" \\
+        --message "my message"
+    """)
+
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=description,
+        epilog=epilog)
+
+    parser.add_argument(
+        '--sender',
+        metavar="EMAIL",
+        type=str,
+        required=True,
+        help="address to send the mail from")
+
+    parser.add_argument(
+        '--to',
+        metavar="EMAIL",
+        nargs='+',
+        type=str,
+        required=True,
+        help="addresses to send the mail to")
+
+    parser.add_argument(
+        '--cc',
+        metavar="EMAIL",
+        nargs='+',
+        type=str,
+        help="addresses to cc the mail to")
+
+    parser.add_argument(
+        '--subject',
+        metavar="TEXT",
+        type=str,
+        required=True,
+        help="subject line of the message")
+
+    parser.add_argument(
+        '--message',
+        metavar="TEXT",
+        type=str,
+        required=True,
+        help="body of the message")
+
+    parser.add_argument(
+        '--binary',
+        metavar="PROGRAM",
+        type=str,
+        help="program to send the mail with")
+
+    args = parser.parse_args()
+
+    binary = args.binary if args.binary else None
+    sendmail = phlsys_sendmail.Sendmail(binary)
+    message = phlmail_format.Text(
+        subject=args.subject,
+        message=args.message,
+        from_address=args.sender,
+        to_addresses=args.to,
+        cc_addresses=args.cc)
+    sendmail.send(message)
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+#------------------------------------------------------------------------------
+# Copyright (C) 2012 Bloomberg L.P.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+#------------------------------- END-OF-FILE ----------------------------------
