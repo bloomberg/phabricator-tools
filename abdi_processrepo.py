@@ -121,18 +121,15 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
         print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
         wb = updateInReview(conduit, wb, gitContext, rb)
-    elif abdt_naming.isStatusBad(wb):
+    elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
-        # TODO: make the bad landing state explicit with the branch state
-        # don't try to update bad landing branches
-        if int(status) != d.REVISION_ACCEPTED:
-            try:
-                print "try updating bad branch"
-                verifyReviewBranchBase(gitContext, reviewBranch)
-                updateInReview(conduit, wb, gitContext, rb)
-            except abdt_exception.AbdUserException:
-                print "still bad"
+        try:
+            print "try updating bad branch"
+            verifyReviewBranchBase(gitContext, reviewBranch)
+            updateInReview(conduit, wb, gitContext, rb)
+        except abdt_exception.AbdUserException:
+            print "still bad"
 
     if not abdt_naming.isStatusBad(wb):
         d = phlcon_differential
