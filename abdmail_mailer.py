@@ -42,7 +42,7 @@ class Mailer(object):
         to.extend(self._admin_emails)
         to.extend(emails)
         self._mail_sender.send(
-            to=to,
+            to_addresses=to,
             subject="user exception",
             message=msg)
 
@@ -52,7 +52,7 @@ class Mailer(object):
         msg += "\nerror when processing branch: " + str(branch_name)
         msg += "\n" + message
         self._mail_sender.send(
-            to=self._admin_emails,
+            to_addresses=self._admin_emails,
             subject="user exception",
             message=msg)
 
@@ -66,13 +66,13 @@ class Mailer(object):
         msg += "\nerror when processing branch: " + branch_name
         msg += "\n" + e.message
         self._mail_sender.send(
-            to=[e.email],
+            to_addresses=[e.email],
             subject="bad review branch",
             message=branch_name)
 
     def badBranchName(self, owner, branch_name):
         self._mail_sender.send(
-            to=[owner],
+            to_addresses=[owner],
             subject="bad review branch",
             message=branch_name)
 

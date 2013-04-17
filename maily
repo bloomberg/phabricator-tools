@@ -81,9 +81,9 @@ usage example:
         phlsys_sendmail.Sendmail(binary),
         args.sender)
     mailsender.send(
-        to_addresses=args.to,
         subject=args.subject,
         message=args.message,
+        to_addresses=args.to,
         cc_addresses=args.cc)
 
 
