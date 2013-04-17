@@ -37,6 +37,9 @@ def createReview(conduit, gitContext, review_branch):
     clone = gitContext.clone
     verifyReviewBranchBase(gitContext, review_branch)
 
+    # TODO: we should also cc other users on the branch
+    # TODO: if there are emails that don't match up to users then we should
+    #       note that on the review and perhaps use the mailer to notify them
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, review_branch.remote_base,
         review_branch.remote_branch)
@@ -154,7 +157,6 @@ def updateInReview(conduit, wb, gitContext, review_branch):
 
     d = phlcon_differential
     with phlsys_conduit.actAsUserContext(conduit, user):
-
         print "- updating revision " + str(wb.id)
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
         parsed = abdt_conduitgit.getFieldsFromCommitHashes(
