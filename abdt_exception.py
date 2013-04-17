@@ -96,7 +96,7 @@ class LandingException(AbdUserException):
 
         """
         new_message = (
-            "abdt_exception__CommitMessageParseException:\n" +
+            "abdt_exception__LandingException:\n" +
             "message: '" + str(message) + "'")
         super(LandingException, self).__init__(new_message)
 
