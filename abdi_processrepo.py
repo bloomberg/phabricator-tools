@@ -4,6 +4,7 @@
 """abd automates the creation and landing of reviews from branches"""
 import subprocess
 
+# XXX: probably too many imports
 import abdcmnt_commenter
 import abdt_exception
 import abdt_naming
