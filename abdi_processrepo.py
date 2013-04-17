@@ -292,13 +292,20 @@ def processUpdatedBranch(
                 commenter.exception(e)
 
 
-def processOrphanedBranches(clone, remote, wbList, remote_branches):
+def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
     for wb in wbList:
         rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(wb)
         if rb not in remote_branches:
-            print "delete orphaned branch: " + wb.branch
+            print "delete abandoned branch: " + wb.branch
+            try:
+                revisionid = int(wb.id)
+            except ValueError:
+                pass
+            else:
+                commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
+                commenter.abandonedBranch(rb)
+                # TODO: abandon the associated revision if not already
             phlgit_push.delete(clone, wb.branch, remote)
-            # TODO: update the associated revision if there is one
 
 
 def processUpdatedRepo(conduit, path, remote, mailer):
@@ -309,7 +316,7 @@ def processUpdatedRepo(conduit, path, remote, mailer):
     makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
     rbDict = dict((makeRb(wb), wb) for wb in wbList)
 
-    processOrphanedBranches(clone, remote, wbList, remote_branches)
+    processAbandonedBranches(conduit, clone, remote, wbList, remote_branches)
 
     for b in remote_branches:
         if abdt_naming.isReviewBranchPrefixed(b):

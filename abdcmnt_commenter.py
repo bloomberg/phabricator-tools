@@ -54,6 +54,13 @@ class Commenter(object):
         message += "git output:\n" + rmu.codeBlock(git_output, lang="text")
         self._createComment(message, silent=True)
 
+    def abandonedBranch(self, branch_name):
+        message = "user deleted branch "
+        message += rmu.monospaced(branch_name) + " "
+        message += "which was linked to this review.\n"
+        message += "this review is now abandoned."
+        self._createComment(message, silent=True)
+
     def _createComment(self, message, silent=False):
         phlcon_differential.createComment(
             self._conduit, self._revision_id, message, silent=silent)
