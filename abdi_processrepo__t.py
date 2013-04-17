@@ -85,7 +85,8 @@ class Test(unittest.TestCase):
         self.mailer = abdmail_mailer.Mailer(
             print_sender,
             ["admin@server.test"],
-            "http://server.fake/testrepo.git")
+            "http://server.fake/testrepo.git",
+            "http://phabricator.server.fake/")
 
     def _countPhabWorkingBranches(self):
         with phlsys_fs.chDirContext("phab"):
@@ -251,6 +252,8 @@ class Test(unittest.TestCase):
         self._devSetAuthorAccount(phldef_conduit.notauser)
         self._devCheckoutPushNewBranch("ph-review/badAuthorWorkflow/master")
         self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devResetBranchToMaster("ph-review/badAuthorWorkflow/master")
         self._devSetAuthorAccount(self.author_account)

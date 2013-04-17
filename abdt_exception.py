@@ -66,6 +66,26 @@ class MissingBaseException(AbdUserException):
         self.base_name = base_name
 
 
+class NoUsersOnBranchException(AbdUserException):
+    def __init__(self, review_branch_name, base_name, emails):
+        """Branch does not contain commits by any known users.
+
+        :review_branch_name: name of the branch being reviewed
+        :base_name: name of the missing base branch
+        :emails: email addresses of authors on the branch
+
+        """
+        message = (
+            "abdt_exception__NoUsersOnBranchException:\n" +
+            "review_branch_name: '" + str(review_branch_name) + "'\n" +
+            "base_name: '" + str(base_name) + "'\n" +
+            "emails: '" + str(emails) + "'\n")
+        super(NoUsersOnBranchException, self).__init__(message)
+        self.review_branch_name = review_branch_name
+        self.base_name = base_name
+        self.emails = emails
+
+
 class CommitMessageParseException(AbdUserException):
 
     def __init__(self, errors, fields, digest):

@@ -13,7 +13,8 @@ def run_once(args, out):
     mailer = abdmail_mailer.Mailer(
         print_sender,
         [args.admin_email],
-        args.repo_desc)
+        args.repo_desc,
+        args.instance_uri)  # TODO: this should be a URI for users not conduit
 
     with phlsys_fs.chDirContext(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")

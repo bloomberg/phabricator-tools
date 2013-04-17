@@ -39,8 +39,7 @@ def getAnyUserFromBranch(clone, conduit, base, branch):
     for user in users:
         if user:
             return user
-    raise abdt_exception.AbdUserException(
-        "no users on branch!")
+    raise abdt_exception.NoUsersOnBranchException(branch, base, emails)
 
 
 def getFieldsFromCommitHashes(conduit, clone, hashes):

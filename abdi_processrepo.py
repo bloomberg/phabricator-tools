@@ -248,32 +248,45 @@ def createFailedReview(conduit, gitContext, review_branch, exception):
         gitContext, review_branch, wb)
 
 
+def tryCreateReview(mailer, conduit, gitContext, review_branch, mail_on_fail):
+    try:
+        createReview(conduit, gitContext, review_branch)
+    except abdt_exception.AbdUserException as e:
+        try:
+            createFailedReview(conduit, gitContext, review_branch, e)
+        except abdt_exception.NoUsersOnBranchException as e:
+            abdt_workingbranch.pushBadPreReview(
+                gitContext, review_branch)
+            if mail_on_fail:
+                mailer.noUsersOnBranch(
+                    e.review_branch_name, e.base_name, e.emails)
+
+
 def processUpdatedBranch(
         mailer, conduit, gitContext, review_branch, working_branch):
     abdte = abdt_exception
     if working_branch is None:
         print "create review for " + review_branch.branch
-        try:
-            createReview(conduit, gitContext, review_branch)
-        except abdte.AbdUserException as e:
-            try:
-                createFailedReview(conduit, gitContext, review_branch, e)
-            except abdte.AbdUserException as e:
-                abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-                mailer.userException(e.message, review_branch.branch)
+        tryCreateReview(
+            mailer, conduit, gitContext, review_branch, mail_on_fail=True)
     else:
         commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
+            hasChanged = not phlgit_branch.isIdentical(
+                gitContext.clone,
+                review_branch.remote_branch,
+                working_branch.remote_branch)
             print "try again to create review for " + review_branch.branch
-            try:
-                phlgit_push.delete(
-                    gitContext.clone,
-                    working_branch.branch,
-                    gitContext.remote)
-                createReview(conduit, gitContext, review_branch)
-            except abdte.AbdUserException as e:
-                abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
-                mailer.userException(e.message, review_branch.branch)
+            phlgit_push.delete(
+                gitContext.clone,
+                working_branch.branch,
+                gitContext.remote)
+            tryCreateReview(
+                mailer,
+                conduit,
+                gitContext,
+                review_branch,
+                mail_on_fail=hasChanged)
         else:
             print "update review for " + review_branch.branch
             try:

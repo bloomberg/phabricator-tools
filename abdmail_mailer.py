@@ -1,25 +1,50 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 import types
 
 
 class Mailer(object):
     """Send mails to interested parties about pre-specified conditions."""
 
-    def __init__(self, mail_sender, admin_emails, repository_name):
+    def __init__(self, mail_sender, admin_emails, repository_name, uri):
         """Initialise, simply store the supplied parameters.
 
         :mail_sender: supports send(to, cc, subject, message)
         :admin_emails: list of string, who to tell when no appropriate users
         :repository_name: the repository that is in context
+        :uri: the address of the phabricator instance
 
         """
         self._mail_sender = mail_sender
         assert not isinstance(
-            admin_emails, types.StringTypes), "admin_emails string"
+            admin_emails, types.StringTypes), "should be list not string"
         self._admin_emails = admin_emails
         self._repository_name = repository_name
+        self._uri = uri
+
+    def noUsersOnBranch(self, branch_name, branch_base, emails):
+        # TODO: determine which of 'emails' we're permitted to send to
+        msg = ""
+        msg += "No registered Phabricator users were found when\n"
+        msg += "trying to create a review from a branch.\n"
+        msg += "\n"
+        msg += "repository:     " + self._repository_name + "\n"
+        msg += "branch:         " + branch_name + "\n"
+        msg += "base branch:    " + branch_base + "\n"
+        msg += "unknown emails: " + str(emails) + "\n"
+        msg += "\n"
+        msg += "If you appear in the 'unknown emails' list then\n"
+        msg += "please register by visiting this link, simply\n"
+        msg += "logging in will resolve the issue:\n"
+        msg += "  " + self._uri + "\n"
+        msg += "\n"
+        msg += "You are receiving this message because you are\n"
+        msg += "either in the unknown email list or an admin.\n"
+        to = []
+        to.extend(self._admin_emails)
+        to.extend(emails)
+        self._mail_sender.send(
+            to=to,
+            subject="user exception",
+            message=msg)
 
     def userException(self, message, branch_name):
         msg = ""
