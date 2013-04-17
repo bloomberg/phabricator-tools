@@ -58,3 +58,8 @@ Angelos Evripiotis (jevripio@bloomberg.net)
 ## Credits and Acknowledgements
 
 Thanks to the awesome guys working on the Phabricator project!
+
+
+## License
+
+MIT license. See license text in [LICENSE](https://github.com/bloomberg/phabricator-tools/blob/master/LICENSE).
