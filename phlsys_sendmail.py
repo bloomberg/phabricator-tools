@@ -4,6 +4,13 @@ import phlsys_subprocess
 
 
 class Sendmail():
+
+    _default_binary = 'sendmail'
+
+    @classmethod
+    def set_default_binary(cls, binary):
+        cls._default_binary = binary
+
     def __init__(self, binary=None):
         """Simply copy the supplied parameters and store in the object.
 
@@ -13,7 +20,7 @@ class Sendmail():
         'catchmail' can be used here instead.
 
         """
-        self._binary = binary if binary is not None else 'sendmail'
+        self._binary = binary if binary is not None else self._default_binary
 
     #def call(*args, stdin=None): <-- supported in Python 3
     def send(self, stdin):

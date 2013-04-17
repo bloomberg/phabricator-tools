@@ -145,8 +145,13 @@ def main():
     args = parser.parse_args()
 
     uname = str(platform.uname())
+
+    if args.sendmail_binary:
+        phlsys_sendmail.Sendmail.set_default_binary(
+            args.sendmail_binary)
+
     mailsender = phlmail_sender.MailSender(
-        phlsys_sendmail.Sendmail(args.sendmail_binary),
+        phlsys_sendmail.Sendmail(),
         "arcyd@" + platform.node())
 
     # exit if we're stopped by SIGTERM
