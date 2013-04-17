@@ -35,12 +35,31 @@ class Commenter(object):
         self._createComment(message)
         self.exception(exception)
 
-    def _createComment(self, message):
+    def createdReview(self, branch_name):
+        message = "created revision from branch "
+        message += rmu.monospaced(branch_name) + "\n"
+        self._createComment(message, silent=True)
+
+    def updatedReview(self, branch_name):
+        message = "updated revision from branch "
+        message += rmu.monospaced(branch_name) + "\n"
+        self._createComment(message, silent=True)
+
+    def landedReview(self, branch_name, base_name, git_output):
+        message = "landed "
+        message += rmu.monospaced(branch_name) + " "
+        message += " on "
+        message += rmu.monospaced(base_name) + "\n"
+        message += "deleted " + rmu.monospaced(branch_name) + "\n"
+        message += "git output:\n" + rmu.codeBlock(git_output, lang="text")
+        self._createComment(message, silent=True)
+
+    def _createComment(self, message, silent=False):
         phlcon_differential.createComment(
-            self._conduit, self._revision_id, message)
+            self._conduit, self._revision_id, message, silent=silent)
 
     def _commitMessageParseException(self, e):
-        message = "failed to update revision, see below.\n"
+        message = "errors were encountered, see below.\n"
         message += "\n"
 
         message += "errors:\n"
@@ -65,7 +84,7 @@ class Commenter(object):
         self._createComment(message)
 
     def _userException(self, e):
-        message = "failed to update revision, see below.\n"
+        message = "errors were encountered, see below.\n"
         message += "\n"
 
         message += "errors:\n"

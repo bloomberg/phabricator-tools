@@ -96,11 +96,8 @@ def createDifferentialReview(
             clone, review_branch.branch, workingBranch, gitContext.remote)
 
     print "- commenting on " + str(review.revisionid)
-    createMessage = ""
-    createMessage += "i created this from " + review_branch.branch + ".\n"
-    createMessage += " pushed to " + workingBranch + "."
-    phlcon_differential.createComment(
-        conduit, review.revisionid, message=createMessage, silent=True)
+    commenter = abdcmnt_commenter.Commenter(conduit, review.revisionid)
+    commenter.createdReview(review_branch.branch)
 
 
 def makeMessageDigest(clone, base, branch):
@@ -180,11 +177,8 @@ def updateInReview(conduit, wb, gitContext, review_branch):
         abdt_naming.WB_STATUS_OK)
 
     print "- commenting on revision " + str(wb.id)
-    updateMessage = ""
-    updateMessage += "i updated this from " + review_branch.branch + ".\n"
-    updateMessage += "pushed to " + wb.branch + "."
-    d.createComment(
-        conduit, wb.id, message=updateMessage, silent=True)
+    commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
+    commenter.updatedReview(review_branch.branch)
 
     return wb
 
@@ -224,14 +218,8 @@ def land(conduit, wb, gitContext, branch):
         phlgit_push.delete(clone, branch, gitContext.remote)
 
     print "- commenting on revision " + str(wb.id)
-    closeMessage = ""
-    closeMessage += "i landed this on " + wb.base + ".\n"
-    closeMessage += "deleted " + wb.branch + "\n"
-    closeMessage += "deleted " + branch + "."
-    d.createComment(
-        conduit, wb.id, message=closeMessage, silent=True)
-    d.createComment(
-        conduit, wb.id, message=squashMessage, silent=True)
+    commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
+    commenter.landedReview(branch, wb.base, squashMessage)
 
     with phlsys_conduit.actAsUserContext(conduit, user):
         d.close(conduit, wb.id)
