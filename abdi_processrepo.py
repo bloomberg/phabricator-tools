@@ -27,6 +27,8 @@ import abdt_workingbranch
 
 #TODO: split into appropriate modules
 
+_DEFAULT_TEST_PLAN = "I DIDNT TEST"
+
 
 def isBasedOn(name, base):
     #TODO: actually do this
@@ -46,21 +48,33 @@ def createReview(conduit, gitContext, review_branch):
 
     print "- author: " + user
 
+    used_default_test_plan = False
+
     hashes = phlgit_log.getRangeHashes(
         clone, review_branch.remote_base, review_branch.remote_branch)
     parsed = abdt_conduitgit.getFieldsFromCommitHashes(conduit, clone, hashes)
     if parsed.errors:
-        raise abdt_exception.CommitMessageParseException(
-            errors=parsed.errors,
-            fields=parsed.fields,
-            digest=makeMessageDigest(
-                clone, review_branch.remote_base, review_branch.remote_branch))
+        used_default_test_plan = True
+        parsed = abdt_conduitgit.getFieldsFromCommitHashes(
+            conduit, clone, hashes, _DEFAULT_TEST_PLAN)
+        if parsed.errors:
+            raise abdt_exception.CommitMessageParseException(
+                errors=parsed.errors,
+                fields=parsed.fields,
+                digest=makeMessageDigest(
+                    clone,
+                    review_branch.remote_base,
+                    review_branch.remote_branch))
 
     rawDiff = phlgit_diff.rawDiffRange(
         clone, review_branch.remote_base, review_branch.remote_branch, 1000)
 
-    createDifferentialReview(
+    revisionid = createDifferentialReview(
         conduit, user, parsed, gitContext, review_branch, rawDiff)
+
+    if used_default_test_plan:
+        commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
+        commenter.usedDefaultTestPlan(review_branch.branch, _DEFAULT_TEST_PLAN)
 
 
 def verifyReviewBranchBase(gitContext, review_branch):
@@ -101,6 +115,8 @@ def createDifferentialReview(
     print "- commenting on " + str(review.revisionid)
     commenter = abdcmnt_commenter.Commenter(conduit, review.revisionid)
     commenter.createdReview(review_branch.branch)
+
+    return review.revisionid
 
 
 def makeMessageDigest(clone, base, branch):
@@ -156,16 +172,22 @@ def updateInReview(conduit, wb, gitContext, review_branch):
         clone, wb.remote_base, remoteBranch, 1000)
 
     d = phlcon_differential
+    used_default_test_plan = False
     with phlsys_conduit.actAsUserContext(conduit, user):
         print "- updating revision " + str(wb.id)
         hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
         parsed = abdt_conduitgit.getFieldsFromCommitHashes(
             conduit, clone, hashes)
         if parsed.errors:
-            raise abdt_exception.CommitMessageParseException(
-                errors=parsed.errors,
-                fields=parsed.fields,
-                digest=makeMessageDigest(clone, wb.remote_base, remoteBranch))
+            used_default_test_plan = True
+            parsed = abdt_conduitgit.getFieldsFromCommitHashes(
+                conduit, clone, hashes, _DEFAULT_TEST_PLAN)
+            if parsed.errors:
+                raise abdt_exception.CommitMessageParseException(
+                    errors=parsed.errors,
+                    fields=parsed.fields,
+                    digest=makeMessageDigest(
+                        clone, wb.remote_base, remoteBranch))
 
         diffid = d.createRawDiff(conduit, rawDiff).id
 
@@ -181,6 +203,8 @@ def updateInReview(conduit, wb, gitContext, review_branch):
     print "- commenting on revision " + str(wb.id)
     commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
     commenter.updatedReview(review_branch.branch)
+    if used_default_test_plan:
+        commenter.usedDefaultTestPlan(wb.branch, _DEFAULT_TEST_PLAN)
 
     return wb
 

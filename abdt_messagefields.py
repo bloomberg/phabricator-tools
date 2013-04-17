@@ -43,6 +43,23 @@ def update(earlier, later):
         reviewerPHIDs=reviewers,
         testPlan=testPlan)
 
+
+def updateTestPlan(fields, test_plan):
+    """Return an updated 'CommitMessageFields' with 'test_plan'
+
+    :fields: a phlcon_differential.ParseCommitMessageFields
+    :test_plan: the test plan to set
+
+    """
+    ParseCommitMessageFields = phlcon_differential.ParseCommitMessageFields
+    assert(isinstance(fields, ParseCommitMessageFields))
+    return ParseCommitMessageFields(
+        title=fields.title,
+        summary=fields.summary,
+        reviewerPHIDs=fields.reviewerPHIDs,
+        testPlan=test_plan)
+
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

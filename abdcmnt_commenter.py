@@ -61,6 +61,30 @@ class Commenter(object):
         message += "this review is now abandoned."
         self._createComment(message, silent=True)
 
+    def usedDefaultTestPlan(self, branch_name, test_plan):
+        message = "a test plan could not be determined from the commits on "
+        message += rmu.monospaced(branch_name) + " "
+        message += "so the following message was used:\n"
+        message += rmu.codeBlock(test_plan, lang="text")
+        message += "for a test plan to be recognised, please use text like "
+        message += "the following in one of your commit messages: \n"
+        message += rmu.codeBlock("Test Plan:\nmy test plan", lang="text")
+        message += "if you put a new commit on the branch then the plan "
+        message += "will be updated.  it will also be updated if you "
+        message += "rewrite the history of the branch.\n"
+        message += "\n"
+        message += "you can achieve this like so:\n"
+
+        code = ""
+        code += "$ git status\n"
+        code += ".. make sure you stash or branch any changes ..\n"
+        code += "$ git checkout " + branch_name + "\n"
+        code += "$ git commit --allow-empty -m 'Test Plan:\\nyour plan'\n"
+        code += "$ git push origin " + branch_name
+
+        message += rmu.codeBlock(code, lang="text")
+        self._createComment(message, silent=True)
+
     def _createComment(self, message, silent=False):
         phlcon_differential.createComment(
             self._conduit, self._revision_id, message, silent=silent)

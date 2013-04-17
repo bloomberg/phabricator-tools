@@ -42,7 +42,7 @@ def getAnyUserFromBranch(clone, conduit, base, branch):
     raise abdt_exception.NoUsersOnBranchException(branch, base, emails)
 
 
-def getFieldsFromCommitHashes(conduit, clone, hashes):
+def getFieldsFromCommitHashes(conduit, clone, hashes, defaultTestPlan=None):
     """Return a ParseCommitMessageResponse based on the commit messages.
 
     :conduit: supports call()
@@ -59,6 +59,12 @@ def getFieldsFromCommitHashes(conduit, clone, hashes):
             conduit, r.subject + "\n\n" + r.message)
         f = phlcon_differential.ParseCommitMessageFields(**p.fields)
         fields = abdt_messagefields.update(fields, f)
+
+    if defaultTestPlan is not None:
+        if fields is not None and not fields.testPlan:
+            fields = abdt_messagefields.updateTestPlan(
+                fields, defaultTestPlan)
+
     message = makeMessageFromFields(conduit, fields)
     return d.parseCommitMessage(conduit, message)
 
