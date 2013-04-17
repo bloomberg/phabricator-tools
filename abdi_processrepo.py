@@ -253,7 +253,7 @@ def createFailedReview(conduit, gitContext, review_branch, exception):
         gitContext.remote)
     commenter = abdcmnt_commenter.Commenter(
         conduit, reviewid)
-    commenter.exception(exception)
+    commenter.failedCreateReview(review_branch.branch, exception)
     abdt_workingbranch.pushBadInReview(
         gitContext, review_branch, wb)
 

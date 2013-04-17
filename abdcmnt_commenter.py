@@ -1,4 +1,5 @@
 import phlcon_differential
+import phlcon_remarkup as rmu
 
 import abdt_exception
 
@@ -26,63 +27,51 @@ class Commenter(object):
                 self._userException(e)
         else:
             message = "unhandled exception: " + str(e)
-            phlcon_differential.createComment(
-                self._conduit, self._revision_id, message)
+            self._createComment(message)
+
+    def failedCreateReview(self, branch_name, exception):
+        message = "failed to create revision from branch "
+        message += rmu.monospaced(branch_name) + "\n"
+        self._createComment(message)
+        self.exception(exception)
+
+    def _createComment(self, message):
+        phlcon_differential.createComment(
+            self._conduit, self._revision_id, message)
 
     def _commitMessageParseException(self, e):
-        message = "failed to update revision, see below."
+        message = "failed to update revision, see below.\n"
         message += "\n"
 
-        message += "\nerrors:"
-        message += "\n"
-        message += "\n  lang=text"
+        message += "errors:\n"
         for error in e.errors:
-            message += "\n  " + error
-        message += "\n"
+            message += rmu.codeBlock(str(error), lang="text", isBad=True)
 
-        message += "\nfields:"
-        message += "\n"
-        message += "\n  lang=text"
-        for field, content in e.fields.items():
-            message += "\n  " + field + ": " + str(content)
-        message += "\n"
+        message += "fields:\n"
+        message += rmu.dictToTable(e.fields)
 
-        message += "\ncombined commit message digest:"
-        message += "\n"
-        message += "\n  lang=text"
-        for line in e.digest.splitlines():
-            message += "\n  " + line
+        message += "combined commit message digest:\n"
+        message += rmu.codeBlock(e.digest, lang="text")
 
-        phlcon_differential.createComment(
-            self._conduit, self._revision_id, message)
+        self._createComment(message)
 
     def _landingException(self, e):
-        message = "failed to land revision, see below."
+        message = "failed to land revision, see below.\n"
         message += "\n"
 
-        message += "\nerrors:"
-        message += "\n"
-        message += "\n  lang=text"
-        for line in str(e).splitlines():
-            message += "\n  " + line
-        message += "\n"
+        message += "errors:\n"
+        message += rmu.codeBlock(str(e), lang="text", isBad=True)
 
-        phlcon_differential.createComment(
-            self._conduit, self._revision_id, message)
+        self._createComment(message)
 
     def _userException(self, e):
-        message = "failed to update revision, see below."
+        message = "failed to update revision, see below.\n"
         message += "\n"
 
-        message += "\nerrors:"
-        message += "\n"
-        message += "\n  lang=text"
-        for line in str(e).splitlines():
-            message += "\n  " + line
-        message += "\n"
+        message += "errors:\n"
+        message += rmu.codeBlock(str(e), lang="text", isBad=True)
 
-        phlcon_differential.createComment(
-            self._conduit, self._revision_id, message)
+        self._createComment(message)
 
 
 #------------------------------------------------------------------------------
