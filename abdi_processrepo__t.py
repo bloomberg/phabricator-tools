@@ -177,7 +177,7 @@ class Test(unittest.TestCase):
             self.conduit, "phab", "origin", self.mailer)
 
     def test_simpleWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/simpleWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
@@ -198,14 +198,14 @@ class Test(unittest.TestCase):
             self.assertEqual(self.author_account.email, email)
 
     def test_badMsgWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/badMsgWorkflow/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devPushNewFile("NEWFILE2", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devPushNewFile("NEWFILE3")
         self._phabUpdateWithExpectations(total=1, bad=0)
-        self._devResetBranchToMaster("ph-review/change/master")
+        self._devResetBranchToMaster("ph-review/badMsgWorkflow/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._devPushNewFile("NEWFILE2")
@@ -214,25 +214,25 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_noReviewerWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/noReviewerWorkflow/master")
         self._devPushNewFile("NEWFILE", has_reviewer=False)
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_badBaseWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/change/blaster")
+        self._devCheckoutPushNewBranch("ph-review/badBaseWorkflow/blaster")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
         with phlsys_fs.chDirContext("developer"):
-            runCommands("git push origin :ph-review/change/blaster")
+            runCommands("git push origin :ph-review/badBaseWorkflow/blaster")
 
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_noBaseWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/change")
+        self._devCheckoutPushNewBranch("ph-review/noBaseWorkflow")
         self._devPushNewFile("NEWFILE", has_plan=False)
 
         # TODO: handle no base properly
@@ -240,7 +240,7 @@ class Test(unittest.TestCase):
 
         # delete the bad branch
         with phlsys_fs.chDirContext("developer"):
-            runCommands("git push origin :ph-review/change")
+            runCommands("git push origin :ph-review/noBaseWorkflow")
 
         self._phabUpdateWithExpectations(total=0, bad=0)
 
@@ -249,10 +249,10 @@ class Test(unittest.TestCase):
 
     def test_badAuthorWorkflow(self):
         self._devSetAuthorAccount(phldef_conduit.notauser)
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/badAuthorWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=1)
-        self._devResetBranchToMaster("ph-review/change/master")
+        self._devResetBranchToMaster("ph-review/badAuthorWorkflow/master")
         self._devSetAuthorAccount(self.author_account)
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -260,7 +260,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_abandonedWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/abandonedWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._actOnTheOnlyReview(self.author_account.user, "abandon")
@@ -271,14 +271,14 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_emptyMergeWorkflow(self):
-        self._devCheckoutPushNewBranch("temp/change/master")
+        self._devCheckoutPushNewBranch("temp/emptyMerge/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to master and land a conflicting change
         with phlsys_fs.chDirContext("developer"):
             runCommands("git checkout master")
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/emptyMerge/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -286,26 +286,26 @@ class Test(unittest.TestCase):
 
         # move back to original and try to push and land
         with phlsys_fs.chDirContext("developer"):
-            runCommands("git checkout temp/change/master")
-        self._devCheckoutPushNewBranch("ph-review/change2/master")
+            runCommands("git checkout temp/emptyMerge/master")
+        self._devCheckoutPushNewBranch("ph-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # 'resolve' by abandoning our change
         with phlsys_fs.chDirContext("developer"):
-            runCommands("git push origin :ph-review/change2/master")
+            runCommands("git push origin :ph-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_mergeConflictWorkflow(self):
-        self._devCheckoutPushNewBranch("temp/change/master")
+        self._devCheckoutPushNewBranch("temp/mergeConflict/master")
         self._devPushNewFile("NEWFILE", contents="hello")
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to master and land a conflicting change
         with phlsys_fs.chDirContext("developer"):
             runCommands("git checkout master")
-        self._devCheckoutPushNewBranch("ph-review/change/master")
+        self._devCheckoutPushNewBranch("ph-review/mergeConflict/master")
         self._devPushNewFile("NEWFILE", contents="goodbye")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -313,8 +313,8 @@ class Test(unittest.TestCase):
 
         # move back to original and try to push and land
         with phlsys_fs.chDirContext("developer"):
-            runCommands("git checkout temp/change/master")
-        self._devCheckoutPushNewBranch("ph-review/change2/master")
+            runCommands("git checkout temp/mergeConflict/master")
+        self._devCheckoutPushNewBranch("ph-review/mergeConflict2/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=1, bad=1)
@@ -324,14 +324,15 @@ class Test(unittest.TestCase):
         with phlsys_fs.chDirContext("developer"):
             runCommands("git fetch -p")
             runCommands("git merge origin/master -s ours")
-            runCommands("git push origin ph-review/change2/master")
+            runCommands("git push origin ph-review/mergeConflict2/master")
         print "update again"
         self._phabUpdateWithExpectations(total=0, bad=0)
 
     def test_changeAlreadyMergedOnBase(self):
         self._devCheckoutPushNewBranch("landing_branch")
         self._devPushNewFile("NEWFILE")
-        self._devCheckoutPushNewBranch("ph-review/change/landing_branch")
+        self._devCheckoutPushNewBranch(
+            "ph-review/alreadyMerged/landing_branch")
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # reset the landing branch back to master to resolve
