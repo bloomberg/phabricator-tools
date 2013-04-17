@@ -4,7 +4,6 @@ from contextlib import contextmanager
 import doctest
 import hashlib
 import json
-import os
 import time
 import unittest
 import urllib
@@ -107,8 +106,8 @@ class Conduit():
     def __init__(
             self,
             conduitUri,
-            user,
-            certificate,
+            user=None,
+            certificate=None,
             actAsUser=None,
             http_proxy=None,
             https_proxy=None):
@@ -122,13 +121,9 @@ class Conduit():
         self._http_proxy = http_proxy
         self._https_proxy = https_proxy
 
-        self._authenticate()
-
-    @classmethod
-    def setPathToArc(cls, path):
-        if not os.path.isfile(path):
-            raise Exception("not a valid file: " + path)
-        cls._pathToArc = path
+        self._conduit = {}
+        if user and certificate:
+            self._authenticate()
 
     def setActAsUser(self,  user):
         self._act_as_user = user
