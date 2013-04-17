@@ -3,7 +3,7 @@
 import os
 import unittest
 import abdmail_mailer
-import abdmail_printsender
+import phlmail_printsender
 import abdt_commitmessage
 import abdt_naming
 import phlcon_differential
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
             phldef_conduit.phab.user,
             phldef_conduit.phab.certificate)
 
-        print_sender = abdmail_printsender.MailSender("phab@server.test")
+        print_sender = phlmail_printsender.MailSender("phab@server.test")
         self.mailer = abdmail_mailer.Mailer(
             print_sender,
             ["admin@server.test"],

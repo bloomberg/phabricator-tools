@@ -1,7 +1,7 @@
 """Process the arguments for a single repository and execute."""
 
 import abdi_processrepo
-import abdmail_printsender
+import phlmail_printsender
 import abdmail_mailer
 import phlsys_conduit
 import phlsys_fs
@@ -9,7 +9,7 @@ import phlsys_subprocess
 
 
 def run_once(args, out):
-    print_sender = abdmail_printsender.MailSender(args.arcyd_email)
+    print_sender = phlmail_printsender.MailSender(args.arcyd_email)
     mailer = abdmail_mailer.Mailer(
         print_sender,
         [args.admin_email],
