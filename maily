@@ -6,7 +6,7 @@
 import argparse
 import sys
 
-import phlmail_format
+import phlmail_sender
 import phlsys_sendmail
 
 
@@ -77,14 +77,14 @@ usage example:
     args = parser.parse_args()
 
     binary = args.binary if args.binary else None
-    sendmail = phlsys_sendmail.Sendmail(binary)
-    message = phlmail_format.Text(
+    mailsender = phlmail_sender.MailSender(
+        phlsys_sendmail.Sendmail(binary),
+        args.sender)
+    mailsender.send(
+        to_addresses=args.to,
         subject=args.subject,
         message=args.message,
-        from_address=args.sender,
-        to_addresses=args.to,
         cc_addresses=args.cc)
-    sendmail.send(message)
 
 
 if __name__ == "__main__":

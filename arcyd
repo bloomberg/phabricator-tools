@@ -96,7 +96,7 @@ import traceback
 
 import abdcmd_single
 import abdcmd_multi
-import phlmail_format
+import phlmail_sender
 import phlsys_sendmail
 
 
@@ -144,9 +144,10 @@ def main():
 
     args = parser.parse_args()
 
-    sendmail = phlsys_sendmail.Sendmail(args.sendmail_binary)
     uname = str(platform.uname())
-    sender = "arcyd@" + platform.node()
+    mailsender = phlmail_sender.MailSender(
+        phlsys_sendmail.Sendmail(args.sendmail_binary),
+        "arcyd@" + platform.node())
 
     # exit if we're stopped by SIGTERM
     def HandleSigterm(signum, frame):
@@ -154,23 +155,18 @@ def main():
         sys.exit()
     signal.signal(signal.SIGTERM, HandleSigterm)
 
-    mime = phlmail_format.Text(
+    mailsender.send(
         subject="arcyd started",
         message=uname,
-        from_address=sender,
         to_addresses=args.sys_admin_emails)
-    sendmail.send(mime)
 
     try:
         args.func(args)
     except BaseException:
-        message = uname + "\n" + traceback.format_exc()
-        mime = phlmail_format.Text(
+        mailsender.send(
             subject="arcyd stopped with exception",
-            message=message,
-            from_address=sender,
+            message=uname + "\n" + traceback.format_exc(),
             to_addresses=args.sys_admin_emails)
-        sendmail.send(mime)
 
 
 if __name__ == "__main__":
