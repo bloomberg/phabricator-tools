@@ -90,6 +90,7 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
 
 import argparse
 import platform
+import signal
 import sys
 import traceback
 
@@ -147,6 +148,12 @@ def main():
     uname = str(platform.uname())
     sender = "arcyd@" + platform.node()
 
+    # exit if we're stopped by SIGTERM
+    def HandleSigterm(signum, frame):
+        # raises 'SystemExit' exception, which will allow us to clean up
+        sys.exit()
+    signal.signal(signal.SIGTERM, HandleSigterm)
+
     mime = phlmail_format.Text(
         subject="arcyd started",
         message=uname,
@@ -156,7 +163,7 @@ def main():
 
     try:
         args.func(args)
-    except Exception:
+    except BaseException:
         message = uname + "\n" + traceback.format_exc()
         mime = phlmail_format.Text(
             subject="arcyd stopped with exception",
