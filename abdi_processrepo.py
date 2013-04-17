@@ -238,6 +238,26 @@ def land(conduit, wb, gitContext, branch):
     # TODO: we probably want to do a better job of cleaning up locally
 
 
+def createFailedReview(conduit, gitContext, review_branch, exception):
+    user = abdt_conduitgit.getAnyUserFromBranch(
+        gitContext.clone,
+        conduit,
+        review_branch.remote_base,
+        review_branch.remote_branch)
+    reviewid = abdt_conduit.createEmptyRevision(conduit, user)
+    wb = abdt_gittypes.makeGitWorkingBranchFromParts(
+        abdt_naming.WB_STATUS_BAD_INREVIEW,
+        review_branch.description,
+        review_branch.base,
+        reviewid,
+        gitContext.remote)
+    commenter = abdcmnt_commenter.Commenter(
+        conduit, reviewid)
+    commenter.exception(exception)
+    abdt_workingbranch.pushBadInReview(
+        gitContext, review_branch, wb)
+
+
 def processUpdatedBranch(
         mailer, conduit, gitContext, review_branch, working_branch):
     abdte = abdt_exception
@@ -247,23 +267,7 @@ def processUpdatedBranch(
             createReview(conduit, gitContext, review_branch)
         except abdte.AbdUserException as e:
             try:
-                user = abdt_conduitgit.getAnyUserFromBranch(
-                    gitContext.clone,
-                    conduit,
-                    review_branch.remote_base,
-                    review_branch.remote_branch)
-                reviewid = abdt_conduit.createEmptyRevision(conduit, user)
-                wb = abdt_gittypes.makeGitWorkingBranchFromParts(
-                    abdt_naming.WB_STATUS_BAD_INREVIEW,
-                    review_branch.description,
-                    review_branch.base,
-                    reviewid,
-                    gitContext.remote)
-                commenter = abdcmnt_commenter.Commenter(
-                    conduit, reviewid)
-                commenter.exception(e)
-                abdt_workingbranch.pushBadInReview(
-                    gitContext, review_branch, wb)
+                createFailedReview(conduit, gitContext, review_branch, e)
             except abdte.AbdUserException as e:
                 abdt_workingbranch.pushBadPreReview(gitContext, review_branch)
                 mailer.userException(e.message, review_branch.branch)
