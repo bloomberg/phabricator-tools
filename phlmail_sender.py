@@ -5,7 +5,7 @@ class MailSender(object):
     """A mail sender that sends mail via a configured sendmail."""
 
     def __init__(self, sendmail, from_email):
-        """Setup to print email to the console from 'from_email'.
+        """Setup to send mail with 'sendmail' from 'from_email'.
 
         :sendmail: the sendmail instance to send with, e.g. a phlsys_sendmail
         :from_email: the address to send from
