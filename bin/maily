@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-"""Maily is a simple wrapper around sendmail."""
+"""Maily - a sendmail wrapper
+
+Intended primarily to test our sendmail integration, this can also be used
+as a very simple wrapper around sendmail.
+"""
+
+_USAGE_EXAMPLES = """
+usage example:
+    $ ./maily \\
+        --from me@server.example \\
+        --to you@server.example \\
+        --subject "my subject" \\
+        --message "my message"
+"""
 
 import argparse
 import os
@@ -21,26 +34,10 @@ import phlsys_sendmail
 
 
 def main():
-    description = str("""
-Maily - a sendmail wrapper
-
-Intended primarily to test our sendmail integration, this can also be used
-as a very simple wrapper around sendmail.
-    """)
-
-    epilog = str("""
-usage example:
-    $ ./maily \\
-        --from me@server.example \\
-        --to you@server.example \\
-        --subject "my subject" \\
-        --message "my message"
-    """)
-
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=description,
-        epilog=epilog)
+        description=__doc__,
+        epilog=_USAGE_EXAMPLES)
 
     parser.add_argument(
         '--sender',
