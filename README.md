@@ -1,10 +1,15 @@
-# phabricator-tools
+phabricator-tools
+=================
 
-*Tools and daemons for administering lots of Phabricator instances and
-integrating them with other tools*
+Tools and daemons for administering lots of Phabricator instances and
+integrating them with other tools.
 
-[Phabricator](http://phabricator.org/) is an awesome, open-source application for communicating
-and collaborating with other software developers within an enterprise.
+Overview
+--------
+
+[Phabricator](http://phabricator.org/) is an awesome, open-source application
+for communicating and collaborating with other software developers within an 
+enterprise.
 
 Many enterprises may be big enough such that it makes sense to have
 an instance of Phabricator per area of responsiblity or product being
@@ -15,9 +20,9 @@ This project aims to complement Phabricator by making installation,
 administration and interoperation easier.  At some point it will
 hopefully be merged with Phabricator-actual.
 
-The first tool to be provided is *Arcyd*, see below.
+Arcyd
+-----
 
-## Arcyd
 This is a daemon which watches git repositories and automatically creates reviews and lands them when accepted.
 
 Here is an example of someone working with a repository which is watched by Arcyd:
@@ -25,20 +30,23 @@ Here is an example of someone working with a repository which is watched by Arcy
     $ git checkout -b feature/mywork
     .. do work and commit ..
     $ git push origin feature/mywork:ph-review/mywork/master
-    .. daemon creates a review based on commit comments ..
-    .. the reviewer appoves ..
-    .. Arcyd merges the changes to master ..
+    
+    .. Arcyd sees branch, creates a review based on commit comments ..
+    
+    .. the reviewer approves ..
+    .. Arcyd see approval, lands the changes on master, closes review ..
 
-(TODO: paste existing doc here)
+Instant Phabricator
+-------------------
 
-## Phabricator Developer setup instructions
+To get up and running quickly, a vagrant configuration is included for
+creating a new Linux VM and making a fully working Phabricator installation;
+including all it's dependencies, i.e. Apache, MySQL.
 
-**To install locally in a clean Linux VM (tested on Lubuntu 12.10):**
+If you want to provision an existing VM or machine with Phabricator you can
+also use the puppet configuration directly.
 
-1. `$ sudo puppet apply vagrant/puppet/phabricator/manifests/default.pp --modulepath vagrant/puppet`
-2. Point a web-browser at 'http://127.0.0.1' to login to your new Phabricator instance
-
-**To create a local VM serving up Phabricator on Windows:**
+__To create a new local VM serving up Phabricator__
 
 1. Install [VirtualBox](https://www.virtualbox.org/)
 2. Install [Vagrant](http://www.vagrantup.com/)
@@ -46,20 +54,28 @@ Here is an example of someone working with a repository which is watched by Arcy
 (should take about 10 mins to download the base image)
 4. Point a web-browser at 'http://127.0.0.1:8080' to login to your new Phabricator instance
 
-**Pre-installed Users**
+__To install within an existing VM or machine__
+(tested on Lubuntu 12.10 on VirtualBox)
+
+1. `$ sudo puppet apply vagrant/puppet/phabricator/manifests/default.pp --modulepath vagrant/puppet`
+2. Point a web-browser at 'http://127.0.0.1' to login to your new Phabricator instance
+
+__Pre-installed Users__
 
 `alice`, `bob`, `phab` (administrator)
 All pre-installed users have the password set to `password`
 
-## Contacts
+Contacts
+--------
 
 Angelos Evripiotis (jevripio@bloomberg.net)
 
-## Credits and Acknowledgements
+Credits and Acknowledgements
+----------------------------
 
 Thanks to the awesome guys working on the Phabricator project!
 
-
-## License
+License
+-------
 
 MIT license. See license text in [LICENSE](https://github.com/bloomberg/phabricator-tools/blob/master/LICENSE).
