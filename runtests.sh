@@ -1,23 +1,20 @@
 # do tests in order of time to execute
 set -e # exit immediately on error
 
-# doctest
-for f in *.py ;
-    do python -m doctest $f ;
-done
-
-flake8 .
+flake8 bin/*
+flake8 py/*.py
 
 # unittest
 # sudo apt-get install python-nose or use the commented-out version
-nosetests *.py --with-doctest
+nosetests py/*.py --with-doctest
 #python -m unittest discover -p "*.py"
 
 # N.B. can easily run individual tests with nose like so:
 # nosetests abdcmd_default:TestAbd.test_abandonedWorkflow
 
 # copyright
-git grep -L "Copyright (C) 2012 Bloomberg L.P." *.py
+git grep -L "Copyright (C) 2012 Bloomberg L.P." py/*.py
+git grep -L "Copyright (C) 2012 Bloomberg L.P." bin/*
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

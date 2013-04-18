@@ -18,8 +18,18 @@ usage examples:
 """
 
 import argparse
+import os
 import sys
 import time
+
+# append "../py/" to sys.path, which is the list of paths to search for modules
+# this is so we can import our libraries directly
+sys.path.append(
+    os.path.join(
+        os.path.dirname(
+            os.path.dirname(
+                os.path.realpath(__file__))),
+        "py"))
 
 import phlsys_conduit
 
