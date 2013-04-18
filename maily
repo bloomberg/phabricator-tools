@@ -69,16 +69,26 @@ usage example:
         help="body of the message")
 
     parser.add_argument(
-        '--binary',
+        '--sendmail-binary',
         metavar="PROGRAM",
         type=str,
-        help="program to send the mail with")
+        help="program to send the mail with (e.g. sendmail, catchmail)")
+
+    parser.add_argument(
+        '--sendmail-type',
+        metavar="TYPE",
+        type=str,
+        help="type of program to send the mail with (sendmail, catchmail), "
+        "this will affect the parameters that Maily will use.")
 
     args = parser.parse_args()
 
-    binary = args.binary if args.binary else None
+    if args.sendmail_type:
+        phlsys_sendmail.Sendmail.set_default_params_from_type(
+            args.sendmail_type)
+
     mailsender = phlmail_sender.MailSender(
-        phlsys_sendmail.Sendmail(binary),
+        phlsys_sendmail.Sendmail(args.sendmail_binary),
         args.sender)
     mailsender.send(
         subject=args.subject,

@@ -32,6 +32,7 @@ usage example:
     $ arcyd
     --system-admin-email systemadmin@server.test \\
     --sendmail-binary sendmail \\
+    --sendmail-type sendmail \\
     single \\
     --instance-uri https://127.0.0.1/api/ \\
     --arcyd-user phab \\
@@ -71,6 +72,7 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     $ arcyd
     --system-admin-email systemadmin@server.test \\
     --sendmail-binary sendmail \\
+    --sendmail-type sendmail \\
     single @localinstance.cfg @email.cfg @repo1.cfg
 
     or you can use inheritance, e.g. in repo2.cfg:
@@ -85,6 +87,7 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     $ arcyd
     --system-admin-email systemadmin@server.test \\
     --sendmail-binary sendmail \\
+    --sendmail-type sendmail \\
     single @localinstance.cfg @email.cfg @repo1.cfg
     """
 
@@ -135,7 +138,16 @@ def main():
         type=str,
         default="sendmail",
         required=True,
-        help="program to send the mail with (e.g. sendmail)")
+        help="program to send the mail with (e.g. sendmail, catchmail)")
+
+    parser.add_argument(
+        '--sendmail-type',
+        metavar="TYPE",
+        type=str,
+        default="sendmail",
+        required=True,
+        help="type of program to send the mail with (sendmail, catchmail), "
+        "this will affect the parameters that Arycd will use.")
 
     subparsers = parser.add_subparsers()
 
@@ -149,6 +161,10 @@ def main():
     if args.sendmail_binary:
         phlsys_sendmail.Sendmail.set_default_binary(
             args.sendmail_binary)
+
+    if args.sendmail_type:
+        phlsys_sendmail.Sendmail.set_default_params_from_type(
+            args.sendmail_type)
 
     mailsender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(),
