@@ -20,6 +20,42 @@ REVISION_ACCEPTED = 2
 REVISION_CLOSED = 3
 REVISION_ABANDONED = 4
 
+# from .../differential/constants/DifferentialAction.php:
+# const ACTION_CLOSE          = 'commit';
+# const ACTION_COMMENT        = 'none';
+# const ACTION_ACCEPT         = 'accept';
+# const ACTION_REJECT         = 'reject';
+# const ACTION_RETHINK        = 'rethink';
+# const ACTION_ABANDON        = 'abandon';
+# const ACTION_REQUEST        = 'request_review';
+# const ACTION_RECLAIM        = 'reclaim';
+# const ACTION_UPDATE         = 'update';
+# const ACTION_RESIGN         = 'resign';
+# const ACTION_SUMMARIZE      = 'summarize';
+# const ACTION_TESTPLAN       = 'testplan';
+# const ACTION_CREATE         = 'create';
+# const ACTION_ADDREVIEWERS   = 'add_reviewers';
+# const ACTION_ADDCCS         = 'add_ccs';
+# const ACTION_CLAIM          = 'claim';
+# const ACTION_REOPEN         = 'reopen';
+ACTION_CLOSE = 'commit'
+ACTION_COMMENT = 'none'
+ACTION_ACCEPT = 'accept'
+ACTION_REJECT = 'reject'
+ACTION_RETHINK = 'rethink'
+ACTION_ABANDON = 'abandon'
+ACTION_REQUEST = 'request_review'
+ACTION_RECLAIM = 'reclaim'
+ACTION_UPDATE = 'update'
+ACTION_RESIGN = 'resign'
+ACTION_SUMMARIZE = 'summarize'
+ACTION_TESTPLAN = 'testplan'
+ACTION_CREATE = 'create'
+ACTION_ADDREVIEWERS = 'add_reviewers'
+ACTION_ADDCCS = 'add_ccs'
+ACTION_CLAIM = 'claim'
+ACTION_REOPEN = 'reopen'
+
 
 def _makeNT(name, *fields):
     return collections.namedtuple(
@@ -220,7 +256,7 @@ def close(conduit, revisionId):
     conduit.call('differential.close', {"revisionID": revisionId})
 
 
-class TestDifferential(unittest.TestCase):
+class Test(unittest.TestCase):
 
     def setUp(self):
         test_data = phldef_conduit
@@ -378,6 +414,47 @@ Test Plan: I proof-read it and it looked ok
         # rely on createRevision to raise if we get anything seriously wrong
         createRevision(
             self.conduit, diff_response["diffid"], parse_response.fields)
+
+    def _createRevision(self, title):
+        diff = """diff --git a/ b/"""
+        message = title + "\n\ntest plan: no test plan"
+        diff_response = createRawDiff(self.conduit, diff)
+        parse_response = parseCommitMessage(self.conduit, message)
+        create_response = createRevision(
+            self.conduit, diff_response.id, parse_response.fields)
+        return create_response.revisionid
+
+    def _authorCommentAction(self, revisionid, action):
+        createComment(self.conduit, revisionid, action=action)
+
+    def _reviewCommentAction(self, revisionid, action):
+        createComment(self.reviewerConduit, revisionid, action=action)
+
+    def _getState(self, revisionid):
+        return query(self.conduit, [revisionid])[0].status
+
+    def _authorActExp(self, revisionid, action, state):
+        self._authorCommentAction(revisionid, action)
+        self.assertEqual(self._getState(revisionid), state)
+
+    def _reviewActExp(self, revisionid, action, state):
+        self._reviewCommentAction(revisionid, action)
+        self.assertEqual(self._getState(revisionid), state)
+
+    def testReviewStates(self):
+        revisionid = self._createRevision("testReviewStates")
+        self._authorActExp(revisionid, ACTION_RETHINK, REVISION_NEEDS_REVISION)
+        self._authorActExp(revisionid, ACTION_REQUEST, REVISION_NEEDS_REVIEW)
+        self._authorActExp(revisionid, ACTION_ABANDON, REVISION_ABANDONED)
+        self._authorActExp(revisionid, ACTION_RECLAIM, REVISION_NEEDS_REVIEW)
+
+        self._reviewActExp(revisionid, ACTION_REJECT, REVISION_NEEDS_REVISION)
+        self._reviewActExp(revisionid, ACTION_ACCEPT, REVISION_ACCEPTED)
+        self._reviewActExp(revisionid, ACTION_REJECT, REVISION_NEEDS_REVISION)
+        self._reviewActExp(revisionid, ACTION_ACCEPT, REVISION_ACCEPTED)
+
+        self._authorActExp(revisionid, ACTION_CLOSE, REVISION_CLOSED)
+
 
 if __name__ == "__main__":
     unittest.main()
