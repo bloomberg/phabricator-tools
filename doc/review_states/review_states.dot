@@ -1,0 +1,68 @@
+/** Phabricator Review States **/
+
+// document the states that a Differential review can enter and the possible
+// transitions between those states.
+
+digraph phabricator_review_states {
+    graph [fontname = "Helvetica"];
+    rankdir=LR;
+
+    // colors from 'Winner Winner Chicken Dinner' by 'b_wiebe'
+    // on kuler, https://kuler.adobe.com
+
+    node [color = "#232621"];
+    edge [fontname = "Helvetica"];
+    node [style = filled, fontname = "Helvetica", fontcolor = white];
+
+    node [label = "needs review"] needs_review;
+    node [label = "needs revision"] needs_revision;
+    node [label = "abandoned"] abandoned;
+    node [label = "accepted"] accepted;
+    node [label = "closed"] closed;
+
+    // author actions
+    edge [color = "#5E7D4D"];
+    needs_review -> abandoned [label = "abandon"];
+    needs_revision -> abandoned [label = "abandon"];
+    accepted -> abandoned [label = "abandon"];
+    abandoned -> needs_review [label = "reclaim"];
+    needs_review -> needs_revision [label = "plan changes"];
+    accepted -> needs_revision [label = "plan changes"];
+    needs_revision -> needs_review [label = "request review"];
+    accepted -> needs_review [label = "request review"];
+    accepted -> closed [label = "close revision"];
+
+    // non-author actions
+    edge [color = "#C74223"];
+    needs_review -> needs_revision [label = "request changes"];
+    accepted -> needs_revision [label = "request changes"];
+    needs_review -> accepted [label = "accept"];
+    needs_revision -> accepted [label = "accept"];
+}
+
+/*
+TODO: doc these
+
+-- all states --
+
+author:
+    edit revision
+
+observer:
+    subscribe
+    commandeer
+
+reviewer:
+    commandeer
+    resign
+
+all:
+    edit dependencies
+    edit maniphest tasks
+    download raw diff
+    flag for later
+    `arc patch`
+    comment
+    add reviewers
+    add ccs
+*/
