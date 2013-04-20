@@ -455,6 +455,12 @@ Test Plan: I proof-read it and it looked ok
 
         self._authorActExp(revisionid, ACTION_CLOSE, REVISION_CLOSED)
 
+    def testUpdateNoFields(self):
+        revisionid = self._createRevision("testUpdateNoFields")
+        diff = """diff --git a/ b/"""
+        diff_response = createRawDiff(self.conduit, diff)
+        updateRevision(
+            self.conduit, revisionid, diff_response.id, [], "update")
 
 if __name__ == "__main__":
     unittest.main()

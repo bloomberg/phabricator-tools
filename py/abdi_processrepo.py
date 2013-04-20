@@ -128,7 +128,7 @@ def makeMessageDigest(clone, base, branch):
     return message
 
 
-def updateReview(conduit, gitContext, reviewBranch, workingBranch):
+def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
     rb = reviewBranch
     wb = workingBranch
 
@@ -137,14 +137,14 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
         print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
-        wb = updateInReview(conduit, wb, gitContext, rb)
+        wb = updateInReview(conduit, wb, gitContext, rb, author)
     elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
         d = phlcon_differential
         status = d.getRevisionStatus(conduit, wb.id)
         try:
             print "try updating bad branch"
             verifyReviewBranchBase(gitContext, reviewBranch)
-            updateInReview(conduit, wb, gitContext, rb)
+            updateInReview(conduit, wb, gitContext, rb, author)
         except abdt_exception.AbdUserException:
             print "still bad"
 
@@ -159,40 +159,26 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
             print "do nothing"
 
 
-def updateInReview(conduit, wb, gitContext, review_branch):
+def updateInReview(conduit, wb, gitContext, review_branch, author):
     remoteBranch = review_branch.remote_branch
     clone = gitContext.clone
-    name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
-        clone, conduit, wb.remote_base, remoteBranch)
 
     print "updateInReview"
 
     print "- creating diff"
     rawDiff = phlgit_diff.rawDiffRange(
         clone, wb.remote_base, remoteBranch, 1000)
+    if not rawDiff:
+        raise abdt_exception.AbdUserException(
+            "no difference from " + wb.base + " to " + wb.branch)
 
     d = phlcon_differential
     used_default_test_plan = False
-    with phlsys_conduit.actAsUserContext(conduit, user):
+    with phlsys_conduit.actAsUserContext(conduit, author):
         print "- updating revision " + str(wb.id)
-        hashes = phlgit_log.getRangeHashes(clone, wb.remote_base, remoteBranch)
-        parsed = abdt_conduitgit.getFieldsFromCommitHashes(
-            conduit, clone, hashes)
-        if parsed.errors:
-            used_default_test_plan = True
-            parsed = abdt_conduitgit.getFieldsFromCommitHashes(
-                conduit, clone, hashes, _DEFAULT_TEST_PLAN)
-            if parsed.errors:
-                raise abdt_exception.CommitMessageParseException(
-                    errors=parsed.errors,
-                    fields=parsed.fields,
-                    digest=makeMessageDigest(
-                        clone, wb.remote_base, remoteBranch))
-
         diffid = d.createRawDiff(conduit, rawDiff).id
-
         d.updateRevision(
-            conduit, wb.id, diffid, parsed.fields, "update")
+            conduit, wb.id, diffid, [], "update")
 
     wb = abdt_workingbranch.pushStatus(
         gitContext,
@@ -322,7 +308,8 @@ def processUpdatedBranch(
                     conduit,
                     gitContext,
                     review_branch,
-                    working_branch)
+                    working_branch,
+                    author_user)
             except abdte.LandingException as e:
                 print "landing exception"
                 abdt_workingbranch.pushBadLand(

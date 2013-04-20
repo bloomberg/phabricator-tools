@@ -38,6 +38,15 @@ class Commenter(object):
     def createdReview(self, branch_name):
         message = "created revision from branch "
         message += rmu.monospaced(branch_name) + "\n"
+        message += "\n"
+        message += "if the revision is accepted then i will automatically try "
+        message += "to land the revision. the commit message will "
+        message += "be created from the title, summary, test plan and other "
+        message += "properties of this review page.\n"
+        message += "\n"
+        message += "the author may change the properties of the review at any "
+        message += "time by following the 'edit revision' link at the "
+        message += "top-right of the page."
         self._createComment(message, silent=True)
 
     def updatedReview(self, branch_name):
@@ -69,20 +78,9 @@ class Commenter(object):
         message += "for a test plan to be recognised, please use text like "
         message += "the following in one of your commit messages: \n"
         message += rmu.codeBlock("Test Plan:\nmy test plan", lang="text")
-        message += "if you put a new commit on the branch then the plan "
-        message += "will be updated.  it will also be updated if you "
-        message += "rewrite the history of the branch.\n"
-        message += "\n"
-        message += "you can achieve this like so:\n"
-
-        code = ""
-        code += "$ git status\n"
-        code += ".. make sure you stash or branch any changes ..\n"
-        code += "$ git checkout " + branch_name + "\n"
-        code += "$ git commit --allow-empty -m 'Test Plan:\\nyour plan'\n"
-        code += "$ git push origin " + branch_name
-
-        message += rmu.codeBlock(code, lang="text")
+        message += "as author you may edit the test plan directly by "
+        message += "using the 'edit revision' link at the top-right of "
+        message += "this review page."
         self._createComment(message, silent=True)
 
     def _createComment(self, message, silent=False):
