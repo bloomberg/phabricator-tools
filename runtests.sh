@@ -8,6 +8,7 @@ flake8 py/*.py
 # 'sudo apt-get install python-nose' or use the commented-out version
 # 'sudo apt-get install python-coverage' to use the '--with-coverage' option
 # the '--with-profile' option should just work
+# the '--failed' option will run only the tests that failed on the last run
 nosetests py/*.py --with-doctest
 #python -m unittest discover -p "*.py"
 
