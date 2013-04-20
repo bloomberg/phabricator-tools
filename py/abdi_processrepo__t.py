@@ -332,6 +332,8 @@ class Test(unittest.TestCase):
             runCommands("git merge origin/master -s ours")
             runCommands("git push origin ph-review/mergeConflict2/master")
         print "update again"
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_changeAlreadyMergedOnBase(self):

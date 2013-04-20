@@ -313,6 +313,10 @@ def processUpdatedBranch(
                 mail_on_fail=hasChanged)
         else:
             print "update review for " + review_branch.branch
+            revision = phlcon_differential.query(
+                conduit, [working_branch.id])[0]
+            author_user = phlcon_user.queryUsernamesFromPhids(
+                conduit, [revision.authorPHID])[0]
             try:
                 updateReview(
                     conduit,
@@ -324,6 +328,11 @@ def processUpdatedBranch(
                 abdt_workingbranch.pushBadLand(
                     gitContext, review_branch, working_branch)
                 commenter.exception(e)
+                with phlsys_conduit.actAsUserContext(conduit, author_user):
+                    phlcon_differential.createComment(
+                        conduit,
+                        working_branch.id,
+                        action=phlcon_differential.ACTION_RETHINK)
             except abdte.AbdUserException as e:
                 print "user exception"
                 abdt_workingbranch.pushBadInReview(
