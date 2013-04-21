@@ -29,7 +29,7 @@ The `abd` group is divided like so:
 * `abdmail` - format and send event-related emails to people
 * `abdt` - shared types, conventions and tools
 
-The `phi` group is divided like so:
+The `phl` group is divided like so:
 * `phlcon` - thin wrappers around Phabricator Conduit APIs
 * `phldef` - predefined data and constants
 * `phlgit` - thin wrappers around Git subcommands
@@ -41,7 +41,7 @@ Binaries for you
 
 `bin`
 
-Here are all the end-products you might wish use from this repository,
+Here are all the end-products you might wish to use from this repository,
 it's probably most convienient to create a symbolic link to them or add
 the bin directory to $PATH.
 
