@@ -19,17 +19,17 @@ The python modules are divided into 'package groups' which are in turn
 divided into 'packages'
 
 There are two top-level package groups:
-* `abd` - Arcyd specific code (may rename this to `arc` later)
+* `abd` - Arcyd Branch Daemon implementation (may rename this to `arc` later)
 * `phl` - code which can be considered re-usable as a 'PHabricator Library'.
 
-The `abd` group is divided like so:
+The `abd` group is divided into packages like so:
 * `abdcmd` - implementation of Arcyd subcommands
 * `abdcmnt` - format and submit event-related comments to Differential reviews
 * `abdti` - high-level Arcyd implementation details
 * `abdmail` - format and send event-related emails to people
 * `abdt` - shared types, conventions and tools
 
-The `phl` group is divided like so:
+The `phl` group is divided into packages like so:
 * `phlcon` - thin wrappers around Phabricator Conduit APIs
 * `phldef` - predefined data and constants
 * `phlgit` - thin wrappers around Git subcommands
