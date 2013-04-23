@@ -102,6 +102,7 @@ import traceback
 
 # append "../py/" to sys.path, which is the list of paths to search for modules
 # this is so we can import our libraries directly
+# N.B. this is only really passable in the module that defines main()
 sys.path.append(
     os.path.join(
         os.path.dirname(
