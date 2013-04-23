@@ -25,7 +25,7 @@ There are two top-level package groups:
 The `abd` group is divided into packages like so:
 * `abdcmd` - implementation of Arcyd subcommands
 * `abdcmnt` - format and submit event-related comments to Differential reviews
-* `abdti` - high-level Arcyd implementation details
+* `abdi` - high-level Arcyd implementation details
 * `abdmail` - format and send event-related emails to people
 * `abdt` - shared types, conventions and tools
 
