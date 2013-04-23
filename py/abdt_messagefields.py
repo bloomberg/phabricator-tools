@@ -1,63 +1,83 @@
 """Operations involving commit messages and ParseCOmmitMessageFields."""
 
-import phlcon_differential
+import collections
+import types
 
 
+def _isIterable(x):
+    return isinstance(x, collections.Iterable)
+
+
+def _isString(x):
+    return isinstance(x, types.StringTypes)
+
+
+def _isIterableNotString(x):
+    return _isIterable(x) and not _isString(x)
+
+
+def _merge(x, y):
+    if x is None and y is not None:
+        return y
+
+    if y is None and x is not None:
+        return x
+
+    if x == y:
+        return x
+
+    if _isString(x) and _isString(y):
+        return x + y
+
+    if _isIterableNotString(x) and _isIterableNotString(y):
+        return list(set(x) | set(y))
+
+    raise ValueError("can't merge: " + str(x) + " and " + str(y))
+
+
+def _copyValues(x, y, keys):
+    for k in keys:
+        x[k] = y[k]
+
+
+# see
+# .../differential/field/selector/DifferentialDefaultFieldSelector.php
 def update(earlier, later):
-    """Return an updated 'CommitMessageFields' based on the 'earlier' version.
+    """Return an merged 'CommitMessageFields' based on the 'earlier' version.
 
     Apply the 'later' version as an update to the 'earlier' one.
 
     If either the earlier or later are None then the non-None one is returned.
 
-    :earlier: a phlcon_differential.ParseCommitMessageFields
-    :later: a phlcon_differential.ParseCommitMessageFields
-    :returns: the updated phlcon_differential.ParseCommitMessageFields
+    :earlier: a dictionary of message fields
+    :later: a dictionary of message fields
+    :returns: the merged dictionary of message fields
 
     """
-    ParseCommitMessageFields = phlcon_differential.ParseCommitMessageFields
 
     if earlier is None and later is not None:
-        assert(isinstance(later, ParseCommitMessageFields))
         return later
 
     if earlier is not None and later is None:
-        assert(isinstance(earlier, ParseCommitMessageFields))
         return earlier
 
-    assert(isinstance(earlier, ParseCommitMessageFields))
-    assert(isinstance(later, ParseCommitMessageFields))
-    title = earlier.title
-    summary = earlier.summary
-    if later.summary:
-        summary += "\n" + later.summary
-    reviewers = set(earlier.reviewerPHIDs)
-    reviewers |= set(later.reviewerPHIDs)
-    reviewers = list(reviewers)
-    testPlan = earlier.testPlan
-    if later.testPlan:
-        testPlan += "\n" + later.testPlan
-    return ParseCommitMessageFields(
-        title=title,
-        summary=summary,
-        reviewerPHIDs=reviewers,
-        testPlan=testPlan)
+    earlier_keys = set(earlier.keys())
+    later_keys = set(later.keys())
 
+    merged = {}
+    _copyValues(merged, earlier_keys, earlier_keys.difference(later_keys))
+    _copyValues(merged, later_keys, later_keys.difference(earlier_keys))
 
-def updateTestPlan(fields, test_plan):
-    """Return an updated 'CommitMessageFields' with 'test_plan'
+    conflict_keys = earlier_keys.intersection(later_keys)
 
-    :fields: a phlcon_differential.ParseCommitMessageFields
-    :test_plan: the test plan to set
+    if "title" in conflict_keys:
+        merged["title"] = earlier["title"]
+        conflict_keys.remove("title")
 
-    """
-    ParseCommitMessageFields = phlcon_differential.ParseCommitMessageFields
-    assert(isinstance(fields, ParseCommitMessageFields))
-    return ParseCommitMessageFields(
-        title=fields.title,
-        summary=fields.summary,
-        reviewerPHIDs=fields.reviewerPHIDs,
-        testPlan=test_plan)
+    for k in conflict_keys:
+        merged[k] = _merge(earlier[k], later[k])
+
+    return merged
 
 
 #------------------------------------------------------------------------------
