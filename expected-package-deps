@@ -1,0 +1,7 @@
+('abdt', ['phlcon', 'phldef', 'phlgit', 'phlgitu', 'phlsys'])
+('phlgit', ['phlsys'])
+('phlcon', ['phldef', 'phlsys'])
+('abdcmd', ['abdi', 'phlsys'])
+('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phldef', 'phlgit', 'phlmail', 'phlsys'])
+('phlsys', ['phldef'])
+('abdcmnt', ['abdt', 'phlcon'])

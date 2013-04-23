@@ -4,6 +4,11 @@ set -e # exit immediately on error
 flake8 bin/*
 flake8 py/*.py
 
+# please install snakefood with ./doc/package_deps/install_snakefood.sh
+sfood py/*.py --internal > deps
+./doc/package_deps/process.py deps file-deps package-deps
+diff expected-package-deps package-deps
+
 # unittest
 # 'sudo apt-get install python-nose' or use the commented-out version
 # 'sudo apt-get install python-coverage' to use the '--with-coverage' option

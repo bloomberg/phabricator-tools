@@ -5,3 +5,6 @@ tags
 .legcache
 .coverage
 .noseids
+package-deps
+file-deps
+deps
