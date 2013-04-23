@@ -20,7 +20,6 @@ import phlsys_conduit
 import phlsys_fs
 import phlsys_git
 import abdt_gittypes
-import abdt_commitmessage
 import abdt_conduit
 import abdt_conduitgit
 import abdt_workingbranch
@@ -52,12 +51,13 @@ def createReview(conduit, gitContext, review_branch):
 
     hashes = phlgit_log.getRangeHashes(
         clone, review_branch.remote_base, review_branch.remote_branch)
-    parsed = abdt_conduitgit.getFieldsFromCommitHashes(conduit, clone, hashes)
+    parsed = abdt_conduitgit.getFieldsFromCommitHash(conduit, clone, hashes[0])
     if parsed.errors:
         used_default_test_plan = True
-        parsed = abdt_conduitgit.getFieldsFromCommitHashes(
-            conduit, clone, hashes, _DEFAULT_TEST_PLAN)
+        parsed = abdt_conduitgit.getFieldsFromCommitHash(
+            conduit, clone, hashes[0], _DEFAULT_TEST_PLAN)
         if parsed.errors:
+            print parsed
             raise abdt_exception.CommitMessageParseException(
                 errors=parsed.errors,
                 fields=parsed.fields,
@@ -205,11 +205,7 @@ def land(conduit, wb, gitContext, branch):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
 
         # compose the commit message
-        info = d.query(conduit, [wb.id])[0]
-        userNames = phlcon_user.queryUsernamesFromPhids(
-            conduit, info.reviewers)
-        message = abdt_commitmessage.make(
-            info.title, info.summary, info.testPlan, userNames, info.uri)
+        message = d.getCommitMessage(conduit, wb.id)
 
         try:
             with phlsys_fs.nostd():

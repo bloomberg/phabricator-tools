@@ -5,8 +5,6 @@ import phlcon_user
 import phlgit_log
 import phlgitu_ref
 
-import abdt_commitmessage
-import abdt_messagefields
 import abdt_exception
 
 
@@ -42,46 +40,30 @@ def getAnyUserFromBranch(clone, conduit, base, branch):
     raise abdt_exception.NoUsersOnBranchException(branch, base, emails)
 
 
-def getFieldsFromCommitHashes(conduit, clone, hashes, defaultTestPlan=None):
-    """Return a ParseCommitMessageResponse based on the commit messages.
+def getFieldsFromCommitHash(conduit, clone, commit_hash, defaultTestPlan=None):
+    """Return a ParseCommitMessageResponse based on the commit message.
 
     :conduit: supports call()
     :clone: supports call()
-    :hashes: list of the commit hashes to examine
+    :commit_hash: a single commit hash to get the message from
     :returns: a phlcon_differential.ParseCommitMessageResponse
 
     """
-    d = phlcon_differential
-    revisions = phlgit_log.makeRevisionsFromHashes(clone, hashes)
-    fields = None
-    for r in revisions:
-        p = d.parseCommitMessage(
-            conduit, r.subject + "\n\n" + r.message)
-        f = phlcon_differential.ParseCommitMessageFields(**p.fields)
-        fields = abdt_messagefields.update(fields, f)
+    revision = phlgit_log.makeRevisionFromHash(clone, commit_hash)
+    message = revision.subject + "\n"
+    message += "\n"
+    message += revision.message + "\n"
+    parsed = phlcon_differential.parseCommitMessage(conduit, message)
 
+    testPlan = "testPlan"
     if defaultTestPlan is not None:
-        if fields is not None and not fields.testPlan:
-            fields = abdt_messagefields.updateTestPlan(
-                fields, defaultTestPlan)
+        if parsed.fields is not None:
+            if not testPlan in parsed.fields or not parsed.fields[testPlan]:
+                message += "Test Plan:\n" + defaultTestPlan
+                parsed = phlcon_differential.parseCommitMessage(
+                    conduit, message)
 
-    message = makeMessageFromFields(conduit, fields)
-    return d.parseCommitMessage(conduit, message)
-
-
-def makeMessageFromFields(conduit, fields):
-    """Return a string message generated from the supplied 'fields'.
-
-    :fields: a phlcon_differential.ParseCommitMessageFields
-    :returns: a string message
-
-    """
-    user_names = None
-    if fields.reviewerPHIDs:
-        user_names = phlcon_user.queryUsernamesFromPhids(
-            conduit, fields.reviewerPHIDs)
-    return abdt_commitmessage.make(
-        fields.title, fields.summary, fields.testPlan, user_names)
+    return parsed
 
 
 #------------------------------------------------------------------------------

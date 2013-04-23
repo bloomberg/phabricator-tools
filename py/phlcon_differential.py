@@ -100,9 +100,6 @@ GetDiffIdResponse = _makeNT(
 ParseCommitMessageResponse = _makeNT(
     'ParseCommitMessageResponse',
     'fields', 'errors')
-ParseCommitMessageFields = _makeNT(
-    'ParseCommitMessageFields',
-    'reviewerPHIDs', 'summary', 'testPlan', 'title')
 RevisionResponse = _makeNT(
     'RevisionResponse',
     'revisionid', 'uri')
@@ -250,6 +247,11 @@ def createComment(conduit, revisionId, message=None, action=None, silent=None):
     response = conduit.call('differential.createcomment', d)
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
+
+
+def getCommitMessage(conduit, revision_id):
+    d = {"revision_id": revision_id}
+    return conduit.call('differential.getcommitmessage', d)
 
 
 def close(conduit, revisionId):
@@ -461,6 +463,26 @@ Test Plan: I proof-read it and it looked ok
         diff_response = createRawDiff(self.conduit, diff)
         updateRevision(
             self.conduit, revisionid, diff_response.id, [], "update")
+
+    def testUpdateStrangeFields(self):
+        revisionid = self._createRevision("testUpdateStrangeFields")
+        message = "test\n\nmeh: blah\nstrange: blah\n123: blah\ntest plan: hmm"
+        diff = """diff --git a/ b/"""
+        diff_response = createRawDiff(self.conduit, diff)
+        parse_response = parseCommitMessage(self.conduit, message)
+        print str(parse_response.fields)
+        updateRevision(
+            self.conduit,
+            revisionid,
+            diff_response.id,
+            parse_response.fields,
+            "update")
+        # TODO: check that the strange fields appear in the summary field
+
+    def testCanGetCommitMessage(self):
+        revisionid = self._createRevision("testUpdateStrangeFields")
+        getCommitMessage(self.conduit, revisionid)
+
 
 if __name__ == "__main__":
     unittest.main()
