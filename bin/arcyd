@@ -92,10 +92,12 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     """
 
 import argparse
+import datetime
 import os
 import platform
 import signal
 import sys
+import time
 import traceback
 
 # append "../py/" to sys.path, which is the list of paths to search for modules
@@ -183,21 +185,46 @@ def main():
     # exit if we're stopped by SIGTERM
     def HandleSigterm(signum, frame):
         # raises 'SystemExit' exception, which will allow us to clean up
-        sys.exit()
+        sys.exit(1)
     signal.signal(signal.SIGTERM, HandleSigterm)
 
+    retry_delays = [{"minutes": 10}, {"hours": 1}, None]
+    validateDelays(retry_delays)
+
+    for retry_delay in retry_delays:
+        mailsender.send(
+            subject="arcyd started",
+            message=uname,
+            to_addresses=args.sys_admin_emails)
+        try:
+            args.func(args)
+        except Exception:
+            message = uname + "\n" + traceback.format_exc()
+            message += "\nwill wait:" + str(retry_delay)
+            mailsender.send(
+                subject="arcyd paused with exception",
+                message=message,
+                to_addresses=args.sys_admin_emails)
+        except BaseException:
+            mailsender.send(
+                subject="arcyd stopped with base exception",
+                message=uname + "\n" + traceback.format_exc(),
+                to_addresses=args.sys_admin_emails)
+            return 1
+
+        if retry_delay is not None:
+            time.sleep(datetime.timedelta(**retry_delay).total_seconds())
+
     mailsender.send(
-        subject="arcyd started",
-        message=uname,
+        subject="arcyd stopped",
+        message="",
         to_addresses=args.sys_admin_emails)
 
-    try:
-        args.func(args)
-    except BaseException:
-        mailsender.send(
-            subject="arcyd stopped with exception",
-            message=uname + "\n" + traceback.format_exc(),
-            to_addresses=args.sys_admin_emails)
+
+def validateDelays(retry_delays):
+    for retry_delay in retry_delays:
+        if retry_delay is not None:
+            datetime.timedelta(**retry_delay).total_seconds()
 
 
 if __name__ == "__main__":
