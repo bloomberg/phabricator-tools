@@ -205,15 +205,6 @@ class Test(unittest.TestCase):
         self._devCheckoutPushNewBranch("ph-review/badMsgWorkflow/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=0)
-
-        # follow the advice that phab will add in a comment about the missing
-        # test plan and how to fix it.
-        with phlsys_fs.chDirContext("developer"):
-            phlsys_subprocess.run(
-                "git", "commit", "--allow-empty", "-m", "Test Plan: my plan")
-            runCommands("git push origin ph-review/badMsgWorkflow/master")
-
-        self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
