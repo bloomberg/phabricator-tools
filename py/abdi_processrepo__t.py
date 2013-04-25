@@ -344,6 +344,9 @@ class Test(unittest.TestCase):
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
+    # TODO: test landing when origin has been updated underneath us
+    # TODO: test landing when dependent review hasn't been landed
+
     def tearDown(self):
         os.chdir(self._saved_path)
         runCommands("rm -rf abd-test")
