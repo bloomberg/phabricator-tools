@@ -5,9 +5,9 @@ flake8 bin/*
 flake8 py/*.py
 
 # please install snakefood with ./doc/package_deps/install_snakefood.sh
-sfood py/*.py --internal > deps
-./doc/package_deps/process.py deps file-deps package-deps
-diff expected-package-deps package-deps
+sfood py/*.py --internal > doc/package_deps/deps
+./doc/package_deps/process.py doc/package_deps/deps doc/package_deps/file-deps doc/package_deps/package-deps
+diff ./doc/package_deps/expected-package-deps ./doc/package_deps/package-deps
 
 # unittest
 # 'sudo apt-get install python-nose' or use the commented-out version
