@@ -51,11 +51,13 @@ def createReview(conduit, gitContext, review_branch):
 
     hashes = phlgit_log.getRangeHashes(
         clone, review_branch.remote_base, review_branch.remote_branch)
-    parsed = abdt_conduitgit.getFieldsFromCommitHash(conduit, clone, hashes[0])
+    commit = hashes[-1]
+    parsed = abdt_conduitgit.getFieldsFromCommitHash(
+        conduit, clone, commit)
     if parsed.errors:
         used_default_test_plan = True
         parsed = abdt_conduitgit.getFieldsFromCommitHash(
-            conduit, clone, hashes[0], _DEFAULT_TEST_PLAN)
+            conduit, clone, commit, _DEFAULT_TEST_PLAN)
         if parsed.errors:
             print parsed
             raise abdt_exception.CommitMessageParseException(
