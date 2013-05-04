@@ -47,7 +47,7 @@ the bin directory to $PATH.
 
 * `arcyd` - the Arcanist branch-watching daemon
 * `phab-ping` - a simple tool to check the responsiveness of your Phabricator
-* `maily` - a trivial wrapper around sendmail to test configuration
+* `arcyon` - a wrapper around Conduit API to aid scripting
 
 Scripts for exercising the binaries
 -----------------------------------
