@@ -8,6 +8,7 @@ import time
 import unittest
 import urllib
 import urllib2
+import urlparse
 
 import phldef_conduit
 
@@ -51,6 +52,28 @@ def actAsUserContext(conduit, user):
             conduit.setActAsUser(prevUser)
         else:
             conduit.clearActAsUser()
+
+
+def makeConduitUri(uri):
+    """Return the expected conduit uri based on the supplied 'uri'
+
+    Usage examples:
+        >>> makeConduitUri('http://127.0.0.1')
+        'http://127.0.0.1/api/'
+
+        >>> makeConduitUri('http://127.0.0.1/')
+        'http://127.0.0.1/api/'
+
+        >>> makeConduitUri('http://127.0.0.1/conduit/')
+        'http://127.0.0.1/api/'
+
+    :uri: a uri to the Phabricator instance
+    :returns: the expected conduit uri
+
+    """
+    url = urlparse.urlparse(uri)
+    expected = url.scheme + "://" + url.netloc + "/api/"
+    return expected
 
 
 def makePhabTestConduit():
