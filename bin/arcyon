@@ -11,6 +11,8 @@ which extend Phabricator.
 
 _USAGE_EXAMPLES = """
 usage example:
+    to display the config that arcyon will use:
+    $ arcyon show-config
     """
 
 import argparse
@@ -29,6 +31,7 @@ sys.path.append(
 
 import phlsys_arcconfig
 import phlsys_arcrc
+import phlsys_subcommand
 
 
 class ShowConfig(object):
@@ -48,21 +51,6 @@ class ShowConfig(object):
         print phlsys_arcconfig.getArcconfig()
 
 
-def setupParser(name, module, subparsers):
-    doc = module.__doc__
-    docSubject = doc.splitlines()[0]
-    docEpilog = '\n'.join(doc.splitlines()[1:])
-    parser = subparsers.add_parser(
-        name,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        help=docSubject,
-        description=docSubject,
-        epilog=docEpilog,
-        fromfile_prefix_chars=module.getFromfilePrefixChars())
-    module.setupParser(parser)
-    parser.set_defaults(func=module.process)
-
-
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -71,7 +59,7 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    setupParser("show-config", ShowConfig, subparsers)
+    phlsys_subcommand.setupParser("show-config", ShowConfig, subparsers)
 
     args = parser.parse_args()
     args.func(args)

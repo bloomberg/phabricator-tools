@@ -114,21 +114,7 @@ import abdcmd_single
 import abdcmd_multi
 import phlmail_sender
 import phlsys_sendmail
-
-
-def setupParser(name, module, subparsers):
-    doc = module.__doc__
-    docSubject = doc.splitlines()[0]
-    docEpilog = '\n'.join(doc.splitlines()[1:])
-    parser = subparsers.add_parser(
-        name,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        help=docSubject,
-        description=docSubject,
-        epilog=docEpilog,
-        fromfile_prefix_chars=module.getFromfilePrefixChars())
-    module.setupParser(parser)
-    parser.set_defaults(func=module.process)
+import phlsys_subcommand
 
 
 def main():
@@ -164,8 +150,8 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    setupParser("single", abdcmd_single, subparsers)
-    setupParser("multi", abdcmd_multi, subparsers)
+    phlsys_subcommand.setupParser("single", abdcmd_single, subparsers)
+    phlsys_subcommand.setupParser("multi", abdcmd_multi, subparsers)
 
     args = parser.parse_args()
 
