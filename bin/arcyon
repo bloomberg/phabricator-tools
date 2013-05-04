@@ -31,6 +31,7 @@ sys.path.append(
 
 import phlsys_arcconfig
 import phlsys_arcrc
+import phlsys_conduit
 import phlsys_subcommand
 
 
@@ -51,6 +52,44 @@ class ShowConfig(object):
         print phlsys_arcconfig.getArcconfig()
 
 
+class DifferentialQuery(object):
+    """display and filter the list of revisions."""
+
+    @staticmethod
+    def getFromfilePrefixChars():
+        return ""
+
+    @staticmethod
+    def setupParser(parser):
+        pass
+
+    @staticmethod
+    def process(args):
+        conduit = makeConduit(args)
+        results = conduit.call("differential.query", {})
+        for x in results:
+            x_id = x["id"]
+            x_title = x["title"]
+            x_status = x["statusName"]
+            print "%s %s %s" % (x_id, x_status, x_title)
+
+
+def makeConduit(args):
+    uri, user, cert = getUriUserCertificate()
+    return phlsys_conduit.Conduit(uri, user, cert)
+
+
+def getUriUserCertificate():
+    arcrc = phlsys_arcrc.getArcrc()
+    arcconfig = phlsys_arcconfig.getArcconfig()
+    uri = arcconfig["conduit_uri"]
+    uri = phlsys_conduit.makeConduitUri(uri)
+    credentials = phlsys_arcrc.getHost(arcrc, uri)
+    user = credentials["user"]
+    cert = credentials["cert"]
+    return uri, user, cert
+
+
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -60,6 +99,7 @@ def main():
     subparsers = parser.add_subparsers()
 
     phlsys_subcommand.setupParser("show-config", ShowConfig, subparsers)
+    phlsys_subcommand.setupParser("query", DifferentialQuery, subparsers)
 
     args = parser.parse_args()
     args.func(args)
