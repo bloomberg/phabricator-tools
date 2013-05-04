@@ -2,7 +2,8 @@
 
 import json
 import os.path
-import urlparse
+
+import phlsys_conduit
 
 
 def findArcrc():
@@ -18,10 +19,8 @@ def getArcrc():
         return json.load(f)
 
 
-def getHostFromArcrc(host):
-    arcrc = getArcrc()
-    url = urlparse.urlparse(host)
-    normalised = url.scheme + "://" + url.netloc + "/api/"
+def getHost(arcrc, host):
+    normalised = phlsys_conduit.makeConduitUri(host)
     return arcrc["hosts"][normalised]
 
 
