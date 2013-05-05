@@ -62,60 +62,85 @@ class DifferentialQuery(object):
 
     @staticmethod
     def setupParser(parser):
-        parser.add_argument(
+        filters = parser.add_argument_group('filter parameters')
+        self_filters = parser.add_argument_group('self filter parameters')
+        user_filters = parser.add_argument_group('user filter parameters')
+        fmts = parser.add_argument_group(
+            'output format parameters', 'choose one only, default is "short"')
+        formats = fmts.add_mutually_exclusive_group()
+
+        filters.add_argument(
+            '--status',
+            type=str,
+            choices=['open', 'accepted', 'closed'],
+            help="limit output to only this status")
+
+        self_filters.add_argument(
             '--author-me',
             action='store_true',
             help="add yourself to the authors filter")
-        parser.add_argument(
+        self_filters.add_argument(
+            '--reviewer-me',
+            action='store_true',
+            help="add yourself to the reviewers filter")
+        self_filters.add_argument(
+            '--cc-me',
+            action='store_true',
+            help="add yourself to the ccs filter")
+        self_filters.add_argument(
+            '--subscriber-me',
+            action='store_true',
+            help="add yourself to the subscribers filter")
+        self_filters.add_argument(
+            '--responsible-me',
+            action='store_true',
+            help="add yourself to the responsibleUsers filter")
+
+        user_filters.add_argument(
             '--authors',
             type=str,
             nargs="+",
             default=[],
+            metavar='USER',
             help="add usernames to the authors filter")
-        parser.add_argument(
-            '--reviewer-me',
-            action='store_true',
-            help="add yourself to the reviewers filter")
-        parser.add_argument(
+        user_filters.add_argument(
             '--reviewers',
             type=str,
             nargs="+",
             default=[],
+            metavar='USER',
             help="add usernames to the reviewers filter")
-        parser.add_argument(
-            '--cc-me',
-            action='store_true',
-            help="add yourself to the ccs filter")
-        parser.add_argument(
+        user_filters.add_argument(
             '--ccs',
             type=str,
             nargs="+",
             default=[],
+            metavar='USER',
             help="add usernames to the ccs filter")
-        parser.add_argument(
-            '--subscriber-me',
-            action='store_true',
-            help="add yourself to the subscribers filter")
-        parser.add_argument(
+        user_filters.add_argument(
             '--subscribers',
             type=str,
             nargs="+",
             default=[],
+            metavar='USER',
             help="add usernames to the subscribers filter")
-        parser.add_argument(
-            '--responsible-user-me',
-            action='store_true',
-            help="add yourself to the responsibleUsers filter")
-        parser.add_argument(
+        user_filters.add_argument(
             '--responsible-users',
             type=str,
             nargs="+",
             default=[],
+            metavar='USER',
             help="add usernames to the responsibleUsers filter")
-        parser.add_argument(
-            '--status',
+
+        formats.add_argument(
+            '--format-type',
+            choices=['json', 'short'],
+            help="see usage examples for sample output")
+        formats.add_argument(
+            '--format-string',
+            metavar='FORMAT',
             type=str,
-            help="open, accepted or closed")
+            help="compose your own output format")
 
     @staticmethod
     def process(args):
@@ -136,7 +161,7 @@ class DifferentialQuery(object):
         processUserField(
             "responsibleUsers",
             args.responsible_users,
-            args.responsible_user_me)
+            args.responsible_me)
 
         users = [u for users in d.itervalues() for u in users]
         users = list(set(users))
@@ -150,18 +175,24 @@ class DifferentialQuery(object):
             d[key] = [userToPhid[u] for u in d[key]]
 
         if args.status:
-            valid_states = ["open", "accepted", "closed"]
-            if args.status not in valid_states:
-                print "status must be one of " + str(valid_states)
-                sys.exit(1)
             d["status"] = "status-" + args.status
 
         results = conduit.call("differential.query", d)
-        for x in results:
-            x_id = x["id"]
-            x_title = x["title"]
-            x_status = x["statusName"]
-            print "%s %s %s" % (x_id, x_status, x_title)
+        if not args.format_type and not args.format_string:
+            args.format_type = "short"
+        if args.format_type:
+            if args.format_type == "json":
+                print results
+            elif args.format_type == "short":
+                for x in results:
+                    x_id = x["id"]
+                    x_title = x["title"]
+                    x_status = x["statusName"]
+                    print "%s %s %s" % (x_id, x_status, x_title)
+            else:
+                raise Exception("unsupported format")
+        else:
+            raise Exception("unsupported format")
 
 
 def makeConduit(args):
