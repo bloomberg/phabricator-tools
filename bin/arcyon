@@ -17,6 +17,7 @@ usage example:
 
 import argparse
 import os
+import string
 import sys
 
 # append "../py/" to sys.path, which is the list of paths to search for modules
@@ -140,7 +141,8 @@ class DifferentialQuery(object):
             '--format-string',
             metavar='FORMAT',
             type=str,
-            help="compose your own output format")
+            help="compose your own output format, e.g. '$id $title', see "
+                 "usage examples for more details")
 
     @staticmethod
     def process(args):
@@ -184,15 +186,15 @@ class DifferentialQuery(object):
             if args.format_type == "json":
                 print results
             elif args.format_type == "short":
+                shortTemplate = string.Template("$id $title $statusName")
                 for x in results:
-                    x_id = x["id"]
-                    x_title = x["title"]
-                    x_status = x["statusName"]
-                    print "%s %s %s" % (x_id, x_status, x_title)
+                    print shortTemplate.safe_substitute(x)
             else:
                 raise Exception("unsupported format")
         else:
-            raise Exception("unsupported format")
+            template = string.Template(args.format_string)
+            for x in results:
+                print template.safe_substitute(x)
 
 
 def makeConduit(args):
