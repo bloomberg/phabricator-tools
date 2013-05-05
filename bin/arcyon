@@ -112,6 +112,10 @@ class DifferentialQuery(object):
             nargs="+",
             default=[],
             help="add usernames to the responsibleUsers filter")
+        parser.add_argument(
+            '--status',
+            type=str,
+            help="open, accepted or closed")
 
     @staticmethod
     def process(args):
@@ -144,6 +148,13 @@ class DifferentialQuery(object):
         # XXX: check for bad userToPhid
         for key in d.iterkeys():
             d[key] = [userToPhid[u] for u in d[key]]
+
+        if args.status:
+            valid_states = ["open", "accepted", "closed"]
+            if args.status not in valid_states:
+                print "status must be one of " + str(valid_states)
+                sys.exit(1)
+            d["status"] = "status-" + args.status
 
         results = conduit.call("differential.query", d)
         for x in results:
