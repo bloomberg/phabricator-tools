@@ -159,6 +159,9 @@ class Conduit():
     def getActAsUser(self):
         return self._act_as_user
 
+    def getUser(self):
+        return self._username
+
     def _authenticate(self):
 
         token = str(int(time.time()))
