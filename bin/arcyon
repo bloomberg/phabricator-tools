@@ -29,6 +29,7 @@ sys.path.append(
                 os.path.realpath(__file__))),
         "py"))
 
+import phlcon_user
 import phlsys_arcconfig
 import phlsys_arcrc
 import phlsys_conduit
@@ -61,12 +62,98 @@ class DifferentialQuery(object):
 
     @staticmethod
     def setupParser(parser):
-        pass
+        parser.add_argument(
+            '--author-me',
+            action='store_true',
+            help="add yourself to the authors filter")
+        parser.add_argument(
+            '--authors',
+            type=str,
+            nargs="+",
+            default=[],
+            help="add usernames to the authors filter")
+        parser.add_argument(
+            '--reviewer-me',
+            action='store_true',
+            help="add yourself to the reviewers filter")
+        parser.add_argument(
+            '--reviewers',
+            type=str,
+            nargs="+",
+            default=[],
+            help="add usernames to the reviewers filter")
+        parser.add_argument(
+            '--cc-me',
+            action='store_true',
+            help="add yourself to the ccs filter")
+        parser.add_argument(
+            '--ccs',
+            type=str,
+            nargs="+",
+            default=[],
+            help="add usernames to the ccs filter")
+        parser.add_argument(
+            '--subscriber-me',
+            action='store_true',
+            help="add yourself to the subscribers filter")
+        parser.add_argument(
+            '--subscribers',
+            type=str,
+            nargs="+",
+            default=[],
+            help="add usernames to the subscribers filter")
+        parser.add_argument(
+            '--responsible-user-me',
+            action='store_true',
+            help="add yourself to the responsibleUsers filter")
+        parser.add_argument(
+            '--responsible-users',
+            type=str,
+            nargs="+",
+            default=[],
+            help="add usernames to the responsibleUsers filter")
 
     @staticmethod
     def process(args):
         conduit = makeConduit(args)
-        results = conduit.call("differential.query", {})
+        authors = args.authors
+        reviewers = args.reviewers
+        ccs = args.ccs
+        subscribers = args.subscribers
+        responsible_users = args.responsible_users
+
+        if args.author_me:
+            authors.append(conduit.getUser())
+        if args.reviewer_me:
+            reviewers.append(conduit.getUser())
+        if args.cc_me:
+            ccs.append(conduit.getUser())
+        if args.subscriber_me:
+            subscribers.append(conduit.getUser())
+        if args.responsible_user_me:
+            responsible_users.append(conduit.getUser())
+
+        users = authors + reviewers + ccs + subscribers + responsible_users
+        users = list(set(users))
+        userToPhid = {}
+        if users:
+            userToPhid = phlcon_user.makeUsernamePhidDict(conduit, users)
+
+        # XXX: check for duplicates in author and reviewer
+        # XXX: check for bad userToPhid
+        d = {}
+        if authors:
+            d["authors"] = [userToPhid[u] for u in authors]
+        if reviewers:
+            d["reviewers"] = [userToPhid[u] for u in reviewers]
+        if ccs:
+            d["ccs"] = [userToPhid[u] for u in ccs]
+        if subscribers:
+            d["subscribers"] = [userToPhid[u] for u in subscribers]
+        if responsible_users:
+            d["responsibleUsers"] = [userToPhid[u] for u in responsible_users]
+
+        results = conduit.call("differential.query", d)
         for x in results:
             x_id = x["id"]
             x_title = x["title"]
