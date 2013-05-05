@@ -16,6 +16,21 @@ QueryResponse = _makeNT(
     'phid', 'userName', 'realName', 'image', 'uri', 'roles')
 
 
+def isNoSuchUserError(e):
+    """Return True if the supplied ConduitException is due to unrecognised user
+
+    :e: a ConduitException
+    :returns: True if the supplied ConduitException is due to unrecognised user
+
+    """
+    errConduitCore = "ERR-CONDUIT-CORE"
+    noSuchEmail = ""
+    noSuchEmail += "Array for %Ls conversion is empty. "
+    noSuchEmail += "Query: SELECT * FROM %s WHERE userPHID IN (%Ls) "
+    noSuchEmail += "AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo %Q"
+    return e.error == errConduitCore and e.errormsg == noSuchEmail
+
+
 def queryUserFromEmail(conduit, email):
     """Return a QueryResponse based on the provided emails.
 
@@ -31,12 +46,7 @@ def queryUserFromEmail(conduit, email):
     try:
         response = conduit.call("user.query", d)
     except phlsys_conduit.ConduitException as e:
-        errConduitCore = "ERR-CONDUIT-CORE"
-        noSuchEmail = ""
-        noSuchEmail += "Array for %Ls conversion is empty. "
-        noSuchEmail += "Query: SELECT * FROM %s WHERE userPHID IN (%Ls) "
-        noSuchEmail += "AND UNIX_TIMESTAMP() BETWEEN dateFrom AND dateTo %Q"
-        if not(e.error == errConduitCore and e.errormsg == noSuchEmail):
+        if not isNoSuchUserError(e):
             raise
 
     if response:
@@ -89,6 +99,35 @@ def queryUsersFromPhids(conduit, phids):
     return [QueryResponse(**u) for u in response]
 
 
+def queryUsersFromUsernames(conduit, usernames):
+    """Return a list of QueryResponse based on the provided usernames.
+
+    Return None if any of 'usernames' is invalid.
+
+    :conduit: must support 'call()' like phlsys_conduit
+    :usernames: a list of strings corresponding to usernames
+    :returns: a list of QueryResponse
+
+    """
+    assert isinstance(usernames, list)
+    d = {"usernames": usernames}
+
+    response = None
+    try:
+        response = conduit.call("user.query", d)
+    except phlsys_conduit.ConduitException as e:
+        if not isNoSuchUserError(e):
+            raise
+
+    if response is None:
+        return None
+
+    if len(response) != len(usernames):
+        raise Exception("unexpected number of entries")
+
+    return [QueryResponse(**u) for u in response]
+
+
 def queryUsernamesFromPhids(conduit, phids):
     """Return a list of username strings based on the provided phids.
 
@@ -101,6 +140,23 @@ def queryUsernamesFromPhids(conduit, phids):
     """
     users = queryUsersFromPhids(conduit, phids)
     return [u.userName for u in users]
+
+
+def makeUsernamePhidDict(conduit, usernames):
+    """Return a dictionary of usernames to phids.
+
+    Return None if any of 'usernames' is invalid.
+
+    :conduit: must support 'call()' like phlsys_conduit
+    :usernames: a list of strings corresponding to Phabricator usernames
+    :returns: a dictionary of usernames to corresponding phids
+
+    """
+    users = queryUsersFromUsernames(conduit, usernames)
+    if users is None:
+        return None
+    else:
+        return {u.userName: u.phid for u in users}
 
 
 class TestUser(unittest.TestCase):
@@ -133,6 +189,23 @@ class TestUser(unittest.TestCase):
         users = queryUsersFromEmails(self.conduit, emails)
         self.assertEqual(len(users), 3)
         self.assertListEqual(users, [self.test_user, None, None])
+
+    def testAliceUsername(self):
+        users = queryUsersFromUsernames(self.conduit, [self.test_user])
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0].userName, self.test_user)
+
+        userDict = makeUsernamePhidDict(self.conduit, [self.test_user])
+        self.assertEqual(len(userDict), 1)
+        self.assertEqual(userDict[self.test_user], users[0].phid)
+
+    def testBadUsername(self):
+        bad_username = "#@)4308f:"
+        users = queryUsersFromUsernames(self.conduit, [bad_username])
+        self.assertIsNone(users)
+
+        userDict = makeUsernamePhidDict(self.conduit, [bad_username])
+        self.assertIsNone(userDict)
 
 
 if __name__ == "__main__":
