@@ -135,7 +135,7 @@ class DifferentialQuery(object):
 
         formats.add_argument(
             '--format-type',
-            choices=['json', 'short'],
+            choices=['json', 'short', 'ids'],
             help="see usage examples for sample output")
         formats.add_argument(
             '--format-string',
@@ -187,6 +187,10 @@ class DifferentialQuery(object):
                 print results
             elif args.format_type == "short":
                 shortTemplate = string.Template("$id $title $statusName")
+                for x in results:
+                    print shortTemplate.safe_substitute(x)
+            elif args.format_type == "ids":
+                shortTemplate = string.Template("$id")
                 for x in results:
                     print shortTemplate.safe_substitute(x)
             else:
