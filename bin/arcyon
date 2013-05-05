@@ -116,24 +116,25 @@ class DifferentialQuery(object):
     @staticmethod
     def process(args):
         conduit = makeConduit(args)
-        authors = args.authors
-        reviewers = args.reviewers
-        ccs = args.ccs
-        subscribers = args.subscribers
-        responsible_users = args.responsible_users
+        me = conduit.getUser()
 
-        if args.author_me:
-            authors.append(conduit.getUser())
-        if args.reviewer_me:
-            reviewers.append(conduit.getUser())
-        if args.cc_me:
-            ccs.append(conduit.getUser())
-        if args.subscriber_me:
-            subscribers.append(conduit.getUser())
-        if args.responsible_user_me:
-            responsible_users.append(conduit.getUser())
+        d = {}
 
-        users = authors + reviewers + ccs + subscribers + responsible_users
+        def processUserField(name, param, add_me):
+            d[name] = param
+            if add_me:
+                d[name].append(me)
+
+        processUserField("authors", args.authors, args.author_me)
+        processUserField("reviewers", args.reviewers, args.reviewer_me)
+        processUserField("ccs", args.ccs, args.cc_me)
+        processUserField("subscribers", args.subscribers, args.subscriber_me)
+        processUserField(
+            "responsibleUsers",
+            args.responsible_users,
+            args.responsible_user_me)
+
+        users = [u for users in d.itervalues() for u in users]
         users = list(set(users))
         userToPhid = {}
         if users:
@@ -141,17 +142,8 @@ class DifferentialQuery(object):
 
         # XXX: check for duplicates in author and reviewer
         # XXX: check for bad userToPhid
-        d = {}
-        if authors:
-            d["authors"] = [userToPhid[u] for u in authors]
-        if reviewers:
-            d["reviewers"] = [userToPhid[u] for u in reviewers]
-        if ccs:
-            d["ccs"] = [userToPhid[u] for u in ccs]
-        if subscribers:
-            d["subscribers"] = [userToPhid[u] for u in subscribers]
-        if responsible_users:
-            d["responsibleUsers"] = [userToPhid[u] for u in responsible_users]
+        for key in d.iterkeys():
+            d[key] = [userToPhid[u] for u in d[key]]
 
         results = conduit.call("differential.query", d)
         for x in results:
