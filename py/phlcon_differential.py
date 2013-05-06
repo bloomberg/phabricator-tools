@@ -56,6 +56,26 @@ ACTION_ADDCCS = 'add_ccs'
 ACTION_CLAIM = 'claim'
 ACTION_REOPEN = 'reopen'
 
+AUTHOR_ACTIONS = {
+    "close": ACTION_CLOSE,
+    "comment": ACTION_COMMENT,
+    "plan changes": ACTION_RETHINK,
+    "abandon": ACTION_ABANDON,
+    "request review": ACTION_REQUEST,
+    "unabandon": ACTION_RECLAIM,
+    "reopen": ACTION_REOPEN
+}
+
+REVIEWER_ACTIONS = {
+    "comment": ACTION_COMMENT,
+    "accept": ACTION_ACCEPT,
+    "request changes": ACTION_REJECT,
+    "resign as reviewer": ACTION_RESIGN,
+    "commandeer": ACTION_CLAIM,
+}
+
+USER_ACTIONS = dict(AUTHOR_ACTIONS.items() + REVIEWER_ACTIONS.items())
+
 
 def _makeNT(name, *fields):
     return collections.namedtuple(
