@@ -78,10 +78,21 @@ class DifferentialQuery(object):
         formats = fmts.add_mutually_exclusive_group()
 
         filters.add_argument(
-            '--status',
+            '--status-type',
             type=str,
             choices=['open', 'accepted', 'closed'],
-            help="limit output to only this status")
+            help="limit output to only this status type")
+        filters.add_argument(
+            '--statuses',
+            type=str,
+            nargs="+",
+            choices=[
+                'Closed',
+                'Abandoned',
+                'Needs Review',
+                'Needs Revision',
+                'Accepted'],
+            help="limit output to only these statuses")
 
         self_filters.add_argument(
             '--author-me',
@@ -194,10 +205,17 @@ class DifferentialQuery(object):
         for key in d.iterkeys():
             d[key] = [userToPhid[u] for u in d[key]]
 
-        if args.status:
-            d["status"] = "status-" + args.status
+        if args.status_type:
+            d["status"] = "status-" + args.status_type
 
         results = conduit.call("differential.query", d)
+
+        if args.statuses:
+            new_results = []
+            for r in results:
+                if r["statusName"] in args.statuses:
+                    new_results.append(r)
+            results = new_results
 
         if args.update_min_age:
             min_age = phlsys_strtotime.durationStringToTimeDelta(
