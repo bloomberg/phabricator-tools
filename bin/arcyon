@@ -18,7 +18,6 @@ usage example:
 import argparse
 import os
 import sys
-import textwrap
 
 # append "../py/" to sys.path, which is the list of paths to search for modules
 # this is so we can import our libraries directly
@@ -30,12 +29,11 @@ sys.path.append(
                 os.path.realpath(__file__))),
         "py"))
 
-import phlcon_differential
 import phlsys_arcconfig
 import phlsys_arcrc
-import phlsys_makeconduit
 import phlsys_subcommand
 
+import aoncmd_comment
 import aoncmd_query
 
 
@@ -56,83 +54,6 @@ class ShowConfig(object):
         print phlsys_arcconfig.getArcconfig()
 
 
-class DifferentialComment(object):
-    """create a comment on a differential review."""
-
-    @staticmethod
-    def getFromfilePrefixChars():
-        return ""
-
-    @staticmethod
-    def setupParser(parser):
-        actions = parser.add_argument_group(
-            'action argument',
-            'use any of ' + textwrap.fill(
-                str(phlcon_differential.USER_ACTIONS.keys())))
-
-        parser.add_argument(
-            'ids',
-            type=int,
-            nargs="*",
-            default=[],
-            help="the revision to comment on (e.g. 1)")
-        parser.add_argument(
-            '--ids-file',
-            metavar='FILE',
-            type=argparse.FileType('r'),
-            help="a file to read ids from, use '-' to specify stdin")
-
-        parser.add_argument(
-            '--message', '-m',
-            metavar="M",
-            default="",
-            type=str,
-            help="the body text of the comment")
-        parser.add_argument(
-            '--message-file',
-            metavar='FILE',
-            type=argparse.FileType('r'),
-            help="a file to read the message from, use '-' for stdin")
-        parser.add_argument(
-            '--silent',
-            action='store_true',
-            help="don't send notification emails for this comment")
-
-        actions.add_argument(
-            '--action', '-a',
-            choices=phlcon_differential.USER_ACTIONS.keys(),
-            metavar="ACTION",
-            default='comment',
-            type=str,
-            help="perform an action on a review")
-
-    @staticmethod
-    def process(args):
-        conduit = phlsys_makeconduit.makeConduit()
-
-        d = {
-            'message': args.message,
-            'silent': args.silent,
-            'action': phlcon_differential.USER_ACTIONS[args.action]
-        }
-
-        if args.message_file:
-            d['message'] += args.message_file.read()
-
-        ids = args.ids
-        if args.ids_file:
-            ids.extend([int(i) for i in args.ids_file.read().split()])
-
-        if not ids:
-            print "error: you have not specified any revision ids"
-            sys.exit(1)
-
-        for i in ids:
-            d["revision_id"] = i
-            result = conduit.call("differential.createcomment", d)
-            print result
-
-
 def main():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -143,7 +64,7 @@ def main():
 
     phlsys_subcommand.setupParser("show-config", ShowConfig, subparsers)
     phlsys_subcommand.setupParser("query", aoncmd_query, subparsers)
-    phlsys_subcommand.setupParser("comment", DifferentialComment, subparsers)
+    phlsys_subcommand.setupParser("comment", aoncmd_comment, subparsers)
 
     args = parser.parse_args()
     args.func(args)
