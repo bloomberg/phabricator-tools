@@ -229,7 +229,7 @@ class DifferentialQuery(object):
             if args.format_type == "json":
                 print results
             elif args.format_type == "short":
-                shortTemplate = string.Template("$id $title $statusName")
+                shortTemplate = string.Template("$id / $statusName / $title")
                 for x in results:
                     print shortTemplate.safe_substitute(x)
             elif args.format_type == "ids":
