@@ -20,6 +20,7 @@ import datetime
 import os
 import string
 import sys
+import textwrap
 
 # append "../py/" to sys.path, which is the list of paths to search for modules
 # this is so we can import our libraries directly
@@ -68,7 +69,10 @@ class DifferentialQuery(object):
         filters = parser.add_argument_group('filter parameters')
         self_filters = parser.add_argument_group('self filter parameters')
         user_filters = parser.add_argument_group('user filter parameters')
-        time_filters = parser.add_argument_group('time filter parameters')
+        time_filters = parser.add_argument_group(
+            'time filter parameters',
+            textwrap.fill(
+                phlsys_strtotime.describeDurationStringToTimeDelta()))
         fmts = parser.add_argument_group(
             'output format parameters', 'choose one only, default is "short"')
         formats = fmts.add_mutually_exclusive_group()
@@ -140,14 +144,12 @@ class DifferentialQuery(object):
             '--update-min-age',
             type=str,
             metavar='AGE',
-            help='include reviews which are at least AGE old. '
-                 + phlsys_strtotime.describeDurationStringToTimeDelta())
+            help='include reviews which are at least AGE old.')
         time_filters.add_argument(
             '--update-max-age',
             type=str,
             metavar='AGE',
-            help='include reviews which are at most AGE old. '
-                 + phlsys_strtotime.describeDurationStringToTimeDelta())
+            help='include reviews which are at most AGE old.')
 
         formats.add_argument(
             '--format-type',
