@@ -29,29 +29,11 @@ sys.path.append(
                 os.path.realpath(__file__))),
         "py"))
 
-import phlsys_arcconfig
-import phlsys_arcrc
 import phlsys_subcommand
 
 import aoncmd_comment
+import aoncmd_showconfig
 import aoncmd_query
-
-
-class ShowConfig(object):
-    """show the configuration as discovered from the current directory."""
-
-    @staticmethod
-    def getFromfilePrefixChars():
-        return ""
-
-    @staticmethod
-    def setupParser(parser):
-        pass
-
-    @staticmethod
-    def process(args):
-        print phlsys_arcrc.getArcrc()
-        print phlsys_arcconfig.getArcconfig()
 
 
 def main():
@@ -62,7 +44,7 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setupParser("show-config", ShowConfig, subparsers)
+    phlsys_subcommand.setupParser("show-config", aoncmd_showconfig, subparsers)
     phlsys_subcommand.setupParser("query", aoncmd_query, subparsers)
     phlsys_subcommand.setupParser("comment", aoncmd_comment, subparsers)
 
