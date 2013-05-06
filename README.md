@@ -20,6 +20,19 @@ This project aims to complement Phabricator by making installation,
 administration and interoperation easier.  At some point it will hopefully
 be merged with Phabricator-actual.
 
+Extend Phabricator easily with Arcyon
+-------------------------------------
+
+There are often house-keeping tasks which you like to be able to automate,
+the Phabricator 'Conduit' API is designed to let you interact with your
+instance over http.
+
+Arcyon wraps up the API with a command-line interface for easy scripting.
+
+e.g. say 'poke' on all open reviews not updated for 2 weeks
+
+    $ arcyon query --min-update-age "2 weeks" --status-type open | arcyon comment --ids-file - -m 'poke'
+
 Hands-free Differential reviews with Arcyd
 ------------------------------------------
 
