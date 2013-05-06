@@ -33,7 +33,7 @@ sys.path.append(
 import phlcon_differential
 import phlsys_arcconfig
 import phlsys_arcrc
-import phlsys_conduit
+import phlsys_makeconduit
 import phlsys_subcommand
 
 import aoncmd_query
@@ -108,7 +108,7 @@ class DifferentialComment(object):
 
     @staticmethod
     def process(args):
-        conduit = makeConduit(args)
+        conduit = phlsys_makeconduit.makeConduit()
 
         d = {
             'message': args.message,
@@ -131,22 +131,6 @@ class DifferentialComment(object):
             d["revision_id"] = i
             result = conduit.call("differential.createcomment", d)
             print result
-
-
-def makeConduit(args):
-    uri, user, cert = getUriUserCertificate()
-    return phlsys_conduit.Conduit(uri, user, cert)
-
-
-def getUriUserCertificate():
-    arcrc = phlsys_arcrc.getArcrc()
-    arcconfig = phlsys_arcconfig.getArcconfig()
-    uri = arcconfig["conduit_uri"]
-    uri = phlsys_conduit.makeConduitUri(uri)
-    credentials = phlsys_arcrc.getHost(arcrc, uri)
-    user = credentials["user"]
-    cert = credentials["cert"]
-    return uri, user, cert
 
 
 def main():

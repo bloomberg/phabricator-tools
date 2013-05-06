@@ -5,10 +5,8 @@ import string
 import textwrap
 
 import phlcon_user
-import phlsys_arcconfig
-import phlsys_arcrc
-import phlsys_conduit
 import phlsys_strtotime
+import phlsys_makeconduit
 
 
 def getFromfilePrefixChars():
@@ -125,7 +123,7 @@ def setupParser(parser):
 
 
 def process(args):
-    conduit = makeConduit(args)
+    conduit = phlsys_makeconduit.makeConduit()
     me = conduit.getUser()
 
     d = {}
@@ -208,22 +206,6 @@ def process(args):
         template = string.Template(args.format_string)
         for x in results:
             print template.safe_substitute(x)
-
-
-def makeConduit(args):
-    uri, user, cert = getUriUserCertificate()
-    return phlsys_conduit.Conduit(uri, user, cert)
-
-
-def getUriUserCertificate():
-    arcrc = phlsys_arcrc.getArcrc()
-    arcconfig = phlsys_arcconfig.getArcconfig()
-    uri = arcconfig["conduit_uri"]
-    uri = phlsys_conduit.makeConduitUri(uri)
-    credentials = phlsys_arcrc.getHost(arcrc, uri)
-    user = credentials["user"]
-    cert = credentials["cert"]
-    return uri, user, cert
 
 
 #------------------------------------------------------------------------------
