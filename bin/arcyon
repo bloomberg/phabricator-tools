@@ -73,15 +73,28 @@ class DifferentialComment(object):
                 str(phlcon_differential.USER_ACTIONS.keys())))
 
         parser.add_argument(
-            'id',
+            'ids',
             type=int,
+            nargs="*",
+            default=[],
             help="the revision to comment on (e.g. 1)")
         parser.add_argument(
+            '--ids-file',
+            metavar='FILE',
+            type=argparse.FileType('r'),
+            help="a file to read ids from, use '-' to specify stdin")
+
+        parser.add_argument(
             '--message', '-m',
-            metavar="TEXT",
-            default=" ",
+            metavar="M",
+            default="",
             type=str,
             help="the body text of the comment")
+        parser.add_argument(
+            '--message-file',
+            metavar='FILE',
+            type=argparse.FileType('r'),
+            help="a file to read the message from, use '-' for stdin")
         parser.add_argument(
             '--silent',
             action='store_true',
@@ -91,6 +104,7 @@ class DifferentialComment(object):
             '--action', '-a',
             choices=phlcon_differential.USER_ACTIONS.keys(),
             metavar="ACTION",
+            default='comment',
             type=str,
             help="perform an action on a review")
 
@@ -98,13 +112,27 @@ class DifferentialComment(object):
     def process(args):
         conduit = makeConduit(args)
 
-        d = {'revision_id': args.id, "message": args.message}
+        d = {
+            'message': args.message,
+            'silent': args.silent,
+            'action': phlcon_differential.USER_ACTIONS[args.action]
+        }
 
-        if args.action:
-            d["action"] = phlcon_differential.USER_ACTIONS[args.action]
+        if args.message_file:
+            d['message'] += args.message_file.read()
 
-        result = conduit.call("differential.createcomment", d)
-        print result
+        ids = args.ids
+        if args.ids_file:
+            ids.extend([int(i) for i in args.ids_file.read().split()])
+
+        if not ids:
+            print "error: you have not specified any revision ids"
+            sys.exit(1)
+
+        for i in ids:
+            d["revision_id"] = i
+            result = conduit.call("differential.createcomment", d)
+            print result
 
 
 class DifferentialQuery(object):
