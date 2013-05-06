@@ -1,4 +1,52 @@
-"""display and filter the list of differential revisions."""
+"""display and filter the list of differential revisions.
+
+usage examples:
+    list all revisions:
+    $ arcyon query
+
+    list ids of all revisions:
+    $ arcyon query --format-type ids
+
+    list all your open revisions:
+    $ arcyon query --author-mine --status-type open
+
+    list all open revisions updated over a week ago
+    $ arcyon query --status-type open --update-min-age "1 weeks"
+
+output formats:
+    --format-type ids
+        3
+        2
+        1
+
+    --format-type short
+        8 / Accepted / add NEWFILE
+        7 / Accepted / add NEWFILE
+        3 / Accepted / add NEWFILE
+
+    --format-type json
+    (cleaned up manually)
+        [{
+            u'authorPHID': u'PHID-USER-agn7y2uw2pj4nc5nknhe',
+            u'status': u'2',
+            u'phid': u'PHID-DREV-4vkkcnkcoyxmf4us4t2l',
+            u'testPlan': u'test plan',
+            u'title': u'add NEWFILE',
+            u'commits': [],
+            u'diffs': [u'5', u'4'],
+            u'uri': u'http://127.0.0.1/D3',
+            u'ccs': [u'PHID-USER-n334wwtakshsxeau3qij'],
+            u'dateCreated': u'1362827032',
+            u'lineCount': u'0',
+            u'branch': None,
+            u'reviewers': [u'PHID-USER-hncf4pdbrr53lsxn5j6z'],
+            u'id': u'3',
+            u'statusName': u'Accepted',
+            u'hashes': [],
+            u'summary': u'',
+            u'dateModified': u'1362827033'
+        }]
+"""
 
 import datetime
 import string
@@ -112,7 +160,7 @@ def setupParser(parser):
 
     formats.add_argument(
         '--format-type',
-        choices=['json', 'short', 'ids'],
+        choices=['ids', 'short', 'json'],
         help="see usage examples for sample output")
     formats.add_argument(
         '--format-string',
