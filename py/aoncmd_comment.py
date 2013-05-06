@@ -1,4 +1,15 @@
-"""create a comment on a differential review."""
+"""create a comment on differential reviews.
+
+usage examples:
+    comment on revision '1':
+    $ arcyon comment 1 -m 'hello revision 1, how are you?'
+
+    accept revision '1':
+    $ arcyon comment 1 -m 'looks good' --action accept
+
+    comment on revisions 1 and 2, reading the message from 'mymessage':
+    $ arcyon comment 1 2 --message-file mymessage
+"""
 
 import argparse
 import sys
@@ -23,7 +34,7 @@ def setupParser(parser):
         type=int,
         nargs="*",
         default=[],
-        help="the revision to comment on (e.g. 1)")
+        help="the revisions to comment on (e.g. 1)")
     parser.add_argument(
         '--ids-file',
         metavar='FILE',
