@@ -32,6 +32,7 @@ sys.path.append(
                 os.path.realpath(__file__))),
         "py"))
 
+import phlcon_differential
 import phlcon_user
 import phlsys_arcconfig
 import phlsys_arcrc
@@ -57,8 +58,67 @@ class ShowConfig(object):
         print phlsys_arcconfig.getArcconfig()
 
 
+class DifferentialComment(object):
+    """create a comment on a differential review."""
+
+    @staticmethod
+    def getFromfilePrefixChars():
+        return ""
+
+    @staticmethod
+    def setupParser(parser):
+        acts = parser.add_argument_group('action arguments')
+        actions = acts.add_mutually_exclusive_group()
+
+        parser.add_argument(
+            'id',
+            type=int,
+            help="the revision to comment on (e.g. 1)")
+        parser.add_argument(
+            '--message', '-m',
+            metavar="TEXT",
+            default=" ",
+            type=str,
+            help="the body text of the comment")
+        parser.add_argument(
+            '--silent',
+            action='store_true',
+            help="don't send notification emails for this comment")
+
+        actions.add_argument(
+            '--author-action',
+            choices=phlcon_differential.AUTHOR_ACTIONS.keys(),
+            type=str,
+            help="perform an author action")
+        actions.add_argument(
+            '--reviewer-action',
+            choices=phlcon_differential.REVIEWER_ACTIONS.keys(),
+            type=str,
+            help="perform a reviewer action")
+        actions.add_argument(
+            '--action',
+            choices=phlcon_differential.USER_ACTIONS.keys(),
+            metavar="ACTION",
+            type=str,
+            help="perform an author or reviewer action")
+
+    @staticmethod
+    def process(args):
+        conduit = makeConduit(args)
+
+        d = {'revision_id': args.id, "message": args.message}
+
+        action = args.action if args.action else args.reviewer_action
+        action = action if action else args.author_action
+        if action:
+            d["action"] = phlcon_differential.USER_ACTIONS[action]
+
+        result = conduit.call("differential.createcomment", d)
+        print result
+
+
 class DifferentialQuery(object):
-    """display and filter the list of revisions."""
+    """display and filter the list of differential revisions."""
 
     @staticmethod
     def getFromfilePrefixChars():
@@ -290,6 +350,7 @@ def main():
 
     phlsys_subcommand.setupParser("show-config", ShowConfig, subparsers)
     phlsys_subcommand.setupParser("query", DifferentialQuery, subparsers)
+    phlsys_subcommand.setupParser("comment", DifferentialComment, subparsers)
 
     args = parser.parse_args()
     args.func(args)
