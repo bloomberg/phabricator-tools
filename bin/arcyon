@@ -142,6 +142,12 @@ class DifferentialQuery(object):
             metavar='AGE',
             help='include reviews which are at least AGE old. '
                  + phlsys_strtotime.describeDurationStringToTimeDelta())
+        time_filters.add_argument(
+            '--update-max-age',
+            type=str,
+            metavar='AGE',
+            help='include reviews which are at most AGE old. '
+                 + phlsys_strtotime.describeDurationStringToTimeDelta())
 
         formats.add_argument(
             '--format-type',
@@ -201,6 +207,19 @@ class DifferentialQuery(object):
                     float(r["dateModified"]))
                 age = now - modified
                 if age >= min_age:
+                    new_results.append(r)
+            results = new_results
+
+        if args.update_max_age:
+            max_age = phlsys_strtotime.durationStringToTimeDelta(
+                args.update_max_age)
+            now = datetime.datetime.now()
+            new_results = []
+            for r in results:
+                modified = datetime.datetime.fromtimestamp(
+                    float(r["dateModified"]))
+                age = now - modified
+                if age <= max_age:
                     new_results.append(r)
             results = new_results
 
