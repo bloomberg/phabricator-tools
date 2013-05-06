@@ -4,15 +4,31 @@
 """Arcyon - util to interact with Conduit API from the command-line.
 
 Intended to make the Conduit API easily accessible and discoverable from a
-dedicated command-line tool.  This should make it easier to write shell scripts
+dedicated command-line tool. This should make it easier to write shell scripts
 which extend Phabricator.
 
 """
 
 _USAGE_EXAMPLES = """
-usage example:
+usage examples:
+
     to display the config that arcyon will use:
     $ arcyon show-config
+
+    to list revisions where you are the author:
+    $ arcyon query --author-me
+
+    to list open revisions where you are the author:
+    $ arcyon query --author-me --status-type open
+
+    to list revisions that are old and open:
+    $ arcyon query --status-type open --min-update-age "2 weeks"
+
+    to comment on revision '1':
+    $ arcyon comment 1 -m 'hello'
+
+    to comment on every revision:
+    $ arcyon query --format-type ids | arcyon comment --ids-file - -m hello
     """
 
 import argparse
