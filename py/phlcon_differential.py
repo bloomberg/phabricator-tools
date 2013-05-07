@@ -77,6 +77,15 @@ REVIEWER_ACTIONS = {
 USER_ACTIONS = dict(AUTHOR_ACTIONS.items() + REVIEWER_ACTIONS.items())
 
 
+# from phabricator/.../...DefaultFieldSelector.php
+class MessageFields(object):
+    title = "title"
+    summary = "summary"
+    test_plan = "testPlan"
+    reviewer_phids = "reviewerPHIDs"
+    cc_phids = "ccPHIDs"
+
+
 def _makeNT(name, *fields):
     return collections.namedtuple(
         'phlcon_differential__' + name,
