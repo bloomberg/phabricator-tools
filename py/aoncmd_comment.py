@@ -65,9 +65,18 @@ def setupParser(parser):
         type=str,
         help="perform an action on a review")
 
+    parser.add_argument(
+        '--act-as-user',
+        type=str,
+        metavar="NAME",
+        help="impersonate a user (admin only)")
+
 
 def process(args):
     conduit = phlsys_makeconduit.makeConduit()
+
+    if args.act_as_user:
+        conduit.setActAsUser(args.act_as_user)
 
     d = {
         'message': args.message,
