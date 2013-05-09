@@ -160,17 +160,21 @@ class Test(unittest.TestCase):
             self._createCommitNewFileRaw(filename, plan, reviewer, contents)
             runCommands("git push")
 
-    def _actOnTheOnlyReview(self, user, action):
-        # accept the review
+    def _getTheOnlyReviewId(self):
         with phlsys_fs.chDirContext("phab"):
             clone = phlsys_git.GitClone(".")
             branches = phlgit_branch.getRemote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         self.assertEqual(len(wbList), 1)
         wb = wbList[0]
+        return wb.id
+
+    def _actOnTheOnlyReview(self, user, action):
+        # accept the review
+        id = self._getTheOnlyReviewId()
         with phlsys_conduit.actAsUserContext(self.conduit, user):
             phlcon_differential.createComment(
-                self.conduit, wb.id, action=action)
+                self.conduit, id, action=action)
 
     def _acceptTheOnlyReview(self):
         self._actOnTheOnlyReview(self.reviewer, "accept")
@@ -341,6 +345,25 @@ class Test(unittest.TestCase):
             runCommands("git push origin landing_branch --force")
 
         self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
+
+    def test_commandeered(self):
+        self._devCheckoutPushNewBranch("ph-review/simpleWorkflow/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._devPushNewFile("NEWFILE2")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+
+        id = self._getTheOnlyReviewId()
+        with phlsys_conduit.actAsUserContext(
+                self.conduit,
+                phldef_conduit.phab.user) as conduit:
+            phlcon_differential.createComment(
+                conduit,
+                id,
+                action=phlcon_differential.ACTION_CLAIM)
+
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 

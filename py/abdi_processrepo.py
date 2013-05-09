@@ -231,7 +231,10 @@ def land(conduit, wb, gitContext, branch):
     commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
     commenter.landedReview(branch, wb.base, squashMessage)
 
-    with phlsys_conduit.actAsUserContext(conduit, user):
+    authorPHID = d.query(conduit, [wb.id])[0].authorPHID
+    authorUser = phlcon_user.queryUsernamesFromPhids(conduit, [authorPHID])[0]
+    # TODO: there's a potential race condition on the author here
+    with phlsys_conduit.actAsUserContext(conduit, authorUser):
         d.close(conduit, wb.id)
     # TODO: we probably want to do a better job of cleaning up locally
 
