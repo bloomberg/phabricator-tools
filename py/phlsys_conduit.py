@@ -164,18 +164,7 @@ class Conduit():
 
     def _authenticate(self):
 
-        token = str(int(time.time()))
-        signature = hashlib.sha1(token + self._certificate).hexdigest()
-
-        message_dict = {
-            "user": self._username,
-            "host": self._conduit_uri,
-            "client": self._client,
-            "clientVersion": self._client_version,
-            "authToken": token,
-            "authSignature": signature,
-        }
-
+        message_dict = self._authenticate_make_message()
         method = "conduit.connect"
 
         response = self._communicate(method, message_dict)
@@ -201,6 +190,19 @@ class Conduit():
 
         if self._act_as_user:
             self._conduit["actAsUser"] = self._act_as_user
+
+    def _authenticate_make_message(self):
+        token = str(int(time.time()))
+        signature = hashlib.sha1(token + self._certificate).hexdigest()
+
+        return {
+            "user": self._username,
+            "host": self._conduit_uri,
+            "client": self._client,
+            "clientVersion": self._client_version,
+            "authToken": token,
+            "authSignature": signature,
+        }
 
     def _communicate(self, method, message_dict):
         path = self._conduit_uri + method
