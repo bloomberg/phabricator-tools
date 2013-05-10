@@ -4,6 +4,7 @@ from contextlib import contextmanager
 import doctest
 import hashlib
 import json
+import sys
 import time
 import unittest
 import urllib
@@ -120,6 +121,9 @@ class ConduitException(Exception):
         self.uri = uri
         self.actAsUser = actAsUser
 
+# we would expect this to arise normally from time to time
+SESSION_ERROR = "ERR-INVALID-SESSION"
+
 
 class Conduit():
 
@@ -229,13 +233,33 @@ class Conduit():
         return json.loads(data)
 
     def call(self, method, param_dict_in=None):
-        param_dict = dict(param_dict_in) if param_dict_in else {}
-        param_dict["__conduit__"] = self._conduit
-        response = self._communicate(method, param_dict)
+        attempts = 3
+        for x in range(attempts):
+            param_dict = dict(param_dict_in) if param_dict_in else {}
+            param_dict["__conduit__"] = self._conduit
+            response = self._communicate(method, param_dict)
 
-        error = response["error_code"]
-        error_message = response["error_info"]
-        result = response["result"]
+            error = response["error_code"]
+            error_message = response["error_info"]
+            result = response["result"]
+
+            if not error:
+                break
+            else:
+                if error == SESSION_ERROR:
+                    self._authenticate()
+                    print >> sys.stderr, "phlsys_conduit: SESSION-ERROR"
+                    # TODO: log this
+                else:
+                    raise ConduitException(
+                        method=method,
+                        error=error,
+                        errormsg=error_message,
+                        result=result,
+                        obj=param_dict,
+                        uri=self._conduit_uri,
+                        actAsUser=self._act_as_user)
+
         if error:
             raise ConduitException(
                 method=method,
