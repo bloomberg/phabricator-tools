@@ -1,9 +1,11 @@
 """Command to process a single repository."""
 
+import functools
 import time
 
 import abdi_processargs
 import phlsys_statusline
+import phlsys_scheduleunreliables
 
 
 def getFromfilePrefixChars():
@@ -78,17 +80,38 @@ def setupParser(parser):
         help="time to wait between fetches")
 
 
-def process(args):
-    out = phlsys_statusline.StatusLine()
+class DelayedRetrySleepOperation(object):
+    def __init__(self, out, secs):
+        self._out = out
+        self._secs = secs
 
-    while True:
-        abdi_processargs.run_once(args, out)
-
-        sleep_remaining = args.sleep_secs
+    def do(self):
+        sleep_remaining = self._secs
         while sleep_remaining > 0:
-            out.display("sleep (" + str(sleep_remaining) + " seconds) ")
+            self._out.display("sleep (" + str(sleep_remaining) + " seconds) ")
             time.sleep(1)
             sleep_remaining -= 1
+        return True
+
+
+def process(args, retry_delays, on_exception_delay):
+    out = phlsys_statusline.StatusLine()
+
+    # TODO: test write access to repo here
+
+    operations = []
+
+    operations.append(
+        phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
+            functools.partial(abdi_processargs.run_once, args, out),
+            list(retry_delays),  # make a copy to be sure
+            on_exception_delay))
+
+    operations.append(
+        DelayedRetrySleepOperation(
+            out, args.sleep_secs))
+
+    phlsys_scheduleunreliables.loopForever(operations)
 
 
 #------------------------------------------------------------------------------

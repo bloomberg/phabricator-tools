@@ -6,6 +6,8 @@ import time
 
 
 def tryLoopDelay(toTry, startLoop, ifException, ifBaseException, delays):
+    # TODO: move this up and out - we're in trouble if 'delays' is an infinite
+    #       iterable
     _validateDelays(delays)
     for delay in itertools.chain(delays, [None]):
         startLoop()

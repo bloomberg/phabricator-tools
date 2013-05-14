@@ -113,7 +113,7 @@ import abdcmd_multi
 import phlmail_sender
 import phlsys_sendmail
 import phlsys_subcommand
-import phlsys_tryloop
+import phlsys_strtotime
 
 
 def main():
@@ -175,31 +175,10 @@ def main():
     signal.signal(signal.SIGTERM, HandleSigterm)
 
     retry_delays = [{"minutes": 10}, {"hours": 1}]
+    strToTime = phlsys_strtotime.durationStringToTimeDelta
+    retry_delays = [strToTime(d) for d in retry_delays]
 
-    def process():
-        args.func(args)
-
-    tryLoopMail(
-        process,
-        mailsender,
-        uname,
-        args.sys_admin_emails,
-        retry_delays)
-
-    mailsender.send(
-        subject="arcyd stopped",
-        message="",
-        to_addresses=args.sys_admin_emails)
-
-
-# TODO: turn this into something re-usable
-def tryLoopMail(process, mailsender, uname, emails, retry_delays):
-
-    def msgStart():
-        mailsender.send(
-            subject="arcyd started",
-            message=uname,
-            to_addresses=emails)
+    emails = args.sys_admin_emails
 
     def msgException(delay):
         message = uname + "\n" + traceback.format_exc()
@@ -210,21 +189,21 @@ def tryLoopMail(process, mailsender, uname, emails, retry_delays):
             message=message,
             to_addresses=emails)
 
-    def msgExitBaseException(delay):
+    try:
+        args.func(args, retry_delays, msgException)
+    except:
         message = uname + "\n" + traceback.format_exc()
         print message
         mailsender.send(
-            subject="arcyd stopped with base exception",
+            subject="arcyd stopped with exception",
             message=message,
             to_addresses=emails)
         sys.exit(1)
 
-    phlsys_tryloop.tryLoopDelay(
-        process,
-        msgStart,
-        msgException,
-        msgExitBaseException,
-        retry_delays)
+    mailsender.send(
+        subject="arcyd stopped",
+        message="",
+        to_addresses=args.sys_admin_emails)
 
 
 if __name__ == "__main__":
