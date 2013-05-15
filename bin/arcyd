@@ -174,7 +174,7 @@ def main():
         sys.exit(1)
     signal.signal(signal.SIGTERM, HandleSigterm)
 
-    retry_delays = [{"minutes": 10}, {"hours": 1}]
+    retry_delays = ["10 minutes", "1 hours"]
     strToTime = phlsys_strtotime.durationStringToTimeDelta
     retry_delays = [strToTime(d) for d in retry_delays]
 
