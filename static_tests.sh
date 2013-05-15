@@ -9,20 +9,21 @@ sfood py/*.py --internal > doc/package_deps/deps
 ./doc/package_deps/process.py doc/package_deps/deps doc/package_deps/file-deps doc/package_deps/package-deps
 diff ./doc/package_deps/expected-package-deps ./doc/package_deps/package-deps
 
-# unittest
-# 'sudo apt-get install python-nose' or use the commented-out version
-# 'sudo apt-get install python-coverage' to use the '--with-coverage' option
-# the '--with-profile' option should just work
-# the '--failed' option will run only the tests that failed on the last run
-nosetests py/*.py --with-doctest
-#python -m unittest discover -p "*.py"
-
-# N.B. can easily run individual tests with nose like so:
-# nosetests abdcmd_default:TestAbd.test_abandonedWorkflow
-
 # copyright
+set +e
+
 git grep -L "Copyright (C) 2012 Bloomberg L.P." py/*.py
+if [ $? -ne 1 ]
+then
+    echo -- above files are missing copyright notice --
+    exit 1
+fi
 git grep -L "Copyright (C) 2012 Bloomberg L.P." bin/*
+if [ $? -ne 1 ]
+then
+    echo -- above files are missing copyright notice --
+    exit 1
+fi
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
@@ -45,3 +46,4 @@ git grep -L "Copyright (C) 2012 Bloomberg L.P." bin/*
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #------------------------------- END-OF-FILE ----------------------------------
+
