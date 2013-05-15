@@ -6,6 +6,7 @@
 import argparse
 import functools
 import time
+import os
 
 import abdcmd_single
 import abdi_processargs
@@ -26,6 +27,24 @@ def setupParser(parser):
         type=str,
         help="files to load configuration from, prefix with @")
     parser.add_argument(
+        '--kill-file',
+        metavar="NAME",
+        type=str,
+        help="filename to watch for, will stop operations safely if the file "
+             "is detected.")
+    parser.add_argument(
+        '--pause-file',
+        metavar="NAME",
+        type=str,
+        help="filename to watch for, will pause operations while the file is "
+             "detected.")
+    parser.add_argument(
+        '--reset-file',
+        metavar="NAME",
+        type=str,
+        help="filename to watch for, will reset operations if the file is "
+             "detected and remove the file.")
+    parser.add_argument(
         '--sleep-secs',
         metavar="TIME",
         type=int,
@@ -45,6 +64,44 @@ class DelayedRetrySleepOperation(object):
             time.sleep(1)
             sleep_remaining -= 1
         return True
+
+
+class ResetFileException(Exception):
+    def __init__(self, path):
+        self.path = path
+        super(ResetFileException, self).__init__()
+
+
+class FileCheckOperation(object):
+    def __init__(self, kill_file, reset_file, pause_file, on_pause):
+        self._kill_file = kill_file
+        self._reset_file = reset_file
+        self._pause_file = pause_file
+        self._on_pause = on_pause
+
+    def do(self):
+        if self._kill_file and os.path.isfile(self._kill_file):
+            os.remove(self._kill_file)
+            raise Exception("kill file: " + self._kill_file)
+        if self._reset_file and os.path.isfile(self._reset_file):
+            raise ResetFileException(self._reset_file)
+        if self._pause_file and os.path.isfile(self._pause_file):
+            if self._on_pause:
+                self._on_pause()
+            while os.path.isfile(self._pause_file):
+                time.sleep(1)
+        return True
+
+
+def tryHandleSpecialFiles(f, on_exception_delay):
+    try:
+        f()
+    except ResetFileException as e:
+        on_exception_delay(None)
+        try:
+            os.remove(e.path)
+        except:
+            on_exception_delay(None)
 
 
 def process(args, retry_delays, on_exception_delay):
@@ -69,11 +126,25 @@ def process(args, retry_delays, on_exception_delay):
             on_exception_delay)
         operations.append(operation)
 
+    def on_pause():
+        on_exception_delay("until_file_removed")
+
+    operations.append(
+        FileCheckOperation(
+            args.kill_file,
+            args.reset_file,
+            args.pause_file,
+            on_pause))
+
     operations.append(
         DelayedRetrySleepOperation(
             out, args.sleep_secs))
 
-    phlsys_scheduleunreliables.loopForever(operations)
+    def loopForever():
+        phlsys_scheduleunreliables.loopForever(list(operations))
+
+    while True:
+        tryHandleSpecialFiles(loopForever, on_exception_delay)
 
 
 #------------------------------------------------------------------------------
