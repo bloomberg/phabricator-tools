@@ -51,6 +51,7 @@ import aoncmd_comment
 import aoncmd_createrevision
 import aoncmd_rawdiff
 import aoncmd_showconfig
+import aoncmd_updaterevision
 import aoncmd_query
 
 
@@ -68,6 +69,8 @@ def main():
     phlsys_subcommand.setupParser("raw-diff", aoncmd_rawdiff, subparsers)
     phlsys_subcommand.setupParser(
         "create-revision", aoncmd_createrevision, subparsers)
+    phlsys_subcommand.setupParser(
+        "update-revision", aoncmd_updaterevision, subparsers)
 
     args = parser.parse_args()
     args.func(args)
