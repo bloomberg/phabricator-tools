@@ -1,6 +1,10 @@
 # do tests in order of time to execute
 set -e # exit immediately on error
 
+# pychecker seems to be mostly wrong, disabled for now
+## please install pychecker with sudo apt-get install pychecker
+## pychecker --quiet --only py/*.py
+
 flake8 bin/*
 flake8 py/*.py
 
