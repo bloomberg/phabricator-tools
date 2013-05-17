@@ -18,6 +18,8 @@ import textwrap
 import phlcon_differential
 import phlsys_makeconduit
 
+import aont_conduitargs
+
 
 def getFromfilePrefixChars():
     return ""
@@ -25,7 +27,7 @@ def getFromfilePrefixChars():
 
 def setupParser(parser):
     actions = parser.add_argument_group(
-        'action argument',
+        'action arguments',
         'use any of ' + textwrap.fill(
             str(phlcon_differential.USER_ACTIONS.keys())))
 
@@ -71,6 +73,7 @@ def setupParser(parser):
         metavar="NAME",
         help="impersonate a user (admin only)")
 
+    aont_conduitargs.addArguments(parser)
 
 def process(args):
     conduit = phlsys_makeconduit.makeConduit()

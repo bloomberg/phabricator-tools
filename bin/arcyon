@@ -54,7 +54,6 @@ import aoncmd_rawdiff
 import aoncmd_showconfig
 import aoncmd_updaterevision
 import aoncmd_query
-import aont_conduitargs
 
 
 def main():
@@ -65,21 +64,14 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    parse_conduit_args = aont_conduitargs.makeParser()
-    parents = [parse_conduit_args]
-
+    phlsys_subcommand.setupParser("show-config", aoncmd_showconfig, subparsers)
+    phlsys_subcommand.setupParser("query", aoncmd_query, subparsers)
+    phlsys_subcommand.setupParser("comment", aoncmd_comment, subparsers)
+    phlsys_subcommand.setupParser("raw-diff", aoncmd_rawdiff, subparsers)
     phlsys_subcommand.setupParser(
-        "show-config", aoncmd_showconfig, subparsers, parents)
+        "create-revision", aoncmd_createrevision, subparsers)
     phlsys_subcommand.setupParser(
-        "query", aoncmd_query, subparsers, parents)
-    phlsys_subcommand.setupParser(
-        "comment", aoncmd_comment, subparsers, parents)
-    phlsys_subcommand.setupParser(
-        "raw-diff", aoncmd_rawdiff, subparsers, parents)
-    phlsys_subcommand.setupParser(
-        "create-revision", aoncmd_createrevision, subparsers, parents)
-    phlsys_subcommand.setupParser(
-        "update-revision", aoncmd_updaterevision, subparsers, parents)
+        "update-revision", aoncmd_updaterevision, subparsers)
 
     args = parser.parse_args()
 

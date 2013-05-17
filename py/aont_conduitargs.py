@@ -1,24 +1,25 @@
 """create an argparser for conduit paramters."""
 
-import argparse
 
+def addArguments(parser):
+    connection = parser.add_argument_group(
+        'connection arguments',
+        'use these optional parameters to override settings present in your\n'
+        '"~/.arcrc" or ".arcconfig" files')
 
-def makeParser():
-    parser = argparse.ArgumentParser(add_help=False)
-
-    parser.add_argument(
+    connection.add_argument(
         "--uri",
         type=str,
         metavar="ADDRESS",
         help="address of the phabricator instance to connect to.")
 
-    parser.add_argument(
+    connection.add_argument(
         "--user",
         type=str,
         metavar="NAME",
         help="name of the user to connect as.")
 
-    parser.add_argument(
+    connection.add_argument(
         "--cert",
         type=str,
         metavar="HEX",
@@ -27,8 +28,6 @@ def makeParser():
              "http://your.phabricator/settings/panel/conduit/. generally you "
              "wouldn't expect to enter this on the command-line and would "
              "make an ~/.arcrc file by using '$ arc install-certificate'.")
-
-    return parser
 
 
 #------------------------------------------------------------------------------

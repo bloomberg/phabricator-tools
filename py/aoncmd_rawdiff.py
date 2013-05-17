@@ -1,14 +1,28 @@
 """Create a raw diff in differential.
 
+you can use the 'diff id' output from this command as input to the
+'arcyon create-revision' and 'arcyon update-revision' commands.
+
 usage examples:
-    create a new raw diff:
+    create a new raw diff by piping in a diff:
+    $ diff -u file1 file2 | arcyon raw-diff
+    99
+
+    create a new raw diff by piping in a file:
     $ arcyon raw-diff < mydiff
+    99
+
+    create a new raw diff by loading a file:
+    $ arcyon raw-diff mydiff
+    99
 """
 
 import argparse
 import sys
 
 import phlsys_makeconduit
+
+import aont_conduitargs
 
 
 def getFromfilePrefixChars():
@@ -18,9 +32,13 @@ def getFromfilePrefixChars():
 def setupParser(parser):
     parser.add_argument(
         'infile',
+        metavar='INFILE',
         nargs='?',
         type=argparse.FileType('r'),
+        help="where to read the diff from, can be filename or '-' for stdin. "
+             "default is stdin if not specified.",
         default=sys.stdin)
+    aont_conduitargs.addArguments(parser)
 
 
 def process(args):

@@ -1,8 +1,20 @@
 """Create a new revision in differential.
 
+you can use the 'revision id' output from this command as input to the
+'arcyon update-revision' command.
+
 usage examples:
+    create a new revision by piping in a diff:
+    $ diff -u file1 file2 | arcyon create-revision -t title -p plan -f -
+    99
+
     create a new revision from diff 1:
     $ arcyon create-revision -d 1 -t 'title' -p 'test plan'
+    99
+
+    create a new revision from diff 1, add a reviewer and a cc:
+    $ arcyon create-revision -d 1 -t title -p test -r reviewer -c cc
+    99
 """
 
 import argparse
@@ -11,46 +23,73 @@ import phlcon_differential
 import phlcon_user
 import phlsys_makeconduit
 
+import aont_conduitargs
+
 
 def getFromfilePrefixChars():
     return ""
 
 
 def setupParser(parser):
-    diffsrc = parser.add_mutually_exclusive_group(required=True)
+    diffsrc_group = parser.add_argument_group(
+        'Diff arguments',
+        'Mutually exclusive, one is required')
+    diffsrc = diffsrc_group.add_mutually_exclusive_group(required=True)
+    req = parser.add_argument_group(
+        'Required revision arguments',
+        'Phabricator requires that you supply both of these')
+    opt = parser.add_argument_group(
+        'Optional revision arguments',
+        'You can supply these later via the web interface if you wish')
 
     diffsrc.add_argument(
         '--diff-id',
         metavar='INT',
+        help='the id of the diff to create the file from, this could be '
+             'the output from a "arcyon raw-diff" call',
         type=int)
     diffsrc.add_argument(
-        '-f', '--raw-diff-file',
+        '--raw-diff-file',
+        '-f',
+        help='the file to read the diff from, use \'-\' for stdin',
         metavar='FILE',
         type=argparse.FileType('r'))
 
-    parser.add_argument(
-        '-t', '--title',
+    req.add_argument(
+        '--title',
+        '-t',
         metavar='TEXT',
         required=True,
+        help='a short description of the changes to review',
         type=str)
-    parser.add_argument(
-        '-p', '--test-plan',
+    req.add_argument(
+        '--test-plan',
+        '-p',
         metavar='TEXT',
         required=True,
+        help='how you tested your changes and how the reviewer'
+             'can verify them',
         type=str)
-    parser.add_argument(
-        '-s', '--summary',
+
+    opt.add_argument(
+        '--summary',
+        '-s',
         metavar='TEXT',
+        help='a longer summary of the changes to review',
         type=str)
-    parser.add_argument(
-        '-r', '--reviewers',
+    opt.add_argument(
+        '--reviewers',
+        '-r',
         nargs="*",
-        metavar='TEXT',
+        metavar='USER',
+        help='a list of reviewer usernames',
         type=str)
-    parser.add_argument(
-        '-c', '--ccs',
+    opt.add_argument(
+        '--ccs',
+        '-c',
         nargs="*",
-        metavar='TEXT',
+        metavar='USER',
+        help='a list of usernames to cc on the review',
         type=str)
 
 #   parser.add_argument(
@@ -58,6 +97,8 @@ def setupParser(parser):
 #       nargs="*",
 #       metavar='ID',
 #       type=int)
+
+    aont_conduitargs.addArguments(parser)
 
 
 def process(args):

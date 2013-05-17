@@ -1,13 +1,20 @@
 """Update an existing revision in differential.
 
 usage examples:
-    update revision 1 from diff 2:
-    $ arcyon update-revision -i 1 -d 2 -m 'fix review issues'
+    update revision 99 by piping in a diff:
+    $ diff -u file1 file2 | arcyon update-revision -i 99 -m fixes -f -
+    99
+
+    update revision 99 from diff 2:
+    $ arcyon update-revision -i 99 -d 2 -m 'fix review issues'
+    99
 """
 
 import argparse
 
 import phlsys_makeconduit
+
+import aont_conduitargs
 
 
 def getFromfilePrefixChars():
@@ -15,28 +22,43 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    diffsrc = parser.add_mutually_exclusive_group(required=True)
+    diffsrc_group = parser.add_argument_group(
+        'Diff arguments',
+        'Mutually exclusive, one is required')
+    diffsrc = diffsrc_group.add_mutually_exclusive_group(required=True)
 
     diffsrc.add_argument(
         '--diff-id',
         metavar='INT',
+        help='the id of the diff to create the file from, this could be '
+             'the output from a "arcyon raw-diff" call',
         type=int)
     diffsrc.add_argument(
-        '-f', '--raw-diff-file',
+        '--raw-diff-file',
+        '-f',
+        help='the file to read the diff from, use \'-\' for stdin',
         metavar='FILE',
         type=argparse.FileType('r'))
 
     parser.add_argument(
-        '-i', '--revision-id',
+        '--revision-id',
+        '-i',
         metavar='INT',
         required=True,
+        help='the id of the revision to update, e.g. the output from a '
+             'previous "arcyon create-revision" command',
         type=str)
 
     parser.add_argument(
-        '-m', '--message',
+        '--message',
+        '-m',
         metavar='TEXT',
         required=True,
+        help='a short description of the update, this appears on the review '
+             'page',
         type=str)
+
+    aont_conduitargs.addArguments(parser)
 
 
 def process(args):

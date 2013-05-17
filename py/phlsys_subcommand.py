@@ -3,7 +3,7 @@
 import argparse
 
 
-def setupParser(name, module, subparsers, parents):
+def setupParser(name, module, subparsers):
     doc = module.__doc__
     docSubject = doc.splitlines()[0]
     docEpilog = '\n'.join(doc.splitlines()[1:])
@@ -13,8 +13,7 @@ def setupParser(name, module, subparsers, parents):
         help=docSubject,
         description=docSubject,
         epilog=docEpilog,
-        fromfile_prefix_chars=module.getFromfilePrefixChars(),
-        parents=parents)
+        fromfile_prefix_chars=module.getFromfilePrefixChars())
     module.setupParser(parser)
     parser.set_defaults(func=module.process)
 
