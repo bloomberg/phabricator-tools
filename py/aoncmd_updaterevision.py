@@ -2,11 +2,11 @@
 
 usage examples:
     update revision 99 by piping in a diff:
-    $ diff -u file1 file2 | arcyon update-revision -i 99 -m fixes -f -
+    $ diff -u file1 file2 | arcyon update-revision 99 fixes -f -
     99
 
     update revision 99 from diff 2:
-    $ arcyon update-revision -i 99 -d 2 -m 'fix review issues'
+    $ arcyon update-revision 99 'fix review issues' -d 2
     99
 """
 
@@ -41,19 +41,13 @@ def setupParser(parser):
         type=argparse.FileType('r'))
 
     parser.add_argument(
-        '--revision-id',
-        '-i',
-        metavar='INT',
-        required=True,
+        'revision_id',
         help='the id of the revision to update, e.g. the output from a '
              'previous "arcyon create-revision" command',
         type=str)
 
     parser.add_argument(
-        '--message',
-        '-m',
-        metavar='TEXT',
-        required=True,
+        'message',
         help='a short description of the update, this appears on the review '
              'page',
         type=str)
