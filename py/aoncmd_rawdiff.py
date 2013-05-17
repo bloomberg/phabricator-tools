@@ -24,7 +24,7 @@ def setupParser(parser):
 
 
 def process(args):
-    conduit = phlsys_makeconduit.makeConduit()
+    conduit = phlsys_makeconduit.makeConduit(args.uri, args.user, args.cert)
 
     d = {'diff': args.infile.read()}
 

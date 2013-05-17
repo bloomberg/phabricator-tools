@@ -45,6 +45,7 @@ sys.path.append(
                 os.path.realpath(__file__))),
         "py"))
 
+import phlsys_makeconduit
 import phlsys_subcommand
 
 import aoncmd_comment
@@ -53,6 +54,7 @@ import aoncmd_rawdiff
 import aoncmd_showconfig
 import aoncmd_updaterevision
 import aoncmd_query
+import aont_conduitargs
 
 
 def main():
@@ -63,17 +65,35 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setupParser("show-config", aoncmd_showconfig, subparsers)
-    phlsys_subcommand.setupParser("query", aoncmd_query, subparsers)
-    phlsys_subcommand.setupParser("comment", aoncmd_comment, subparsers)
-    phlsys_subcommand.setupParser("raw-diff", aoncmd_rawdiff, subparsers)
+    parse_conduit_args = aont_conduitargs.makeParser()
+    parents = [parse_conduit_args]
+
     phlsys_subcommand.setupParser(
-        "create-revision", aoncmd_createrevision, subparsers)
+        "show-config", aoncmd_showconfig, subparsers, parents)
     phlsys_subcommand.setupParser(
-        "update-revision", aoncmd_updaterevision, subparsers)
+        "query", aoncmd_query, subparsers, parents)
+    phlsys_subcommand.setupParser(
+        "comment", aoncmd_comment, subparsers, parents)
+    phlsys_subcommand.setupParser(
+        "raw-diff", aoncmd_rawdiff, subparsers, parents)
+    phlsys_subcommand.setupParser(
+        "create-revision", aoncmd_createrevision, subparsers, parents)
+    phlsys_subcommand.setupParser(
+        "update-revision", aoncmd_updaterevision, subparsers, parents)
 
     args = parser.parse_args()
-    args.func(args)
+
+    try:
+        args.func(args)
+    except phlsys_makeconduit.InsufficientInfoException as e:
+        print "ERROR - insufficient information"
+        print e
+        print
+        print "N.B. you may also specify uri, user or cert explicitly like so:"
+        print "  --uri URI           address of phabricator instance"
+        print "  --user USERNAME     username of user to connect as"
+        print "  --cert CERTIFICATE  certificate for user Phabrictor account"
+        return 1
 
 
 if __name__ == "__main__":

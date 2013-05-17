@@ -19,9 +19,13 @@ def findArcconfig():
     return None
 
 
-def getArcconfig():
-    with open(findArcconfig()) as f:
+def load(path):
+    with open(path) as f:
         return json.load(f)
+
+
+def getArcconfig():
+    return load(findArcconfig())
 
 
 #------------------------------------------------------------------------------

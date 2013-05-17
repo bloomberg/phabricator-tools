@@ -1,31 +1,34 @@
-"""Wrapper to integrate with Arcanist's ~/.arcrc file"""
+"""create an argparser for conduit paramters."""
 
-import json
-import os.path
-
-import phlsys_conduit
+import argparse
 
 
-def findArcrc():
-    home = os.path.expanduser("~")
-    path = os.path.join(home, ".arcrc")
-    if os.path.isfile(path):
-        return path
-    return None
+def makeParser():
+    parser = argparse.ArgumentParser(add_help=False)
 
+    parser.add_argument(
+        "--uri",
+        type=str,
+        metavar="ADDRESS",
+        help="address of the phabricator instance to connect to.")
 
-def load(path):
-    with open(path) as f:
-        return json.load(f)
+    parser.add_argument(
+        "--user",
+        type=str,
+        metavar="NAME",
+        help="name of the user to connect as.")
 
+    parser.add_argument(
+        "--cert",
+        type=str,
+        metavar="HEX",
+        help="long certificate string of the user to connect as, you can find "
+             "this string here: "
+             "http://your.phabricator/settings/panel/conduit/. generally you "
+             "wouldn't expect to enter this on the command-line and would "
+             "make an ~/.arcrc file by using '$ arc install-certificate'.")
 
-def getArcrc():
-    return load(findArcrc())
-
-
-def getHost(arcrc, host):
-    normalised = phlsys_conduit.makeConduitUri(host)
-    return arcrc["hosts"].get(normalised, None)
+    return parser
 
 
 #------------------------------------------------------------------------------
