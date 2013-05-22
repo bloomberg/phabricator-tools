@@ -4,7 +4,7 @@ set -e # exit immediately on error
 # cd to the dir of this script, so we can run scripts in the same dir
 cd "$(dirname "$0")"
 
-./run_static_tests_only.sh
+./static_tests.sh
 
 # unittest
 # 'sudo apt-get install python-nose' or use the commented-out version
