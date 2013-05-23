@@ -117,9 +117,9 @@ def process(args):
 
     if args.format_python:
         pprint.pprint(result)
-    if args.format_json:
+    elif args.format_json:
         print json.dumps(result, sort_keys=True, indent=2)
-    if args.format_strings:
+    elif args.format_strings:
         fmt = args.format_strings[0]
         fmt_change = args.format_strings[1]
         if fmt:
