@@ -22,7 +22,7 @@ def run_once(args, out):
         args.repo_desc,
         args.instance_uri)  # TODO: this should be a URI for users not conduit
 
-    # prepare delays in the event of trouble when fetching
+    # prepare delays in the event of trouble when fetching or connecting
     # TODO: perhaps this policy should be decided higher-up
     delays = [
         datetime.timedelta(seconds=1),
@@ -50,15 +50,26 @@ def run_once(args, out):
     # XXX: until conduit refreshes the connection, we'll suffer from
     #      timeouts; reduce the probability of this by using a new
     #      conduit each time.
-    conduit = phlsys_conduit.Conduit(
-        args.instance_uri,
-        args.arcyd_user,
-        args.arcyd_cert,
-        https_proxy=args.https_proxy)
+
+    # create an array so that the 'connect' closure binds to the 'conduit'
+    # variable as we'd expect, otherwise it'll just modify a local variable
+    # and this 'conduit' will remain 'None'
+    # XXX: we can do better in python 3.x
+    conduit = [None]
+
+    def connect():
+        #nonlocal conduit # XXX: we'll rebind in python 3.x, instead of array
+        conduit[0] = phlsys_conduit.Conduit(
+            args.instance_uri,
+            args.arcyd_user,
+            args.arcyd_cert,
+            https_proxy=args.https_proxy)
+
+    phlsys_tryloop.tryLoopDelay(connect, delays, onException=on_exception)
 
     out.display("process (" + args.repo_desc + "): ")
     abdi_processrepo.processUpdatedRepo(
-        conduit, args.repo_path, "origin", mailer)
+        conduit[0], args.repo_path, "origin", mailer)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
