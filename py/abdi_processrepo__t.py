@@ -348,8 +348,25 @@ class Test(unittest.TestCase):
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
-    def test_commandeered(self):
-        self._devCheckoutPushNewBranch("ph-review/simpleWorkflow/master")
+    def test_commandeeredUpdate(self):
+        self._devCheckoutPushNewBranch("ph-review/commandeeredUpdate/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+
+        id = self._getTheOnlyReviewId()
+        with phlsys_conduit.actAsUserContext(
+                self.conduit,
+                phldef_conduit.alice.user) as conduit:
+            phlcon_differential.createComment(
+                conduit,
+                id,
+                action=phlcon_differential.ACTION_CLAIM)
+
+        self._devPushNewFile("NEWFILE2")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+
+    def test_commandeeredLand(self):
+        self._devCheckoutPushNewBranch("ph-review/commandeeredLand/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
