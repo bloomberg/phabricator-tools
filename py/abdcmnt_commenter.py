@@ -76,7 +76,7 @@ class Commenter(object):
         message += "so the following message was used:\n"
         message += rmu.codeBlock(test_plan, lang="text")
         message += "for a test plan to be recognised, please use text like "
-        message += "the following in one of your commit messages: \n"
+        message += "the following in your latest commit message: \n"
         message += rmu.codeBlock("Test Plan:\nmy test plan", lang="text")
         message += "as author you may edit the test plan directly by "
         message += "using the 'edit revision' link at the top-right of "
