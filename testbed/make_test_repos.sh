@@ -23,3 +23,5 @@ git add README
 git commit -m 'intial commit'
 git push origin master
 cd ..
+
+mkdir -p touches

@@ -40,6 +40,13 @@ def run_once(args, out):
         print >> sys.stderr, "will wait ",
         print >> sys.stderr, delay
 
+    if args.try_touch_path:
+        try:
+            # TODO: don't rely on the touch command
+            phlsys_subprocess.run("touch", args.try_touch_path)
+        except Exception:
+            pass  # XXX: we don't care atm, later log this
+
     with phlsys_fs.chDirContext(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
         phlsys_tryloop.tryLoopDelay(
@@ -70,6 +77,14 @@ def run_once(args, out):
     out.display("process (" + args.repo_desc + "): ")
     abdi_processrepo.processUpdatedRepo(
         conduit[0], args.repo_path, "origin", mailer)
+
+    if args.ok_touch_path:
+        try:
+            # TODO: don't rely on the touch command
+            phlsys_subprocess.run("touch", args.ok_touch_path)
+        except Exception:
+            pass  # XXX: we don't care atm, later log this
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

@@ -79,6 +79,18 @@ def setupParser(parser):
         default=60,
         help="time to wait between fetches")
 
+    parser.add_argument(
+        '--try-touch-path',
+        metavar="PATH",
+        type=str,
+        help="file to touch when trying to update a repo")
+
+    parser.add_argument(
+        '--ok-touch-path',
+        metavar="PATH",
+        type=str,
+        help="file to touch when successfully updated a repo")
+
 
 class DelayedRetrySleepOperation(object):
     def __init__(self, out, secs):
