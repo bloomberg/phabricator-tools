@@ -1,33 +1,37 @@
 """Conveniently retry exception-prone operations."""
 
-import datetime
 import itertools
 import time
 
 
-def tryLoopDelay(toTry, startLoop, ifException, ifBaseException, delays):
-    # TODO: move this up and out - we're in trouble if 'delays' is an infinite
-    #       iterable
-    _validateDelays(delays)
+def tryLoopDelay(toTry, delays, exceptionToIgnore=Exception, onException=None):
+    """Return the value returned by the supplied 'toTry' operation.
+
+    If 'toTry()' raises an 'exceptionToIgnore' then do 'onException(e, delay)'
+    if 'onException' is supplied, where 'e' is the exception object and
+    'delay' is the next delay.  Note that 'delay' will be None on the last try.
+
+    The function will continue looping until it runs out of delays or 'toTry()'
+    stops raising 'exceptionToIgnore'.
+
+    :toTry: a function which takes no parameters
+    :delays: an iterable of datetime.timedelta
+    :exceptionToIgnore: class of exception to ignore, defaults to 'Exception'
+    :onException: function taking (exception, delay)
+    :returns: return value from toTry()
+
+    """
+    # TODO: None may arise by mistake in 'delays', use a unique object as
+    #       sentinel
     for delay in itertools.chain(delays, [None]):
-        startLoop()
-
         try:
-            toTry()
-            return
-        except Exception:
-            ifException(delay)
-        except BaseException:
-            ifBaseException(delay)
-
-        if delay is not None:
-            time.sleep(datetime.timedelta(**delay).total_seconds())
-
-
-def _validateDelays(retry_delays):
-    """if there's a problem in the retry delays, it's better to fail early."""
-    for retry_delay in retry_delays:
-        datetime.timedelta(**retry_delay).total_seconds()
+            return toTry()
+        except exceptionToIgnore as e:
+            if onException is not None:
+                onException(e, delay)
+            if delay is None:
+                raise e
+        time.sleep(delay.total_seconds())
 
 
 #------------------------------------------------------------------------------
