@@ -1,5 +1,8 @@
 """Process the arguments for a single repository and execute."""
 
+import datetime
+import sys
+
 import abdi_processrepo
 import phlsys_sendmail
 import phlmail_sender
@@ -7,6 +10,7 @@ import abdmail_mailer
 import phlsys_conduit
 import phlsys_fs
 import phlsys_subprocess
+import phlsys_tryloop
 
 
 def run_once(args, out):
@@ -18,9 +22,30 @@ def run_once(args, out):
         args.repo_desc,
         args.instance_uri)  # TODO: this should be a URI for users not conduit
 
+    # prepare delays in the event of trouble when fetching
+    # TODO: perhaps this policy should be decided higher-up
+    delays = [
+        datetime.timedelta(seconds=1),
+        datetime.timedelta(seconds=1),
+        datetime.timedelta(seconds=10),
+        datetime.timedelta(seconds=10),
+        datetime.timedelta(seconds=100),
+        datetime.timedelta(seconds=100),
+        datetime.timedelta(seconds=1000),
+    ]
+
+    # print to stderr if we get an exception when fetching
+    def on_exception(e, delay):
+        print >> sys.stderr, e
+        print >> sys.stderr, "will wait ",
+        print >> sys.stderr, delay
+
     with phlsys_fs.chDirContext(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
-        phlsys_subprocess.runCommands("git fetch -p")
+        phlsys_tryloop.tryLoopDelay(
+            lambda: phlsys_subprocess.runCommands("git fetch -p"),
+            delays,
+            onException=on_exception)
 
     # XXX: until conduit refreshes the connection, we'll suffer from
     #      timeouts; reduce the probability of this by using a new
