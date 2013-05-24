@@ -35,12 +35,13 @@ class Commenter(object):
         self._createComment(message)
         self.exception(exception)
 
-    def createdReview(self, branch_name):
+    def createdReview(self, branch_name, base_name):
         message = "created revision from branch "
         message += rmu.monospaced(branch_name) + "\n"
         message += "\n"
         message += "if the revision is accepted then i will automatically try "
-        message += "to land the revision. the commit message will "
+        message += "to land the revision on " + rmu.monospaced(base_name) + "."
+        message += " the commit message will "
         message += "be created from the title, summary, test plan and other "
         message += "properties of this review page.\n"
         message += "\n"

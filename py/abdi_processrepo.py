@@ -116,7 +116,7 @@ def createDifferentialReview(
 
     print "- commenting on " + str(review.revisionid)
     commenter = abdcmnt_commenter.Commenter(conduit, review.revisionid)
-    commenter.createdReview(review_branch.branch)
+    commenter.createdReview(review_branch.branch, review_branch.base)
 
     return review.revisionid
 
