@@ -45,18 +45,16 @@ def main():
         'address',
         metavar="URI",
         type=str,
-        help="address of the Phabricator API, e.g. "
-        "https://secure.phabricator.com/api/. "
-        "Note that the trailing slash is required.")
+        help="address of the Phabricator instance, e.g. "
+        "https://secure.phabricator.com")
 
     args = parser.parse_args()
 
-    # TODO: handle URIs more robustly, shoudn't require /api/ at the end
-    #       can print URI we actually use if we extrapolate for the user
-
     # perform the ping and display the time taken and result
     start = time.time()
-    conduit = phlsys_conduit.Conduit(args.address)
+    uri = phlsys_conduit.makeConduitUri(args.address)
+    print "conduit.ping " + str(uri)
+    conduit = phlsys_conduit.Conduit(uri)
     result = conduit.ping()
     end = time.time()
     msecs = (end - start) * 1000
