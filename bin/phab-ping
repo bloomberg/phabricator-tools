@@ -9,15 +9,14 @@ This allows you to check that Phabricator instances are running as expected.
 _USAGE_EXAMPLES = """
 usage examples:
     ping the official Phabricator install once:
-    $ ./phab-ping https://secure.phabricator.com/
+    $ phab-ping https://secure.phabricator.com -c 1
 
     ping the local Phabricator install once:
-    $ ./phab-ping http://127.0.0.1/api/
-
-    Note that the trailing slash is required.
+    $ phab-ping http://127.0.0.1 -c 1
 """
 
 import argparse
+import itertools
 import os
 import sys
 import time
@@ -42,23 +41,53 @@ def main():
         epilog=_USAGE_EXAMPLES)
 
     parser.add_argument(
-        'address',
-        metavar="URI",
+        'destination',
+        metavar="destination",
         type=str,
         help="address of the Phabricator instance, e.g. "
         "https://secure.phabricator.com")
 
+    parser.add_argument(
+        '--count', '-c',
+        metavar="count",
+        type=int,
+        help="number of times to ping, default is unlimited")
+
+    parser.add_argument(
+        '--interval', '-i',
+        metavar="interval",
+        type=float,
+        default=1.0,
+        help="wait interval seconds between sending each request, default is "
+             "to wait one second. Minimum wait is 0.2 seconds.")
+
     args = parser.parse_args()
 
+    if args.interval < 0.2:
+        print "interval must be at least 0.2 seconds"
+        sys.exit(2)
+
     # perform the ping and display the time taken and result
-    start = time.time()
-    uri = phlsys_conduit.makeConduitUri(args.address)
+    uri = phlsys_conduit.makeConduitUri(args.destination)
     print "conduit.ping " + str(uri)
-    conduit = phlsys_conduit.Conduit(uri)
-    result = conduit.ping()
-    end = time.time()
-    msecs = (end - start) * 1000
-    print str(int(msecs)) + " msecs : " + result
+
+    if args.count is not None:
+        sequence = xrange(args.count)
+    else:
+        sequence = itertools.count()
+
+    is_first = True
+    for i in sequence:
+        if not is_first:
+            time.sleep(args.interval)
+        print "request " + str(i + 1) + " :",
+        conduit = phlsys_conduit.Conduit(uri)
+        start = time.time()
+        result = conduit.ping()
+        end = time.time()
+        msecs = (end - start) * 1000
+        print str(int(msecs)) + "msecs : " + result
+        is_first = False
 
 
 if __name__ == "__main__":
