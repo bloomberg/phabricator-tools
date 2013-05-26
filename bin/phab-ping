@@ -16,8 +16,8 @@ usage examples:
     ping the official Phabricator install once:
     $ phab-ping https://secure.phabricator.com -c 1
 
-    ping the local Phabricator install once:
-    $ phab-ping http://127.0.0.1 -c 1
+    ping the local Phabricator install indefinitely:
+    $ phab-ping http://127.0.0.1
 """
 
 import argparse
@@ -128,7 +128,7 @@ def main():
         print "min / mean / max =",
         mean = stats.sum / stats.count
         vals = [stats.min, mean, stats.max]
-        print ' / '.join(["{0:0.2f}".format(i) for i in vals]), 'msecs'
+        print ' / '.join(["{0:0.2f}".format(i) for i in vals]), 'ms'
 
 
 if __name__ == "__main__":
