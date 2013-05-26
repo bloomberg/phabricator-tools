@@ -16,6 +16,7 @@ usage examples:
 """
 
 import argparse
+import collections
 import itertools
 import os
 import sys
@@ -49,13 +50,13 @@ def main():
 
     parser.add_argument(
         '--count', '-c',
-        metavar="count",
+        metavar="TIMES",
         type=int,
         help="number of times to ping, default is unlimited")
 
     parser.add_argument(
         '--interval', '-i',
-        metavar="interval",
+        metavar="SECONDS",
         type=float,
         default=1.0,
         help="wait interval seconds between sending each request, default is "
@@ -77,17 +78,52 @@ def main():
         sequence = itertools.count()
 
     is_first = True
-    for i in sequence:
-        if not is_first:
-            time.sleep(args.interval)
-        print "request " + str(i + 1) + " :",
-        conduit = phlsys_conduit.Conduit(uri)
-        start = time.time()
-        result = conduit.ping()
-        end = time.time()
-        msecs = (end - start) * 1000
-        print str(int(msecs)) + "msecs : " + result
-        is_first = False
+
+    Stats = collections.namedtuple(
+        "phabping__Stats", ['min', 'max', 'sum', 'count'])
+    stats = None
+
+    try:
+        for i in sequence:
+            # pause between requests
+            if not is_first:
+                time.sleep(args.interval)
+
+            print "request " + str(i + 1) + " :",
+
+            conduit = phlsys_conduit.Conduit(uri)
+            start = time.time()
+            result = conduit.ping()
+            end = time.time()
+
+            msecs = (end - start) * 1000
+            print result, ":", str(int(msecs)), "ms"
+
+            # atomically update the 'stats' object
+            # (we may receive KeyboardInterrupt during update)
+            if stats:
+                stats = Stats(
+                    min=min(stats.min, msecs),
+                    max=max(stats.max, msecs),
+                    sum=stats.sum + msecs,
+                    count=i + 1)
+            else:
+                stats = Stats(min=msecs, max=msecs, sum=msecs, count=i + 1)
+
+            is_first = False
+    except KeyboardInterrupt:
+        # print a newline to separate the ^C
+        print
+
+    if not stats:
+        print "no requests processed."
+    else:
+        print "---", uri, "conduit.ping statistics", "---"
+        print stats.count, "requests processed"
+        print "min / mean / max =",
+        mean = stats.sum / stats.count
+        vals = [stats.min, mean, stats.max]
+        print ' / '.join(["{0:0.2f}".format(i) for i in vals]), 'msecs'
 
 
 if __name__ == "__main__":
