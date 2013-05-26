@@ -83,6 +83,27 @@ __Pre-installed Users__
 `alice`, `bob`, `phab` (administrator)
 All pre-installed users have the password set to `password`
 
+Monitor your Phabricator instance with phab-ping
+------------------------------------------------
+
+A simple wrapper around the 'conduit.ping' API which Phabricator provides,
+`phab-ping` behaves much like the regular ping as a simple health-check tool.
+
+It requests some information from the instance running at the specified URI
+and reports how long Phabricator takes to respond.
+
+    $ phab-ping https://secure.phabricator.com
+    conduit.ping https://secure.phabricator.com/api/
+    request 1 : ip-10-170-222-96 : 1336 ms
+    request 2 : ip-10-170-222-96 : 1352 ms
+    request 3 : ip-10-170-222-96 : 1355 ms
+    request 4 : ip-10-170-222-96 : 1353 ms
+    request 5 : ip-10-170-222-96 : 1456 ms
+    ^C
+    --- https://secure.phabricator.com/api/ conduit.ping statistics ---
+    5 requests processed
+    min / mean / max = 1336.74 / 1371.00 / 1456.22 ms
+
 Contacts
 --------
 
