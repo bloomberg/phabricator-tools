@@ -1,7 +1,7 @@
 trap "echo FAILED!; exit" ERR
 set -x
 
-arcyon='../bin/arcyon'
+arcyon='../../bin/arcyon'
 
 id="$($arcyon create-revision -t title -p plan -f diff1)"
 $arcyon get-diff -r $id --ls
