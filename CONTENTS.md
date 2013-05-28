@@ -3,7 +3,7 @@ Directory Layout
 
 * `bin` - binaries for you
 * `py` - the python source
-* `testbed` - scripts for exercising the binaries
+* `testbed` - scripts for exercising the binaries; for testing and as examples
 * `vagrant` - artifacts for creating an instant phabricator install
 
 Binaries for you
@@ -70,9 +70,8 @@ To make it easy to get started with the binaries, here are some scripts which
 illustrate usage examples, test functionality and form simple utilities.
 
 They come in two flavors:
+* tools - simple wrappers that perform a useful function and illustrate usage
 * exercisers - try to use as much of the binaries features as possible for QA
-* recipies - well-documented usage-examples intended to be copied and extended
-* utils - simple wrappers that perform a useful function
 
 Artifacts for creating an instant phabricator install
 -----------------------------------------------------
