@@ -81,7 +81,7 @@ def queryUsersFromEmails(conduit, emails):
 def queryUsersFromPhids(conduit, phids):
     """Return a list of QueryResponse based on the provided phids.
 
-    If a phid does not correspond to a username then raise ValueError.
+    If a phid does not correspond to a username then return None.
 
     :conduit: must support 'call()' like phlsys_conduit
     :phids: a list of strings corresponding to user phids
@@ -91,10 +91,16 @@ def queryUsersFromPhids(conduit, phids):
     if not isinstance(phids, list):
         raise ValueError("phids must be a list")
     d = {"phids": phids}
-    response = conduit.call("user.query", d)
 
-    if len(response) != len(phids):
-        raise Exception("unexpected number of entries")
+    try:
+        response = conduit.call("user.query", d)
+    except phlsys_conduit.ConduitException as e:
+        if not isNoSuchUserError(e):
+            raise
+        return None
+    else:
+        if len(response) != len(phids):
+            raise Exception("unexpected number of entries")
 
     return [QueryResponse(**u) for u in response]
 
@@ -159,6 +165,23 @@ def makeUsernamePhidDict(conduit, usernames):
         return {u.userName: u.phid for u in users}
 
 
+def makePhidUsernameDict(conduit, phids):
+    """Return a dictionary of phids to usernames.
+
+    Return None if any of 'phids' is invalid.
+
+    :conduit: must support 'call()' like phlsys_conduit
+    :phids: a list of strings corresponding to Phabricator PHIDs
+    :returns: a dictionary of usernames to corresponding phids
+
+    """
+    users = queryUsersFromPhids(conduit, phids)
+    if users is None:
+        return None
+    else:
+        return {u.phid: u.userName for u in users}
+
+
 class TestUser(unittest.TestCase):
 
     def setUp(self):
@@ -199,6 +222,12 @@ class TestUser(unittest.TestCase):
         self.assertEqual(len(userDict), 1)
         self.assertEqual(userDict[self.test_user], users[0].phid)
 
+        username = users[0].userName
+        phid = users[0].phid
+        phidDict = makePhidUsernameDict(self.conduit, [phid])
+        self.assertEqual(len(phidDict), 1)
+        self.assertEqual(phidDict[phid], username)
+
     def testBadUsername(self):
         bad_username = "#@)4308f:"
         users = queryUsersFromUsernames(self.conduit, [bad_username])
@@ -206,6 +235,11 @@ class TestUser(unittest.TestCase):
 
         userDict = makeUsernamePhidDict(self.conduit, [bad_username])
         self.assertIsNone(userDict)
+
+    def testBadPhid(self):
+        bad_phid = "asd9f87"
+        phidDict = makePhidUsernameDict(self.conduit, [bad_phid])
+        self.assertIsNone(phidDict)
 
 
 if __name__ == "__main__":
