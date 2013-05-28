@@ -105,6 +105,13 @@ def setupParser(parser):
         'output format parameters', 'choose one only, default is "short"')
     formats = fmts.add_mutually_exclusive_group()
 
+    parser.add_argument(
+        '--translate',
+        action='store_true',
+        help='translate user PHIDs to usernames and add as new '
+             'elements to the output dictionary so theyre visible in python '
+             'and json output formats.')
+
     filters.add_argument(
         '--status-type',
         type=str,
@@ -240,6 +247,8 @@ def process(args):
 
     results = conduit.call("differential.query", d)
 
+    # apply filters
+
     if args.statuses:
         new_results = []
         for r in results:
@@ -268,6 +277,32 @@ def process(args):
             if age <= args.update_max_age:
                 new_results.append(r)
         results = new_results
+
+    # apply transformations
+
+    if args.translate:
+        # gather user PHIDs
+        user_phids = set()
+        for r in results:
+            user_phids.add(r["authorPHID"])
+            for u in r["ccs"]:
+                user_phids.add(u)
+            for u in r["reviewers"]:
+                user_phids.add(u)
+
+        # get the names back
+        phidToUser = {}
+        user_phids = list(user_phids)
+        if user_phids:
+            phidToUser = phlcon_user.makePhidUsernameDict(conduit, user_phids)
+
+        # do the translation
+        for r in results:
+            r[u"authorUsername"] = phidToUser[r["authorPHID"]]
+            r[u"ccUsernames"] = [phidToUser[u] for u in r["ccs"]]
+            r[u"reviewerUsernames"] = [phidToUser[u] for u in r["reviewers"]]
+
+    # output results
 
     if not args.format_type and not args.format_string:
         args.format_type = "short"
