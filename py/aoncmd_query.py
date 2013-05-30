@@ -84,6 +84,7 @@ import textwrap
 
 import phlcon_user
 import phlsys_strtotime
+import phlsys_timedeltatostr
 import phlsys_makeconduit
 
 import aont_conduitargs
@@ -211,6 +212,11 @@ def setupParser(parser):
     aont_conduitargs.addArguments(parser)
 
 
+def humanTimeSince(dt):
+    elapsed = datetime.datetime.now() - dt
+    return phlsys_timedeltatostr.quantized(elapsed)
+
+
 def process(args):
     conduit = phlsys_makeconduit.makeConduit(args.uri, args.user, args.cert)
     me = conduit.getUser()
@@ -301,6 +307,12 @@ def process(args):
             r[u"authorUsername"] = phidToUser[r["authorPHID"]]
             r[u"ccUsernames"] = [phidToUser[u] for u in r["ccs"]]
             r[u"reviewerUsernames"] = [phidToUser[u] for u in r["reviewers"]]
+
+    for r in results:
+        r[u"humanTimeSinceDateModified"] = humanTimeSince(
+            datetime.datetime.fromtimestamp(float(r["dateModified"])))
+        r[u"humanTimeSinceDateCreated"] = humanTimeSince(
+            datetime.datetime.fromtimestamp(float(r["dateCreated"])))
 
     # output results
 
