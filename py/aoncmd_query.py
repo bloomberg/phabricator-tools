@@ -79,6 +79,22 @@ def setupParser(parser):
         help='translate user PHIDs to usernames and add as new '
              'elements to the output dictionary so theyre visible in python '
              'and json output formats.')
+    parser.add_argument(
+        '--max-results',
+        type=int,
+        metavar='INT',
+        help='limit the number of results returned, if unspecified then the '
+             'server default limit is used (seems to be 1000).')
+    parser.add_argument(
+        '--offset-results',
+        type=int,
+        metavar='INT',
+        help='where there is a limit on the number of results, you can supply '
+             'an offset to return the next batch of results. e.g. if the '
+             'number of results is limited to 100, then to see the next "page"'
+             'of results, supply an offset of 100.  To see "page 3" of the '
+             'results, supply an offset of 200 and so on.  Theres no way to '
+             'count the total number of results at present.')
 
     filters.add_argument(
         '--status-type',
@@ -228,6 +244,13 @@ def process(args):
     if args.arcanist_projects:
         d["arcanistProjects"] = args.arcanist_projects
 
+    if args.max_results:
+        d["limit"] = args.max_results
+
+    if args.offset_results:
+        d["offset"] = args.offset_results
+
+    # perform the query
     results = conduit.call("differential.query", d)
 
     # apply filters
