@@ -74,6 +74,14 @@ def setupParser(parser):
     formats = fmts.add_mutually_exclusive_group()
 
     parser.add_argument(
+        '--ids',
+        type=int,
+        metavar='INT',
+        nargs='+',
+        default=[],
+        help='optional list of ids to limit the search to, if none are '
+             'supplied then all ids are subject to the query.')
+    parser.add_argument(
         '--translate',
         action='store_true',
         help='translate user PHIDs to usernames and add as new '
@@ -237,6 +245,9 @@ def process(args):
     # XXX: check for bad userToPhid
     for key in d.iterkeys():
         d[key] = [userToPhid[u] for u in d[key]]
+
+    if args.ids:
+        d["ids"] = args.ids
 
     if args.status_type:
         d["status"] = "status-" + args.status_type
