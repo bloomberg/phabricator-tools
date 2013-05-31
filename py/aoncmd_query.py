@@ -47,6 +47,7 @@ import datetime
 import json
 import pprint
 import string
+import sys
 import textwrap
 
 import phlcon_user
@@ -81,6 +82,10 @@ def setupParser(parser):
         default=[],
         help='optional list of ids to limit the search to, if none are '
              'supplied then all ids are subject to the query.')
+    parser.add_argument(
+        '--ids-stdin',
+        action='store_true',
+        help='read additional list of ids to limit the query to from stdin.')
     parser.add_argument(
         '--translate',
         action='store_true',
@@ -248,6 +253,10 @@ def process(args):
 
     if args.ids:
         d["ids"] = args.ids
+
+    if args.ids_stdin:
+        ids = [int(i) for i in " ".join(sys.stdin.readlines()).split()]
+        d["ids"] = args.ids + ids
 
     if args.status_type:
         d["status"] = "status-" + args.status_type
