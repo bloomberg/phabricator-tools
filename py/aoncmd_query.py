@@ -96,6 +96,13 @@ def setupParser(parser):
             'Needs Revision',
             'Accepted'],
         help="limit output to only these statuses")
+    filters.add_argument(
+        '--arcanist-projects',
+        type=str,
+        nargs="+",
+        default=[],
+        metavar='STR',
+        help="add projects to the arcanistProjects filter")
 
     self_filters.add_argument(
         '--author-me',
@@ -217,6 +224,9 @@ def process(args):
 
     if args.status_type:
         d["status"] = "status-" + args.status_type
+
+    if args.arcanist_projects:
+        d["arcanistProjects"] = args.arcanist_projects
 
     results = conduit.call("differential.query", d)
 
