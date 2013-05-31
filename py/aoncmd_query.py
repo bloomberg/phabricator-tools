@@ -29,20 +29,7 @@ output formats:
           u'branch': None,
           u'ccs': [u'PHID-USER-n334wwtakshsxeau3qij'],
           u'commits': [],
-          u'dateCreated': u'1362827032',
-          u'dateModified': u'1362827033',
-          u'diffs': [u'5', u'4'],
-          u'hashes': [],
-          u'id': u'3',
-          u'lineCount': u'0',
-          u'phid': u'PHID-DREV-4vkkcnkcoyxmf4us4t2l',
-          u'reviewers': [u'PHID-USER-hncf4pdbrr53lsxn5j6z'],
-          u'status': u'2',
-          u'statusName': u'Accepted',
-          u'summary': u'',
-          u'testPlan': u'test plan',
-          u'title': u'add NEWFILE',
-          u'uri': u'http://127.0.0.1/D3'}]
+          ...
 
     --format-type json
         [
@@ -53,27 +40,7 @@ output formats:
             "PHID-USER-n334wwtakshsxeau3qij"
             ],
             "commits": [],
-            "dateCreated": "1362827032",
-            "dateModified": "1362827033",
-            "diffs": [
-            "5",
-            "4"
-            ],
-            "hashes": [],
-            "id": "3",
-            "lineCount": "0",
-            "phid": "PHID-DREV-4vkkcnkcoyxmf4us4t2l",
-            "reviewers": [
-            "PHID-USER-hncf4pdbrr53lsxn5j6z"
-            ],
-            "status": "2",
-            "statusName": "Accepted",
-            "summary": "",
-            "testPlan": "test plan",
-            "title": "add NEWFILE",
-            "uri": "http://127.0.0.1/D3"
-          }
-        ]
+            ...
 """
 
 import datetime
