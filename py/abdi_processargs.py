@@ -1,7 +1,7 @@
 """Process the arguments for a single repository and execute."""
 
 import datetime
-import sys
+import logging
 
 import abdi_processrepo
 import phlsys_sendmail
@@ -34,11 +34,9 @@ def run_once(args, out):
         datetime.timedelta(seconds=1000),
     ]
 
-    # print to stderr if we get an exception when fetching
+    # log.error if we get an exception when fetching
     def on_exception(e, delay):
-        print >> sys.stderr, e
-        print >> sys.stderr, "will wait ",
-        print >> sys.stderr, delay
+        logging.error(str(e) + "\nwill wait " + str(delay))
 
     if args.try_touch_path:
         try:
