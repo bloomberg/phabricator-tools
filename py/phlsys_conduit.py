@@ -4,7 +4,7 @@ from contextlib import contextmanager
 import doctest
 import hashlib
 import json
-import sys
+import logging
 import time
 import unittest
 import urllib
@@ -247,9 +247,8 @@ class Conduit():
                 break
             else:
                 if error == SESSION_ERROR:
+                    logging.warning("phlsys_conduit: SESSION-ERROR")
                     self._authenticate()
-                    print >> sys.stderr, "phlsys_conduit: SESSION-ERROR"
-                    # TODO: log this
                 else:
                     raise ConduitException(
                         method=method,
