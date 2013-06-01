@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 """Exception hierarchy for abd user and system errors."""
 
 

@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 """Print a status line, carriage return to stay on the same line."""
 
 import datetime

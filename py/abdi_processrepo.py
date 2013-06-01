@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 """abd automates the creation and landing of reviews from branches"""
 import subprocess
 

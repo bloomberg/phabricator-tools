@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# encoding: utf-8
 """Helpers for interacting with the filesystem."""
 
 from contextlib import contextmanager

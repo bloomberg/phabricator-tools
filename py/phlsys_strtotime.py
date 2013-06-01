@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 """A poor substitute for PHP's strtotime function."""
 
 import datetime

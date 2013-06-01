@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
 """Interact with other programs using command-line semantics."""
 
 import collections
