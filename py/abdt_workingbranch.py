@@ -1,3 +1,5 @@
+"""Git operations on working branches."""
+
 import abdt_naming
 import phlgit_push
 import phlgitu_ref
