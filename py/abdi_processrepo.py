@@ -1,5 +1,4 @@
 """abd automates the creation and landing of reviews from branches"""
-import subprocess
 
 # XXX: probably too many imports
 import abdcmnt_commenter
@@ -16,6 +15,7 @@ import phlgit_push
 import phlsys_conduit
 import phlsys_fs
 import phlsys_git
+import phlsys_subprocess
 import abdt_gittypes
 import abdt_conduit
 import abdt_conduitgit
@@ -213,9 +213,9 @@ def land(conduit, wb, gitContext, branch):
                     wb.remote_branch,
                     message,
                     name + " <" + email + ">")
-        except subprocess.CalledProcessError as e:
+        except phlsys_subprocess.CalledProcessError as e:
             clone.call("reset", "--hard")  # fix the working copy
-            raise abdt_exception.LandingException(str(e) + "\n" + e.output)
+            raise abdt_exception.LandingException('\n' + e.stdout)
 
         print "- pushing " + wb.remote_base
         phlgit_push.push(clone, wb.base, gitContext.remote)

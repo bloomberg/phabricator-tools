@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import unittest
-import subprocess
 
 import phlsys_fs
 from phlsys_subprocess import (run,
                                runCommands,
-                               RunResult)
+                               RunResult,
+                               CalledProcessError)
 
 
 class PhlsysSubprocessTests(unittest.TestCase):
@@ -40,7 +40,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
         "Passing command returns non zero exit status"
         with phlsys_fs.nostd() as stderr:
             cmd = "time"
-            self.assertRaises(subprocess.CalledProcessError, run, cmd)
+            self.assertRaises(CalledProcessError, run, cmd)
             self.assertTrue(cmd in stderr.out)
 
     def test_run_commands(self):
@@ -63,7 +63,8 @@ class PhlsysSubprocessTests(unittest.TestCase):
         "Passing incorrect commands returns non zero exit status"
         with phlsys_fs.nostd() as stderr:
             cmd = "time"
-            self.assertRaises(subprocess.CalledProcessError, runCommands, cmd)
+            self.assertRaises(
+                CalledProcessError, runCommands, cmd)
             self.assertTrue(cmd in stderr.out)
 
 if __name__ == "__main__":

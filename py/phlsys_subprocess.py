@@ -10,6 +10,38 @@ RunResult = collections.namedtuple(
     ['stdout', 'stderr'])
 
 
+class Error(Exception):
+    """Base class for exceptions in this module."""
+    pass
+
+
+class CalledProcessError(Error):
+    """Exception for passing errors from called processes.
+
+    Attributes:
+        cmd      -- array, the command used to launch the subprocess
+        stdin    -- string, the input supplied to the command
+        stdout   -- string, the stdout output from the command
+        stderr   -- string, the stderr output from the command
+        exitcode -- int, the exitcode from the command
+    """
+
+    def __init__(self, cmd, stdin, stdout, stderr, exitcode, workingdir):
+        self.cmd = cmd
+        self.stdin = stdin
+        self.stdout = stdout
+        self.stderr = stderr
+        self.exitcode = exitcode
+        self.workingdir = workingdir
+        self.msg = "cmd: {0}\n".format(" ".join(cmd))
+        if workingdir:
+            self.msg += "workingdir: {0}\n".format(workingdir)
+        if stdin:
+            self.msg += "stdin: {0}\n".format(stdin)
+        self.msg += "stdout: {0}\nstderr: {1}\n".format(stdout, stderr)
+        super(CalledProcessError, self).__init__(self.msg)
+
+
 #def run(*args, workingDir=None): <-- supported in Python 3, use kwargs for now
 def run(*args, **kwargs):
     """Execute the command described by args, return a 'RunResult'.
@@ -17,7 +49,7 @@ def run(*args, **kwargs):
     This is a convenience function which wraps the functionality of
     subprocess.Popen() in a manner more compatible for our uses here.
 
-    Raise a 'subprocess.CalledProcessError' if the return code is not equal to
+    Raise a 'CalledProcessError' if the return code is not equal to
     zero; also echo extra information to stderr.
 
     Usage examples:
@@ -62,7 +94,13 @@ def run(*args, **kwargs):
             error_msg += "stdin: {0}\n".format(stdin)
         error_msg += "out: {0}\nerr: {1}\n".format(out, err)
         sys.stderr.write(error_msg)
-        raise subprocess.CalledProcessError(p.returncode, cmd, out)
+        raise CalledProcessError(
+            cmd=cmd,
+            stdin=stdin,
+            stdout=out,
+            stderr=err,
+            exitcode=p.returncode,
+            workingdir=workingDir)
     return RunResult(stdout=out, stderr=err)
 
 
@@ -73,8 +111,7 @@ def runCommands(*commands):
     This is a convenience function which wraps the functionality of
     run() in a manner more compatible for test cases.
 
-    Raise a 'subprocess.CalledProcessError' if the return code is not equal to
-    zero; also echo extra information to stderr.
+    Raise a 'CalledProcessError' if the return code is not equal to zero
 
     Note that behaviour is undefined in the presense of quotes and backticks.
 
