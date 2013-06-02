@@ -2,6 +2,7 @@ import phlmail_format
 
 
 class MailSender(object):
+
     """A mail sender that sends mail via a configured sendmail."""
 
     def __init__(self, sendmail, from_email):

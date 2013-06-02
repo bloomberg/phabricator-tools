@@ -90,6 +90,7 @@ def makePhabTestConduit():
 
 
 class ConduitException(Exception):
+
     def __init__(self, method, error, errormsg, result, obj, uri, actAsUser):
         """Construct from an error returned by conduit
 

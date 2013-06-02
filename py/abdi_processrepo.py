@@ -21,13 +21,13 @@ import abdt_conduit
 import abdt_conduitgit
 import abdt_workingbranch
 
-#TODO: split into appropriate modules
+# TODO: split into appropriate modules
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 
 
 def isBasedOn(name, base):
-    #TODO: actually do this
+    # TODO: actually do this
     return True
 
 

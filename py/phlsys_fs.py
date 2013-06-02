@@ -6,7 +6,7 @@ import sys
 import tempfile
 
 
-#TODO: write a docstring with doctests when we have a tempdir helper
+# TODO: write a docstring with doctests when we have a tempdir helper
 @contextmanager
 def chDirContext(newDir):
     savedPath = os.getcwd()
@@ -30,6 +30,7 @@ def tmpfile(tmp_dir=None, suffix=''):
 def nostd(err=True):
     "Suppress stderr or stdout"
     class Devnull(object):
+
         def write(self, s):
             self.out = s
     if err:

@@ -2,6 +2,7 @@
 
 
 class AbdBaseException(Exception):
+
     def __init__(self, message):
         """Base for abd exceptions to inherit from.
 
@@ -15,6 +16,7 @@ class AbdBaseException(Exception):
 
 
 class AbdUserException(AbdBaseException):
+
     def __init__(self, message):
         """Base for abd user-triggered exceptions to inherit from.
 
@@ -28,6 +30,7 @@ class AbdUserException(AbdBaseException):
 
 
 class AbdSystemException(AbdBaseException):
+
     def __init__(self, message):
         """Base for abd system-triggered exceptions to inherit from.
 
@@ -47,6 +50,7 @@ class AbdSystemException(AbdBaseException):
 
 
 class MissingBaseException(AbdUserException):
+
     def __init__(self, review_branch_name, base_name):
         """Branch which the review branch is based on does not exist.
 
@@ -64,6 +68,7 @@ class MissingBaseException(AbdUserException):
 
 
 class NoUsersOnBranchException(AbdUserException):
+
     def __init__(self, review_branch_name, base_name, emails):
         """Branch does not contain commits by any known users.
 

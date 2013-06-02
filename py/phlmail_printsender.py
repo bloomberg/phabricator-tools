@@ -2,6 +2,7 @@ import phlmail_format
 
 
 class MailSender(object):
+
     """A mail sender that just prints the mails to the console."""
 
     def __init__(self, from_email):

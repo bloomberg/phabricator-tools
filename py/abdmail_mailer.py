@@ -2,6 +2,7 @@ import types
 
 
 class Mailer(object):
+
     """Send mails to interested parties about pre-specified conditions."""
 
     def __init__(self, mail_sender, admin_emails, repository_name, uri):

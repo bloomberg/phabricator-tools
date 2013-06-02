@@ -10,6 +10,7 @@ import abdt_conduit
 
 
 class Test(unittest.TestCase):
+
     def __init__(self, data):
         super(Test, self).__init__(data)
         self.test_data = None

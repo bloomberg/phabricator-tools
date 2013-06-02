@@ -11,6 +11,7 @@ import phlsys_conduit
 
 
 class InsufficientInfoException(Exception):
+
     def __init__(self, message):
         super(InsufficientInfoException, self).__init__(message)
 

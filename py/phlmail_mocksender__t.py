@@ -4,6 +4,7 @@ import phlmail_mocksender
 
 
 class Test(unittest.TestCase):
+
     def test_empty(self):
         mailsender = phlmail_mocksender.MailSender()
         self.assertEqual(len(mailsender.mailboxes), 0)

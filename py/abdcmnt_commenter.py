@@ -5,6 +5,7 @@ import abdt_exception
 
 
 class Commenter(object):
+
     """Make pre-defined comments on Differential revisions."""
 
     def __init__(self, conduit, revision_id):

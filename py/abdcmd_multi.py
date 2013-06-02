@@ -50,6 +50,7 @@ def setupParser(parser):
 
 
 class DelayedRetrySleepOperation(object):
+
     def __init__(self, out, secs):
         self._out = out
         self._secs = secs
@@ -64,12 +65,14 @@ class DelayedRetrySleepOperation(object):
 
 
 class ResetFileException(Exception):
+
     def __init__(self, path):
         self.path = path
         super(ResetFileException, self).__init__()
 
 
 class FileCheckOperation(object):
+
     def __init__(self, kill_file, reset_file, pause_file, on_pause):
         self._kill_file = kill_file
         self._reset_file = reset_file

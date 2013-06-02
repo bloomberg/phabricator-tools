@@ -54,6 +54,7 @@ def parseFilenamesFromRawDiff(diff):
 
 
 class TestDiff(unittest.TestCase):
+
     def __init__(self, data):
         super(TestDiff, self).__init__(data)
         self.path = "phlgit_diff_TestDiff"

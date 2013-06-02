@@ -34,6 +34,7 @@ def runCommands(*commands):
 
 
 class Test(unittest.TestCase):
+
     def __init__(self, data):
         super(Test, self).__init__(data)
         self.reviewer = phldef_conduit.alice.user
@@ -61,7 +62,7 @@ class Test(unittest.TestCase):
         self._gitCommitAll("add " + filename, "test plan", reviewer)
 
     def setUp(self):
-        #TODO: just make a temp dir
+        # TODO: just make a temp dir
         runCommands("rm -rf abd-test")
         runCommands("mkdir abd-test")
         self._saved_path = os.getcwd()
@@ -241,7 +242,7 @@ class Test(unittest.TestCase):
         self._devPushNewFile("NEWFILE", has_plan=False)
 
         # TODO: handle no base properly
-        #self._phabUpdateWithExpectations(total=1, bad=1)
+        # self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
         with phlsys_fs.chDirContext("developer"):

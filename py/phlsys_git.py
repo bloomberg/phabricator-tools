@@ -5,7 +5,7 @@ import unittest
 
 import phlsys_subprocess
 
-#TODO: add support for user.name and user.email to git clone
+# TODO: add support for user.name and user.email to git clone
 
 
 class GitClone():
@@ -13,7 +13,7 @@ class GitClone():
     def __init__(self, workingDir):
         self._workingDir = os.path.abspath(workingDir)
 
-    #def call(*args, stdin=None): <-- supported in Python 3
+    # def call(*args, stdin=None): <-- supported in Python 3
     def call(self, *args, **kwargs):
         stdin = kwargs.pop("stdin", None)
         assert(not kwargs)

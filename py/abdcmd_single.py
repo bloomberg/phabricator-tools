@@ -93,6 +93,7 @@ def setupParser(parser):
 
 
 class DelayedRetrySleepOperation(object):
+
     def __init__(self, out, secs):
         self._out = out
         self._secs = secs

@@ -5,6 +5,7 @@ import phlsys_subprocess
 
 
 class PhlsysSubprocessTests(unittest.TestCase):
+
     def test_run_valid_simple_cmd(self):
         "Valid simple cmd - run returns equal RunResult instance"
         args = ("echo", "hello stdout")

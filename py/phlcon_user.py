@@ -179,6 +179,7 @@ def makePhidUsernameDict(conduit, phids):
 
 
 class TestUser(unittest.TestCase):
+
     def __init__(self, data):
         super(TestUser, self).__init__(data)
         self.conduit = None

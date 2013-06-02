@@ -37,6 +37,7 @@ def loopOnce(operations, paused_operations):
 
 class DelayedRetryNotifyOperation(object):
     # TODO: support iterables generally
+
     def __init__(self, operation, delays, on_exception=None):
         self._op = operation
         self._delays = list(delays)  # we want our own copy since we'll modify

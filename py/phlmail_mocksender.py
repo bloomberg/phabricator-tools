@@ -7,6 +7,7 @@ Mail = collections.namedtuple(
 
 
 class MailSender(object):
+
     """A mail sender that just stores mail to make testing easier."""
 
     def __init__(self):

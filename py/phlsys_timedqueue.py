@@ -10,6 +10,7 @@ import heapq
 
 
 class TimedQueue(object):
+
     def __init__(self):
         self._items = []
         self._counter = 0

@@ -33,7 +33,7 @@ class Sendmail():
         self._binary = binary if binary is not None else self._default_binary
         self._params = params if params is not None else self._default_params
 
-    #def call(*args, stdin=None): <-- supported in Python 3
+    # def call(*args, stdin=None): <-- supported in Python 3
     def send(self, stdin):
         result = phlsys_subprocess.run(
             self._binary, *self._params, stdin=stdin)

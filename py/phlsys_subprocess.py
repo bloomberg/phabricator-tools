@@ -10,11 +10,13 @@ RunResult = collections.namedtuple(
 
 
 class Error(Exception):
+
     """Base class for exceptions in this module."""
     pass
 
 
 class CalledProcessError(Error):
+
     """Exception for passing errors from called processes.
 
     Attributes:
@@ -41,7 +43,8 @@ class CalledProcessError(Error):
         super(CalledProcessError, self).__init__(self.msg)
 
 
-#def run(*args, workingDir=None): <-- supported in Python 3, use kwargs for now
+# def run(*args, workingDir=None): <-- supported in Python 3, use kwargs
+# for now
 def run(*args, **kwargs):
     """Execute the command described by args, return a 'RunResult'.
 

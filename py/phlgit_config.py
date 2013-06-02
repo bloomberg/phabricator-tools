@@ -40,6 +40,7 @@ def getEmail(clone):
 
 
 class TestLog(unittest.TestCase):
+
     def __init__(self, data):
         super(TestLog, self).__init__(data)
         self.path = "phlgit_diff_TestDiff"
