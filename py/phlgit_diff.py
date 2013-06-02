@@ -54,10 +54,13 @@ def parseFilenamesFromRawDiff(diff):
 
 
 class TestDiff(unittest.TestCase):
+    def __init__(self, data):
+        super(TestDiff, self).__init__(data)
+        self.path = "phlgit_diff_TestDiff"
+        self.clone = None
 
     def setUp(self):
         # TODO: make this more portable with shutil etc.
-        self.path = "phlgit_diff_TestDiff"
         phlsys_subprocess.run_commands("mkdir " + self.path)
         phlsys_subprocess.run("git", "init", workingDir=self.path)
         self.clone = phlsys_git.GitClone(self.path)

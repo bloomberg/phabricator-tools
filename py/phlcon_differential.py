@@ -288,6 +288,10 @@ def close(conduit, revisionId):
 
 
 class Test(unittest.TestCase):
+    def __init__(self, data):
+        super(Test, self).__init__(data)
+        self.conduit = None
+        self.reviewerConduit = None
 
     def setUp(self):
         test_data = phldef_conduit

@@ -34,6 +34,14 @@ def runCommands(*commands):
 
 
 class Test(unittest.TestCase):
+    def __init__(self, data):
+        super(Test, self).__init__(data)
+        self.reviewer = phldef_conduit.alice.user
+        self.author_account = phldef_conduit.bob
+        self._saved_path = None
+        self.conduit = None
+        self.mailer = None
+        self.mock_sender = None
 
     def _gitCommitAll(self, subject, testPlan, reviewer):
         reviewers = [reviewer] if reviewer else None
@@ -53,8 +61,6 @@ class Test(unittest.TestCase):
         self._gitCommitAll("add " + filename, "test plan", reviewer)
 
     def setUp(self):
-        self.reviewer = phldef_conduit.alice.user
-        self.author_account = phldef_conduit.bob
         #TODO: just make a temp dir
         runCommands("rm -rf abd-test")
         runCommands("mkdir abd-test")

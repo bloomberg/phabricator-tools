@@ -217,15 +217,19 @@ def getRangeToHereRawBody(clone, start):
 
 class TestLog(unittest.TestCase):
 
-    def setUp(self):
-        # TODO: make this more portable with shutil etc.
+    def __init__(self, data):
+        super(TestLog, self).__init__(data)
         self.path = "phlgit_diff_TestDiff"
-        phlsys_subprocess.run_commands("mkdir " + self.path)
-        phlsys_subprocess.run("git", "init", workingDir=self.path)
-        self.clone = phlsys_git.GitClone(self.path)
+        self.clone = None
         self.authorName = "No one"
         self.authorEmail = "noone@nowhere.com"
         self.author = self.authorName + " <" + self.authorEmail + ">"
+
+    def setUp(self):
+        # TODO: make this more portable with shutil etc.
+        phlsys_subprocess.run_commands("mkdir " + self.path)
+        phlsys_subprocess.run("git", "init", workingDir=self.path)
+        self.clone = phlsys_git.GitClone(self.path)
 
     def _createCommitNewFile(self, filename, subject=None, message=None):
         phlsys_subprocess.run_commands(

@@ -179,6 +179,11 @@ def makePhidUsernameDict(conduit, phids):
 
 
 class TestUser(unittest.TestCase):
+    def __init__(self, data):
+        super(TestUser, self).__init__(data)
+        self.conduit = None
+        self.test_user = phldef_conduit.alice.user
+        self.test_email = phldef_conduit.alice.email
 
     def setUp(self):
         test_data = phldef_conduit
@@ -186,8 +191,6 @@ class TestUser(unittest.TestCase):
             test_data.test_uri,
             test_data.alice.user,
             test_data.alice.certificate)
-        self.test_user = phldef_conduit.alice.user
-        self.test_email = phldef_conduit.alice.email
 
     def testAliceEmail(self):
         users = queryUsersFromEmails(self.conduit, [self.test_email])

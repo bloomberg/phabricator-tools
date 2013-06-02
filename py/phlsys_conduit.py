@@ -279,20 +279,20 @@ class TestConduit(unittest.TestCase):
 
     def testCanPing(self):
         test_data = phldef_conduit
-        self.conduit = Conduit(
+        conduit = Conduit(
             test_data.test_uri,
             test_data.alice.user,
             test_data.alice.certificate)
-        self.conduit.ping()
+        conduit.ping()
 
     def testCanListReviews(self):
         test_data = phldef_conduit
-        self.conduit = Conduit(
+        conduit = Conduit(
             test_data.test_uri,
             test_data.alice.user,
             test_data.alice.certificate)
-        self.conduit.ping()
-        self.conduit.call("differential.query")
+        conduit.ping()
+        conduit.call("differential.query")
 
     def testRaisesOnNonAuth(self):
         test_data = phldef_conduit

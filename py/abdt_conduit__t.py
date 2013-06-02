@@ -10,6 +10,11 @@ import abdt_conduit
 
 
 class Test(unittest.TestCase):
+    def __init__(self, data):
+        super(Test, self).__init__(data)
+        self.test_data = None
+        self.conduit = None
+
     def setUp(self):
         self.test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
