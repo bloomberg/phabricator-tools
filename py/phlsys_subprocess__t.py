@@ -1,54 +1,59 @@
 import unittest
 
 import phlsys_fs
-from phlsys_subprocess import (run,
-                               runCommands,
-                               RunResult,
-                               CalledProcessError)
+import phlsys_subprocess
 
 
 class PhlsysSubprocessTests(unittest.TestCase):
     def test_run_valid_simple_cmd(self):
         "Valid simple cmd - run returns equal RunResult instance"
         args = ("echo", "hello stdout")
-        result = run(*args)
-        expect = RunResult(stdout=args[1] + "\n", stderr='')
+        result = phlsys_subprocess.run(*args)
+        expect = phlsys_subprocess.RunResult(stdout=args[1] + "\n", stderr='')
         self.assertEqual(result, expect)
 
     def test_run_list(self):
         "Passing valid list on stdin sorted in reverse order"
         args = ("sort", "-r")
         kwargs = {"stdin": "1\n2\n3"}
-        result = run(*args, **kwargs)
-        expect = RunResult(stdout=kwargs['stdin'][::-1] + "\n", stderr='')
+        result = phlsys_subprocess.run(*args, **kwargs)
+        expect = phlsys_subprocess.RunResult(
+            stdout=kwargs['stdin'][::-1] + "\n", stderr='')
         self.assertEqual(result, expect)
 
     def test_invalid_cmd(self):
         "Passing invalid command - catch OSError"
         with phlsys_fs.nostd() as stderr:
-            self.assertRaises(OSError, run, "invalidcmd")
+            self.assertRaises(OSError, phlsys_subprocess.run, "invalidcmd")
             self.assertTrue("OSError" in stderr.out)
 
     def test_invalid_kwargs(self):
         "Passing unexpected kwargs - catch assertion error"
         self.assertRaises(
             AssertionError,
-            run, workingDir='foo', stdin='bar', unexpected='foo')
+            phlsys_subprocess.run,
+            workingDir='foo',
+            stdin='bar',
+            unexpected='foo')
 
     def test_invalid_return_code(self):
         "Passing command returns non zero exit status"
         with phlsys_fs.nostd() as stderr:
             cmd = "time"
-            self.assertRaises(CalledProcessError, run, cmd)
+            self.assertRaises(
+                phlsys_subprocess.CalledProcessError,
+                phlsys_subprocess.run,
+                cmd)
             self.assertTrue(cmd in stderr.out)
 
     def test_run_commands(self):
         "Run simple cmds - returns None"
-        self.assertEqual(None, runCommands("echo hello stdout"))
+        self.assertEqual(
+            None, phlsys_subprocess.runCommands("echo hello stdout"))
 
     def test_run_multi_commands(self):
         "Run multiple cmds - returns None"
-        self.assertEqual(None, runCommands(
+        self.assertEqual(None, phlsys_subprocess.runCommands(
             "echo hello stdout", "echo goodbye stdout"))
 
     def test_assertion_raised(self):
@@ -56,14 +61,17 @@ class PhlsysSubprocessTests(unittest.TestCase):
         for bad in ("'", '"', '`'):
             self.assertRaises(
                 AssertionError,
-                runCommands, "echo {0}hello stdout{0}".format(bad))
+                phlsys_subprocess.runCommands,
+                "echo {0}hello stdout{0}".format(bad))
 
     def test_invalid_return_code_run_commands(self):
         "Passing incorrect commands returns non zero exit status"
         with phlsys_fs.nostd() as stderr:
             cmd = "time"
             self.assertRaises(
-                CalledProcessError, runCommands, cmd)
+                phlsys_subprocess.CalledProcessError,
+                phlsys_subprocess.runCommands,
+                cmd)
             self.assertTrue(cmd in stderr.out)
 
 
