@@ -246,7 +246,8 @@ class Conduit():
                 break
             else:
                 if error == SESSION_ERROR:
-                    logging.warning("phlsys_conduit: SESSION-ERROR")
+                    logging.warning(
+                        "phlsys_conduit: SESSION-ERROR (try {0})".format(x))
                     self._authenticate()
                 else:
                     raise ConduitException(
