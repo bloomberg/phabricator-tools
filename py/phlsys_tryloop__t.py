@@ -55,7 +55,7 @@ class Test(unittest.TestCase):
             raise TestException()
 
         numDelays = 4
-        delays = [datetime.timedelta() for x in range(0, numDelays)]
+        delays = [datetime.timedelta() for _ in range(0, numDelays)]
         try:
             phlsys_tryloop.tryLoopDelay(failer, delays, TestException)
         except TestException:
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
             raise TypeError()
 
         numDelays = 4
-        delays = [datetime.timedelta() for x in range(0, numDelays)]
+        delays = [datetime.timedelta() for _ in range(0, numDelays)]
         try:
             phlsys_tryloop.tryLoopDelay(failer, delays, TestException)
         except TypeError:
@@ -106,7 +106,7 @@ class Test(unittest.TestCase):
             on_exception_counter.append(1)
 
         numDelays = 4
-        delays = [datetime.timedelta() for x in range(0, numDelays)]
+        delays = [datetime.timedelta() for _ in range(0, numDelays)]
         try:
             phlsys_tryloop.tryLoopDelay(
                 failer, delays, onException=on_exception)

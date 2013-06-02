@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
         def bad_do():
             raise Exception("bad_do")
 
-        def reportNothing(delay):
+        def reportNothing(_):
             pass
 
         def makeOperation():
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
                 bad_do, delays, reportNothing)
 
         num_operations = 10
-        operations = set([makeOperation() for i in range(0, num_operations)])
+        operations = set([makeOperation() for _ in range(0, num_operations)])
         self.assertEqual(num_operations, len(operations))
 
         bad_operations = phlsys_scheduleunreliables.makeTimedQueue()
@@ -98,7 +98,7 @@ class Test(unittest.TestCase):
             results.add(s)
             raise Exception("bad_do")
 
-        def reportNothing(delay):
+        def reportNothing(_):
             pass
 
         def makeOperation(s):
@@ -131,7 +131,7 @@ class Test(unittest.TestCase):
         def bad_do():
             raise Exception("bad_do")
 
-        def reportNothing(delay):
+        def reportNothing(_):
             pass
 
         def makeOperation():
@@ -140,7 +140,7 @@ class Test(unittest.TestCase):
                 functools.partial(bad_do), delays, reportNothing)
 
         # N.B. loopOnce() expects a set
-        operations = set([makeOperation() for i in range(0, num_operations)])
+        operations = set([makeOperation() for _ in range(0, num_operations)])
         self.assertEqual(num_operations, len(operations))
 
         bad_operations = phlsys_scheduleunreliables.makeTimedQueue()

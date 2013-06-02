@@ -12,7 +12,7 @@ def setupParser(parser):
     pass
 
 
-def process(args):
+def process(_):
     print "~/.arcrc:"
     print phlsys_arcrc.getArcrc()
     print
