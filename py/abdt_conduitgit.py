@@ -16,7 +16,7 @@ def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
     committer = phlgit_log.getAuthorNamesEmailsFromHashes(clone, [commit])[0]
     name = committer[0]
     email = committer[1]
-    user = phlcon_user.queryUsersFromEmails(conduit, [email])[0]
+    user = phlcon_user.query_users_from_emails(conduit, [email])[0]
     if not user:
         raise abdt_exception.AbdUserException(
             "first committer is not a Phabricator user")
@@ -33,7 +33,7 @@ def getAnyUserFromBranch(clone, conduit, base, branch):
         hashes = phlgit_log.getLastNCommitHashesFromRef(clone, 1, branch)
     committers = phlgit_log.getAuthorNamesEmailsFromHashes(clone, hashes)
     emails = [committer[1] for committer in committers]
-    users = phlcon_user.queryUsersFromEmails(conduit, emails)
+    users = phlcon_user.query_users_from_emails(conduit, emails)
     for user in users:
         if user:
             return user

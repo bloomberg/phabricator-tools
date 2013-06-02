@@ -244,7 +244,7 @@ def process(args):
     users = list(set(users))
     userToPhid = {}
     if users:
-        userToPhid = phlcon_user.makeUsernamePhidDict(conduit, users)
+        userToPhid = phlcon_user.make_username_phid_dict(conduit, users)
 
     # XXX: check for duplicates in author and reviewer
     # XXX: check for bad userToPhid
@@ -320,7 +320,8 @@ def process(args):
         phidToUser = {}
         user_phids = list(user_phids)
         if user_phids:
-            phidToUser = phlcon_user.makePhidUsernameDict(conduit, user_phids)
+            phidToUser = phlcon_user.make_phid_username_dict(
+                conduit, user_phids)
 
         # do the translation
         for r in results:

@@ -229,7 +229,8 @@ def land(conduit, wb, gitContext, branch):
     commenter.landedReview(branch, wb.base, squashMessage)
 
     authorPHID = d.query(conduit, [wb.id])[0].authorPHID
-    authorUser = phlcon_user.queryUsernamesFromPhids(conduit, [authorPHID])[0]
+    authorUser = phlcon_user.query_usernames_from_phids(
+        conduit, [authorPHID])[0]
     # TODO: there's a potential race condition on the author here
     with phlsys_conduit.act_as_user_context(conduit, authorUser):
         d.close(conduit, wb.id)
@@ -299,7 +300,7 @@ def processUpdatedBranch(
             print "update review for " + review_branch.branch
             revision = phlcon_differential.query(
                 conduit, [working_branch.id])[0]
-            author_user = phlcon_user.queryUsernamesFromPhids(
+            author_user = phlcon_user.query_usernames_from_phids(
                 conduit, [revision.authorPHID])[0]
             try:
                 updateReview(

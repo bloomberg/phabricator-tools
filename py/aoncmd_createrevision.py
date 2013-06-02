@@ -126,7 +126,7 @@ def process(args):
     users = list(set(users))
     userToPhid = {}
     if users:
-        userToPhid = phlcon_user.makeUsernamePhidDict(conduit, users)
+        userToPhid = phlcon_user.make_username_phid_dict(conduit, users)
     for key in fields.iterkeys():
         fields[key] = [userToPhid[u] for u in fields[key]]
 
