@@ -80,7 +80,7 @@ def process(args):
     conduit = phlsys_makeconduit.makeConduit()
 
     if args.act_as_user:
-        conduit.setActAsUser(args.act_as_user)
+        conduit.set_act_as_user(args.act_as_user)
 
     d = {
         'message': args.message,

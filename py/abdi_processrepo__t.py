@@ -179,7 +179,7 @@ class Test(unittest.TestCase):
     def _actOnTheOnlyReview(self, user, action):
         # accept the review
         reviewid = self._getTheOnlyReviewId()
-        with phlsys_conduit.actAsUserContext(self.conduit, user):
+        with phlsys_conduit.act_as_user_context(self.conduit, user):
             phlcon_differential.createComment(
                 self.conduit, reviewid, action=action)
 
@@ -361,7 +361,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
 
         reviewid = self._getTheOnlyReviewId()
-        with phlsys_conduit.actAsUserContext(
+        with phlsys_conduit.act_as_user_context(
                 self.conduit,
                 phldef_conduit.alice.user) as conduit:
             phlcon_differential.createComment(
@@ -380,7 +380,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
 
         reviewid = self._getTheOnlyReviewId()
-        with phlsys_conduit.actAsUserContext(
+        with phlsys_conduit.act_as_user_context(
                 self.conduit,
                 phldef_conduit.phab.user) as conduit:
             phlcon_differential.createComment(

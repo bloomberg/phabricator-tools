@@ -24,7 +24,7 @@ def get_arcrc():
 
 
 def get_host(arcrc, host):
-    normalised = phlsys_conduit.makeConduitUri(host)
+    normalised = phlsys_conduit.make_conduit_uri(host)
     return arcrc["hosts"].get(normalised, None)
 
 

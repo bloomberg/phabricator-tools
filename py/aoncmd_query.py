@@ -222,7 +222,7 @@ def humanTimeSince(dt):
 
 def process(args):
     conduit = phlsys_makeconduit.makeConduit(args.uri, args.user, args.cert)
-    me = conduit.getUser()
+    me = conduit.get_user()
 
     d = {}
 

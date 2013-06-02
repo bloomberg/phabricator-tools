@@ -7,7 +7,7 @@ import phlcon_differential
 def createEmptyRevision(conduit, author):
     empty_diff = "diff --git a/ b/"
 
-    with phlsys_conduit.actAsUserContext(conduit, author):
+    with phlsys_conduit.act_as_user_context(conduit, author):
         diff_id = phlcon_differential.createRawDiff(conduit, empty_diff).id
         fields = {
             "title": "empty revision",

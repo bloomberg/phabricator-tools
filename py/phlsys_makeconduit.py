@@ -103,7 +103,7 @@ def getUriUserCertificate(uri, user, cert):
             if uri is None:
                 raise _makeException(no_uri, arcconfig_no_uri)
 
-    uri = phlsys_conduit.makeConduitUri(uri)
+    uri = phlsys_conduit.make_conduit_uri(uri)
 
     arcrc_no_entry = (
         "no entry for the uri was found in .arcrc, you may add one like so:\n"

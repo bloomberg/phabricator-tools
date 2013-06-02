@@ -17,54 +17,55 @@ import phldef_conduit
 
 
 @contextmanager
-def actAsUserContext(conduit, user):
+def act_as_user_context(conduit, user):
     """Manage the context of impersonating another user.
 
-    Restore the original actAsUserContext value when the context expires or if
-    an exception is raised.  The context manager itself is exception neutral.
+    Restore the original act_as_user_context value when the context expires
+    or if an exception is raised.  The context manager itself is exception
+    neutral.
 
     Usage Example:
         impersonate alice
-        >>> conduit = makePhabTestConduit()
-        >>> with actAsUserContext(conduit, 'alice'):\
+        >>> conduit = make_phab_test_conduit()
+        >>> with act_as_user_context(conduit, 'alice'):\
                 conduit.call("user.whoami")["userName"]
         u'alice'
 
         impersonate bob
-        >>> conduit = makePhabTestConduit()
-        >>> with actAsUserContext(conduit, 'bob'):\
+        >>> conduit = make_phab_test_conduit()
+        >>> with act_as_user_context(conduit, 'bob'):\
                 conduit.call("user.whoami")["userName"]
         u'bob'
 
         impersonate bob, revert to phab when context expires
-        >>> conduit = makePhabTestConduit()
-        >>> with actAsUserContext(conduit, 'bob'): pass
+        >>> conduit = make_phab_test_conduit()
+        >>> with act_as_user_context(conduit, 'bob'): pass
         >>> conduit.call("user.whoami")["userName"]
         u'phab'
 
     """
-    prevUser = conduit.getActAsUser()
+    prevUser = conduit.get_act_as_user()
     try:
-        conduit.setActAsUser(user)
+        conduit.set_act_as_user(user)
         yield conduit
     finally:
         if prevUser:
-            conduit.setActAsUser(prevUser)
+            conduit.set_act_as_user(prevUser)
         else:
-            conduit.clearActAsUser()
+            conduit.clear_act_as_user()
 
 
-def makeConduitUri(uri):
+def make_conduit_uri(uri):
     """Return the expected conduit uri based on the supplied 'uri'
 
     Usage examples:
-        >>> makeConduitUri('http://127.0.0.1')
+        >>> make_conduit_uri('http://127.0.0.1')
         'http://127.0.0.1/api/'
 
-        >>> makeConduitUri('http://127.0.0.1/')
+        >>> make_conduit_uri('http://127.0.0.1/')
         'http://127.0.0.1/api/'
 
-        >>> makeConduitUri('http://127.0.0.1/conduit/')
+        >>> make_conduit_uri('http://127.0.0.1/conduit/')
         'http://127.0.0.1/api/'
 
     :uri: a uri to the Phabricator instance
@@ -76,7 +77,7 @@ def makeConduitUri(uri):
     return expected
 
 
-def makePhabTestConduit():
+def make_phab_test_conduit():
     """Return a new Conduit constructed from phldef_conduit test_uri and phab.
 
     :returns: a new Conduit constructed from phldef_conduit test_uri and phab
@@ -152,18 +153,18 @@ class Conduit():
         if user and certificate:
             self._authenticate()
 
-    def setActAsUser(self,  user):
+    def set_act_as_user(self,  user):
         self._act_as_user = user
         self._conduit["actAsUser"] = self._act_as_user
 
-    def clearActAsUser(self):
+    def clear_act_as_user(self):
         self._act_as_user = None
         del self._conduit["actAsUser"]
 
-    def getActAsUser(self):
+    def get_act_as_user(self):
         return self._act_as_user
 
-    def getUser(self):
+    def get_user(self):
         return self._username
 
     def _authenticate(self):
@@ -278,7 +279,7 @@ class Conduit():
 
 class TestConduit(unittest.TestCase):
 
-    def testCanPing(self):
+    def test_can_ping(self):
         test_data = phldef_conduit
         conduit = Conduit(
             test_data.test_uri,
@@ -286,7 +287,7 @@ class TestConduit(unittest.TestCase):
             test_data.alice.certificate)
         conduit.ping()
 
-    def testCanListReviews(self):
+    def test_can_list_reviews(self):
         test_data = phldef_conduit
         conduit = Conduit(
             test_data.test_uri,
@@ -295,7 +296,7 @@ class TestConduit(unittest.TestCase):
         conduit.ping()
         conduit.call("differential.query")
 
-    def testRaisesOnNonAuth(self):
+    def test_raises_on_non_auth(self):
         test_data = phldef_conduit
         self.assertRaises(
             ConduitException,

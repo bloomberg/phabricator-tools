@@ -60,7 +60,7 @@ def main():
         sys.exit(2)
 
     # perform the ping and display the time taken and result
-    uri = phlsys_conduit.makeConduitUri(args.destination)
+    uri = phlsys_conduit.make_conduit_uri(args.destination)
     print "conduit.ping " + str(uri)
 
     if args.count is not None:

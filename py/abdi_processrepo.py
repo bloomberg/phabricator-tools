@@ -92,7 +92,7 @@ def createDifferentialReview(
     phlgit_checkout.newBranchForceBasedOn(
         clone, review_branch.branch, review_branch.remote_branch)
 
-    with phlsys_conduit.actAsUserContext(conduit, user):
+    with phlsys_conduit.act_as_user_context(conduit, user):
         print "- creating diff"
         diffid = phlcon_differential.createRawDiff(conduit, rawDiff).id
 
@@ -173,7 +173,7 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
 
     d = phlcon_differential
     used_default_test_plan = False
-    with phlsys_conduit.actAsUserContext(conduit, author):
+    with phlsys_conduit.act_as_user_context(conduit, author):
         print "- updating revision " + str(wb.id)
         diffid = d.createRawDiff(conduit, rawDiff).id
         d.updateRevision(
@@ -200,7 +200,7 @@ def land(conduit, wb, gitContext, branch):
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
     d = phlcon_differential
-    with phlsys_conduit.actAsUserContext(conduit, user):
+    with phlsys_conduit.act_as_user_context(conduit, user):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
 
         # compose the commit message
@@ -231,7 +231,7 @@ def land(conduit, wb, gitContext, branch):
     authorPHID = d.query(conduit, [wb.id])[0].authorPHID
     authorUser = phlcon_user.queryUsernamesFromPhids(conduit, [authorPHID])[0]
     # TODO: there's a potential race condition on the author here
-    with phlsys_conduit.actAsUserContext(conduit, authorUser):
+    with phlsys_conduit.act_as_user_context(conduit, authorUser):
         d.close(conduit, wb.id)
     # TODO: we probably want to do a better job of cleaning up locally
 
@@ -313,7 +313,7 @@ def processUpdatedBranch(
                 abdt_workingbranch.pushBadLand(
                     gitContext, review_branch, working_branch)
                 commenter.exception(e)
-                with phlsys_conduit.actAsUserContext(conduit, author_user):
+                with phlsys_conduit.act_as_user_context(conduit, author_user):
                     phlcon_differential.createComment(
                         conduit,
                         working_branch.id,
