@@ -135,8 +135,8 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setupParser("single", abdcmd_single, subparsers)
-    phlsys_subcommand.setupParser("multi", abdcmd_multi, subparsers)
+    phlsys_subcommand.setup_parser("single", abdcmd_single, subparsers)
+    phlsys_subcommand.setup_parser("multi", abdcmd_multi, subparsers)
 
     args = parser.parse_args()
 

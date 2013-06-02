@@ -3,7 +3,7 @@
 import argparse
 
 
-def setupParser(name, module, subparsers):
+def setup_parser(name, module, subparsers):
     doc = module.__doc__
     docSubject = doc.splitlines()[0]
     docEpilog = '\n'.join(doc.splitlines()[1:])

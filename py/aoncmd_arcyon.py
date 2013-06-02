@@ -50,15 +50,16 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setupParser("show-config", aoncmd_showconfig, subparsers)
-    phlsys_subcommand.setupParser("query", aoncmd_query, subparsers)
-    phlsys_subcommand.setupParser("comment", aoncmd_comment, subparsers)
-    phlsys_subcommand.setupParser("raw-diff", aoncmd_rawdiff, subparsers)
-    phlsys_subcommand.setupParser(
+    phlsys_subcommand.setup_parser(
+        "show-config", aoncmd_showconfig, subparsers)
+    phlsys_subcommand.setup_parser("query", aoncmd_query, subparsers)
+    phlsys_subcommand.setup_parser("comment", aoncmd_comment, subparsers)
+    phlsys_subcommand.setup_parser("raw-diff", aoncmd_rawdiff, subparsers)
+    phlsys_subcommand.setup_parser(
         "create-revision", aoncmd_createrevision, subparsers)
-    phlsys_subcommand.setupParser(
+    phlsys_subcommand.setup_parser(
         "update-revision", aoncmd_updaterevision, subparsers)
-    phlsys_subcommand.setupParser("get-diff", aoncmd_getdiff, subparsers)
+    phlsys_subcommand.setup_parser("get-diff", aoncmd_getdiff, subparsers)
 
     args = parser.parse_args()
 
