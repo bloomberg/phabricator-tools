@@ -293,8 +293,16 @@ class TestConduit(unittest.TestCase):
             test_data.TEST_URI,
             test_data.ALICE.user,
             test_data.ALICE.certificate)
-        conduit.ping()
         conduit.call("differential.query")
+
+    def test_can_act_as_user(self):
+        test_data = phldef_conduit
+        conduit = Conduit(
+            test_data.TEST_URI,
+            test_data.PHAB.user,
+            test_data.PHAB.certificate)
+        with act_as_user_context(conduit, test_data.ALICE.user):
+            conduit.call("differential.query")
 
     def test_raises_on_non_auth(self):
         test_data = phldef_conduit
