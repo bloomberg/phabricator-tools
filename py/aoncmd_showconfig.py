@@ -14,7 +14,7 @@ def setupParser(parser):
 
 def process(_):
     print "~/.arcrc:"
-    print phlsys_arcrc.getArcrc()
+    print phlsys_arcrc.get_arcrc()
     print
     print ".arcconfig:"
     print phlsys_arcconfig.get_arcconfig()

@@ -30,7 +30,7 @@ def getUriUserCertificate(uri, user, cert):
         return uri, user, cert
 
     # try to load arcrc, if we can find it
-    arcrc_path = phlsys_arcrc.findArcrc()
+    arcrc_path = phlsys_arcrc.find_arcrc()
     arcrc = None
     try:
         if arcrc_path is not None:
@@ -116,7 +116,7 @@ def getUriUserCertificate(uri, user, cert):
         if arcrc is None:
             raise _makeException(no_user, bad_arcrc)
         if "hosts" in arcrc:
-            host = phlsys_arcrc.getHost(arcrc, uri)
+            host = phlsys_arcrc.get_host(arcrc, uri)
             if host is None:
                 raise _makeException(no_user, arcrc_no_entry)
             user = host.get("user", None)
@@ -134,7 +134,7 @@ def getUriUserCertificate(uri, user, cert):
         if arcrc is None:
             raise _makeException(no_cert, bad_arcrc)
         if "hosts" in arcrc:
-            host = phlsys_arcrc.getHost(arcrc, uri)
+            host = phlsys_arcrc.get_host(arcrc, uri)
             if host is None:
                 raise _makeException(no_cert, arcrc_no_entry)
             cert = host.get("cert", None)

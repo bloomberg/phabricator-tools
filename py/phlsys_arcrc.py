@@ -6,7 +6,7 @@ import os.path
 import phlsys_conduit
 
 
-def findArcrc():
+def find_arcrc():
     home = os.path.expanduser("~")
     path = os.path.join(home, ".arcrc")
     if os.path.isfile(path):
@@ -19,11 +19,11 @@ def load(path):
         return json.load(f)
 
 
-def getArcrc():
-    return load(findArcrc())
+def get_arcrc():
+    return load(find_arcrc())
 
 
-def getHost(arcrc, host):
+def get_host(arcrc, host):
     normalised = phlsys_conduit.makeConduitUri(host)
     return arcrc["hosts"].get(normalised, None)
 
