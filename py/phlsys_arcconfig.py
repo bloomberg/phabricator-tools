@@ -4,15 +4,15 @@ import json
 import os
 
 
-def _parentDir(path):
+def _parent_dir(path):
     return os.path.abspath(os.path.join(path, os.pardir))
 
 
-def findArcconfig():
+def find_arcconfig():
     path = None
     nextpath = os.getcwd()
     while path != nextpath:
-        path, nextpath = nextpath, _parentDir(nextpath)
+        path, nextpath = nextpath, _parent_dir(nextpath)
         config_path = os.path.join(path, ".arcconfig")
         if os.path.isfile(config_path):
             return config_path
@@ -24,8 +24,8 @@ def load(path):
         return json.load(f)
 
 
-def getArcconfig():
-    return load(findArcconfig())
+def get_arcconfig():
+    return load(find_arcconfig())
 
 
 #------------------------------------------------------------------------------

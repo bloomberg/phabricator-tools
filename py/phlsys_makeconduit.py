@@ -41,7 +41,7 @@ def getUriUserCertificate(uri, user, cert):
         pass
 
     # try to load arcconfig, if we can find it
-    arcconfig_path = phlsys_arcconfig.findArcconfig()
+    arcconfig_path = phlsys_arcconfig.find_arcconfig()
     arcconfig = None
     try:
         if arcconfig_path is not None:

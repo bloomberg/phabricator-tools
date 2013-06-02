@@ -17,7 +17,7 @@ def process(_):
     print phlsys_arcrc.getArcrc()
     print
     print ".arcconfig:"
-    print phlsys_arcconfig.getArcconfig()
+    print phlsys_arcconfig.get_arcconfig()
 
 
 #------------------------------------------------------------------------------
