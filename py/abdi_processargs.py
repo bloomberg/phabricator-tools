@@ -48,7 +48,7 @@ def run_once(args, out):
     with phlsys_fs.chDirContext(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
         phlsys_tryloop.tryLoopDelay(
-            lambda: phlsys_subprocess.runCommands("git fetch -p"),
+            lambda: phlsys_subprocess.run_commands("git fetch -p"),
             delays,
             onException=on_exception)
 

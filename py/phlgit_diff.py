@@ -58,7 +58,7 @@ class TestDiff(unittest.TestCase):
     def setUp(self):
         # TODO: make this more portable with shutil etc.
         self.run = phlsys_subprocess.run
-        self.runCommands = phlsys_subprocess.runCommands
+        self.runCommands = phlsys_subprocess.run_commands
         self.path = "phlgit_diff_TestDiff"
         self.runCommands("mkdir " + self.path)
         self.run("git", "init", workingDir=self.path)

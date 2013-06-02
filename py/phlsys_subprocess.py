@@ -104,7 +104,7 @@ def run(*args, **kwargs):
 
 
 # XXX: doesn't handle quotes or backticks
-def runCommands(*commands):
+def run_commands(*commands):
     """Execute the command-line strings descripted by '*commands'.
 
     This is a convenience function which wraps the functionality of
@@ -116,10 +116,10 @@ def runCommands(*commands):
 
     Usage examples:
         Echoing 'hello stdout' to stdout:
-        >>> runCommands('echo hello stdout')
+        >>> run_commands('echo hello stdout')
 
         Echoing 'hello stdout' 'goodbye stdout' to stdout:
-        >>> runCommands('echo hello stdout', 'echo goodbye stdout')
+        >>> run_commands('echo hello stdout', 'echo goodbye stdout')
 
     :*commands: a list of strings corresponding to command-lines
     :returns: None

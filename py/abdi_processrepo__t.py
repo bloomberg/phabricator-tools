@@ -30,7 +30,7 @@ import abdi_processrepo
 
 
 def runCommands(*commands):
-    phlsys_subprocess.runCommands(*commands)
+    phlsys_subprocess.run_commands(*commands)
 
 
 class Test(unittest.TestCase):

@@ -28,7 +28,7 @@ class TestGitClone(unittest.TestCase):
     def testCanCommit(self):
         # TODO: make this more portable with shutil etc.
         run = phlsys_subprocess.run
-        runCommands = phlsys_subprocess.runCommands
+        runCommands = phlsys_subprocess.run_commands
         path = "phlsys_git_TestGitContext"
         runCommands("mkdir " + path)
         run("git", "init", workingDir=path)

@@ -49,11 +49,11 @@ class PhlsysSubprocessTests(unittest.TestCase):
     def test_run_commands(self):
         "Run simple cmds - returns None"
         self.assertEqual(
-            None, phlsys_subprocess.runCommands("echo hello stdout"))
+            None, phlsys_subprocess.run_commands("echo hello stdout"))
 
     def test_run_multi_commands(self):
         "Run multiple cmds - returns None"
-        self.assertEqual(None, phlsys_subprocess.runCommands(
+        self.assertEqual(None, phlsys_subprocess.run_commands(
             "echo hello stdout", "echo goodbye stdout"))
 
     def test_assertion_raised(self):
@@ -61,7 +61,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
         for bad in ("'", '"', '`'):
             self.assertRaises(
                 AssertionError,
-                phlsys_subprocess.runCommands,
+                phlsys_subprocess.run_commands,
                 "echo {0}hello stdout{0}".format(bad))
 
     def test_invalid_return_code_run_commands(self):
@@ -70,7 +70,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
             cmd = "time"
             self.assertRaises(
                 phlsys_subprocess.CalledProcessError,
-                phlsys_subprocess.runCommands,
+                phlsys_subprocess.run_commands,
                 cmd)
             self.assertTrue(cmd in stderr.out)
 
