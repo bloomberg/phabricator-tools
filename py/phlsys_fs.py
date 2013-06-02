@@ -8,7 +8,7 @@ import tempfile
 
 # TODO: write a docstring with doctests when we have a tempdir helper
 @contextmanager
-def chDirContext(newDir):
+def chdir_context(newDir):
     savedPath = os.getcwd()
     os.chdir(newDir)
     try:

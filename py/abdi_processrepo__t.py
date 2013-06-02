@@ -76,11 +76,11 @@ class Test(unittest.TestCase):
         self._devSetAuthorAccount(self.author_account)
         self._phabSetAuthorAccount(phldef_conduit.phab)
 
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             self._createCommitNewFile("README", self.reviewer)
             runCommands("git push origin master")
 
-        with phlsys_fs.chDirContext("phab"):
+        with phlsys_fs.chdir_context("phab"):
             runCommands("git fetch origin -p")
 
         self.conduit = phlsys_conduit.Conduit(
@@ -96,14 +96,14 @@ class Test(unittest.TestCase):
             "http://phabricator.server.fake/")
 
     def _countPhabWorkingBranches(self):
-        with phlsys_fs.chDirContext("phab"):
+        with phlsys_fs.chdir_context("phab"):
             clone = phlsys_git.GitClone(".")
             branches = phlgit_branch.getRemote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         return len(wbList)
 
     def _countPhabBadWorkingBranches(self):
-        with phlsys_fs.chDirContext("phab"):
+        with phlsys_fs.chdir_context("phab"):
             clone = phlsys_git.GitClone(".")
             branches = phlgit_branch.getRemote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
@@ -114,7 +114,7 @@ class Test(unittest.TestCase):
         return numBadBranches
 
     def _phabUpdate(self):
-        with phlsys_fs.chDirContext("phab"):
+        with phlsys_fs.chdir_context("phab"):
             runCommands("git fetch origin -p")
         abdi_processrepo.processUpdatedRepo(
             self.conduit, "phab", "origin", self.mailer)
@@ -131,7 +131,7 @@ class Test(unittest.TestCase):
             self.assertEqual(len(self.mock_sender.mails), emails)
 
     def _phabUpdateWithExpectations(self, total=None, bad=None, emails=None):
-        with phlsys_fs.chDirContext("phab"):
+        with phlsys_fs.chdir_context("phab"):
             runCommands("git fetch origin -p")
 
         # multiple updates should have the same result if we are
@@ -150,25 +150,25 @@ class Test(unittest.TestCase):
         phlgit_config.setUsernameEmail(devClone, account.user, account.email)
 
     def _devResetBranchToMaster(self, branch):
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git reset origin/master --hard")
             runCommands("git push -u origin " + branch + " --force")
 
     def _devCheckoutPushNewBranch(self, branch):
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git checkout -b " + branch)
             runCommands("git push -u origin " + branch)
 
     def _devPushNewFile(
             self, filename, has_reviewer=True, has_plan=True, contents=""):
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             reviewer = self.reviewer if has_reviewer else None
             plan = "testplan" if has_plan else None
             self._createCommitNewFileRaw(filename, plan, reviewer, contents)
             runCommands("git push")
 
     def _getTheOnlyReviewId(self):
-        with phlsys_fs.chDirContext("phab"):
+        with phlsys_fs.chdir_context("phab"):
             clone = phlsys_git.GitClone(".")
             branches = phlgit_branch.getRemote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
@@ -201,7 +201,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
         # check the author on master
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git fetch -p", "git checkout master")
             clone = phlsys_git.GitClone(".")
             head = phlgit_log.getLastCommitHash(clone)
@@ -232,7 +232,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git push origin :ph-review/badBaseWorkflow/blaster")
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
@@ -245,7 +245,7 @@ class Test(unittest.TestCase):
         # self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git push origin :ph-review/noBaseWorkflow")
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
@@ -284,7 +284,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to master and land a conflicting change
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git checkout master")
         self._devCheckoutPushNewBranch("ph-review/emptyMerge/master")
         self._devPushNewFile("NEWFILE")
@@ -293,7 +293,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to original and try to push and land
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git checkout temp/emptyMerge/master")
         self._devCheckoutPushNewBranch("ph-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -301,7 +301,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # 'resolve' by abandoning our change
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git push origin :ph-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
@@ -311,7 +311,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to master and land a conflicting change
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git checkout master")
         self._devCheckoutPushNewBranch("ph-review/mergeConflict/master")
         self._devPushNewFile("NEWFILE", contents="goodbye")
@@ -320,7 +320,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to original and try to push and land
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git checkout temp/mergeConflict/master")
         self._devCheckoutPushNewBranch("ph-review/mergeConflict2/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -329,7 +329,7 @@ class Test(unittest.TestCase):
 
         # 'resolve' by forcing our change through
         print "force our change"
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git fetch -p")
             runCommands("git merge origin/master -s ours")
             runCommands("git push origin ph-review/mergeConflict2/master")
@@ -346,7 +346,7 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # reset the landing branch back to master to resolve
-        with phlsys_fs.chDirContext("developer"):
+        with phlsys_fs.chdir_context("developer"):
             runCommands("git checkout landing_branch")
             runCommands("git reset origin/master --hard")
             runCommands("git push origin landing_branch --force")

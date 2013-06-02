@@ -45,7 +45,7 @@ def run_once(args, out):
         except Exception:
             pass  # XXX: we don't care atm, later log this
 
-    with phlsys_fs.chDirContext(args.repo_path):
+    with phlsys_fs.chdir_context(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
         phlsys_tryloop.tryLoopDelay(
             lambda: phlsys_subprocess.run_commands("git fetch -p"),
