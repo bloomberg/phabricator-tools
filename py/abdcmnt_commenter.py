@@ -62,7 +62,7 @@ class Commenter(object):
         message += " on "
         message += rmu.monospaced(base_name) + "\n"
         message += "deleted " + rmu.monospaced(branch_name) + "\n"
-        message += "git output:\n" + rmu.codeBlock(git_output, lang="text")
+        message += "git output:\n" + rmu.code_block(git_output, lang="text")
         self._createComment(message, silent=True)
 
     def abandonedBranch(self, branch_name):
@@ -76,10 +76,10 @@ class Commenter(object):
         message = "a test plan could not be determined from the commits on "
         message += rmu.monospaced(branch_name) + " "
         message += "so the following message was used:\n"
-        message += rmu.codeBlock(test_plan, lang="text")
+        message += rmu.code_block(test_plan, lang="text")
         message += "for a test plan to be recognised, please use text like "
         message += "the following in your latest commit message: \n"
-        message += rmu.codeBlock("Test Plan:\nmy test plan", lang="text")
+        message += rmu.code_block("Test Plan:\nmy test plan", lang="text")
         message += "as author you may edit the test plan directly by "
         message += "using the 'edit revision' link at the top-right of "
         message += "this review page."
@@ -95,13 +95,13 @@ class Commenter(object):
 
         message += "errors:\n"
         for error in e.errors:
-            message += rmu.codeBlock(str(error), lang="text", isBad=True)
+            message += rmu.code_block(str(error), lang="text", isBad=True)
 
         message += "fields:\n"
-        message += rmu.dictToTable(e.fields)
+        message += rmu.dict_to_table(e.fields)
 
         message += "combined commit message digest:\n"
-        message += rmu.codeBlock(e.digest, lang="text")
+        message += rmu.code_block(e.digest, lang="text")
 
         self._createComment(message)
 
@@ -110,7 +110,7 @@ class Commenter(object):
         message += "\n"
 
         message += "errors:\n"
-        message += rmu.codeBlock(str(e), lang="text", isBad=True)
+        message += rmu.code_block(str(e), lang="text", isBad=True)
 
         self._createComment(message)
 
@@ -119,7 +119,7 @@ class Commenter(object):
         message += "\n"
 
         message += "errors:\n"
-        message += rmu.codeBlock(str(e), lang="text", isBad=True)
+        message += rmu.code_block(str(e), lang="text", isBad=True)
 
         self._createComment(message)
 

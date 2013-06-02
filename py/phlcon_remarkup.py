@@ -1,7 +1,7 @@
 """Helpers to easily generate properly formatted remarkup."""
 
 
-def codeBlock(message, lang=None, name=None, lines=None, isBad=False):
+def code_block(message, lang=None, name=None, lines=None, isBad=False):
     """Return a string code block.
 
     Note that the code block should start on a new line and will insert
@@ -9,15 +9,15 @@ def codeBlock(message, lang=None, name=None, lines=None, isBad=False):
     preceeding blank line then the block will not display correctly.
 
     e.g. good:
-        "hello\\n" + codeBlock("goodbye")
+        "hello\\n" + code_block("goodbye")
 
     e.g. bad:
-        "hello" + codeBlock("goodbye")
+        "hello" + code_block("goodbye")
 
     e.g. bad:
-        "hello\\n\\n" + codeBlock("goodbye")
+        "hello\\n\\n" + code_block("goodbye")
 
-    >>> codeBlock("hello")
+    >>> code_block("hello")
     '\\n```hello```\\n\\n'
 
     :message: the string to be formatted as a code block
@@ -48,22 +48,22 @@ def codeBlock(message, lang=None, name=None, lines=None, isBad=False):
     return block
 
 
-def dictToTable(dictionary):
+def dict_to_table(dictionary):
     """Return a string table from the supplied dictionary.
 
     Note that the table should start on a new line and will insert a blank
     line at the start of itself and at the end.
 
     e.g. good:
-        "hello\n" + dictToTable({"a": "b"})
+        "hello\n" + dict_to_table({"a": "b"})
 
     e.g. bad:
-        "hello" + dictToTable({"a": "b"})
+        "hello" + dict_to_table({"a": "b"})
 
-    >>> dictToTable({"a": "b"})
+    >>> dict_to_table({"a": "b"})
     '\\n| **a** | b |\\n\\n'
 
-    >>> dictToTable({})
+    >>> dict_to_table({})
     ''
 
     :dictionary: the string to be formatted as a code block
