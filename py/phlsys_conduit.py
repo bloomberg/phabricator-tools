@@ -1,7 +1,6 @@
 """Wrapper to call Phabricator's Conduit API"""
 
 from contextlib import contextmanager
-import doctest
 import hashlib
 import json
 import logging
@@ -308,9 +307,6 @@ class TestConduit(unittest.TestCase):
     # TODO: test raises on bad instanceUri
     # TODO: test instanceUri without trailing slash
 
-if __name__ == "__main__":
-    doctest.testmod()
-    unittest.main()
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

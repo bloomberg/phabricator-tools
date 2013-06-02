@@ -513,9 +513,6 @@ Test Plan: I proof-read it and it looked ok
         getCommitMessage(self.conduit, revisionid)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

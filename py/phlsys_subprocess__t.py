@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import unittest
 
 import phlsys_fs
@@ -67,9 +66,6 @@ class PhlsysSubprocessTests(unittest.TestCase):
                 CalledProcessError, runCommands, cmd)
             self.assertTrue(cmd in stderr.out)
 
-if __name__ == "__main__":
-    suite = unittest.TestLoader().loadTestsFromTestCase(PhlsysSubprocessTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

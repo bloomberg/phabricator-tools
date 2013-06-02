@@ -93,9 +93,6 @@ class TestDiff(unittest.TestCase):
         self.runCommands("rm -rf " + self.path)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

@@ -1,7 +1,6 @@
 """Interact with other programs using command-line semantics."""
 
 import collections
-import doctest
 import subprocess
 import sys
 
@@ -131,9 +130,6 @@ def runCommands(*commands):
     for c in commands:
         run(*c.split())
 
-
-if __name__ == "__main__":
-    doctest.testmod()
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

@@ -242,9 +242,6 @@ class TestUser(unittest.TestCase):
         self.assertIsNone(phidDict)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

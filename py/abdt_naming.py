@@ -1,7 +1,6 @@
 """Naming conventions for abd"""
 
 import collections
-import doctest
 import unittest
 
 WB_STATUS_OK = "ok"
@@ -294,10 +293,6 @@ class TestNaming(unittest.TestCase):
         self.assertEqual(w.base, "master")
         self.assertEqual(w.id, "1")
 
-
-if __name__ == "__main__":
-    doctest.testmod()
-    unittest.main()
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
