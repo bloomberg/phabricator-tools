@@ -7,13 +7,9 @@ import phldef_conduit
 import phlsys_conduit
 
 
-def _makeNT(name, *fields):
-    return collections.namedtuple('phlcon_user__' + name, fields)
-
-
-QueryResponse = _makeNT(
-    'QueryResponse',
-    'phid', 'userName', 'realName', 'image', 'uri', 'roles')
+QueryResponse = collections.namedtuple(
+    'phlcon_user__QueryResponse',
+    ['phid', 'userName', 'realName', 'image', 'uri', 'roles'])
 
 
 def isNoSuchUserError(e):
