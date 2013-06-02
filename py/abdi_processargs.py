@@ -47,7 +47,7 @@ def run_once(args, out):
 
     with phlsys_fs.chdir_context(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
-        phlsys_tryloop.tryLoopDelay(
+        phlsys_tryloop.try_loop_delay(
             lambda: phlsys_subprocess.run_commands("git fetch -p"),
             delays,
             onException=on_exception)
@@ -70,7 +70,7 @@ def run_once(args, out):
             args.arcyd_cert,
             https_proxy=args.https_proxy)
 
-    phlsys_tryloop.tryLoopDelay(connect, delays, onException=on_exception)
+    phlsys_tryloop.try_loop_delay(connect, delays, onException=on_exception)
 
     out.display("process (" + args.repo_desc + "): ")
     abdi_processrepo.processUpdatedRepo(

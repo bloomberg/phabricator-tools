@@ -41,8 +41,8 @@ class Test(unittest.TestCase):
         pass
 
     def test_B_ReturnsResult(self):
-        self.assertEqual(1, phlsys_tryloop.tryLoopDelay(lambda: 1, []))
-        self.assertEqual("hi", phlsys_tryloop.tryLoopDelay(lambda: "hi", []))
+        self.assertEqual(1, phlsys_tryloop.try_loop_delay(lambda: 1, []))
+        self.assertEqual("hi", phlsys_tryloop.try_loop_delay(lambda: "hi", []))
 
     def test_C_RetriesEachDelay(self):
 
@@ -58,7 +58,7 @@ class Test(unittest.TestCase):
         numDelays = 4
         delays = [datetime.timedelta() for _ in range(0, numDelays)]
         try:
-            phlsys_tryloop.tryLoopDelay(failer, delays, TestException)
+            phlsys_tryloop.try_loop_delay(failer, delays, TestException)
         except TestException:
             pass
         else:
@@ -80,7 +80,7 @@ class Test(unittest.TestCase):
         numDelays = 4
         delays = [datetime.timedelta() for _ in range(0, numDelays)]
         try:
-            phlsys_tryloop.tryLoopDelay(failer, delays, TestException)
+            phlsys_tryloop.try_loop_delay(failer, delays, TestException)
         except TypeError:
             pass
         else:
@@ -109,7 +109,7 @@ class Test(unittest.TestCase):
         numDelays = 4
         delays = [datetime.timedelta() for _ in range(0, numDelays)]
         try:
-            phlsys_tryloop.tryLoopDelay(
+            phlsys_tryloop.try_loop_delay(
                 failer, delays, onException=on_exception)
         except TestException:
             pass

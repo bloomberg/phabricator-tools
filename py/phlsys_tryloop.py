@@ -4,7 +4,8 @@ import itertools
 import time
 
 
-def tryLoopDelay(toTry, delays, exceptionToIgnore=Exception, onException=None):
+def try_loop_delay(
+        toTry, delays, exceptionToIgnore=Exception, onException=None):
     """Return the value returned by the supplied 'toTry' operation.
 
     If 'toTry()' raises an 'exceptionToIgnore' then do 'onException(e, delay)'
