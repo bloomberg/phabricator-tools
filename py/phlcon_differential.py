@@ -298,14 +298,14 @@ class Test(unittest.TestCase):
     def setUp(self):
         test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
-            test_data.test_uri,
-            test_data.alice.user,
-            test_data.alice.certificate)
+            test_data.TEST_URI,
+            test_data.ALICE.user,
+            test_data.ALICE.certificate)
 
         self.reviewerConduit = phlsys_conduit.Conduit(
-            test_data.test_uri,
-            test_data.bob.user,
-            test_data.bob.certificate)
+            test_data.TEST_URI,
+            test_data.BOB.user,
+            test_data.BOB.certificate)
 
     def testNullQuery(self):
         query(self.conduit)

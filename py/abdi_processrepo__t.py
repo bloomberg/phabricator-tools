@@ -37,8 +37,8 @@ class Test(unittest.TestCase):
 
     def __init__(self, data):
         super(Test, self).__init__(data)
-        self.reviewer = phldef_conduit.alice.user
-        self.author_account = phldef_conduit.bob
+        self.reviewer = phldef_conduit.ALICE.user
+        self.author_account = phldef_conduit.BOB
         self._saved_path = None
         self.conduit = None
         self.mailer = None
@@ -74,7 +74,7 @@ class Test(unittest.TestCase):
         )
 
         self._devSetAuthorAccount(self.author_account)
-        self._phabSetAuthorAccount(phldef_conduit.phab)
+        self._phabSetAuthorAccount(phldef_conduit.PHAB)
 
         with phlsys_fs.chdir_context("developer"):
             self._createCommitNewFile("README", self.reviewer)
@@ -84,9 +84,9 @@ class Test(unittest.TestCase):
             runCommands("git fetch origin -p")
 
         self.conduit = phlsys_conduit.Conduit(
-            phldef_conduit.test_uri,
-            phldef_conduit.phab.user,
-            phldef_conduit.phab.certificate)
+            phldef_conduit.TEST_URI,
+            phldef_conduit.PHAB.user,
+            phldef_conduit.PHAB.certificate)
 
         self.mock_sender = phlmail_mocksender.MailSender()
         self.mailer = abdmail_mailer.Mailer(
@@ -363,7 +363,7 @@ class Test(unittest.TestCase):
         reviewid = self._getTheOnlyReviewId()
         with phlsys_conduit.act_as_user_context(
                 self.conduit,
-                phldef_conduit.alice.user) as conduit:
+                phldef_conduit.ALICE.user) as conduit:
             phlcon_differential.create_comment(
                 conduit,
                 reviewid,
@@ -382,7 +382,7 @@ class Test(unittest.TestCase):
         reviewid = self._getTheOnlyReviewId()
         with phlsys_conduit.act_as_user_context(
                 self.conduit,
-                phldef_conduit.phab.user) as conduit:
+                phldef_conduit.PHAB.user) as conduit:
             phlcon_differential.create_comment(
                 conduit,
                 reviewid,

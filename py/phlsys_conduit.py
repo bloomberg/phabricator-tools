@@ -85,9 +85,9 @@ def make_phab_test_conduit():
     """
     test_data = phldef_conduit
     return Conduit(
-        test_data.test_uri,
-        test_data.phab.user,
-        test_data.phab.certificate)
+        test_data.TEST_URI,
+        test_data.PHAB.user,
+        test_data.PHAB.certificate)
 
 
 class ConduitException(Exception):
@@ -129,7 +129,7 @@ SESSION_ERROR = "ERR-INVALID-SESSION"
 class Conduit():
 
     # TODO: make this configurable
-    testUri = phldef_conduit.test_uri
+    testUri = phldef_conduit.TEST_URI
 
     def __init__(
             self,
@@ -282,17 +282,17 @@ class TestConduit(unittest.TestCase):
     def test_can_ping(self):
         test_data = phldef_conduit
         conduit = Conduit(
-            test_data.test_uri,
-            test_data.alice.user,
-            test_data.alice.certificate)
+            test_data.TEST_URI,
+            test_data.ALICE.user,
+            test_data.ALICE.certificate)
         conduit.ping()
 
     def test_can_list_reviews(self):
         test_data = phldef_conduit
         conduit = Conduit(
-            test_data.test_uri,
-            test_data.alice.user,
-            test_data.alice.certificate)
+            test_data.TEST_URI,
+            test_data.ALICE.user,
+            test_data.ALICE.certificate)
         conduit.ping()
         conduit.call("differential.query")
 
@@ -301,9 +301,9 @@ class TestConduit(unittest.TestCase):
         self.assertRaises(
             ConduitException,
             Conduit,
-            test_data.test_uri,
+            test_data.TEST_URI,
             "dontcreateausercalledthis",
-            test_data.alice.certificate)
+            test_data.ALICE.certificate)
 
     # TODO: test re-authentication when the token expires
     # TODO: need to test something that requires authentication

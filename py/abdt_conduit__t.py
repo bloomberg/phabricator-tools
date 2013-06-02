@@ -19,13 +19,13 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
-            self.test_data.test_uri,
-            self.test_data.phab.user,
-            self.test_data.phab.certificate)
+            self.test_data.TEST_URI,
+            self.test_data.PHAB.user,
+            self.test_data.PHAB.certificate)
 
     def testCreateEmptyRevision(self):
         revision_id = abdt_conduit.createEmptyRevision(
-            self.conduit, self.test_data.alice.user)
+            self.conduit, self.test_data.ALICE.user)
 
         revision_list = phlcon_differential.query(self.conduit, [revision_id])
         self.assertEqual(len(revision_list), 1)

@@ -183,15 +183,15 @@ class TestUser(unittest.TestCase):
     def __init__(self, data):
         super(TestUser, self).__init__(data)
         self.conduit = None
-        self.test_user = phldef_conduit.alice.user
-        self.test_email = phldef_conduit.alice.email
+        self.test_user = phldef_conduit.ALICE.user
+        self.test_email = phldef_conduit.ALICE.email
 
     def setUp(self):
         test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
-            test_data.test_uri,
-            test_data.alice.user,
-            test_data.alice.certificate)
+            test_data.TEST_URI,
+            test_data.ALICE.user,
+            test_data.ALICE.certificate)
 
     def testAliceEmail(self):
         users = query_users_from_emails(self.conduit, [self.test_email])
