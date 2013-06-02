@@ -177,7 +177,8 @@ def makeRevisionsFromHashes(clone, hashes):
     :returns: a list of 'phlgit_log__Revision'
 
     """
-    return [makeRevisionFromHash(clone, h) for h in hashes]
+    revisions = [makeRevisionFromHash(clone, h) for h in hashes]
+    return revisions
 
 
 def getAuthorNamesEmailsFromHashes(clone, hashes):
@@ -218,18 +219,17 @@ class TestLog(unittest.TestCase):
 
     def setUp(self):
         # TODO: make this more portable with shutil etc.
-        self.run = phlsys_subprocess.run
-        self.runCommands = phlsys_subprocess.run_commands
         self.path = "phlgit_diff_TestDiff"
-        self.runCommands("mkdir " + self.path)
-        self.run("git", "init", workingDir=self.path)
+        phlsys_subprocess.run_commands("mkdir " + self.path)
+        phlsys_subprocess.run("git", "init", workingDir=self.path)
         self.clone = phlsys_git.GitClone(self.path)
         self.authorName = "No one"
         self.authorEmail = "noone@nowhere.com"
         self.author = self.authorName + " <" + self.authorEmail + ">"
 
     def _createCommitNewFile(self, filename, subject=None, message=None):
-        self.runCommands("touch " + os.path.join(self.path, filename))
+        phlsys_subprocess.run_commands(
+            "touch " + os.path.join(self.path, filename))
         self.clone.call("add", filename)
         if not subject:
             if message:
@@ -311,7 +311,7 @@ class TestLog(unittest.TestCase):
         self.assertEqual(committers[0], (self.authorName, self.authorEmail))
 
     def tearDown(self):
-        self.runCommands("rm -rf " + self.path)
+        phlsys_subprocess.run_commands("rm -rf " + self.path)
 
 
 #------------------------------------------------------------------------------

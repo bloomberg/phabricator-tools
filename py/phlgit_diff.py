@@ -57,15 +57,14 @@ class TestDiff(unittest.TestCase):
 
     def setUp(self):
         # TODO: make this more portable with shutil etc.
-        self.run = phlsys_subprocess.run
-        self.runCommands = phlsys_subprocess.run_commands
         self.path = "phlgit_diff_TestDiff"
-        self.runCommands("mkdir " + self.path)
-        self.run("git", "init", workingDir=self.path)
+        phlsys_subprocess.run_commands("mkdir " + self.path)
+        phlsys_subprocess.run("git", "init", workingDir=self.path)
         self.clone = phlsys_git.GitClone(self.path)
 
     def _createCommitNewFile(self, filename):
-        self.runCommands("touch " + os.path.join(self.path, filename))
+        phlsys_subprocess.run_commands(
+            "touch " + os.path.join(self.path, filename))
         self.clone.call("add", filename)
         self.clone.call("commit", "-a", "-m", filename)
 
@@ -90,7 +89,7 @@ class TestDiff(unittest.TestCase):
             parseFilenamesFromRawDiff(rawDiff3))
 
     def tearDown(self):
-        self.runCommands("rm -rf " + self.path)
+        phlsys_subprocess.run_commands("rm -rf " + self.path)
 
 
 #------------------------------------------------------------------------------

@@ -43,11 +43,9 @@ class TestLog(unittest.TestCase):
 
     def setUp(self):
         # TODO: make this more portable with shutil etc.
-        self.run = phlsys_subprocess.run
-        self.runCommands = phlsys_subprocess.run_commands
         self.path = "phlgit_diff_TestDiff"
-        self.runCommands("mkdir " + self.path)
-        self.run("git", "init", workingDir=self.path)
+        phlsys_subprocess.run_commands("mkdir " + self.path)
+        phlsys_subprocess.run("git", "init", workingDir=self.path)
         self.clone = phlsys_git.GitClone(self.path)
 
     def testCanSetAndGetUsernameEmail(self):
@@ -70,7 +68,7 @@ class TestLog(unittest.TestCase):
         self.assertEqual(getEmail(self.clone), testEmail2)
 
     def tearDown(self):
-        self.runCommands("rm -rf " + self.path)
+        phlsys_subprocess.run_commands("rm -rf " + self.path)
 
 
 #------------------------------------------------------------------------------

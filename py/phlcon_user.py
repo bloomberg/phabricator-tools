@@ -140,8 +140,8 @@ def queryUsernamesFromPhids(conduit, phids):
     :returns: a list of strings corresponding to Phabricator usernames
 
     """
-    users = queryUsersFromPhids(conduit, phids)
-    return [u.userName for u in users]
+    usernames = [u.userName for u in queryUsersFromPhids(conduit, phids)]
+    return usernames
 
 
 def makeUsernamePhidDict(conduit, usernames):
