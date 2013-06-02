@@ -5,7 +5,8 @@ set -e # exit immediately on error
 # TODO: find workaround for borked import detection
 # TODO: fix phlcon_differential.createDiff() to not have 16 params
 pychecker \
-    --quiet --only --no-import --exec --constant1 --initattr \
+    --quiet --only --no-import --exec --constant1 --initattr --changetypes \
+    --no-deprecated \
     --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
     py/*.py
 
