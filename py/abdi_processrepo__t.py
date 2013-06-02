@@ -171,10 +171,10 @@ class Test(unittest.TestCase):
 
     def _actOnTheOnlyReview(self, user, action):
         # accept the review
-        id = self._getTheOnlyReviewId()
+        reviewid = self._getTheOnlyReviewId()
         with phlsys_conduit.actAsUserContext(self.conduit, user):
             phlcon_differential.createComment(
-                self.conduit, id, action=action)
+                self.conduit, reviewid, action=action)
 
     def _acceptTheOnlyReview(self):
         self._actOnTheOnlyReview(self.reviewer, "accept")
@@ -353,13 +353,13 @@ class Test(unittest.TestCase):
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
 
-        id = self._getTheOnlyReviewId()
+        reviewid = self._getTheOnlyReviewId()
         with phlsys_conduit.actAsUserContext(
                 self.conduit,
                 phldef_conduit.alice.user) as conduit:
             phlcon_differential.createComment(
                 conduit,
-                id,
+                reviewid,
                 action=phlcon_differential.ACTION_CLAIM)
 
         self._devPushNewFile("NEWFILE2")
@@ -372,13 +372,13 @@ class Test(unittest.TestCase):
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=0)
 
-        id = self._getTheOnlyReviewId()
+        reviewid = self._getTheOnlyReviewId()
         with phlsys_conduit.actAsUserContext(
                 self.conduit,
                 phldef_conduit.phab.user) as conduit:
             phlcon_differential.createComment(
                 conduit,
-                id,
+                reviewid,
                 action=phlcon_differential.ACTION_CLAIM)
 
         self._acceptTheOnlyReview()
