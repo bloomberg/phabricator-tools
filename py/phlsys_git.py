@@ -25,7 +25,7 @@ class GitClone():
 
 class TestGitClone(unittest.TestCase):
 
-    def testCanCommit(self):
+    def test_can_commit(self):
         # TODO: make this more portable with shutil etc.
         run = phlsys_subprocess.run
         runCommands = phlsys_subprocess.run_commands
