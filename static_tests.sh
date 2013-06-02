@@ -1,9 +1,13 @@
 # do tests in order of time to execute
 set -e # exit immediately on error
 
-# pychecker seems to be mostly wrong, disabled for now
 ## please install pychecker with sudo apt-get install pychecker
-## pychecker --quiet --only py/*.py
+# TODO: find workaround for borked import detection
+# TODO: fix phlcon_differential.createDiff() to not have 16 params
+pychecker \
+    --quiet --only --no-import --exec --constant1 \
+    --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
+    py/*.py
 
 flake8 bin/*
 flake8 py/*.py
