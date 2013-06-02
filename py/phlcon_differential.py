@@ -86,25 +86,25 @@ class MessageFields(object):
     cc_phids = "ccPHIDs"
 
 
-def _makeNT(name, *fields):
+def _make_nt(name, *fields):
     return collections.namedtuple(
         'phlcon_differential__' + name,
         fields)
 
 
-def _copyDictNoNones(d):
+def _copy_dict_no_nones(d):
     clean = {}
     clean.update((k, v) for k, v in d.iteritems() if v is not None)
     return clean
 
 
-def _ensureKeys(d, *keys):
+def _ensure_keys(d, *keys):
     for k in keys:
         if k not in d:
             d[k] = None
 
 
-def _ensureKeysDefault(dic, default, *keys):
+def _ensure_keys_default(dic, default, *keys):
     """Ensure that the dictionary has the supplied keys.
 
     Initialiase them with a deepcopy of the supplied 'default' if not.
@@ -119,20 +119,20 @@ def _ensureKeysDefault(dic, default, *keys):
         if k not in dic:
             dic[k] = copy.deepcopy(default)
 
-CreateRawDiffResponse = _makeNT('CreateRawDiffResponse', 'id', 'uri')
-GetDiffIdResponse = _makeNT(
+CreateRawDiffResponse = _make_nt('CreateRawDiffResponse', 'id', 'uri')
+GetDiffIdResponse = _make_nt(
     'GetDiffIdResponse',
     'parent', 'properties', 'sourceControlSystem', 'sourceControlPath',
     'dateCreated', 'dateModified', 'lintStatus', 'bookmark', 'changes',
     'revisionID', 'sourceControlBaseRevision', 'branch',
     'projectName', 'unitStatus', 'creationMethod', 'id', 'description')
-ParseCommitMessageResponse = _makeNT(
+ParseCommitMessageResponse = _make_nt(
     'ParseCommitMessageResponse',
     'fields', 'errors')
-RevisionResponse = _makeNT(
+RevisionResponse = _make_nt(
     'RevisionResponse',
     'revisionid', 'uri')
-QueryResponse = _makeNT(
+QueryResponse = _make_nt(
     'QueryResponse',
     'authorPHID', 'status', 'phid', 'testPlan', 'title', 'commits',
     'diffs', 'uri', 'ccs', 'dateCreated', 'lineCount', 'branch', 'reviewers',
@@ -140,12 +140,12 @@ QueryResponse = _makeNT(
     'auxiliary')
 
 
-def createRawDiff(conduit, diff):
+def create_raw_diff(conduit, diff):
     response = conduit.call("differential.createrawdiff", {"diff": diff})
     return CreateRawDiffResponse(**response)
 
 
-def createDiff(
+def create_diff(
         conduit,
         changes_dict,
         source_machine,
@@ -162,7 +162,7 @@ def createDiff(
         author_phid=None,
         arcanist_project=None,
         repository_uuid=None):
-    """@todo: Docstring for createDiff
+    """@todo: Docstring for create_diff
 
     :conduit: conduit to operate on
     :changes_dict: changes response, 'changes' field of GetDiffResponse
@@ -204,7 +204,7 @@ def createDiff(
         "arcanistProject": arcanist_project,
         "repositoryUUID": repository_uuid,
     }
-    d = _copyDictNoNones(d)
+    d = _copy_dict_no_nones(d)
     response = conduit.call("differential.creatediff", d)
     return response
 
@@ -212,27 +212,27 @@ def createDiff(
 # XXX: it might be better to narrow the contract of this if the conduit
 #      API is going to keep changing, don't want to fixup based on
 #      changes that don't matter
-def _getDiff(conduit, revision_id=None, diff_id=None):
+def _get_diff(conduit, revision_id=None, diff_id=None):
     d = {"revision_id": revision_id, "diff_id": diff_id}
-    d = _copyDictNoNones(d)
+    d = _copy_dict_no_nones(d)
     response = conduit.call("differential.getdiff", d)
     response["id"] = int(response["id"])
     return GetDiffIdResponse(**response)
 
 
-def parseCommitMessage(conduit, corpus, partial=None):
+def parse_commit_message(conduit, corpus, partial=None):
     d = {"corpus": corpus, "partial": partial}
-    d = _copyDictNoNones(d)
+    d = _copy_dict_no_nones(d)
     p = ParseCommitMessageResponse(
         **conduit.call("differential.parsecommitmessage", d))
-    _ensureKeysDefault(
+    _ensure_keys_default(
         p.fields, "", "summary", "testPlan", "title")
-    _ensureKeysDefault(
+    _ensure_keys_default(
         p.fields, [], "reviewerPHIDs")
     return p
 
 
-def createRevision(conduit, diffId, fields):
+def create_revision(conduit, diffId, fields):
     d = {"diffid": diffId, "fields": fields}
     return RevisionResponse(
         **conduit.call("differential.createrevision", d))
@@ -242,22 +242,22 @@ def query(
         conduit,
         ids=None):  # list(uint)
     # TODO: typechecking
-    d = _copyDictNoNones({'ids': ids})
+    d = _copy_dict_no_nones({'ids': ids})
     response = conduit.call("differential.query", d)
     query_response_list = []
     for r in response:
-        _ensureKeys(r, "sourcePath", "auxiliary")
+        _ensure_keys(r, "sourcePath", "auxiliary")
         r["id"] = int(r["id"])
         r["status"] = int(r["status"])
         query_response_list.append(QueryResponse(**r))
     return query_response_list
 
 
-def getRevisionStatus(conduit, id):
+def get_revision_status(conduit, id):
     return query(conduit, [int(id)])[0].status
 
 
-def updateRevision(conduit, id, diffid, fields, message):
+def update_revision(conduit, id, diffid, fields, message):
     d = {
         "id": id, "diffid": diffid,
         "fields": fields, "message": message
@@ -267,18 +267,19 @@ def updateRevision(conduit, id, diffid, fields, message):
     return RevisionResponse(**response)
 
 
-def createComment(conduit, revisionId, message=None, action=None, silent=None):
+def create_comment(
+        conduit, revisionId, message=None, action=None, silent=None):
     d = {
         "revision_id": revisionId, "message": message,
         "action": action, "silent": silent
     }
-    d = _copyDictNoNones(d)
+    d = _copy_dict_no_nones(d)
     response = conduit.call('differential.createcomment', d)
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
 
 
-def getCommitMessage(conduit, revision_id):
+def get_commit_message(conduit, revision_id):
     d = {"revision_id": revision_id}
     return conduit.call('differential.getcommitmessage', d)
 
@@ -320,7 +321,7 @@ class Test(unittest.TestCase):
         message += summary + "\n"
         message += "Test Plan: " + test_plan + "\n"
         message += "Reviewers: " + reviewers + "\n"
-        parse_response = parseCommitMessage(self.conduit, message)
+        parse_response = parse_commit_message(self.conduit, message)
         self.assertEqual(parse_response.fields["title"], title)
         self.assertEqual(parse_response.fields["summary"], summary)
         self.assertEqual(parse_response.fields["testPlan"], test_plan)
@@ -357,15 +358,15 @@ index d4711bb..1c634f5 100644
 +another line
 """
 
-        diff_response = createRawDiff(self.conduit, diff)
+        diff_response = create_raw_diff(self.conduit, diff)
 
-        get_diff_response = _getDiff(self.conduit, diff_id=diff_response.id)
+        get_diff_response = _get_diff(self.conduit, diff_id=diff_response.id)
         self.assertEqual(get_diff_response.id, diff_response.id)
 
-        parse_response = parseCommitMessage(self.conduit, message)
+        parse_response = parse_commit_message(self.conduit, message)
         self.assertEqual(len(parse_response.errors), 0)
 
-        create_response = createRevision(
+        create_response = create_revision(
             self.conduit, diff_response.id, parse_response.fields)
 
         query_response_list = query(self.conduit, [create_response.revisionid])
@@ -374,9 +375,9 @@ index d4711bb..1c634f5 100644
         self.assertEqual(query_response_list[0].id, create_response.revisionid)
         self.assertEqual(query_response_list[0].status, REVISION_NEEDS_REVIEW)
 
-        diff2_response = createRawDiff(self.conduit, diff2)
+        diff2_response = create_raw_diff(self.conduit, diff2)
 
-        update_response = updateRevision(
+        update_response = update_revision(
             self.conduit,
             create_response.revisionid, diff2_response.id,
             parse_response.fields, "updated with new diff")
@@ -384,7 +385,7 @@ index d4711bb..1c634f5 100644
             update_response.revisionid, create_response.revisionid)
         self.assertEqual(update_response.uri, create_response.uri)
 
-        comment_response = createComment(
+        comment_response = create_comment(
             self.reviewerConduit, create_response.revisionid, action="accept")
         self.assertEqual(
             comment_response.revisionid, create_response.revisionid)
@@ -421,12 +422,12 @@ add a line to README
 
 Test Plan: I proof-read it and it looked ok
 """
-        raw_diff_response = createRawDiff(self.conduit, diff)
-        get_diff_response = _getDiff(
+        raw_diff_response = create_raw_diff(self.conduit, diff)
+        get_diff_response = _get_diff(
             self.conduit,
             diff_id=raw_diff_response.id)
 
-        diff_response = createDiff(
+        diff_response = create_diff(
             self.conduit,
             changes_dict=get_diff_response.changes,
             source_machine="test_machine",
@@ -444,27 +445,27 @@ Test Plan: I proof-read it and it looked ok
             arcanist_project="project",
             repository_uuid=None)
 
-        parse_response = parseCommitMessage(self.conduit, message)
+        parse_response = parse_commit_message(self.conduit, message)
         self.assertEqual(len(parse_response.errors), 0)
 
-        # rely on createRevision to raise if we get anything seriously wrong
-        createRevision(
+        # rely on create_revision to raise if we get anything seriously wrong
+        create_revision(
             self.conduit, diff_response["diffid"], parse_response.fields)
 
     def _createRevision(self, title):
         diff = """diff --git a/ b/"""
         message = title + "\n\ntest plan: no test plan"
-        diff_response = createRawDiff(self.conduit, diff)
-        parse_response = parseCommitMessage(self.conduit, message)
-        create_response = createRevision(
+        diff_response = create_raw_diff(self.conduit, diff)
+        parse_response = parse_commit_message(self.conduit, message)
+        create_response = create_revision(
             self.conduit, diff_response.id, parse_response.fields)
         return create_response.revisionid
 
     def _authorCommentAction(self, revisionid, action):
-        createComment(self.conduit, revisionid, action=action)
+        create_comment(self.conduit, revisionid, action=action)
 
     def _reviewCommentAction(self, revisionid, action):
-        createComment(self.reviewerConduit, revisionid, action=action)
+        create_comment(self.reviewerConduit, revisionid, action=action)
 
     def _getState(self, revisionid):
         return query(self.conduit, [revisionid])[0].status
@@ -494,18 +495,18 @@ Test Plan: I proof-read it and it looked ok
     def testUpdateNoFields(self):
         revisionid = self._createRevision("testUpdateNoFields")
         diff = """diff --git a/ b/"""
-        diff_response = createRawDiff(self.conduit, diff)
-        updateRevision(
+        diff_response = create_raw_diff(self.conduit, diff)
+        update_revision(
             self.conduit, revisionid, diff_response.id, [], "update")
 
     def testUpdateStrangeFields(self):
         revisionid = self._createRevision("testUpdateStrangeFields")
         message = "test\n\nmeh: blah\nstrange: blah\n123: blah\ntest plan: hmm"
         diff = """diff --git a/ b/"""
-        diff_response = createRawDiff(self.conduit, diff)
-        parse_response = parseCommitMessage(self.conduit, message)
+        diff_response = create_raw_diff(self.conduit, diff)
+        parse_response = parse_commit_message(self.conduit, message)
         print str(parse_response.fields)
-        updateRevision(
+        update_revision(
             self.conduit,
             revisionid,
             diff_response.id,
@@ -515,7 +516,7 @@ Test Plan: I proof-read it and it looked ok
 
     def testCanGetCommitMessage(self):
         revisionid = self._createRevision("testUpdateStrangeFields")
-        getCommitMessage(self.conduit, revisionid)
+        get_commit_message(self.conduit, revisionid)
 
 
 #------------------------------------------------------------------------------

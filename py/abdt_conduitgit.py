@@ -53,14 +53,14 @@ def getFieldsFromCommitHash(conduit, clone, commit_hash, defaultTestPlan=None):
     message = revision.subject + "\n"
     message += "\n"
     message += revision.message + "\n"
-    parsed = phlcon_differential.parseCommitMessage(conduit, message)
+    parsed = phlcon_differential.parse_commit_message(conduit, message)
 
     testPlan = "testPlan"
     if defaultTestPlan is not None:
         if parsed.fields is not None:
             if not testPlan in parsed.fields or not parsed.fields[testPlan]:
                 message += "Test Plan:\n" + defaultTestPlan
-                parsed = phlcon_differential.parseCommitMessage(
+                parsed = phlcon_differential.parse_commit_message(
                     conduit, message)
 
     return parsed

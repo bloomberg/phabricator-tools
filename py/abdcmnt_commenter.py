@@ -86,7 +86,7 @@ class Commenter(object):
         self._createComment(message, silent=True)
 
     def _createComment(self, message, silent=False):
-        phlcon_differential.createComment(
+        phlcon_differential.create_comment(
             self._conduit, self._revision_id, message, silent=silent)
 
     def _commitMessageParseException(self, e):

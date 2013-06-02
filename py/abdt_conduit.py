@@ -8,7 +8,7 @@ def createEmptyRevision(conduit, author):
     empty_diff = "diff --git a/ b/"
 
     with phlsys_conduit.act_as_user_context(conduit, author):
-        diff_id = phlcon_differential.createRawDiff(conduit, empty_diff).id
+        diff_id = phlcon_differential.create_raw_diff(conduit, empty_diff).id
         fields = {
             "title": "empty revision",
             "testPlan": "UNTESTED",
@@ -20,7 +20,8 @@ def createEmptyRevision(conduit, author):
         # if ccs:
         #     assert not isinstance(ccs, types.StringTypes)
         #     fields["ccs"] = ccs
-        revision = phlcon_differential.createRevision(conduit, diff_id, fields)
+        revision = phlcon_differential.create_revision(
+            conduit, diff_id, fields)
         return revision.revisionid
 
 

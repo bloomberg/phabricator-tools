@@ -94,10 +94,10 @@ def createDifferentialReview(
 
     with phlsys_conduit.act_as_user_context(conduit, user):
         print "- creating diff"
-        diffid = phlcon_differential.createRawDiff(conduit, rawDiff).id
+        diffid = phlcon_differential.create_raw_diff(conduit, rawDiff).id
 
         print "- creating revision"
-        review = phlcon_differential.createRevision(
+        review = phlcon_differential.create_revision(
             conduit, diffid, parsed.fields)
         print "- created " + str(review.revisionid)
 
@@ -139,7 +139,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
         wb = updateInReview(conduit, wb, gitContext, rb, author)
     elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
         d = phlcon_differential
-        status = d.getRevisionStatus(conduit, wb.id)
+        status = d.get_revision_status(conduit, wb.id)
         try:
             print "try updating bad branch"
             verifyReviewBranchBase(gitContext, reviewBranch)
@@ -149,7 +149,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
 
     if not abdt_naming.isStatusBad(wb):
         d = phlcon_differential
-        status = d.getRevisionStatus(conduit, wb.id)
+        status = d.get_revision_status(conduit, wb.id)
         if int(status) == d.REVISION_ACCEPTED:
             verifyReviewBranchBase(gitContext, reviewBranch)
             land(conduit, wb, gitContext, reviewBranch.branch)
@@ -175,8 +175,8 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
     used_default_test_plan = False
     with phlsys_conduit.act_as_user_context(conduit, author):
         print "- updating revision " + str(wb.id)
-        diffid = d.createRawDiff(conduit, rawDiff).id
-        d.updateRevision(
+        diffid = d.create_raw_diff(conduit, rawDiff).id
+        d.update_revision(
             conduit, wb.id, diffid, [], "update")
 
     wb = abdt_workingbranch.pushStatus(
@@ -204,7 +204,7 @@ def land(conduit, wb, gitContext, branch):
         phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
 
         # compose the commit message
-        message = d.getCommitMessage(conduit, wb.id)
+        message = d.get_commit_message(conduit, wb.id)
 
         try:
             with phlsys_fs.nostd():
@@ -314,7 +314,7 @@ def processUpdatedBranch(
                     gitContext, review_branch, working_branch)
                 commenter.exception(e)
                 with phlsys_conduit.act_as_user_context(conduit, author_user):
-                    phlcon_differential.createComment(
+                    phlcon_differential.create_comment(
                         conduit,
                         working_branch.id,
                         action=phlcon_differential.ACTION_RETHINK)
