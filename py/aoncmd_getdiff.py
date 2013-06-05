@@ -32,6 +32,17 @@ output formats:
             "currentPath": "NEWFILE",
             "delLines": "0",
             ...
+
+    --format-unified
+        diff -uNard a/ b/
+        +++ a/foo.c
+        --- b/foo.c
+        @@ 1,3 +0,0 @@
+         some
+        +content
+        -contnet
+         file
+        ...
 """
 
 import json
@@ -87,6 +98,11 @@ def setupParser(parser):
         help='print json representation of the raw response from '
              'the server.')
     output.add_argument(
+        '--format-unified',
+        action='store_true',
+        help='outputs a unified diff that can be used to apply the changes'
+             'locally to the working copy')
+    output.add_argument(
         '--format-strings',
         '--fs',
         type=str,
@@ -119,6 +135,8 @@ def process(args):
         pprint.pprint(result)
     elif args.format_json:
         print json.dumps(result, sort_keys=True, indent=2)
+    elif args.format_unified:
+        print unified_diff(result)
     elif args.format_strings:
         fmt = args.format_strings[0]
         fmt_change = args.format_strings[1]
@@ -135,6 +153,16 @@ def process(args):
         for path in paths:
             print path
 
+
+def unified_diff(result):
+    for change in result["changes"]:
+        print '--- ' + change["oldPath"]
+        print '+++ ' + change["currentPath"]
+        for hunk in change["hunks"]:
+            hunk_format = "@@ -{oldOffset},{oldLength}"
+            hunk_format += " +{newOffset},{newLength} @@"
+            print hunk_format.format(**hunk)
+            print hunk["corpus"]
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
