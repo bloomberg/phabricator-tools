@@ -15,7 +15,7 @@ Here are all the end-products you might wish to use from this repository,
 it's probably most convienient to create a symbolic link to them or add
 the bin directory to $PATH.
 
-* `arcyd` - the Arcanist branch-watching daemon
+* `arcyd` - the Arcanist Git branch-watching daemon
 * `phab-ping` - a simple tool to check the responsiveness of your Phabricator
 * `arcyon` - a wrapper around Conduit API to aid scripting
  
@@ -44,7 +44,7 @@ so it's important that we can have one up and running easily, these artifacts
 enable you to create a new instance of Phabricator in a single step using
 Vagrant and Puppet.
 
-Please see [README](https://github.com/bloomberg/phabricator-tools/blob/master/LICENSE)
+Please see [README](https://github.com/bloomberg/phabricator-tools/blob/master/README.md#install-phabricator-in-one-step)
 for quickstart instructions.
 
 Python Source
