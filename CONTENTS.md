@@ -2,9 +2,9 @@ Directory Layout
 ================
 
 * `bin` - binaries for you
-* `py` - the python source
 * `testbed` - scripts for exercising the binaries; for testing and as examples
 * `vagrant` - artifacts for creating an instant phabricator install
+* `py` - the python source
 
 Binaries for you
 ----------------
@@ -18,6 +18,28 @@ the bin directory to $PATH.
 * `arcyd` - the Arcanist branch-watching daemon
 * `phab-ping` - a simple tool to check the responsiveness of your Phabricator
 * `arcyon` - a wrapper around Conduit API to aid scripting
+ 
+Scripts for exercising the binaries
+-----------------------------------
+
+`testbed`
+
+To make it easy to get started with the binaries, here are some scripts which
+illustrate usage examples, test functionality and form simple utilities.
+
+They come in two flavors:
+* tools - simple wrappers that perform a useful function and illustrate usage
+* exercisers - try to use as much of the binaries features as possible for QA
+
+Artifacts for creating an instant phabricator install
+-----------------------------------------------------
+
+`vagrant`
+
+Everything here depends on having an instance of Phabricator up and running;
+so it's important that we can have one up and running easily, these artifacts
+enable you to create a new instance of Phabricator in a single step using
+Vagrant and Puppet.
 
 Python Source
 -------------
@@ -60,25 +82,3 @@ The `phl` package group is divided into packages like so:
 * `phlgit`  - thin wrappers around Git subcommands
 * `phlgitu` - high-level Git utilities
 * `phlsys`  - wrappers around interaction with the operating system
-
-Scripts for exercising the binaries
------------------------------------
-
-`testbed`
-
-To make it easy to get started with the binaries, here are some scripts which
-illustrate usage examples, test functionality and form simple utilities.
-
-They come in two flavors:
-* tools - simple wrappers that perform a useful function and illustrate usage
-* exercisers - try to use as much of the binaries features as possible for QA
-
-Artifacts for creating an instant phabricator install
------------------------------------------------------
-
-`vagrant`
-
-Everything here depends on having an instance of Phabricator up and running;
-so it's important that we can have one up and running easily, these artifacts
-enable you to create a new instance of Phabricator in a single step using
-Vagrant and Puppet.
