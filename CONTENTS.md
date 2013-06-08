@@ -44,6 +44,9 @@ so it's important that we can have one up and running easily, these artifacts
 enable you to create a new instance of Phabricator in a single step using
 Vagrant and Puppet.
 
+Please see [README](https://github.com/bloomberg/phabricator-tools/blob/master/LICENSE)
+for quickstart instructions.
+
 Python Source
 -------------
 
