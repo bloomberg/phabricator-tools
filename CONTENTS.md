@@ -19,6 +19,9 @@ the bin directory to $PATH.
 * `phab-ping` - a simple tool to check the responsiveness of your Phabricator
 * `arcyon` - a wrapper around Conduit API to aid scripting
  
+Each command comes with comprehensive help, available by passing the '--help' argument, e.g.:
+`$ arcyd --help`
+
 Scripts for exercising the binaries
 -----------------------------------
 
