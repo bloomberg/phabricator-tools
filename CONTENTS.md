@@ -2,7 +2,7 @@ Directory Layout
 ================
 
 * `bin` - binaries for you
-* `testbed` - scripts for exercising the binaries; for testing and as examples
+* `examples` - examples and utils for using the binaries
 * `vagrant` - artifacts for creating an instant phabricator install
 * `py` - the python source
 
@@ -22,17 +22,13 @@ the bin directory to $PATH.
 Each command comes with comprehensive help, available by passing the '--help' argument, e.g.:
 `$ arcyd --help`
 
-Scripts for exercising the binaries
------------------------------------
+Examples for using the binaries
+-------------------------------
 
-`testbed`
+`examples`
 
 To make it easy to get started with the binaries, here are some scripts which
-illustrate usage examples, test functionality and form simple utilities.
-
-They come in two flavors:
-* tools - simple wrappers that perform a useful function and illustrate usage
-* exercisers - try to use as much of the binaries features as possible for QA
+illustrate usage examples and provide simple utilities.
 
 Artifacts for creating an instant phabricator install
 -----------------------------------------------------

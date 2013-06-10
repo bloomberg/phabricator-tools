@@ -13,7 +13,7 @@ to_email=$3
 #sendmail="--sendmail-binary catchmail --sendmail-type catchmail"
 sendmail="--sendmail-binary sendmail --sendmail-type sendmail"
 
-maily="../arcyd/maily --sender $from_email --to $to_email $sendmail"
+maily="../../testbed/arcyd/maily --sender $from_email --to $to_email $sendmail"
 $maily --subject "started pinging $address" --message " "
 tempfile=`mktemp`
 echo "pinging $address"
