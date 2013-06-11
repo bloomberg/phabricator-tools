@@ -13,10 +13,10 @@ pychecker \
 flake8 bin/*
 flake8 py/*.py
 
-# please install snakefood with ./doc/package_deps/install_snakefood.sh
-sfood py/*.py --internal > doc/package_deps/deps
-./doc/package_deps/process.py doc/package_deps/deps doc/package_deps/file-deps doc/package_deps/package-deps
-diff ./doc/package_deps/expected-package-deps ./doc/package_deps/package-deps
+# please install snakefood with ./meta/package_deps/install_snakefood.sh
+sfood py/*.py --internal > meta/package_deps/deps
+./meta/package_deps/process.py meta/package_deps/deps meta/package_deps/file-deps meta/package_deps/package-deps
+diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 
 # copyright
 set +e
