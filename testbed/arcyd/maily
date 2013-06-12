@@ -20,16 +20,12 @@ import argparse
 import os
 import sys
 
-# append "../py/" to sys.path, which is the list of paths to search for modules
-# this is so we can import our libraries directly
-# N.B. this is only really passable in the module that defines main()
-sys.path.append(
-    os.path.join(
-        os.path.dirname(
-            os.path.dirname(
-                os.path.dirname(
-                    os.path.realpath(__file__)))),
-        "py"))
+# append our module dirs to sys.path, which is the list of paths to search
+# for modules this is so we can import our libraries directly
+# N.B. this magic is only really passable up-front in the entrypoint module
+PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+PARENT_PARENT_DIR = os.path.dirname(PARENT_DIR)
+sys.path.append(os.path.join(PARENT_PARENT_DIR, "py", "phl"))
 
 import phlmail_sender
 import phlsys_sendmail

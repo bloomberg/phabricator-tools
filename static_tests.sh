@@ -1,33 +1,29 @@
 # do tests in order of time to execute
 set -e # exit immediately on error
 
+libscripts=`find py/ -iname '*.py'`
+allscripts="bin/* $libscripts"
+
 ## please install pychecker with sudo apt-get install pychecker
 # TODO: find workaround for borked import detection
 # TODO: fix phlcon_differential.createDiff() to not have 16 params
-pychecker \
+PYTHONPATH=py/phl pychecker \
     --quiet --only --no-import --exec --constant1 --initattr --changetypes \
     --no-deprecated \
     --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
-    py/*.py
+    py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
 
-flake8 bin/*
-flake8 py/*.py
+flake8 $allscripts
 
 # please install snakefood with ./meta/package_deps/install_snakefood.sh
-sfood py/*.py --internal > meta/package_deps/deps
+sfood $libscripts --internal > meta/package_deps/deps
 ./meta/package_deps/process.py meta/package_deps/deps meta/package_deps/file-deps meta/package_deps/package-deps
 diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 
 # copyright
 set +e
 
-git grep -L "Copyright (C) 2012 Bloomberg L.P." py/*.py
-if [ $? -ne 1 ]
-then
-    echo -- above files are missing copyright notice --
-    exit 1
-fi
-git grep -L "Copyright (C) 2012 Bloomberg L.P." bin/*
+git grep -L "Copyright (C) 2012 Bloomberg L.P." $allscripts
 if [ $? -ne 1 ]
 then
     echo -- above files are missing copyright notice --

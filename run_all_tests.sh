@@ -6,12 +6,14 @@ cd "$(dirname "$0")"
 
 ./static_tests.sh
 
+libscripts="$(find py -iname '*.py')"
+
 # unittest
 # 'sudo apt-get install python-nose' or use the commented-out version
 # 'sudo apt-get install python-coverage' to use the '--with-coverage' option
 # the '--with-profile' option should just work
 # the '--failed' option will run only the tests that failed on the last run
-nosetests py/*.py --with-doctest --doctest-tests --failed
+PYTHONPATH=py/phl nosetests $libscripts --with-doctest --doctest-tests
 #python -m unittest discover -p "*.py"
 
 # N.B. can easily run individual tests with nose like so:
