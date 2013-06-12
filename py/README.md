@@ -21,18 +21,27 @@ These are the top-level package groups:
 * `phl` - code which can be considered re-usable as a 'PHabricator Library'.
 * `pig` - Phab-ping implementation
 
-The `abd` package group is divided into packages like so:
+-----
+
+The **abd** package group is divided into packages like so:
+
 * `abdcmd`  - implementation of Arcyd subcommands
 * `abdcmnt` - format and submit event-related comments to Differential reviews
 * `abdi`    - high-level Arcyd implementation details
 * `abdmail` - format and send event-related emails to people
 * `abdt`    - shared types, conventions and tools
 
-The `aon` package group is divided into packages like so:
+-----
+
+The **aon** package group is divided into packages like so:
+
 * `aoncmd`  - implementation of Arcyon subcommands
 * `aont`    - shared types, conventions and tools
 
-The `phl` package group is divided into packages like so:
+-----
+
+The **phl** package group is divided into packages like so:
+
 * `phlcon`  - thin wrappers around Phabricator Conduit APIs
 * `phldef`  - predefined data and constants
 * `phlgit`  - thin wrappers around Git subcommands
