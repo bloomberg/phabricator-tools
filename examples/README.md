@@ -28,7 +28,7 @@ health-check tool against Phabricator installations.
 The examples here assume:
 * you are running from the `examples/phab-ping/` directory
 
-*Examples:*
+**Examples:**
 
 * `ping_phabricator_actual.sh` - check that the official Phabricator instance
    at 'secure.phabricator.com' is reachable and report the round trip time for
@@ -87,7 +87,7 @@ To guide you through meeting these requirements, please try running:
 examples/arcyon/ $ ./_check_requirements.sh
 ```
 
-*Examples:*
+**Examples:**
 
 * `_check_requirements.sh` - make sure that the other examples will be able to
   run in the current environment; if not then give suggestions for setting up
@@ -170,19 +170,19 @@ $ ./list_top_authors.sh
 
 * `list_waiting_on.sh`
 ```
-Revisions you have authored, waiting on others:
+  Revisions you have authored, waiting on others:
   178 / Needs Review / full context when diffing
 
-Revisions you are reviewing, waiting on others:
+  Revisions you are reviewing, waiting on others:
   169 / Accepted / .gitignore: .ropeproject
 ```
 
 * `nudge_stale_waiting_on.sh`
 ```
-$ ./nudge_stale_waiting_on.sh
-will comment 'nudge' on the following reviews:
-178 169
-Hit 'y' to continue or any other to exit: y
-{u'revisionid': u'178', u'uri': u'http://127.0.0.1/D178'}
-{u'revisionid': u'169', u'uri': u'http://127.0.0.1/D169'}
+  $ ./nudge_stale_waiting_on.sh
+  will comment 'nudge' on the following reviews:
+  178 169
+  Hit 'y' to continue or any other to exit: y
+  {u'revisionid': u'178', u'uri': u'http://127.0.0.1/D178'}
+  {u'revisionid': u'169', u'uri': u'http://127.0.0.1/D169'}
 ```
