@@ -1,15 +1,17 @@
 """Wrapper to call Phabricator's users Conduit API"""
 
-import collections
 import unittest
 
 import phldef_conduit
 import phlsys_conduit
+import phlsys_namedtuple
 
 
-QueryResponse = collections.namedtuple(
+QueryResponse = phlsys_namedtuple.make_named_tuple(
     'phlcon_user__QueryResponse',
-    ['phid', 'userName', 'realName', 'image', 'uri', 'roles'])
+    required=['phid', 'userName', 'realName', 'image', 'uri', 'roles'],
+    defaults={},
+    ignored=['currentStatus', 'currentStatusUntil'])
 
 
 def is_no_such_error(e):
@@ -37,7 +39,7 @@ def query_user_from_email(conduit, email):
     :returns: a QueryResponse or None
 
     """
-    d = {"emails": [email]}
+    d = {"emails": [email], "limit": len(email)}
     response = None
     try:
         response = conduit.call("user.query", d)
@@ -86,7 +88,7 @@ def query_users_from_phids(conduit, phids):
     """
     if not isinstance(phids, list):
         raise ValueError("phids must be a list")
-    d = {"phids": phids}
+    d = {"phids": phids, "limit": len(phids)}
 
     try:
         response = conduit.call("user.query", d)
@@ -96,7 +98,7 @@ def query_users_from_phids(conduit, phids):
         return None
     else:
         if len(response) != len(phids):
-            raise Exception("unexpected number of entries")
+            raise Exception("unexpected number of entries\n" + str(response))
 
     return [QueryResponse(**u) for u in response]
 
@@ -112,7 +114,7 @@ def query_users_from_usernames(conduit, usernames):
 
     """
     assert isinstance(usernames, list)
-    d = {"usernames": usernames}
+    d = {"usernames": usernames, "limit": len(usernames)}
 
     response = None
     try:
