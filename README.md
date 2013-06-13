@@ -23,9 +23,9 @@ be merged with Phabricator-actual.
 Extend Phabricator easily with Arcyon
 -------------------------------------
 
-There are often house-keeping tasks which you like to be able to automate,
+There are often house-keeping tasks which you like to be able to automate;
 the Phabricator 'Conduit' API is designed to let you interact with your
-instance over http.
+instance over HTTP.
 
 Arcyon wraps up the API with a command-line interface for easy scripting.
 
@@ -36,8 +36,8 @@ e.g. say 'poke' on all open reviews not updated for 2 weeks
 Hands-free Differential reviews with Arcyd
 ------------------------------------------
 
-This is a daemon which watches git repositories and automatically creates
-reviews and lands them when accepted.
+This is a daemon which watches Git repositories and automatically creates
+reviews, then lands them when accepted.
 
 Here is an example of someone working with a repository which is watched
 by Arcyd:
@@ -49,17 +49,17 @@ by Arcyd:
     .. Arcyd sees 'ph-review' branch, creates a review based on commits ..
 
     .. the reviewer approves ..
-    .. Arcyd see approval, lands the changes on master, deletes branch ..
+    .. Arcyd sees approval, lands the changes on master, deletes branch ..
 
 Install Phabricator in one step
 -------------------------------
 
-To get up and running quickly, a vagrant configuration is included for
-creating a new Linux VM and making a fully working Phabricator installation;
-including all it's dependencies, i.e. Apache, MySQL.
+To get up and running quickly, a Vagrant configuration is included for
+creating a new Linux VM and making a fully working Phabricator installation,
+including all its dependencies, i.e. Apache, MySQL.
 
 If you want to provision an existing VM or machine with Phabricator you
-can also use the puppet configuration directly.
+can also use the included Puppet configuration directly.
 
 __To create a new local VM serving up Phabricator__
 
@@ -89,7 +89,7 @@ Monitor your Phabricator instance with phab-ping
 A simple wrapper around the 'conduit.ping' API which Phabricator provides,
 `phab-ping` behaves much like the regular ping as a simple health-check tool.
 
-It requests some information from the instance running at the specified URI
+It requests some information from the instance running at the specified URL
 and reports how long Phabricator takes to respond.
 
     $ phab-ping https://secure.phabricator.com
