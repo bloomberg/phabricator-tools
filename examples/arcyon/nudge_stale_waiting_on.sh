@@ -1,5 +1,8 @@
 # comment 'nudge' on reviews which we've been waiting on for over 2 days
 
+# exit with error message if anything returns error status
+trap 'echo FAILED; exit 1' ERR
+
 arcyon="../../bin/arcyon"
 minage="2 days"
 ids1=`$arcyon query --author-me --status-type open --statuses 'Needs Review' --format-type ids --update-min-age "$minage"`

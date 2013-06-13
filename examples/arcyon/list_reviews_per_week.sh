@@ -1,3 +1,6 @@
+# exit with error message if anything returns error status
+trap 'echo FAILED; exit 1' ERR
+
 arcyon="../../bin/arcyon"
 echo "last update time, counts per week:"
 echo "(n.b. counts last 1000 reviews or so only)"
