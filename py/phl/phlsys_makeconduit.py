@@ -51,6 +51,10 @@ def getUriUserCertificate(uri, user, cert):
     except EnvironmentError:
         pass
 
+    install_arc_url = str(
+        "http://www.phabricator.com/docs/phabricator/article/"
+        "Arcanist_User_Guide.html#installing-arcanist")
+
     no_uri = "no uri to a Phabricator instance was specified."
     no_user = "no username for the Phabricator instance was specified."
     no_cert = "no certificate for the Phabricator instance was specified."
@@ -71,7 +75,8 @@ def getUriUserCertificate(uri, user, cert):
         "To generate a valid ~/.arcrc for a particular instance, you may "
         "run:\n"
         "\n"
-        "$ arc install-certificate [URI]")
+        "$ arc install-certificate [URI]\n"
+        "N.B. to install arc:\n" + install_arc_url)
     bad_arcrc = (
         "can't load .arcrc, it may be invalid json or not permissioned\n"
         "path used: " + str(arcrc_path))
@@ -80,7 +85,8 @@ def getUriUserCertificate(uri, user, cert):
         "path used: " + str(arcconfig_path))
     arcrc_no_default = (
         "no default uri was discovered in .arcrc, you may add one like so:\n"
-        "$ arc set-config default https://your.phabricator/")
+        "$ arc set-config default https://your.phabricator/\n"
+        "N.B. to install arc:\n" + install_arc_url)
     arcconfig_no_uri = (
         ".arcconfig doesn't seem to contain a conduit_uri entry\n"
         "path used: " + str(arcconfig_path))
@@ -107,7 +113,8 @@ def getUriUserCertificate(uri, user, cert):
 
     arcrc_no_entry = (
         "no entry for the uri was found in .arcrc, you may add one like so:\n"
-        "$ arc install-certificate " + uri)
+        "$ arc install-certificate " + uri + "\n"
+        "N.B. to install arc:\n" + install_arc_url)
 
     # try to discover user
     if user is None:
