@@ -2,4 +2,4 @@
 trap 'echo FAILED; exit 1' ERR
 
 arcyon="../../bin/arcyon"
-$arcyon query --translate --format-string '$authorUsername' | sort | uniq -c | sort -rn | tail
+$arcyon query --translate --format-string '$authorUsername' | sort | uniq -c | sort -rn | head
