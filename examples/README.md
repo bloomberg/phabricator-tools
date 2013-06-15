@@ -91,6 +91,34 @@ examples/arcyon/ $ ./_check_requirements.sh
 
 * `_check_requirements.sh` - make sure that the other examples will be able to
   run in the current environment; if not then give suggestions for setting up
+```
+    $ ./_check_requirements.sh
+    found arcyon:
+    /usr/bin/arcyon
+
+    got uri from .arcconfig
+    path: /home/angelos/phabricator-tools/examples/arcyon/.arcconfig
+    uri: https://secure.phabricator.com
+
+    changed uri:
+    - https://secure.phabricator.com
+    + https://secure.phabricator.com/api/
+    ?                               +++++
+
+    got user from uri's entry in .arcrc
+    path: /home/angelos/.arcrc
+    user: jevripio
+
+    got cert from uri's entry in .arcrc
+    path: /home/angelos/.arcrc
+    cert: ftp6drbggntdjg5h...
+
+    uri :  https://secure.phabricator.com/api/
+    user:  jevripio
+    cert:  ftp6drbggntdjg5h6ym7ptfgv4jjwvnl...
+
+    [OK]
+```
 
 * `count_recent_reviews_per_period.sh`
 ```

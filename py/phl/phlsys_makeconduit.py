@@ -5,6 +5,8 @@ provided.
 
 """
 
+import difflib
+
 import phlsys_arcconfig
 import phlsys_arcrc
 import phlsys_conduit
@@ -21,13 +23,13 @@ def _makeException(*args):
 
 
 def makeConduit(uri=None, user=None, cert=None):
-    uri, user, cert = getUriUserCertificate(uri, user, cert)
+    uri, user, cert, _ = getUriUserCertificateExplanation(uri, user, cert)
     return phlsys_conduit.Conduit(uri, user, cert)
 
 
-def getUriUserCertificate(uri, user, cert):
+def getUriUserCertificateExplanation(uri, user, cert):
     if uri and user and cert:
-        return uri, user, cert
+        return uri, user, cert, "all parameters were supplied"
 
     # try to load arcrc, if we can find it
     arcrc_path = phlsys_arcrc.find_arcrc()
@@ -91,6 +93,8 @@ def getUriUserCertificate(uri, user, cert):
         ".arcconfig doesn't seem to contain a conduit_uri entry\n"
         "path used: " + str(arcconfig_path))
 
+    explanations = []
+
     # try to discover conduit uri first
     if uri is None:
         if not arcconfig_path:
@@ -102,14 +106,22 @@ def getUriUserCertificate(uri, user, cert):
                 uri = arcrc["config"].get("default", None)
             if uri is None:
                 raise _makeException(no_uri, no_arcconfig, arcrc_no_default)
+            explanations.append(
+                "got uri from 'default' entry in arcrc\n"
+                "  path: {0}\n"
+                "  uri: {1}".format(arcrc_path, uri))
         else:  # if arcconfig_path
             if arcconfig is None:
                 raise _makeException(no_uri, bad_arcconfig)
             uri = arcconfig.get("conduit_uri", None)
             if uri is None:
                 raise _makeException(no_uri, arcconfig_no_uri)
+            explanations.append(
+                "got uri from .arcconfig\n"
+                "  path: {0}\n"
+                "  uri: {1}".format(arcconfig_path, uri))
 
-    uri = phlsys_conduit.make_conduit_uri(uri)
+    uri = _fix_uri(explanations, uri)
 
     arcrc_no_entry = (
         "no entry for the uri was found in .arcrc, you may add one like so:\n"
@@ -127,8 +139,16 @@ def getUriUserCertificate(uri, user, cert):
             if host is None:
                 raise _makeException(no_user, arcrc_no_entry)
             user = host.get("user", None)
+            explanations.append(
+                "got user from uri's entry in .arcrc\n"
+                "  path: {0}\n"
+                "  user: {1}".format(arcrc_path, user))
             if cert is None:
                 cert = host.get("cert", None)
+                explanations.append(
+                    "got cert from uri's entry in .arcrc\n"
+                    "  path: {0}\n"
+                    "  cert: {1}".format(arcrc_path, cert[:16] + '...'))
             if user is None:
                 raise _makeException(no_user, arcrc_no_entry)
         if user is None:
@@ -145,6 +165,10 @@ def getUriUserCertificate(uri, user, cert):
             if host is None:
                 raise _makeException(no_cert, arcrc_no_entry)
             cert = host.get("cert", None)
+            explanations.append(
+                "got cert from uri's entry in .arcrc\n"
+                "  path: {0}\n"
+                "  cert: {1}".format(arcrc_path, cert[:16] + '...'))
         if cert is None:
             raise _makeException(no_cert, arcrc_no_entry)
 
@@ -152,7 +176,18 @@ def getUriUserCertificate(uri, user, cert):
     if not (uri and user and cert) or arcrc_path is None:
         raise Exception("unexpected error determinining uri, user or cert")
 
-    return uri, user, cert
+    return uri, user, cert, '\n\n'.join(explanations)
+
+
+def _fix_uri(explanations, uri):
+    old_uri = uri
+    uri = phlsys_conduit.make_conduit_uri(uri)
+    if uri != old_uri:
+        diff = list(difflib.Differ().compare([old_uri], [uri]))
+        diff = ['  ' + s.strip() for s in diff]
+        diff = '\n'.join(diff)
+        explanations.append("changed uri:\n{0}".format(diff))
+    return uri
 
 
 #------------------------------------------------------------------------------

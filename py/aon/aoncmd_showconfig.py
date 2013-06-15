@@ -1,7 +1,6 @@
 """show the configuration as discovered from the current directory."""
 
-import phlsys_arcconfig
-import phlsys_arcrc
+import phlsys_makeconduit
 
 
 def getFromfilePrefixChars():
@@ -13,11 +12,13 @@ def setupParser(parser):
 
 
 def process(_):
-    print "~/.arcrc:"
-    print phlsys_arcrc.get_arcrc()
+    getExplanation = phlsys_makeconduit.getUriUserCertificateExplanation
+    uri, user, cert, explanation = getExplanation(None, None, None)
+    print explanation
     print
-    print ".arcconfig:"
-    print phlsys_arcconfig.get_arcconfig()
+    print "uri : ", uri
+    print "user: ", user
+    print "cert: ", cert[:32] + '...'
 
 
 #------------------------------------------------------------------------------
