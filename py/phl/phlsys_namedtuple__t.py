@@ -1,6 +1,7 @@
 """Test suite for phlsys_namedtuple"""
 
 import unittest
+import warnings
 
 import phlsys_namedtuple
 
@@ -21,16 +22,18 @@ import phlsys_namedtuple
 # [ B] factory() raises a phlsys_namedtuple.Error if 'required' contains
 #      items which weren't supplied to factory().
 # [ D] factory() ignores parameters mentioned in 'ignored' without event
-# [ C] factory() asserts if parameters not mentioned in 'required', 'defaults'
-#      and 'ignored' are encountered.
+# [ C] factory() ignores parameters not mentioned in 'required', 'defaults'
+#      and 'ignored', a warnings.warn is emitted if any encountered.
 # [ E] make() asserts if 'required', 'default' and 'ignored' are not disjoint
 # [ F] subsequent calls to make() don't affect previously created factories
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_RaiseMissing
-# [ C] test_C_AssertUnexpected
+# [ C] test_C_WarnUnexpected
 # [ D] test_D_ignoreIgnored
+# [ E] test_E_AssertDisjoint
+# [ F] test_F_IndependentFactory
 #==============================================================================
 
 
@@ -68,13 +71,30 @@ class Test(unittest.TestCase):
         with self.assertRaises(phlsys_namedtuple.Error):
             self.factory(d2=2)
 
-    def test_C_AssertUnexpected(self):
-        with self.assertRaises(AssertionError):
+    def test_C_WarnUnexpected(self):
+        # Cause all warnings to always be triggered.
+        warnings.simplefilter("always")
+
+        with warnings.catch_warnings(record=True) as w:
             self.factory(r1=1, r2=2, dingbat=3)
-        with self.assertRaises(AssertionError):
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "ignoring unexpected args" in str(w[-1].message)
+            assert "dingbat" in str(w[-1].message)
+
+        with warnings.catch_warnings(record=True) as w:
             self.factory(r1=1, r2=2, dingbat=3, d1=2, d2=3)
-        with self.assertRaises(AssertionError):
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "ignoring unexpected args" in str(w[-1].message)
+            assert "dingbat" in str(w[-1].message)
+
+        with warnings.catch_warnings(record=True) as w:
             self.factory(r1=1, r2=2, dingbat=3, d1=2, d2=3, i1=-1, i2=-2)
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+            assert "ignoring unexpected args" in str(w[-1].message)
+            assert "dingbat" in str(w[-1].message)
 
     def test_D_IgnoreIgnored(self):
         self.factory(r1=1, r2=2, i1=-1)

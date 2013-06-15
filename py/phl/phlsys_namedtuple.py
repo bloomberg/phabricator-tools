@@ -12,6 +12,7 @@ parameters.
 """
 
 import collections
+import warnings
 
 
 class Error(Exception):
@@ -34,6 +35,10 @@ def make_named_tuple(name, required, defaults, ignored):
     Items from the specified 'ignored' list are removed from the keyword
     arguments provided to the factory function prior to constructing the
     namedtuple.
+
+    If items are encountered which are not mentioned by 'required', 'defaults'
+    or 'ignored' then they are automatically ignored and a warnings.warn is
+    emitted.
 
     Usage Examples:
 
@@ -63,6 +68,7 @@ def make_named_tuple(name, required, defaults, ignored):
     default_attr = dict(defaults)
     default_attr_keys = default_attr.viewkeys()
     ignored_attr = set(ignored)
+    expected_attr = required_attr | default_attr_keys
     assert not (default_attr_keys & required_attr)
     assert not (default_attr_keys & ignored_attr)
     assert not (ignored_attr & required_attr)
@@ -77,10 +83,12 @@ def make_named_tuple(name, required, defaults, ignored):
         for key in ignored_keys:
             del kwargs[key]
 
-        # warn programmers if we need to handle more attributes, users should
-        # be running optimised, so assertions won't be firing
-        unexpected = keys - (required_attr | default_attr_keys)
-        assert not unexpected, "unexpected args: " + str(unexpected)
+        # emit warnings and proceed if we encounter unexpeced attributes
+        unexpected = keys - expected_attr
+        if unexpected:
+            warnings.warn("ignoring unexpected args: " + str(unexpected))
+            for key in unexpected:
+                del kwargs[key]
 
         missing_attr = required_attr - keys
         if missing_attr:
