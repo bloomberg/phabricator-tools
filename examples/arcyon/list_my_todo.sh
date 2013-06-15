@@ -9,5 +9,7 @@ trap 'echo FAILED; exit 1' ERR
 echo Revisions you have authored:
 ../../bin/arcyon query --author-me --status-type open --statuses Accepted 'Needs Revision'
 
+echo
+
 echo Revisions you are reviewing:
 ../../bin/arcyon query --reviewer-me --status-type open --statuses 'Needs Review'
