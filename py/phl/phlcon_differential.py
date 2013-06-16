@@ -3,15 +3,17 @@
 import collections
 import copy
 
-# TODO: look into some sort of const protection for these
-# from ArcanistRevisionDifferentialStatus.php:
+# Enumerate the states that a Differential review can be in
+## TODO: look into some sort of const protection for these
+## from ArcanistRevisionDifferentialStatus.php:
 REVISION_NEEDS_REVIEW = 0
 REVISION_NEEDS_REVISION = 1
 REVISION_ACCEPTED = 2
 REVISION_CLOSED = 3
 REVISION_ABANDONED = 4
 
-# from .../differential/constants/DifferentialAction.php:
+# Enumerate the actions that can be performed on a Differential review
+## from .../differential/constants/DifferentialAction.php:
 ACTION_CLOSE = 'commit'
 ACTION_COMMENT = 'none'
 ACTION_ACCEPT = 'accept'
@@ -30,6 +32,8 @@ ACTION_ADDCCS = 'add_ccs'
 ACTION_CLAIM = 'claim'
 ACTION_REOPEN = 'reopen'
 
+# Enumerate all the actions that an author may perform on a review
+# map the strings that appear in the web UI to string that conduit expects
 AUTHOR_ACTIONS = {
     "close": ACTION_CLOSE,
     "comment": ACTION_COMMENT,
@@ -40,6 +44,9 @@ AUTHOR_ACTIONS = {
     "reopen": ACTION_REOPEN
 }
 
+# Enumerate all the actions that an reviewer may perform on a review
+# map the strings that appear in the web UI to string that conduit expects
+# note that everyone except the author of a review is considered a reviewer
 REVIEWER_ACTIONS = {
     "comment": ACTION_COMMENT,
     "accept": ACTION_ACCEPT,
@@ -48,9 +55,14 @@ REVIEWER_ACTIONS = {
     "commandeer": ACTION_CLAIM,
 }
 
+# Enumerate all the actions either a reviewer or author may perform
+# map the strings that appear in the web UI to string that conduit expects
 USER_ACTIONS = dict(AUTHOR_ACTIONS.items() + REVIEWER_ACTIONS.items())
 
 
+# Enumerate some of the fields that Differential expects to be able fill out
+# based on commit messages, these are accepted by create_revision and
+# accept_revision
 # from phabricator/.../...DefaultFieldSelector.php
 class MessageFields(object):
     title = "title"
