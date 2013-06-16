@@ -73,18 +73,21 @@ class MessageFields(object):
 
 
 def _make_nt(name, *fields):
+    """Return a collections.namedtuple with module prefix for convenience."""
     return collections.namedtuple(
         'phlcon_differential__' + name,
         fields)
 
 
 def _copy_dict_no_nones(d):
+    """Return a copy of the supplied 'd' minus any keys mapping to 'None'."""
     clean = {}
     clean.update((k, v) for k, v in d.iteritems() if v is not None)
     return clean
 
 
 def _ensure_keys(d, *keys):
+    """Modify supplied 'd'; ensure supplied 'keys', map to None if absent."""
     for k in keys:
         if k not in d:
             d[k] = None
