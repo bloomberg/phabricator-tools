@@ -7,13 +7,8 @@ import unittest
 import phldef_conduit
 import phlsys_conduit
 
-# from ArcanistRevisionDifferentialStatus.php:
-# const NEEDS_REVIEW      = 0;
-# const NEEDS_REVISION    = 1;
-# const ACCEPTED          = 2;
-# const CLOSED            = 3;
-# const ABANDONED         = 4;
 # TODO: look into some sort of const protection for these
+# from ArcanistRevisionDifferentialStatus.php:
 REVISION_NEEDS_REVIEW = 0
 REVISION_NEEDS_REVISION = 1
 REVISION_ACCEPTED = 2
@@ -21,23 +16,6 @@ REVISION_CLOSED = 3
 REVISION_ABANDONED = 4
 
 # from .../differential/constants/DifferentialAction.php:
-# const ACTION_CLOSE          = 'commit';
-# const ACTION_COMMENT        = 'none';
-# const ACTION_ACCEPT         = 'accept';
-# const ACTION_REJECT         = 'reject';
-# const ACTION_RETHINK        = 'rethink';
-# const ACTION_ABANDON        = 'abandon';
-# const ACTION_REQUEST        = 'request_review';
-# const ACTION_RECLAIM        = 'reclaim';
-# const ACTION_UPDATE         = 'update';
-# const ACTION_RESIGN         = 'resign';
-# const ACTION_SUMMARIZE      = 'summarize';
-# const ACTION_TESTPLAN       = 'testplan';
-# const ACTION_CREATE         = 'create';
-# const ACTION_ADDREVIEWERS   = 'add_reviewers';
-# const ACTION_ADDCCS         = 'add_ccs';
-# const ACTION_CLAIM          = 'claim';
-# const ACTION_REOPEN         = 'reopen';
 ACTION_CLOSE = 'commit'
 ACTION_COMMENT = 'none'
 ACTION_ACCEPT = 'accept'
