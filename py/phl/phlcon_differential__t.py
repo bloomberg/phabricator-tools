@@ -243,17 +243,17 @@ Test Plan: I proof-read it and it looked ok
 
         states = phlcon_differential.ReviewStates
 
-        authorActExp(revisionid, d.ACTION_RETHINK, states.needs_revision)
-        authorActExp(revisionid, d.ACTION_REQUEST, states.needs_review)
-        authorActExp(revisionid, d.ACTION_ABANDON, states.abandoned)
-        authorActExp(revisionid, d.ACTION_RECLAIM, states.needs_review)
+        authorActExp(revisionid, d.Action.rethink, states.needs_revision)
+        authorActExp(revisionid, d.Action.request, states.needs_review)
+        authorActExp(revisionid, d.Action.abandon, states.abandoned)
+        authorActExp(revisionid, d.Action.reclaim, states.needs_review)
 
-        reviewActExp(revisionid, d.ACTION_REJECT, states.needs_revision)
-        reviewActExp(revisionid, d.ACTION_ACCEPT, states.accepted)
-        reviewActExp(revisionid, d.ACTION_REJECT, states.needs_revision)
-        reviewActExp(revisionid, d.ACTION_ACCEPT, states.accepted)
+        reviewActExp(revisionid, d.Action.reject, states.needs_revision)
+        reviewActExp(revisionid, d.Action.accept, states.accepted)
+        reviewActExp(revisionid, d.Action.reject, states.needs_revision)
+        reviewActExp(revisionid, d.Action.accept, states.accepted)
 
-        authorActExp(revisionid, d.ACTION_CLOSE, states.closed)
+        authorActExp(revisionid, d.Action.close, states.closed)
 
     def testUpdateNoFields(self):
         revisionid = self._createRevision("testUpdateNoFields")

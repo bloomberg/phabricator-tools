@@ -367,7 +367,7 @@ class Test(unittest.TestCase):
             phlcon_differential.create_comment(
                 conduit,
                 reviewid,
-                action=phlcon_differential.ACTION_CLAIM)
+                action=phlcon_differential.Action.claim)
 
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -386,7 +386,7 @@ class Test(unittest.TestCase):
             phlcon_differential.create_comment(
                 conduit,
                 reviewid,
-                action=phlcon_differential.ACTION_CLAIM)
+                action=phlcon_differential.Action.claim)
 
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)

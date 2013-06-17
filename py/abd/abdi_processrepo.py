@@ -318,7 +318,7 @@ def processUpdatedBranch(
                     phlcon_differential.create_comment(
                         conduit,
                         working_branch.id,
-                        action=phlcon_differential.ACTION_RETHINK)
+                        action=phlcon_differential.Action.rethink)
             except abdte.AbdUserException as e:
                 print "user exception"
                 abdt_workingbranch.pushBadInReview(

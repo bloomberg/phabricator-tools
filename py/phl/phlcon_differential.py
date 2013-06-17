@@ -13,47 +13,50 @@ class ReviewStates(object):  # XXX: will derive from Enum in Python 3.4+
     closed = 3
     abandoned = 4
 
+
 # Enumerate the actions that can be performed on a Differential review
 ## from .../differential/constants/DifferentialAction.php:
-ACTION_CLOSE = 'commit'
-ACTION_COMMENT = 'none'
-ACTION_ACCEPT = 'accept'
-ACTION_REJECT = 'reject'
-ACTION_RETHINK = 'rethink'
-ACTION_ABANDON = 'abandon'
-ACTION_REQUEST = 'request_review'
-ACTION_RECLAIM = 'reclaim'
-ACTION_UPDATE = 'update'
-ACTION_RESIGN = 'resign'
-ACTION_SUMMARIZE = 'summarize'
-ACTION_TESTPLAN = 'testplan'
-ACTION_CREATE = 'create'
-ACTION_ADDREVIEWERS = 'add_reviewers'
-ACTION_ADDCCS = 'add_ccs'
-ACTION_CLAIM = 'claim'
-ACTION_REOPEN = 'reopen'
+class Action(object):  # XXX: will derive from Enum in Python 3.4+
+    close = 'commit'
+    comment = 'none'
+    accept = 'accept'
+    reject = 'reject'
+    rethink = 'rethink'
+    abandon = 'abandon'
+    request = 'request_review'
+    reclaim = 'reclaim'
+    update = 'update'
+    resign = 'resign'
+    summarize = 'summarize'
+    testplan = 'testplan'
+    create = 'create'
+    addreviewers = 'add_reviewers'
+    addccs = 'add_ccs'
+    claim = 'claim'
+    reopen = 'reopen'
+
 
 # Enumerate all the actions that an author may perform on a review
 # map the strings that appear in the web UI to string that conduit expects
 AUTHOR_ACTIONS = {
-    "close": ACTION_CLOSE,
-    "comment": ACTION_COMMENT,
-    "plan changes": ACTION_RETHINK,
-    "abandon": ACTION_ABANDON,
-    "request review": ACTION_REQUEST,
-    "unabandon": ACTION_RECLAIM,
-    "reopen": ACTION_REOPEN
+    "close": Action.close,
+    "comment": Action.comment,
+    "plan changes": Action.rethink,
+    "abandon": Action.abandon,
+    "request review": Action.request,
+    "unabandon": Action.reclaim,
+    "reopen": Action.reopen,
 }
 
 # Enumerate all the actions that an reviewer may perform on a review
 # map the strings that appear in the web UI to string that conduit expects
 # note that everyone except the author of a review is considered a reviewer
 REVIEWER_ACTIONS = {
-    "comment": ACTION_COMMENT,
-    "accept": ACTION_ACCEPT,
-    "request changes": ACTION_REJECT,
-    "resign as reviewer": ACTION_RESIGN,
-    "commandeer": ACTION_CLAIM,
+    "comment": Action.comment,
+    "accept": Action.accept,
+    "request changes": Action.reject,
+    "resign as reviewer": Action.resign,
+    "commandeer": Action.claim,
 }
 
 # Enumerate all the actions either a reviewer or author may perform
