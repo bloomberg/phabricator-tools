@@ -1,8 +1,7 @@
 """Wrapper to call Phabricator's Differential Conduit API"""
 
-import collections
-
 import phlsys_dictutil
+import phlsys_namedtuple
 
 
 # Enumerate the states that a Differential review can be in
@@ -77,32 +76,47 @@ class MessageFields(object):  # XXX: will derive from Enum in Python 3.4+
     cc_phids = "ccPHIDs"
 
 
-def _make_nt(name, *fields):
-    """Return a collections.namedtuple with module prefix for convenience."""
-    return collections.namedtuple(
-        'phlcon_differential__' + name,
-        fields)
+CreateRawDiffResponse = phlsys_namedtuple.make_named_tuple(
+    'CreateRawDiffResponse',
+    required=['id', 'uri'],
+    defaults={},
+    ignored=[])
 
 
-CreateRawDiffResponse = _make_nt('CreateRawDiffResponse', 'id', 'uri')
-GetDiffIdResponse = _make_nt(
-    'GetDiffIdResponse',
-    'parent', 'properties', 'sourceControlSystem', 'sourceControlPath',
-    'dateCreated', 'dateModified', 'lintStatus', 'bookmark', 'changes',
-    'revisionID', 'sourceControlBaseRevision', 'branch',
-    'projectName', 'unitStatus', 'creationMethod', 'id', 'description')
-ParseCommitMessageResponse = _make_nt(
-    'ParseCommitMessageResponse',
-    'fields', 'errors')
-RevisionResponse = _make_nt(
-    'RevisionResponse',
-    'revisionid', 'uri')
-QueryResponse = _make_nt(
-    'QueryResponse',
-    'authorPHID', 'status', 'phid', 'testPlan', 'title', 'commits',
-    'diffs', 'uri', 'ccs', 'dateCreated', 'lineCount', 'branch', 'reviewers',
-    'id', 'statusName', 'hashes', 'summary', 'dateModified', 'sourcePath',
-    'auxiliary')
+GetDiffIdResponse = phlsys_namedtuple.make_named_tuple(
+    'phlcon_differential__GetDiffIdResponse',
+    required=[
+        'parent', 'properties', 'sourceControlSystem', 'sourceControlPath',
+        'dateCreated', 'dateModified', 'lintStatus', 'bookmark', 'changes',
+        'revisionID', 'sourceControlBaseRevision', 'branch',
+        'projectName', 'unitStatus', 'creationMethod', 'id', 'description'],
+    defaults={},
+    ignored=[])
+
+
+ParseCommitMessageResponse = phlsys_namedtuple.make_named_tuple(
+    'phlcon_differential__ParseCommitMessageResponse',
+    required=['fields', 'errors'],
+    defaults={},
+    ignored=[])
+
+
+RevisionResponse = phlsys_namedtuple.make_named_tuple(
+    'phlcon_differential__RevisionResponse',
+    required=['revisionid', 'uri'],
+    defaults={},
+    ignored=[])
+
+
+QueryResponse = phlsys_namedtuple.make_named_tuple(
+    'phlcon_differential__QueryResponse',
+    required=[
+        'authorPHID', 'status', 'phid', 'testPlan', 'title', 'commits',
+        'diffs', 'uri', 'ccs', 'dateCreated', 'lineCount', 'branch',
+        'reviewers', 'id', 'statusName', 'hashes', 'summary', 'dateModified',
+        'sourcePath', 'auxiliary'],
+    defaults={},
+    ignored=[])
 
 
 def create_raw_diff(conduit, diff):
