@@ -20,12 +20,12 @@ def copy_dict_no_nones(d):
     return clean
 
 
-def ensure_keys(d, *keys):
+def ensure_keys(d, keys):
     """Modify supplied 'd'; ensure supplied 'keys', map to None if absent.
 
     Usage examples:
         >>> d = {'b': 1, 'd': 2}
-        >>> ensure_keys(d, 'a', 'c')
+        >>> ensure_keys(d, ['a', 'c'])
         >>> d == {'a': None, 'b': 1, 'c': None, 'd': 2}
         True
 
@@ -39,7 +39,7 @@ def ensure_keys(d, *keys):
             d[k] = None
 
 
-def ensure_keys_default(dic, default, *keys):
+def ensure_keys_default(dic, default, keys):
     """Ensure that the dictionary has the supplied keys.
 
     Initialiase them with a deepcopy of the supplied 'default' if not.
@@ -47,7 +47,7 @@ def ensure_keys_default(dic, default, *keys):
     Usage examples:
         >>> d = {'b': 1, 'd': 2}
         >>> default = [0, 1, 2]
-        >>> ensure_keys_default(d, default, 'a', 'c')
+        >>> ensure_keys_default(d, default, ['a', 'c'])
         >>> default[:] = []  # clear the list in place
         >>> d == {'a': [0, 1, 2], 'b': 1, 'c': [0, 1, 2], 'd': 2}
         True

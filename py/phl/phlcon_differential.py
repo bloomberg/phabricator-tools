@@ -191,9 +191,9 @@ def parse_commit_message(conduit, corpus, partial=None):
     p = ParseCommitMessageResponse(
         **conduit.call("differential.parsecommitmessage", d))
     phlsys_dictutil.ensure_keys_default(
-        p.fields, "", "summary", "testPlan", "title")
+        p.fields, "", ["summary", "testPlan", "title"])
     phlsys_dictutil.ensure_keys_default(
-        p.fields, [], "reviewerPHIDs")
+        p.fields, [], ["reviewerPHIDs"])
     return p
 
 
@@ -211,7 +211,7 @@ def query(
     response = conduit.call("differential.query", d)
     query_response_list = []
     for r in response:
-        phlsys_dictutil.ensure_keys(r, "sourcePath", "auxiliary")
+        phlsys_dictutil.ensure_keys(r, ["sourcePath", "auxiliary"])
         r["id"] = int(r["id"])
         r["status"] = int(r["status"])
         query_response_list.append(QueryResponse(**r))

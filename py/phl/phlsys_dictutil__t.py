@@ -51,7 +51,7 @@ class Test(unittest.TestCase):
     def test_C_EnsureKeys(self):
         d1 = {'b': 1, 'e': 2, 'f': 3}
         d1copy = copy.deepcopy(d1)
-        phlsys_dictutil.ensure_keys(d1, 'a', 'b', 'c', 'd', 'e')
+        phlsys_dictutil.ensure_keys(d1, ['a', 'b', 'c', 'd', 'e'])
         self.assertDictContainsSubset(d1copy, d1)
         d2 = {'a': None, 'b': 1, 'c': None, 'd': None, 'e': 2, 'f': 3}
         self.assertDictEqual(d1, d2)
@@ -61,7 +61,7 @@ class Test(unittest.TestCase):
         d1copy = copy.deepcopy(d1)
         default = [[0, 1, 2], 1, 2]  # nest a list to prove deep copying
         phlsys_dictutil.ensure_keys_default(
-            d1, default, 'a', 'b', 'c', 'd', 'e')
+            d1, default, ['a', 'b', 'c', 'd', 'e'])
         self.assertDictContainsSubset(d1copy, d1)
         default[0][:] = []  # clear the list in place to prove we have copied
         default[:] = []  # clear the list in place to prove we have copied
