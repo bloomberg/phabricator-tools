@@ -68,7 +68,7 @@ USER_ACTIONS = dict(AUTHOR_ACTIONS.items() + REVIEWER_ACTIONS.items())
 # based on commit messages, these are accepted by create_revision and
 # accept_revision
 # from phabricator/.../...DefaultFieldSelector.php
-class MessageFields(object):
+class MessageFields(object):  # XXX: will derive from Enum in Python 3.4+
     title = "title"
     summary = "summary"
     test_plan = "testPlan"
