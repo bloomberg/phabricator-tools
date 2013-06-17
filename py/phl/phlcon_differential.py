@@ -1,7 +1,8 @@
 """Wrapper to call Phabricator's Differential Conduit API"""
 
 import collections
-import copy
+
+import phlsys_dictutil
 
 
 # Enumerate the states that a Differential review can be in
@@ -82,35 +83,6 @@ def _make_nt(name, *fields):
         'phlcon_differential__' + name,
         fields)
 
-
-def _copy_dict_no_nones(d):
-    """Return a copy of the supplied 'd' minus any keys mapping to 'None'."""
-    clean = {}
-    clean.update((k, v) for k, v in d.iteritems() if v is not None)
-    return clean
-
-
-def _ensure_keys(d, *keys):
-    """Modify supplied 'd'; ensure supplied 'keys', map to None if absent."""
-    for k in keys:
-        if k not in d:
-            d[k] = None
-
-
-def _ensure_keys_default(dic, default, *keys):
-    """Ensure that the dictionary has the supplied keys.
-
-    Initialiase them with a deepcopy of the supplied 'default' if not.
-
-    :dic: the dictionary to modify
-    :default: the default value (will be deep copied)
-    :*keys: the keys to ensure
-    :returns: None
-
-    """
-    for k in keys:
-        if k not in dic:
-            dic[k] = copy.deepcopy(default)
 
 CreateRawDiffResponse = _make_nt('CreateRawDiffResponse', 'id', 'uri')
 GetDiffIdResponse = _make_nt(
@@ -197,7 +169,7 @@ def create_diff(
         "arcanistProject": arcanist_project,
         "repositoryUUID": repository_uuid,
     }
-    d = _copy_dict_no_nones(d)
+    d = phlsys_dictutil.copy_dict_no_nones(d)
     response = conduit.call("differential.creatediff", d)
     return response
 
@@ -207,7 +179,7 @@ def create_diff(
 #      changes that don't matter
 def _get_diff(conduit, revision_id=None, diff_id=None):
     d = {"revision_id": revision_id, "diff_id": diff_id}
-    d = _copy_dict_no_nones(d)
+    d = phlsys_dictutil.copy_dict_no_nones(d)
     response = conduit.call("differential.getdiff", d)
     response["id"] = int(response["id"])
     return GetDiffIdResponse(**response)
@@ -215,12 +187,12 @@ def _get_diff(conduit, revision_id=None, diff_id=None):
 
 def parse_commit_message(conduit, corpus, partial=None):
     d = {"corpus": corpus, "partial": partial}
-    d = _copy_dict_no_nones(d)
+    d = phlsys_dictutil.copy_dict_no_nones(d)
     p = ParseCommitMessageResponse(
         **conduit.call("differential.parsecommitmessage", d))
-    _ensure_keys_default(
+    phlsys_dictutil.ensure_keys_default(
         p.fields, "", "summary", "testPlan", "title")
-    _ensure_keys_default(
+    phlsys_dictutil.ensure_keys_default(
         p.fields, [], "reviewerPHIDs")
     return p
 
@@ -235,11 +207,11 @@ def query(
         conduit,
         ids=None):  # list(uint)
     # TODO: typechecking
-    d = _copy_dict_no_nones({'ids': ids})
+    d = phlsys_dictutil.copy_dict_no_nones({'ids': ids})
     response = conduit.call("differential.query", d)
     query_response_list = []
     for r in response:
-        _ensure_keys(r, "sourcePath", "auxiliary")
+        phlsys_dictutil.ensure_keys(r, "sourcePath", "auxiliary")
         r["id"] = int(r["id"])
         r["status"] = int(r["status"])
         query_response_list.append(QueryResponse(**r))
@@ -266,7 +238,7 @@ def create_comment(
         "revision_id": revisionId, "message": message,
         "action": action, "silent": silent
     }
-    d = _copy_dict_no_nones(d)
+    d = phlsys_dictutil.copy_dict_no_nones(d)
     response = conduit.call('differential.createcomment', d)
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
