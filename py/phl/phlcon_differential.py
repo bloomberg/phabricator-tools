@@ -3,14 +3,15 @@
 import collections
 import copy
 
+
 # Enumerate the states that a Differential review can be in
-## TODO: look into some sort of const protection for these
 ## from ArcanistRevisionDifferentialStatus.php:
-REVISION_NEEDS_REVIEW = 0
-REVISION_NEEDS_REVISION = 1
-REVISION_ACCEPTED = 2
-REVISION_CLOSED = 3
-REVISION_ABANDONED = 4
+class ReviewStates(object):  # XXX: will derive from Enum in Python 3.4+
+    needs_review = 0
+    needs_revision = 1
+    accepted = 2
+    closed = 3
+    abandoned = 4
 
 # Enumerate the actions that can be performed on a Differential review
 ## from .../differential/constants/DifferentialAction.php:

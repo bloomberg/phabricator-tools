@@ -117,7 +117,7 @@ index d4711bb..1c634f5 100644
         self.assertEqual(query_response_list[0].id, create_response.revisionid)
         self.assertEqual(
             query_response_list[0].status,
-            phlcon_differential.REVISION_NEEDS_REVIEW)
+            phlcon_differential.ReviewStates.needs_review)
 
         diff2_response = phlcon_differential.create_raw_diff(
             self.conduit, diff2)
@@ -143,7 +143,7 @@ index d4711bb..1c634f5 100644
         self.assertEqual(query_response_list[0].id, create_response.revisionid)
         self.assertEqual(
             query_response_list[0].status,
-            phlcon_differential.REVISION_ACCEPTED)
+            phlcon_differential.ReviewStates.accepted)
 
         phlcon_differential.close(self.conduit, create_response.revisionid)
 
@@ -153,7 +153,8 @@ index d4711bb..1c634f5 100644
         self.assertEqual(query_response_list[0].uri, create_response.uri)
         self.assertEqual(query_response_list[0].id, create_response.revisionid)
         self.assertEqual(
-            query_response_list[0].status, phlcon_differential.REVISION_CLOSED)
+            query_response_list[0].status,
+            phlcon_differential.ReviewStates.closed)
 
     def testCreateDiffRevision(self):
         diff = """
@@ -240,17 +241,19 @@ Test Plan: I proof-read it and it looked ok
         authorActExp = self._authorActExp
         reviewActExp = self._reviewActExp
 
-        authorActExp(revisionid, d.ACTION_RETHINK, d.REVISION_NEEDS_REVISION)
-        authorActExp(revisionid, d.ACTION_REQUEST, d.REVISION_NEEDS_REVIEW)
-        authorActExp(revisionid, d.ACTION_ABANDON, d.REVISION_ABANDONED)
-        authorActExp(revisionid, d.ACTION_RECLAIM, d.REVISION_NEEDS_REVIEW)
+        states = phlcon_differential.ReviewStates
 
-        reviewActExp(revisionid, d.ACTION_REJECT, d.REVISION_NEEDS_REVISION)
-        reviewActExp(revisionid, d.ACTION_ACCEPT, d.REVISION_ACCEPTED)
-        reviewActExp(revisionid, d.ACTION_REJECT, d.REVISION_NEEDS_REVISION)
-        reviewActExp(revisionid, d.ACTION_ACCEPT, d.REVISION_ACCEPTED)
+        authorActExp(revisionid, d.ACTION_RETHINK, states.needs_revision)
+        authorActExp(revisionid, d.ACTION_REQUEST, states.needs_review)
+        authorActExp(revisionid, d.ACTION_ABANDON, states.abandoned)
+        authorActExp(revisionid, d.ACTION_RECLAIM, states.needs_review)
 
-        authorActExp(revisionid, d.ACTION_CLOSE, d.REVISION_CLOSED)
+        reviewActExp(revisionid, d.ACTION_REJECT, states.needs_revision)
+        reviewActExp(revisionid, d.ACTION_ACCEPT, states.accepted)
+        reviewActExp(revisionid, d.ACTION_REJECT, states.needs_revision)
+        reviewActExp(revisionid, d.ACTION_ACCEPT, states.accepted)
+
+        authorActExp(revisionid, d.ACTION_CLOSE, states.closed)
 
     def testUpdateNoFields(self):
         revisionid = self._createRevision("testUpdateNoFields")

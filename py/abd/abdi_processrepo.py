@@ -150,7 +150,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
     if not abdt_naming.isStatusBad(wb):
         d = phlcon_differential
         status = d.get_revision_status(conduit, wb.id)
-        if int(status) == d.REVISION_ACCEPTED:
+        if int(status) == d.ReviewStates.accepted:
             verifyReviewBranchBase(gitContext, reviewBranch)
             land(conduit, wb, gitContext, reviewBranch.branch)
             # TODO: we probably want to do a better job of cleaning up locally
