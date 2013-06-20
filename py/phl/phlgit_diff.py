@@ -9,7 +9,7 @@ import phlsys_subprocess
 
 
 def rawDiffRangeToHere(clone, start):
-    return clone.call("diff", start + "...")
+    return clone.call("diff", start + "...", "-M")
 
 
 def rawDiffRange(clone, base, new, context_lines=None):
@@ -26,11 +26,16 @@ def rawDiffRange(clone, base, new, context_lines=None):
     :returns: a string of the raw diff
 
     """
+    args = [
+        "diff",
+        base + "..." + new,
+        "-M",  # automatically detect moves/renames
+    ]
+
     if context_lines:
-        result = clone.call(
-            "diff", base + "..." + new, "--unified=" + str(context_lines))
-    else:
-        result = clone.call("diff", base + "..." + new)
+        args.append("--unified=" + str(context_lines))
+
+    result = clone.call(*args)
     return result
 
 
