@@ -391,6 +391,22 @@ class Test(unittest.TestCase):
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
+    def test_createHugeReview(self):
+        self._devCheckoutPushNewBranch("ph-review/createHugeReview/master")
+        lots = "h\n" * 1 * 1024 * 1024
+        self._devPushNewFile("NEWFILE", contents=lots)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+
+    def test_hugeUpdateToReview(self):
+        self._devCheckoutPushNewBranch("ph-review/hugeUpdateReview/master")
+        self._devPushNewFile("NEWFILE")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        lots = "h\n" * 1 * 1024 * 1024
+        self._devPushNewFile("NEWFILE2", contents=lots)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+        self._phabUpdateWithExpectations(total=1, bad=1)
+
     # TODO: test landing when origin has been updated underneath us
     # TODO: test landing when dependent review hasn't been landed
 

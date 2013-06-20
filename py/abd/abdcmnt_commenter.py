@@ -24,6 +24,8 @@ class Commenter(object):
                 self._commitMessageParseException(e)
             elif isinstance(e, abdt_exception.LandingException):
                 self._landingException(e)
+            elif isinstance(e, abdt_exception.LargeDiffException):
+                self._diffException(e)
             else:
                 self._userException(e)
         else:
@@ -111,6 +113,17 @@ class Commenter(object):
 
         message += "errors:\n"
         message += rmu.code_block(str(e), lang="text", isBad=True)
+
+        self._createComment(message)
+
+    def _diffException(self, e):
+        message = str("failed to create diff, tried to reduce context but it "
+                      "was still too large.\n")
+        message += "\n"
+        message += "diff size: " + str(e.diff_len) + " bytes\n"
+        message += "diff size limit: " + str(e.diff_len_limit) + " bytes\n"
+        message += "summary:\n"
+        message += rmu.code_block(str(e.diff_summary), lang="text", isBad=True)
 
         self._createComment(message)
 

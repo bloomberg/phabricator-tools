@@ -24,6 +24,9 @@ import abdt_workingbranch
 # TODO: split into appropriate modules
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
+MAX_DIFF_SIZE = 1.5 * 1024 * 1024
+_DIFF_CONTEXT_LINES = 1000
+_LESS_DIFF_CONTEXT_LINES = 100
 
 
 def isBasedOn(name, base):
@@ -66,7 +69,28 @@ def createReview(conduit, gitContext, review_branch):
                     review_branch.remote_branch))
 
     rawDiff = phlgit_diff.rawDiffRange(
-        clone, review_branch.remote_base, review_branch.remote_branch, 1000)
+        clone,
+        review_branch.remote_base,
+        review_branch.remote_branch,
+        _DIFF_CONTEXT_LINES)
+
+    # if the diff is too big then regen with less context
+    if len(rawDiff) >= MAX_DIFF_SIZE:
+        rawDiff = phlgit_diff.rawDiffRange(
+            clone,
+            review_branch.remote_base,
+            review_branch.remote_branch,
+            _LESS_DIFF_CONTEXT_LINES)
+
+    # if the diff is still too big then regen with no context
+    if len(rawDiff) >= MAX_DIFF_SIZE:
+        rawDiff = phlgit_diff.rawDiffRange(
+            clone, review_branch.remote_base, review_branch.remote_branch)
+
+    # if the diff is still too big then error
+    if len(rawDiff) >= MAX_DIFF_SIZE:
+        raise abdt_exception.LargeDiffException(
+            "diff too big", len(rawDiff), MAX_DIFF_SIZE)
 
     revisionid = createDifferentialReview(
         conduit, user, parsed, gitContext, review_branch, rawDiff)
@@ -166,10 +190,29 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
 
     print "- creating diff"
     rawDiff = phlgit_diff.rawDiffRange(
-        clone, wb.remote_base, remoteBranch, 1000)
+        clone, wb.remote_base, remoteBranch, _DIFF_CONTEXT_LINES)
     if not rawDiff:
         raise abdt_exception.AbdUserException(
             "no difference from " + wb.base + " to " + wb.branch)
+
+    # if the diff is too big then regen with less context
+    # used_less_context = False
+    if len(rawDiff) >= MAX_DIFF_SIZE:
+        # used_less_context = True
+        rawDiff = phlgit_diff.rawDiffRange(
+            clone, wb.remote_base, remoteBranch, _LESS_DIFF_CONTEXT_LINES)
+
+    # if the diff is still too big then regen with no context
+    # used_no_context = False
+    if len(rawDiff) >= MAX_DIFF_SIZE:
+        # used_no_context = True
+        rawDiff = phlgit_diff.rawDiffRange(
+            clone, wb.remote_base, remoteBranch)
+
+    # if the diff is still too big then error
+    if len(rawDiff) >= MAX_DIFF_SIZE:
+        raise abdt_exception.LargeDiffException(
+            "diff too big", len(rawDiff), MAX_DIFF_SIZE)
 
     d = phlcon_differential
     used_default_test_plan = False

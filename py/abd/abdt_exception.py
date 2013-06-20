@@ -88,6 +88,27 @@ class NoUsersOnBranchException(AbdUserException):
         self.emails = emails
 
 
+class LargeDiffException(AbdUserException):
+
+    def __init__(self, diff_summary, diff_len, diff_len_limit):
+        """Describe failure to create small enough diff.
+
+        :diff_summary: a textual summary of the diff, e.g. diff --stat
+        :diff_len: the size of the diff
+        :diff_len_limit: the size limit for diffs
+
+        """
+        message = (
+            "abdt_exception__LargeDiffException:\n"
+            "diff_summary: '" + str(diff_summary) + "'\n"
+            "diff_len: '" + str(diff_len) + "'\n"
+            "diff_len_limit: '" + str(diff_len_limit) + "'\n")
+        super(LargeDiffException, self).__init__(message)
+        self.diff_summary = diff_summary
+        self.diff_len = diff_len
+        self.diff_len_limit = diff_len_limit
+
+
 class CommitMessageParseException(AbdUserException):
 
     def __init__(self, errors, fields, digest):
