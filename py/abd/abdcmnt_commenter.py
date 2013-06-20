@@ -1,5 +1,5 @@
 import phlcon_differential
-import phlcon_remarkup as rmu
+import phlcon_remarkup
 
 import abdt_exception
 
@@ -34,16 +34,17 @@ class Commenter(object):
 
     def failedCreateReview(self, branch_name, exception):
         message = "failed to create revision from branch "
-        message += rmu.monospaced(branch_name) + "\n"
+        message += phlcon_remarkup.monospaced(branch_name) + "\n"
         self._createComment(message)
         self.exception(exception)
 
     def createdReview(self, branch_name, base_name):
         message = "created revision from branch "
-        message += rmu.monospaced(branch_name) + "\n"
+        message += phlcon_remarkup.monospaced(branch_name) + "\n"
         message += "\n"
         message += "if the revision is accepted then i will automatically try "
-        message += "to land the revision on " + rmu.monospaced(base_name) + "."
+        message += "to land the revision on "
+        message += phlcon_remarkup.monospaced(base_name) + "."
         message += " the commit message will "
         message += "be created from the title, summary, test plan and other "
         message += "properties of this review page.\n"
@@ -55,33 +56,35 @@ class Commenter(object):
 
     def updatedReview(self, branch_name):
         message = "updated revision from branch "
-        message += rmu.monospaced(branch_name) + "\n"
+        message += phlcon_remarkup.monospaced(branch_name) + "\n"
         self._createComment(message, silent=True)
 
     def landedReview(self, branch_name, base_name, git_output):
         message = "landed "
-        message += rmu.monospaced(branch_name) + " "
+        message += phlcon_remarkup.monospaced(branch_name) + " "
         message += " on "
-        message += rmu.monospaced(base_name) + "\n"
-        message += "deleted " + rmu.monospaced(branch_name) + "\n"
-        message += "git output:\n" + rmu.code_block(git_output, lang="text")
+        message += phlcon_remarkup.monospaced(base_name) + "\n"
+        message += "deleted " + phlcon_remarkup.monospaced(branch_name) + "\n"
+        message += "git output:\n"
+        message += phlcon_remarkup.code_block(git_output, lang="text")
         self._createComment(message, silent=True)
 
     def abandonedBranch(self, branch_name):
         message = "user deleted branch "
-        message += rmu.monospaced(branch_name) + " "
+        message += phlcon_remarkup.monospaced(branch_name) + " "
         message += "which was linked to this review.\n"
         message += "this review is now abandoned."
         self._createComment(message, silent=True)
 
     def usedDefaultTestPlan(self, branch_name, test_plan):
         message = "a test plan could not be determined from the commits on "
-        message += rmu.monospaced(branch_name) + " "
+        message += phlcon_remarkup.monospaced(branch_name) + " "
         message += "so the following message was used:\n"
-        message += rmu.code_block(test_plan, lang="text")
+        message += phlcon_remarkup.code_block(test_plan, lang="text")
         message += "for a test plan to be recognised, please use text like "
         message += "the following in your latest commit message: \n"
-        message += rmu.code_block("Test Plan:\nmy test plan", lang="text")
+        message += phlcon_remarkup.code_block(
+            "Test Plan:\nmy test plan", lang="text")
         message += "as author you may edit the test plan directly by "
         message += "using the 'edit revision' link at the top-right of "
         message += "this review page."
@@ -97,13 +100,14 @@ class Commenter(object):
 
         message += "errors:\n"
         for error in e.errors:
-            message += rmu.code_block(str(error), lang="text", isBad=True)
+            message += phlcon_remarkup.code_block(
+                str(error), lang="text", isBad=True)
 
         message += "fields:\n"
-        message += rmu.dict_to_table(e.fields)
+        message += phlcon_remarkup.dict_to_table(e.fields)
 
         message += "combined commit message digest:\n"
-        message += rmu.code_block(e.digest, lang="text")
+        message += phlcon_remarkup.code_block(e.digest, lang="text")
 
         self._createComment(message)
 
@@ -112,7 +116,7 @@ class Commenter(object):
         message += "\n"
 
         message += "errors:\n"
-        message += rmu.code_block(str(e), lang="text", isBad=True)
+        message += phlcon_remarkup.code_block(str(e), lang="text", isBad=True)
 
         self._createComment(message)
 
@@ -123,7 +127,8 @@ class Commenter(object):
         message += "diff size: " + str(e.diff_len) + " bytes\n"
         message += "diff size limit: " + str(e.diff_len_limit) + " bytes\n"
         message += "summary:\n"
-        message += rmu.code_block(str(e.diff_summary), lang="text", isBad=True)
+        message += phlcon_remarkup.code_block(
+            str(e.diff_summary), lang="text", isBad=True)
 
         self._createComment(message)
 
@@ -132,7 +137,7 @@ class Commenter(object):
         message += "\n"
 
         message += "errors:\n"
-        message += rmu.code_block(str(e), lang="text", isBad=True)
+        message += phlcon_remarkup.code_block(str(e), lang="text", isBad=True)
 
         self._createComment(message)
 
