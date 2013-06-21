@@ -4,8 +4,6 @@ set -e # exit immediately on error
 # cd to the dir of this script, so we can run scripts in the same dir
 cd "$(dirname "$0")"
 
-./static_tests.sh
-
 libscripts="$(find py -iname '*.py')"
 
 # unittest
