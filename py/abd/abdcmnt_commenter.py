@@ -112,11 +112,24 @@ class Commenter(object):
         self._createComment(message)
 
     def _landingException(self, e):
-        message = "failed to land revision, see below.\n"
-        message += "\n"
+        base = phlcon_remarkup.monospaced(e.base_name)
+        branch = phlcon_remarkup.monospaced(e.review_branch_name)
+        author = phlcon_remarkup.bold('author')
+        reviewer = phlcon_remarkup.bold('reviewer')
 
+        message = "failed to land revision on " + base + ", see below.\n"
+        message += "\n"
         message += "errors:\n"
         message += phlcon_remarkup.code_block(str(e), lang="text", isBad=True)
+        message += "this is probably due to merge conflicts.\n"
+        message += "\n"
+        message += author + ", please do the following:\n"
+        message += "\n"
+        message += "- merge " + base + " into " + branch + "\n"
+        message += "- resolve merge conflicts\n"
+        message += "- push to " + branch + "\n"
+        message += "\n"
+        message += reviewer + " may then accept review with the new changes.\n"
 
         self._createComment(message)
 

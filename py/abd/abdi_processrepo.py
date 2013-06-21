@@ -258,7 +258,8 @@ def land(conduit, wb, gitContext, branch):
                     name + " <" + email + ">")
         except phlsys_subprocess.CalledProcessError as e:
             clone.call("reset", "--hard")  # fix the working copy
-            raise abdt_exception.LandingException('\n' + e.stdout)
+            raise abdt_exception.LandingException(
+                '\n' + e.stdout, branch, wb.base)
 
         print "- pushing " + wb.remote_base
         phlgit_push.push(clone, wb.base, gitContext.remote)

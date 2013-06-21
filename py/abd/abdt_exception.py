@@ -132,16 +132,22 @@ class CommitMessageParseException(AbdUserException):
 
 class LandingException(AbdUserException):
 
-    def __init__(self, message):
+    def __init__(self, message, review_branch_name, base_name):
         """Describe failure to land a review.
 
         :message: any available error message
+        :review_branch_name: name of the branch being reviewed
+        :base_name: name of the missing base branch
 
         """
         new_message = (
             "abdt_exception__LandingException:\n" +
-            "message: '" + str(message) + "'")
+            "message: '" + str(message) + "'\n" +
+            "review_branch_name: '" + str(review_branch_name) + "'\n" +
+            "base_name: '" + str(base_name) + "'\n")
         super(LandingException, self).__init__(new_message)
+        self.review_branch_name = review_branch_name
+        self.base_name = base_name
 
 
 #------------------------------------------------------------------------------
