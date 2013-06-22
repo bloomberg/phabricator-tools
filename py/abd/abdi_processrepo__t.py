@@ -143,11 +143,11 @@ class Test(unittest.TestCase):
 
     def _devSetAuthorAccount(self, account):
         devClone = phlsys_git.GitClone("developer")
-        phlgit_config.setUsernameEmail(devClone, account.user, account.email)
+        phlgit_config.set_username_email(devClone, account.user, account.email)
 
     def _phabSetAuthorAccount(self, account):
         devClone = phlsys_git.GitClone("phab")
-        phlgit_config.setUsernameEmail(devClone, account.user, account.email)
+        phlgit_config.set_username_email(devClone, account.user, account.email)
 
     def _devResetBranchToMaster(self, branch):
         with phlsys_fs.chdir_context("developer"):

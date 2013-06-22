@@ -5,12 +5,12 @@
 # phlgit_config
 #
 # Public Classes:
-#   TestLog
+#   Test
 #
 # Public Functions:
-#   setUsernameEmail
-#   getUsername
-#   getEmail
+#   set_username_email
+#   get_username
+#   get_email
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -22,7 +22,7 @@ import phlsys_git
 import phlsys_subprocess
 
 
-def setUsernameEmail(clone, username, email):
+def set_username_email(clone, username, email):
     """Set the user.name and user.email on the supplied git clone.
 
     :clone: the clone to operate on
@@ -35,7 +35,7 @@ def setUsernameEmail(clone, username, email):
     clone.call("config", "user.email", email)
 
 
-def getUsername(clone):
+def get_username(clone):
     """Return the string username for the current clone.
 
     :clone: the clone to operate on
@@ -45,7 +45,7 @@ def getUsername(clone):
     return clone.call("config", "--get", "user.name").strip()
 
 
-def getEmail(clone):
+def get_email(clone):
     """Return the string email for the current clone.
 
     :clone: the clone to operate on
@@ -55,10 +55,10 @@ def getEmail(clone):
     return clone.call("config", "--get", "user.email").strip()
 
 
-class TestLog(unittest.TestCase):
+class Test(unittest.TestCase):
 
     def __init__(self, data):
-        super(TestLog, self).__init__(data)
+        super(Test, self).__init__(data)
         self.path = "phlgit_diff_TestDiff"
         self.clone = None
 
@@ -71,21 +71,21 @@ class TestLog(unittest.TestCase):
     def testCanSetAndGetUsernameEmail(self):
         testUsername = "test"
         testEmail = "test@server.fake"
-        setUsernameEmail(self.clone, testUsername, testEmail)
-        self.assertEqual(getUsername(self.clone), testUsername)
-        self.assertEqual(getEmail(self.clone), testEmail)
+        set_username_email(self.clone, testUsername, testEmail)
+        self.assertEqual(get_username(self.clone), testUsername)
+        self.assertEqual(get_email(self.clone), testEmail)
 
     def testCanSetAndGetUsernameEmailTwice(self):
         testUsername = "test"
         testUsername2 = "another test username"
         testEmail = "test@server.fake"
         testEmail2 = "another.test.username@server.fake"
-        setUsernameEmail(self.clone, testUsername, testEmail)
-        self.assertEqual(getUsername(self.clone), testUsername)
-        self.assertEqual(getEmail(self.clone), testEmail)
-        setUsernameEmail(self.clone, testUsername2, testEmail2)
-        self.assertEqual(getUsername(self.clone), testUsername2)
-        self.assertEqual(getEmail(self.clone), testEmail2)
+        set_username_email(self.clone, testUsername, testEmail)
+        self.assertEqual(get_username(self.clone), testUsername)
+        self.assertEqual(get_email(self.clone), testEmail)
+        set_username_email(self.clone, testUsername2, testEmail2)
+        self.assertEqual(get_username(self.clone), testUsername2)
+        self.assertEqual(get_email(self.clone), testEmail2)
 
     def tearDown(self):
         phlsys_subprocess.run_commands("rm -rf " + self.path)
