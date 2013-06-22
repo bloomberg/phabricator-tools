@@ -182,7 +182,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
     wb = workingBranch
 
     clone = gitContext.clone
-    isBranchIdentical = phlgit_branch.isIdentical
+    isBranchIdentical = phlgit_branch.is_identical
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
         print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
@@ -351,7 +351,7 @@ def processUpdatedBranch(
     else:
         commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
-            hasChanged = not phlgit_branch.isIdentical(
+            hasChanged = not phlgit_branch.is_identical(
                 gitContext.clone,
                 review_branch.remote_branch,
                 working_branch.remote_branch)
@@ -414,7 +414,7 @@ def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
 
 def processUpdatedRepo(conduit, path, remote, mailer):
     clone = phlsys_git.GitClone(path)
-    remote_branches = phlgit_branch.getRemote(clone, remote)
+    remote_branches = phlgit_branch.get_remote(clone, remote)
     gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
     wbList = abdt_naming.getWorkingBranches(remote_branches)
     makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch

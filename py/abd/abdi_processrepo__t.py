@@ -98,14 +98,14 @@ class Test(unittest.TestCase):
     def _countPhabWorkingBranches(self):
         with phlsys_fs.chdir_context("phab"):
             clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.getRemote(clone, "origin")
+            branches = phlgit_branch.get_remote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         return len(wbList)
 
     def _countPhabBadWorkingBranches(self):
         with phlsys_fs.chdir_context("phab"):
             clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.getRemote(clone, "origin")
+            branches = phlgit_branch.get_remote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         numBadBranches = 0
         for wb in wbList:
@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
     def _getTheOnlyReviewId(self):
         with phlsys_fs.chdir_context("phab"):
             clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.getRemote(clone, "origin")
+            branches = phlgit_branch.get_remote(clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         self.assertEqual(len(wbList), 1)
         wb = wbList[0]

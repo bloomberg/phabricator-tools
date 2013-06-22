@@ -5,43 +5,43 @@
 # phlgit_branch
 #
 # Public Functions:
-#   isTreeSame
-#   isIdentical
-#   getLocal
-#   getRemote
+#   is_tree_same
+#   is_identical
+#   get_local
+#   get_remote
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 
-def _catFilePretty(clone, objectHash):
+def _cat_file_pretty(clone, objectHash):
     return clone.call('cat-file', '-p', objectHash)
 
 
-def _getTree(clone, commit):
-    content = _catFilePretty(clone, commit).splitlines()
+def _get_tree(clone, commit):
+    content = _cat_file_pretty(clone, commit).splitlines()
     tree = content[0].split("tree ")[1].strip()
     return tree
 
 
-def isTreeSame(clone, branch, targetBranch):
-    branchTree = _getTree(clone, branch)
-    targetTree = _getTree(clone, targetBranch)
+def is_tree_same(clone, branch, targetBranch):
+    branchTree = _get_tree(clone, branch)
+    targetTree = _get_tree(clone, targetBranch)
     return branchTree == targetTree
 
 
-def _gitRevParse(clone, rev):
+def _git_rev_parse(clone, rev):
     return clone.call('rev-parse', rev)
 
 
-def isIdentical(clone, branch, targetBranch):
-    branchRev = _gitRevParse(clone, branch)
-    targetRev = _gitRevParse(clone, targetBranch)
+def is_identical(clone, branch, targetBranch):
+    branchRev = _git_rev_parse(clone, branch)
+    targetRev = _git_rev_parse(clone, targetBranch)
     return branchRev == targetRev
 
 
-def _getRefs(clone):
+def _get_refs(clone):
     # the output list is like:
     #     SHA1      Refname
     #     SHA1      Refname
@@ -53,20 +53,20 @@ def _getRefs(clone):
     return refs
 
 
-def _filterRefsInNamespace(refs, namespace):
+def _filter_refs_in_namespace(refs, namespace):
     return [ref[len(namespace):] for ref in refs if ref.startswith(namespace)]
 
 
-def getLocal(clone):
-    refs = _getRefs(clone)
-    return _filterRefsInNamespace(refs, "refs/heads/")
+def get_local(clone):
+    refs = _get_refs(clone)
+    return _filter_refs_in_namespace(refs, "refs/heads/")
 
 
-def getRemote(clone, remote):
-    refs = _getRefs(clone)
+def get_remote(clone, remote):
+    refs = _get_refs(clone)
     remote_head = "refs/remotes/" + remote + "/head"
     refs = [r for r in refs if r != remote_head]
-    return _filterRefsInNamespace(refs, "refs/remotes/" + remote + "/")
+    return _filter_refs_in_namespace(refs, "refs/remotes/" + remote + "/")
 
 
 #------------------------------------------------------------------------------
