@@ -1,6 +1,10 @@
 # generate documentation
 set -e # exit immediately on error
 
+python meta/docgen/updatemodcontents.py \
+    --force-insert \
+    `find meta/docgen -iname '*.py' | grep -v __t`
+
 function write_group_doc {
     group=$1
     dir="py/$group"
