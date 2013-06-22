@@ -4,9 +4,6 @@
 # -----------------------------------------------------------------------------
 # phlcon_user
 #
-# Public Classes:
-#   TestUser
-#
 # Public Functions:
 #   is_no_such_error
 #   query_user_from_email
@@ -24,9 +21,6 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import unittest
-
-import phldef_conduit
 import phlsys_conduit
 import phlsys_namedtuple
 
@@ -202,70 +196,6 @@ def make_phid_username_dict(conduit, phids):
         return None
     else:
         return {u.phid: u.userName for u in users}
-
-
-class TestUser(unittest.TestCase):
-
-    def __init__(self, data):
-        super(TestUser, self).__init__(data)
-        self.conduit = None
-        self.test_user = phldef_conduit.ALICE.user
-        self.test_email = phldef_conduit.ALICE.email
-
-    def setUp(self):
-        test_data = phldef_conduit
-        self.conduit = phlsys_conduit.Conduit(
-            test_data.TEST_URI,
-            test_data.ALICE.user,
-            test_data.ALICE.certificate)
-
-    def testAliceEmail(self):
-        users = query_users_from_emails(self.conduit, [self.test_email])
-        self.assertEqual(len(users), 1)
-        self.assertEqual(users[0], self.test_user)
-
-        user = query_user_from_email(self.conduit, self.test_email)
-        self.assertEqual(user.userName, self.test_user)
-
-        phidUsers = query_users_from_phids(self.conduit, [user.phid])
-        self.assertEqual(phidUsers[0].userName, self.test_user)
-
-        phidUsernames = query_usernames_from_phids(self.conduit, [user.phid])
-        self.assertEqual(phidUsernames[0], self.test_user)
-
-    def testAliceAndNooneEmail(self):
-        emails = [self.test_email, "noone@server.invalid", "a@server.invalid"]
-        users = query_users_from_emails(self.conduit, emails)
-        self.assertEqual(len(users), 3)
-        self.assertListEqual(users, [self.test_user, None, None])
-
-    def testAliceUsername(self):
-        users = query_users_from_usernames(self.conduit, [self.test_user])
-        self.assertEqual(len(users), 1)
-        self.assertEqual(users[0].userName, self.test_user)
-
-        userDict = make_username_phid_dict(self.conduit, [self.test_user])
-        self.assertEqual(len(userDict), 1)
-        self.assertEqual(userDict[self.test_user], users[0].phid)
-
-        username = users[0].userName
-        phid = users[0].phid
-        phidDict = make_phid_username_dict(self.conduit, [phid])
-        self.assertEqual(len(phidDict), 1)
-        self.assertEqual(phidDict[phid], username)
-
-    def testBadUsername(self):
-        bad_username = "#@)4308f:"
-        users = query_users_from_usernames(self.conduit, [bad_username])
-        self.assertIsNone(users)
-
-        userDict = make_username_phid_dict(self.conduit, [bad_username])
-        self.assertIsNone(userDict)
-
-    def testBadPhid(self):
-        bad_phid = "asd9f87"
-        phidDict = make_phid_username_dict(self.conduit, [bad_phid])
-        self.assertIsNone(phidDict)
 
 
 #------------------------------------------------------------------------------
