@@ -158,7 +158,7 @@ def createDifferentialReview(
             review.revisionid)
 
         print "- pushing working branch: " + workingBranch
-        phlgit_push.pushAsymmetrical(
+        phlgit_push.push_asymmetrical(
             clone, review_branch.branch, workingBranch, gitContext.remote)
 
     print "- commenting on " + str(review.revisionid)

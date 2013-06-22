@@ -5,10 +5,10 @@
 # phlgit_push
 #
 # Public Functions:
-#   pushAsymmetricalForce
-#   pushAsymmetrical
+#   push_asymmetrical_force
+#   push_asymmetrical
 #   push
-#   moveAsymmetrical
+#   move_asymmetrical
 #   delete
 #
 # -----------------------------------------------------------------------------
@@ -16,11 +16,11 @@
 # =============================================================================
 
 
-def pushAsymmetricalForce(clone, localBranch, remoteBranch, remoteName):
+def push_asymmetrical_force(clone, localBranch, remoteBranch, remoteName):
     clone.call('push', remoteName, localBranch + ":" + remoteBranch, "--force")
 
 
-def pushAsymmetrical(clone, localBranch, remoteBranch, remoteName):
+def push_asymmetrical(clone, localBranch, remoteBranch, remoteName):
     clone.call('push', remoteName, localBranch + ":" + remoteBranch)
 
 
@@ -28,7 +28,7 @@ def push(clone, branch, remoteName):
     clone.call('push', remoteName, branch)
 
 
-def moveAsymmetrical(clone, local_branch, old_remote, new_remote, remote):
+def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):
     """Delete 'old_remote', push 'local_branch' to 'new_remote' on 'remote'.
 
     :clone: supports call()

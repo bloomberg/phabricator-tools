@@ -30,13 +30,13 @@ def pushStatus(gitContext, review_branch, working_branch, status):
 
     new_branch = working_branch.branch
     if old_branch == new_branch:
-        phlgit_push.pushAsymmetricalForce(
+        phlgit_push.push_asymmetrical_force(
             clone,
             review_branch.remote_branch,
             phlgitu_ref.makeLocal(new_branch),
             remote)
     else:
-        phlgit_push.moveAsymmetrical(
+        phlgit_push.move_asymmetrical(
             clone,
             review_branch.remote_branch,
             phlgitu_ref.makeLocal(old_branch),
@@ -50,7 +50,7 @@ def pushBadPreReview(gitContext, review_branch):
     working_branch_name = abdt_naming.makeWorkingBranchName(
         abdt_naming.WB_STATUS_BAD_PREREVIEW,
         review_branch.description, review_branch.base, "none")
-    phlgit_push.pushAsymmetrical(
+    phlgit_push.push_asymmetrical(
         gitContext.clone,
         phlgitu_ref.makeRemote(
             review_branch.branch, gitContext.remote),
