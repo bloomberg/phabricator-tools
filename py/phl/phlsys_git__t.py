@@ -1,36 +1,43 @@
-"""Wrapper to call git, with working directory"""
-# =============================================================================
-# CONTENTS
-# -----------------------------------------------------------------------------
-# phlsys_git
+"""Test suite for phlsys_git"""
+#==============================================================================
+#                                   TEST PLAN
+#------------------------------------------------------------------------------
+# Here we detail the things we are concerned to test and specify which tests
+# cover those concerns.
 #
-# Public Classes:
-#   GitClone
-#
-# -----------------------------------------------------------------------------
-# (this contents block is generated, edits will be lost)
-# =============================================================================
+# Concerns:
+# TODO
+#------------------------------------------------------------------------------
+# Tests:
+# TODO
+#==============================================================================
 
-import os
+import unittest
 
+import phlsys_git
 import phlsys_subprocess
 
-# TODO: add support for user.name and user.email to git clone
 
+class Test(unittest.TestCase):
 
-class GitClone():
+    def setUp(self):
+        pass
 
-    def __init__(self, workingDir):
-        self._workingDir = os.path.abspath(workingDir)
+    def tearDown(self):
+        pass
 
-    # def call(*args, stdin=None): <-- supported in Python 3
-    def call(self, *args, **kwargs):
-        stdin = kwargs.pop("stdin", None)
-        assert(not kwargs)
-        result = phlsys_subprocess.run(
-            'git', *args,
-            stdin=stdin, workingDir=self._workingDir)
-        return result.stdout
+    def test_can_commit(self):
+        # TODO: make this more portable with shutil etc.
+        run = phlsys_subprocess.run
+        runCommands = phlsys_subprocess.run_commands
+        path = "phlsys_git_TestGitContext"
+        runCommands("mkdir " + path)
+        run("git", "init", workingDir=path)
+        clone = phlsys_git.GitClone(path)
+        runCommands("touch " + path + "/README")
+        clone.call("add", "README")
+        clone.call("commit", "-m", "initial commit")
+        runCommands("rm -rf " + path)
 
 
 #------------------------------------------------------------------------------
