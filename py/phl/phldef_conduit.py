@@ -13,7 +13,7 @@
 #   ALICE
 #   BOB
 #   PHAB
-#   notauser
+#   NOTAUSER
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -51,7 +51,7 @@ PHAB = Account(user="phab", email="phab@server.test", certificate=(
     "2b2sa2kvlpf"))
 
 # a user that definitely won't be registered, useful for testing
-notauser = Account(user="#:)-", email="notauser@server.invalid", certificate=(
+NOTAUSER = Account(user="#:)-", email="notauser@server.invalid", certificate=(
     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
     "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
     "ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"

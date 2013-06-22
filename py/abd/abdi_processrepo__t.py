@@ -254,7 +254,7 @@ class Test(unittest.TestCase):
     # TODO: test_noCommitWorkflow
 
     def test_badAuthorWorkflow(self):
-        self._devSetAuthorAccount(phldef_conduit.notauser)
+        self._devSetAuthorAccount(phldef_conduit.NOTAUSER)
         self._devCheckoutPushNewBranch("ph-review/badAuthorWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=1, emails=1)
