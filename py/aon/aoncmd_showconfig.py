@@ -25,7 +25,7 @@ def setupParser(parser):
 
 
 def process(_):
-    getExplanation = phlsys_makeconduit.getUriUserCertificateExplanation
+    getExplanation = phlsys_makeconduit.get_uri_user_cert_explanation
     uri, user, cert, explanation = getExplanation(None, None, None)
     print explanation
     print

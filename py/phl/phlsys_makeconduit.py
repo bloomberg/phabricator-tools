@@ -13,8 +13,8 @@ provided.
 #   InsufficientInfoException
 #
 # Public Functions:
-#   makeConduit
-#   getUriUserCertificateExplanation
+#   make_conduit
+#   get_uri_user_cert_explanation
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -33,16 +33,16 @@ class InsufficientInfoException(Exception):
         super(InsufficientInfoException, self).__init__(message)
 
 
-def _makeException(*args):
+def _make_exception(*args):
     return InsufficientInfoException("\n" + "\n\n".join(args))
 
 
-def makeConduit(uri=None, user=None, cert=None):
-    uri, user, cert, _ = getUriUserCertificateExplanation(uri, user, cert)
+def make_conduit(uri=None, user=None, cert=None):
+    uri, user, cert, _ = get_uri_user_cert_explanation(uri, user, cert)
     return phlsys_conduit.Conduit(uri, user, cert)
 
 
-def getUriUserCertificateExplanation(uri, user, cert):
+def get_uri_user_cert_explanation(uri, user, cert):
     if uri and user and cert:
         return uri, user, cert, "all parameters were supplied"
 
@@ -114,23 +114,23 @@ def getUriUserCertificateExplanation(uri, user, cert):
     if uri is None:
         if not arcconfig_path:
             if not arcrc_path:
-                raise _makeException(no_uri, no_arcconfig, no_arcrc)
+                raise _make_exception(no_uri, no_arcconfig, no_arcrc)
             if arcrc is None:
-                raise _makeException(no_uri, no_arcconfig, bad_arcrc)
+                raise _make_exception(no_uri, no_arcconfig, bad_arcrc)
             if "config" in arcrc:
                 uri = arcrc["config"].get("default", None)
             if uri is None:
-                raise _makeException(no_uri, no_arcconfig, arcrc_no_default)
+                raise _make_exception(no_uri, no_arcconfig, arcrc_no_default)
             explanations.append(
                 "got uri from 'default' entry in arcrc\n"
                 "  path: {0}\n"
                 "  uri: {1}".format(arcrc_path, uri))
         else:  # if arcconfig_path
             if arcconfig is None:
-                raise _makeException(no_uri, bad_arcconfig)
+                raise _make_exception(no_uri, bad_arcconfig)
             uri = arcconfig.get("conduit_uri", None)
             if uri is None:
-                raise _makeException(no_uri, arcconfig_no_uri)
+                raise _make_exception(no_uri, arcconfig_no_uri)
             explanations.append(
                 "got uri from .arcconfig\n"
                 "  path: {0}\n"
@@ -146,13 +146,13 @@ def getUriUserCertificateExplanation(uri, user, cert):
     # try to discover user
     if user is None:
         if not arcrc_path:
-            raise _makeException(no_user, no_arcrc)
+            raise _make_exception(no_user, no_arcrc)
         if arcrc is None:
-            raise _makeException(no_user, bad_arcrc)
+            raise _make_exception(no_user, bad_arcrc)
         if "hosts" in arcrc:
             host = phlsys_arcrc.get_host(arcrc, uri)
             if host is None:
-                raise _makeException(no_user, arcrc_no_entry)
+                raise _make_exception(no_user, arcrc_no_entry)
             user = host.get("user", None)
             explanations.append(
                 "got user from uri's entry in .arcrc\n"
@@ -165,27 +165,27 @@ def getUriUserCertificateExplanation(uri, user, cert):
                     "  path: {0}\n"
                     "  cert: {1}".format(arcrc_path, cert[:16] + '...'))
             if user is None:
-                raise _makeException(no_user, arcrc_no_entry)
+                raise _make_exception(no_user, arcrc_no_entry)
         if user is None:
-            raise _makeException(no_user, arcrc_no_entry)
+            raise _make_exception(no_user, arcrc_no_entry)
 
     # try to discover cert
     if cert is None:
         if not arcrc_path:
-            raise _makeException(no_cert, no_arcrc)
+            raise _make_exception(no_cert, no_arcrc)
         if arcrc is None:
-            raise _makeException(no_cert, bad_arcrc)
+            raise _make_exception(no_cert, bad_arcrc)
         if "hosts" in arcrc:
             host = phlsys_arcrc.get_host(arcrc, uri)
             if host is None:
-                raise _makeException(no_cert, arcrc_no_entry)
+                raise _make_exception(no_cert, arcrc_no_entry)
             cert = host.get("cert", None)
             explanations.append(
                 "got cert from uri's entry in .arcrc\n"
                 "  path: {0}\n"
                 "  cert: {1}".format(arcrc_path, cert[:16] + '...'))
         if cert is None:
-            raise _makeException(no_cert, arcrc_no_entry)
+            raise _make_exception(no_cert, arcrc_no_entry)
 
     # make a generic statement if we've missed an error case
     if not (uri and user and cert) or arcrc_path is None:
