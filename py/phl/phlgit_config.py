@@ -4,9 +4,6 @@
 # -----------------------------------------------------------------------------
 # phlgit_config
 #
-# Public Classes:
-#   Test
-#
 # Public Functions:
 #   set_username_email
 #   get_username
@@ -15,11 +12,6 @@
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-
-import unittest
-
-import phlsys_git
-import phlsys_subprocess
 
 
 def set_username_email(clone, username, email):
@@ -55,40 +47,6 @@ def get_email(clone):
     return clone.call("config", "--get", "user.email").strip()
 
 
-class Test(unittest.TestCase):
-
-    def __init__(self, data):
-        super(Test, self).__init__(data)
-        self.path = "phlgit_diff_TestDiff"
-        self.clone = None
-
-    def setUp(self):
-        # TODO: make this more portable with shutil etc.
-        phlsys_subprocess.run_commands("mkdir " + self.path)
-        phlsys_subprocess.run("git", "init", workingDir=self.path)
-        self.clone = phlsys_git.GitClone(self.path)
-
-    def testCanSetAndGetUsernameEmail(self):
-        testUsername = "test"
-        testEmail = "test@server.fake"
-        set_username_email(self.clone, testUsername, testEmail)
-        self.assertEqual(get_username(self.clone), testUsername)
-        self.assertEqual(get_email(self.clone), testEmail)
-
-    def testCanSetAndGetUsernameEmailTwice(self):
-        testUsername = "test"
-        testUsername2 = "another test username"
-        testEmail = "test@server.fake"
-        testEmail2 = "another.test.username@server.fake"
-        set_username_email(self.clone, testUsername, testEmail)
-        self.assertEqual(get_username(self.clone), testUsername)
-        self.assertEqual(get_email(self.clone), testEmail)
-        set_username_email(self.clone, testUsername2, testEmail2)
-        self.assertEqual(get_username(self.clone), testUsername2)
-        self.assertEqual(get_email(self.clone), testEmail2)
-
-    def tearDown(self):
-        phlsys_subprocess.run_commands("rm -rf " + self.path)
 
 
 #------------------------------------------------------------------------------
