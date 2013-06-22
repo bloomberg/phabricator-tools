@@ -25,6 +25,7 @@ appear in the help pages.
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
+# updatemodcontents
 #
 # Public Functions:
 #   main
@@ -45,6 +46,7 @@ import argparse
 import ast
 import cStringIO
 import contextlib
+import os
 import sys
 import tokenize
 
@@ -93,9 +95,11 @@ def process_module(
     assignments = []
     parse_module(raw, classes, functions, assignments)
 
+    name = os.path.splitext(os.path.basename(m))[0]
+
     with contextlib.closing(cStringIO.StringIO()) as contents:
         contents.write(contents_signature)
-        print_contents(contents, classes, functions, assignments)
+        print_contents(contents, name, classes, functions, assignments)
         print(block_marker, file=contents)
 
         new_raw = ''.join([
@@ -155,7 +159,8 @@ def parse_module(s, classes, functions, assignments):
                     assignments.append(name)
 
 
-def print_contents(f, classes, functions, assignments):
+def print_contents(f, name, classes, functions, assignments):
+    print("#", name, file=f)
     print("#", file=f)
     if classes:
         print_items_indented(f, "Public Classes", classes)

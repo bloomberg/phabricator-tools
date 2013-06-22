@@ -10,6 +10,7 @@ For benchmarking Phabricator you might want to take a look at 'Apache Bench'.
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
+# pigcmd_phabping
 #
 # Public Functions:
 #   main

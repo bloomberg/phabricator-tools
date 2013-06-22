@@ -12,6 +12,7 @@ usage examples:
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
+# aoncmd_updaterevision
 #
 # Public Functions:
 #   getFromfilePrefixChars
