@@ -38,7 +38,7 @@ def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
 
 
 def getAnyUserFromBranch(clone, conduit, base, branch):
-    if phlgitu_ref.parseRefHash(clone, base) is None:
+    if phlgitu_ref.parse_ref_hash(clone, base) is None:
         hashes = phlgit_log.get_last_n_commit_hashes_from_ref(clone, 1, branch)
     else:
         hashes = phlgit_log.get_range_hashes(clone, base, branch)

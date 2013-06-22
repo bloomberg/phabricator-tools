@@ -5,40 +5,40 @@
 # phlgitu_ref
 #
 # Public Functions:
-#   makeRemote
-#   makeLocal
-#   parseRefHash
+#   make_remote
+#   make_local
+#   parse_ref_hash
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 
-def makeRemote(ref, remote):
+def make_remote(ref, remote):
     """Return a Git reference based on a local name and a remote name.
 
     Usage example:
-        >>> makeRemote("mywork", "origin")
+        >>> make_remote("mywork", "origin")
         'refs/remotes/origin/mywork'
 
-        >>> makeRemote("mywork", "github")
+        >>> make_remote("mywork", "github")
         'refs/remotes/github/mywork'
     """
     return str("refs/remotes/" + remote + "/" + ref)
 
 
-def makeLocal(ref):
+def make_local(ref):
     """Return a fully qualified Git reference based on a local name.
 
     Usage example:
-        >>> makeLocal("mywork")
+        >>> make_local("mywork")
         'refs/heads/mywork'
     """
     # TODO: check that it isn't already fully qualified
     return str("refs/heads/" + ref)
 
 
-def parseRefHash(clone, ref):
+def parse_ref_hash(clone, ref):
     """Return string of the ref's commit hash if valid, else None.
 
     :clone: supports call()

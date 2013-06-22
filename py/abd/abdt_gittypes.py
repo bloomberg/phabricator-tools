@@ -80,7 +80,7 @@ def makeGitWorkingBranch(working_branch, remote):
     :returns: a GitWorkingBranch
 
     """
-    makeRemote = phlgitu_ref.makeRemote
+    makeRemote = phlgitu_ref.make_remote
     return GitWorkingBranch(
         branch=working_branch.branch,
         status=working_branch.status,
@@ -113,7 +113,7 @@ def makeGitReviewBranch(review_branch, remote):
     :returns: a GitReviewBranch
 
     """
-    makeRemote = phlgitu_ref.makeRemote
+    makeRemote = phlgitu_ref.make_remote
     return GitReviewBranch(
         branch=review_branch.branch,
         description=review_branch.description,

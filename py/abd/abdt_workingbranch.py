@@ -33,14 +33,14 @@ def pushStatus(gitContext, review_branch, working_branch, status):
         phlgit_push.push_asymmetrical_force(
             clone,
             review_branch.remote_branch,
-            phlgitu_ref.makeLocal(new_branch),
+            phlgitu_ref.make_local(new_branch),
             remote)
     else:
         phlgit_push.move_asymmetrical(
             clone,
             review_branch.remote_branch,
-            phlgitu_ref.makeLocal(old_branch),
-            phlgitu_ref.makeLocal(new_branch),
+            phlgitu_ref.make_local(old_branch),
+            phlgitu_ref.make_local(new_branch),
             remote)
 
     return working_branch
@@ -52,9 +52,9 @@ def pushBadPreReview(gitContext, review_branch):
         review_branch.description, review_branch.base, "none")
     phlgit_push.push_asymmetrical(
         gitContext.clone,
-        phlgitu_ref.makeRemote(
+        phlgitu_ref.make_remote(
             review_branch.branch, gitContext.remote),
-        phlgitu_ref.makeLocal(working_branch_name),
+        phlgitu_ref.make_local(working_branch_name),
         gitContext.remote)
 
 
