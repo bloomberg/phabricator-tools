@@ -7,7 +7,6 @@
 # Public Classes:
 #   ConduitException
 #   Conduit
-#   TestConduit
 #
 # Public Functions:
 #   act_as_user_context
@@ -26,7 +25,6 @@ import hashlib
 import json
 import logging
 import time
-import unittest
 import urllib
 import urllib2
 import urlparse
@@ -296,48 +294,6 @@ class Conduit():
 
     def ping(self):
         return self.call("conduit.ping")
-
-
-class TestConduit(unittest.TestCase):
-
-    def test_can_ping(self):
-        test_data = phldef_conduit
-        conduit = Conduit(
-            test_data.TEST_URI,
-            test_data.ALICE.user,
-            test_data.ALICE.certificate)
-        conduit.ping()
-
-    def test_can_list_reviews(self):
-        test_data = phldef_conduit
-        conduit = Conduit(
-            test_data.TEST_URI,
-            test_data.ALICE.user,
-            test_data.ALICE.certificate)
-        conduit.call("differential.query")
-
-    def test_can_act_as_user(self):
-        test_data = phldef_conduit
-        conduit = Conduit(
-            test_data.TEST_URI,
-            test_data.PHAB.user,
-            test_data.PHAB.certificate)
-        with act_as_user_context(conduit, test_data.ALICE.user):
-            conduit.call("differential.query")
-
-    def test_raises_on_non_auth(self):
-        test_data = phldef_conduit
-        self.assertRaises(
-            ConduitException,
-            Conduit,
-            test_data.TEST_URI,
-            "dontcreateausercalledthis",
-            test_data.ALICE.certificate)
-
-    # TODO: test re-authentication when the token expires
-    # TODO: need to test something that requires authentication
-    # TODO: test raises on bad instanceUri
-    # TODO: test instanceUri without trailing slash
 
 
 #------------------------------------------------------------------------------
