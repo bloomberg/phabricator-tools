@@ -94,7 +94,7 @@ def createReview(conduit, gitContext, review_branch):
                     review_branch.remote_base,
                     review_branch.remote_branch))
 
-    rawDiff = phlgit_diff.rawDiffRange(
+    rawDiff = phlgit_diff.raw_diff_range(
         clone,
         review_branch.remote_base,
         review_branch.remote_branch,
@@ -102,7 +102,7 @@ def createReview(conduit, gitContext, review_branch):
 
     # if the diff is too big then regen with less context
     if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = phlgit_diff.rawDiffRange(
+        rawDiff = phlgit_diff.raw_diff_range(
             clone,
             review_branch.remote_base,
             review_branch.remote_branch,
@@ -110,7 +110,7 @@ def createReview(conduit, gitContext, review_branch):
 
     # if the diff is still too big then regen with no context
     if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = phlgit_diff.rawDiffRange(
+        rawDiff = phlgit_diff.raw_diff_range(
             clone, review_branch.remote_base, review_branch.remote_branch)
 
     # if the diff is still too big then error
@@ -215,7 +215,7 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
     print "updateInReview"
 
     print "- creating diff"
-    rawDiff = phlgit_diff.rawDiffRange(
+    rawDiff = phlgit_diff.raw_diff_range(
         clone, wb.remote_base, remoteBranch, _DIFF_CONTEXT_LINES)
     if not rawDiff:
         raise abdt_exception.AbdUserException(
@@ -225,14 +225,14 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
     # used_less_context = False
     if len(rawDiff) >= MAX_DIFF_SIZE:
         # used_less_context = True
-        rawDiff = phlgit_diff.rawDiffRange(
+        rawDiff = phlgit_diff.raw_diff_range(
             clone, wb.remote_base, remoteBranch, _LESS_DIFF_CONTEXT_LINES)
 
     # if the diff is still too big then regen with no context
     # used_no_context = False
     if len(rawDiff) >= MAX_DIFF_SIZE:
         # used_no_context = True
-        rawDiff = phlgit_diff.rawDiffRange(
+        rawDiff = phlgit_diff.raw_diff_range(
             clone, wb.remote_base, remoteBranch)
 
     # if the diff is still too big then error

@@ -5,12 +5,12 @@
 # phlgit_diff
 #
 # Public Classes:
-#   TestDiff
+#   Test
 #
 # Public Functions:
-#   rawDiffRangeToHere
-#   rawDiffRange
-#   parseFilenamesFromRawDiff
+#   raw_diff_range_to_here
+#   raw_diff_range
+#   parse_filenames_from_raw_diff
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -24,11 +24,11 @@ import phlsys_git
 import phlsys_subprocess
 
 
-def rawDiffRangeToHere(clone, start):
+def raw_diff_range_to_here(clone, start):
     return clone.call("diff", start + "...", "-M")
 
 
-def rawDiffRange(clone, base, new, context_lines=None):
+def raw_diff_range(clone, base, new, context_lines=None):
     """Return a raw diff from the history on 'new' that is not on 'base'.
 
     Note that commits that are cherry-picked from new to old will still appear
@@ -55,7 +55,7 @@ def rawDiffRange(clone, base, new, context_lines=None):
     return result
 
 
-def parseFilenamesFromRawDiff(diff):
+def parse_filenames_from_raw_diff(diff):
     matches = re.findall(
         "^diff --git a/(.*) b/(.*)$",
         diff,
@@ -74,10 +74,10 @@ def parseFilenamesFromRawDiff(diff):
         return unames
 
 
-class TestDiff(unittest.TestCase):
+class Test(unittest.TestCase):
 
     def __init__(self, data):
-        super(TestDiff, self).__init__(data)
+        super(Test, self).__init__(data)
         self.path = "phlgit_diff_TestDiff"
         self.clone = None
 
@@ -100,18 +100,18 @@ class TestDiff(unittest.TestCase):
         self.clone.call("checkout", "fork")
         self._createCommitNewFile("ONLY_FORK")
         self._createCommitNewFile("ONLY_FORK2")
-        rawDiff = rawDiffRangeToHere(self.clone, "master")
-        rawDiff2 = rawDiffRange(self.clone, "master", "fork")
-        rawDiff3 = rawDiffRange(self.clone, "master", "fork", 1000)
+        rawDiff = raw_diff_range_to_here(self.clone, "master")
+        rawDiff2 = raw_diff_range(self.clone, "master", "fork")
+        rawDiff3 = raw_diff_range(self.clone, "master", "fork", 1000)
         self.assertEqual(
             set(["ONLY_FORK", "ONLY_FORK2"]),
-            parseFilenamesFromRawDiff(rawDiff))
+            parse_filenames_from_raw_diff(rawDiff))
         self.assertEqual(
             set(["ONLY_FORK", "ONLY_FORK2"]),
-            parseFilenamesFromRawDiff(rawDiff2))
+            parse_filenames_from_raw_diff(rawDiff2))
         self.assertEqual(
             set(["ONLY_FORK", "ONLY_FORK2"]),
-            parseFilenamesFromRawDiff(rawDiff3))
+            parse_filenames_from_raw_diff(rawDiff3))
 
     def tearDown(self):
         phlsys_subprocess.run_commands("rm -rf " + self.path)
