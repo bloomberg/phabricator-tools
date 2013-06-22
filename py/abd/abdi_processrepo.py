@@ -139,7 +139,7 @@ def verifyReviewBranchBase(gitContext, review_branch):
 def createDifferentialReview(
         conduit, user, parsed, gitContext, review_branch, rawDiff):
     clone = gitContext.clone
-    phlgit_checkout.newBranchForceBasedOn(
+    phlgit_checkout.new_branch_force_based_on(
         clone, review_branch.branch, review_branch.remote_branch)
 
     with phlsys_conduit.act_as_user_context(conduit, user):
@@ -270,7 +270,8 @@ def land(conduit, wb, gitContext, branch):
         clone, conduit, wb.remote_base, wb.remote_branch)
     d = phlcon_differential
     with phlsys_conduit.act_as_user_context(conduit, user):
-        phlgit_checkout.newBranchForceBasedOn(clone, wb.base, wb.remote_base)
+        phlgit_checkout.new_branch_force_based_on(
+            clone, wb.base, wb.remote_base)
 
         # compose the commit message
         message = d.get_commit_message(conduit, wb.id)

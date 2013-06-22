@@ -5,14 +5,14 @@
 # phlgit_checkout
 #
 # Public Functions:
-#   newBranchForceBasedOn
+#   new_branch_force_based_on
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 
-def newBranchForceBasedOn(clone, new_branch, base):
+def new_branch_force_based_on(clone, new_branch, base):
     """Checkout onto a new branch copy of base, overwite existing branch.
 
     :clone: the clone to operate on
