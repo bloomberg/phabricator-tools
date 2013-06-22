@@ -5,8 +5,8 @@
 # phlsys_strtotime
 #
 # Public Functions:
-#   describeDurationStringToTimeDelta
-#   durationStringToTimeDelta
+#   describe_duration_string_to_time_delta
+#   duration_string_to_time_delta
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -15,7 +15,7 @@
 import datetime
 
 
-def describeDurationStringToTimeDelta():
+def describe_duration_string_to_time_delta():
     return str('time can be specified like "5 hours 20 minutes", use '
                'combinations of seconds, minutes, hours, days, weeks. '
                'each unit should only appear once.  you may use floating '
@@ -23,29 +23,29 @@ def describeDurationStringToTimeDelta():
                'e.g. "1 weeks -1.5 days".')
 
 
-def durationStringToTimeDelta(s):
+def duration_string_to_time_delta(s):
     """Return a datetime.timedelta based on the supplied string 's'.
 
     Usage examples:
-        >>> str(durationStringToTimeDelta("1 seconds"))
+        >>> str(duration_string_to_time_delta("1 seconds"))
         '0:00:01'
 
-        >>> str(durationStringToTimeDelta("2 minutes"))
+        >>> str(duration_string_to_time_delta("2 minutes"))
         '0:02:00'
 
-        >>> str(durationStringToTimeDelta("2 hours 2 minutes"))
+        >>> str(duration_string_to_time_delta("2 hours 2 minutes"))
         '2:02:00'
 
-        >>> str(durationStringToTimeDelta("1 days 2 hours 2 minutes"))
+        >>> str(duration_string_to_time_delta("1 days 2 hours 2 minutes"))
         '1 day, 2:02:00'
 
-        >>> str(durationStringToTimeDelta("1.5 days"))
+        >>> str(duration_string_to_time_delta("1.5 days"))
         '1 day, 12:00:00'
 
-        >>> str(durationStringToTimeDelta("1 days -1 hours"))
+        >>> str(duration_string_to_time_delta("1 days -1 hours"))
         '23:00:00'
 
-        >>> str(durationStringToTimeDelta("1 milliseconds"))
+        >>> str(duration_string_to_time_delta("1 milliseconds"))
         '0:00:00.001000'
 
     :s: a string in the appropriate time format

@@ -83,7 +83,7 @@ def setupParser(parser):
     time_filters = parser.add_argument_group(
         'time filter parameters',
         textwrap.fill(
-            phlsys_strtotime.describeDurationStringToTimeDelta()))
+            phlsys_strtotime.describe_duration_string_to_time_delta()))
     fmts = parser.add_argument_group(
         'output format parameters', 'choose one only, default is "short"')
     formats = fmts.add_mutually_exclusive_group()
@@ -206,12 +206,12 @@ def setupParser(parser):
 
     time_filters.add_argument(
         '--update-min-age',
-        type=phlsys_strtotime.durationStringToTimeDelta,
+        type=phlsys_strtotime.duration_string_to_time_delta,
         metavar='AGE',
         help='include reviews which are at least AGE old.')
     time_filters.add_argument(
         '--update-max-age',
-        type=phlsys_strtotime.durationStringToTimeDelta,
+        type=phlsys_strtotime.duration_string_to_time_delta,
         metavar='AGE',
         help='include reviews which are at most AGE old.')
 
