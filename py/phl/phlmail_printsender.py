@@ -27,7 +27,7 @@ class MailSender(object):
 
     def send(self, subject, message, to_addresses, cc_addresses=None):
         print "-----"
-        print phlmail_format.Text(
+        print phlmail_format.text(
             subject, message, self._from_email, to_addresses, cc_addresses)
         print "-----"
 

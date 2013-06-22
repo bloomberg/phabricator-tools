@@ -28,7 +28,7 @@ class MailSender(object):
         self._from_email = from_email
 
     def send(self, subject, message, to_addresses, cc_addresses=None):
-        mime = phlmail_format.Text(
+        mime = phlmail_format.text(
             subject, message, self._from_email, to_addresses, cc_addresses)
         self._sendmail.send(mime)
 

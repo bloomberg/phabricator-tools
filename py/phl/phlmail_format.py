@@ -5,7 +5,7 @@
 # phlmail_format
 #
 # Public Functions:
-#   Text
+#   text
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -18,15 +18,15 @@ from email.mime.text import MIMEText
 
 
 # XXX: not really sure we can support bcc in the header so leave it off for now
-def Text(subject, message, from_address, to_addresses, cc_addresses=None):
-    """@todo: Docstring for Text
+def text(subject, message, from_address, to_addresses, cc_addresses=None):
+    """Return a string of mime-text based on supplied parameters.
 
     :subject: the string subject line for the message
     :message: the string body of the message
     :from_address: the string email address we are sending from
     :to_addresses: the list of string email addresses we are sending to
     :cc_addresses: the list of string email addresses we are ccing to
-    :returns: @todo
+    :returns: string mime-text
 
     """
     assert not isinstance(to_addresses, types.StringTypes), "'to' is string"
