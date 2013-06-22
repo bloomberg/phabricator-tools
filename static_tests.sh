@@ -2,7 +2,7 @@
 set -e # exit immediately on error
 
 libscripts=`find py/ -iname '*.py'`
-allscripts="bin/* $libscripts"
+allscripts="bin/* meta/docgen/*.py $libscripts"
 
 ## please install pychecker with sudo apt-get install pychecker
 # TODO: find workaround for borked import detection
