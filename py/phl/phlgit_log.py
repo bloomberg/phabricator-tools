@@ -4,9 +4,6 @@
 # -----------------------------------------------------------------------------
 # phlgit_log
 #
-# Public Classes:
-#   Test
-#
 # Public Functions:
 #   get_range_to_here_hashes
 #   get_last_n_commit_hashes
@@ -28,12 +25,7 @@
 # =============================================================================
 
 import collections
-import os
 import string
-import unittest
-
-import phlsys_git
-import phlsys_subprocess
 
 """NamedTuple to represent a git revision.
 
@@ -240,109 +232,6 @@ def get_range_to_here_raw_body(clone, start):
     # TODO: we actually want something that can return an list of bodies
     # TODO: '-n ' '1' is a hack until we return a list
     return clone.call("log", start + "..", "--format=format:%B", "-n", "1")
-
-
-class Test(unittest.TestCase):
-
-    def __init__(self, data):
-        super(Test, self).__init__(data)
-        self.path = "phlgit_diff_TestDiff"
-        self.clone = None
-        self.authorName = "No one"
-        self.authorEmail = "noone@nowhere.com"
-        self.author = self.authorName + " <" + self.authorEmail + ">"
-
-    def setUp(self):
-        # TODO: make this more portable with shutil etc.
-        phlsys_subprocess.run_commands("mkdir " + self.path)
-        phlsys_subprocess.run("git", "init", workingDir=self.path)
-        self.clone = phlsys_git.GitClone(self.path)
-
-    def _createCommitNewFile(self, filename, subject=None, message=None):
-        phlsys_subprocess.run_commands(
-            "touch " + os.path.join(self.path, filename))
-        self.clone.call("add", filename)
-        if not subject:
-            if message:
-                raise Exception("didn't expect message with empty subject")
-            self.clone.call(
-                "commit", "-a", "-m", filename,
-                "--author", self.author)
-        elif not message:
-            self.clone.call(
-                "commit", "-a", "-m", subject,
-                "--author", self.author)
-        else:
-            message = subject + "\n\n" + message
-            self.clone.call(
-                "commit", "-a", "-m", message,
-                "--author", self.author)
-
-#     def testNoCommits(self):
-#         hashes = get_range_to_here_hashes(self.clone, "HEAD")
-#         self.assertIsNotNone(hashes)
-#         self.assertTrue(not hashes)
-#         self.assertIsInstance(hashes, list)
-#         head = get_last_commit_hash(self.clone)
-#         self.assertIsNone(head)
-#         head2 = get_last_n_commit_hashes(self.clone, 1)
-#         self.assertIsNotNone(head2)
-#         self.assertEqual(head, head2[0])
-
-    def testOneCommit(self):
-        self._createCommitNewFile("README")
-        hashes = get_range_to_here_hashes(self.clone, "HEAD")
-        self.assertIsNotNone(hashes)
-        self.assertTrue(not hashes)
-        self.assertIsInstance(hashes, list)
-        head = get_last_commit_hash(self.clone)
-        self.assertIsNotNone(head)
-        head2 = get_last_n_commit_hashes(self.clone, 1)
-        self.assertIsNotNone(head2)
-        self.assertEqual(head, head2[0])
-        self.assertListEqual(get_last_n_commit_hashes(self.clone, 0), [])
-        self.assertRaises(ValueError, get_last_n_commit_hashes, self.clone, 2)
-
-    def testTwoCommits(self):
-        self._createCommitNewFile("README")
-        self._createCommitNewFile("README2")
-        head = get_last_commit_hash(self.clone)
-        self.assertIsNotNone(head)
-        hashes = get_last_n_commit_hashes(self.clone, 2)
-        self.assertIsNotNone(hashes)
-        self.assertEqual(head, hashes[-1])
-        self.assertListEqual(hashes, hashes)
-
-    def testSimpleFork(self):
-        self._createCommitNewFile("README")
-        self.clone.call("branch", "fork")
-        self._createCommitNewFile("ONLY_MASTER")
-        self.clone.call("checkout", "fork")
-        self._createCommitNewFile("ONLY_FORK", "ONLY_FORK", "BODY\nBODY")
-        self._createCommitNewFile("ONLY_FORK2")
-
-        log = get_range_to_here_raw_body(self.clone, "master")
-        self.assertIn("ONLY_FORK", log)
-        self.assertNotIn("ONLY_MASTER", log)
-        self.assertNotIn("README", log)
-
-        hashes = get_range_to_here_hashes(self.clone, "master")
-        hashes2 = get_range_hashes(self.clone, "master", "fork")
-        self.assertListEqual(hashes, hashes2)
-        r0 = make_revision_from_hash(self.clone, hashes[0])
-        self.assertEqual(r0.subject, "ONLY_FORK")
-        self.assertEqual(r0.message, "BODY\nBODY\n")
-        r1 = make_revision_from_hash(self.clone, hashes[1])
-        self.assertEqual(r1.subject, "ONLY_FORK2")
-        self.assertIsNotNone(r1.message)
-        self.assertIsInstance(r1.message, str)
-
-        committers = get_author_names_emails_from_hashes(self.clone, hashes)
-        self.assertEqual(len(committers), 1)
-        self.assertEqual(committers[0], (self.authorName, self.authorEmail))
-
-    def tearDown(self):
-        phlsys_subprocess.run_commands("rm -rf " + self.path)
 
 
 #------------------------------------------------------------------------------
