@@ -8,9 +8,9 @@
 #   DelayedRetryNotifyOperation
 #
 # Public Functions:
-#   loopForever
-#   makeTimedQueue
-#   loopOnce
+#   loop_forever
+#   make_timed_queue
+#   loop_once
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -19,7 +19,7 @@
 import phlsys_timedqueue
 
 
-def loopForever(operations):
+def loop_forever(operations):
     # use a copy of the original, as we may modify it
     # we need to do set operations so 'set' is most appropriate
     operations = set(operations)
@@ -27,14 +27,14 @@ def loopForever(operations):
     paused_operations = phlsys_timedqueue.TimedQueue()
 
     while True:
-        loopOnce(operations, paused_operations)
+        loop_once(operations, paused_operations)
 
 
-def makeTimedQueue():
+def make_timed_queue():
     return phlsys_timedqueue.TimedQueue()
 
 
-def loopOnce(operations, paused_operations):
+def loop_once(operations, paused_operations):
     assert isinstance(operations, set)
     operations |= set(paused_operations.pop_expired())
 

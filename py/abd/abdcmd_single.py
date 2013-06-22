@@ -140,7 +140,7 @@ def process(args, retry_delays, on_exception_delay):
         DelayedRetrySleepOperation(
             out, args.sleep_secs))
 
-    phlsys_scheduleunreliables.loopForever(operations)
+    phlsys_scheduleunreliables.loop_forever(operations)
 
 
 #------------------------------------------------------------------------------

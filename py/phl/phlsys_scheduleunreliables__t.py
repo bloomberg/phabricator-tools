@@ -54,8 +54,8 @@ class Test(unittest.TestCase):
         data = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
         operations = set([makeOperation(i) for i in data])
 
-        phlsys_scheduleunreliables.loopOnce(
-            operations, phlsys_scheduleunreliables.makeTimedQueue())
+        phlsys_scheduleunreliables.loop_once(
+            operations, phlsys_scheduleunreliables.make_timed_queue())
 
         self.assertSetEqual(data, results)
 
@@ -78,8 +78,8 @@ class Test(unittest.TestCase):
         operations = set([makeOperation() for _ in range(0, num_operations)])
         self.assertEqual(num_operations, len(operations))
 
-        bad_operations = phlsys_scheduleunreliables.makeTimedQueue()
-        phlsys_scheduleunreliables.loopOnce(
+        bad_operations = phlsys_scheduleunreliables.make_timed_queue()
+        phlsys_scheduleunreliables.loop_once(
             operations, bad_operations)
 
         # loopOnce() should have moved all our operations into bad_operations
@@ -110,15 +110,15 @@ class Test(unittest.TestCase):
         data = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
         operations = set([makeOperation(i) for i in data])
 
-        bad_operations = phlsys_scheduleunreliables.makeTimedQueue()
+        bad_operations = phlsys_scheduleunreliables.make_timed_queue()
 
-        phlsys_scheduleunreliables.loopOnce(
+        phlsys_scheduleunreliables.loop_once(
             operations, bad_operations)
         self.assertSetEqual(data, results)
 
         # we should fill the results with the same data again
         results = set()
-        phlsys_scheduleunreliables.loopOnce(
+        phlsys_scheduleunreliables.loop_once(
             operations, bad_operations)
         self.assertSetEqual(data, results)
 
@@ -144,9 +144,9 @@ class Test(unittest.TestCase):
         operations = set([makeOperation() for _ in range(0, num_operations)])
         self.assertEqual(num_operations, len(operations))
 
-        bad_operations = phlsys_scheduleunreliables.makeTimedQueue()
+        bad_operations = phlsys_scheduleunreliables.make_timed_queue()
 
-        phlsys_scheduleunreliables.loopOnce(
+        phlsys_scheduleunreliables.loop_once(
             operations, bad_operations)
         self.assertEqual(0, len(operations))
         self.assertEqual(0, len(bad_operations.pop_expired()))

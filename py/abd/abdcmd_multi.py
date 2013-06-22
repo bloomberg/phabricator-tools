@@ -160,7 +160,7 @@ def process(args, retry_delays, on_exception_delay):
             out, args.sleep_secs))
 
     def loopForever():
-        phlsys_scheduleunreliables.loopForever(list(operations))
+        phlsys_scheduleunreliables.loop_forever(list(operations))
 
     while True:
         tryHandleSpecialFiles(loopForever, on_exception_delay)
