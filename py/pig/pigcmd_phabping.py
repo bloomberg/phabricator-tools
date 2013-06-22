@@ -7,6 +7,16 @@ In the event bad arguments we return -2.
 
 For benchmarking Phabricator you might want to take a look at 'Apache Bench'.
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   main
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 _USAGE_EXAMPLES = """
 usage examples:
