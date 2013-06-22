@@ -25,9 +25,12 @@ Wrapper around 'git push'
 Utilities for working with git refs.
 * `phlmail_format.py` -
 Format valid mime-text suitable for piping into sendmail.
-* `phlmail_mocksender.py`
-* `phlmail_printsender.py`
-* `phlmail_sender.py`
+* `phlmail_mocksender.py` -
+A mail sender that just stores mail to make testing easier.
+* `phlmail_printsender.py` -
+A mail sender that just prints the mails to the console.
+* `phlmail_sender.py` -
+A mail sender that sends mail via a configured sendmail.
 * `phlsys_arcconfig.py` -
 Wrapper to integrate with Arcanist's .arcconfig file
 * `phlsys_arcrc.py` -
