@@ -1,4 +1,14 @@
 """Convenience functions for deailing with Phabricator's Conduit api."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   createEmptyRevision
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import phlsys_conduit
 import phlcon_differential

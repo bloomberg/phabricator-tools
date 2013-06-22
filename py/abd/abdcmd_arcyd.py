@@ -20,6 +20,16 @@ minimal user workflow:
     .. Reviewer accepts the change ..
     .. Arcyd squashes the 'ph-review' branch onto master and deletes it ..
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   main
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 _USAGE_EXAMPLES = """
 usage example:

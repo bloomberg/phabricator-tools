@@ -1,4 +1,17 @@
 """Git operations on working branches."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   pushStatus
+#   pushBadPreReview
+#   pushBadInReview
+#   pushBadLand
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import abdt_naming
 import phlgit_push

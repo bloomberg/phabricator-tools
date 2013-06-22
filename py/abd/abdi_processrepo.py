@@ -1,4 +1,29 @@
 """abd automates the creation and landing of reviews from branches"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   isBasedOn
+#   createReview
+#   verifyReviewBranchBase
+#   createDifferentialReview
+#   makeMessageDigest
+#   updateReview
+#   updateInReview
+#   land
+#   createFailedReview
+#   tryCreateReview
+#   processUpdatedBranch
+#   processAbandonedBranches
+#   processUpdatedRepo
+#
+# Public Assignments:
+#   MAX_DIFF_SIZE
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 # XXX: probably too many imports
 import abdcmnt_commenter

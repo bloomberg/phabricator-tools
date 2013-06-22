@@ -1,4 +1,22 @@
 """Define useful aggregates for interacting with git without passing alot."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   makeWorkingBranchWithStatus
+#   makeGitWorkingBranch
+#   makeGitWorkingBranchFromParts
+#   makeGitReviewBranch
+#
+# Public Assignments:
+#   GitReviewBranch
+#   GitWorkingBranch
+#   GitContext
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import collections
 

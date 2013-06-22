@@ -1,4 +1,16 @@
 """Operations combining conduit with git."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getPrimaryNameEmailAndUserFromBranch
+#   getAnyUserFromBranch
+#   getFieldsFromCommitHash
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import phlcon_differential
 import phlcon_user

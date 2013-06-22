@@ -1,4 +1,40 @@
 """Naming conventions for abd"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   TestNaming
+#
+# Public Functions:
+#   getReviewBranchPrefix
+#   getWorkingBranchPrefix
+#   isStatusBad
+#   isStatusBadPreReview
+#   isStatusBadLand
+#   isReviewBranchPrefixed
+#   getWithoutPrefix
+#   makeReviewBranchNameFromWorkingBranch
+#   makeReviewBranchName
+#   makeWorkingBranchName
+#   makeReviewBranchFromName
+#   makeWorkingBranchFromName
+#   getWorkingBranches
+#
+# Public Assignments:
+#   WB_STATUS_OK
+#   WB_STATUS_PREFIX_BAD
+#   WB_STATUS_BAD_NAME
+#   WB_STATUS_BAD_PREREVIEW
+#   WB_STATUS_BAD_INREVIEW
+#   WB_STATUS_BAD_LAND
+#   WB_DICT_STATUS_DESC
+#   WorkingBranch
+#   ReviewBranch
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import collections
 import unittest

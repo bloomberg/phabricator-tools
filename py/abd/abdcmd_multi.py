@@ -1,4 +1,22 @@
 """Command to process multiple repos."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   DelayedRetrySleepOperation
+#   ResetFileException
+#   FileCheckOperation
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   tryHandleSpecialFiles
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import argparse
 import functools

@@ -1,4 +1,21 @@
 """Exception hierarchy for abd user and system errors."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   AbdBaseException
+#   AbdUserException
+#   AbdSystemException
+#   MissingBaseException
+#   NoUsersOnBranchException
+#   LargeDiffException
+#   CommitMessageParseException
+#   LandingException
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 
 class AbdBaseException(Exception):
