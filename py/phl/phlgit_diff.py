@@ -4,9 +4,6 @@
 # -----------------------------------------------------------------------------
 # phlgit_diff
 #
-# Public Classes:
-#   Test
-#
 # Public Functions:
 #   raw_diff_range_to_here
 #   raw_diff_range
@@ -16,12 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import os
 import re
-import unittest
-
-import phlsys_git
-import phlsys_subprocess
 
 
 def raw_diff_range_to_here(clone, start):
@@ -72,49 +64,6 @@ def parse_filenames_from_raw_diff(diff):
         unames.extend(names[1])
         unames = set(unames)
         return unames
-
-
-class Test(unittest.TestCase):
-
-    def __init__(self, data):
-        super(Test, self).__init__(data)
-        self.path = "phlgit_diff_TestDiff"
-        self.clone = None
-
-    def setUp(self):
-        # TODO: make this more portable with shutil etc.
-        phlsys_subprocess.run_commands("mkdir " + self.path)
-        phlsys_subprocess.run("git", "init", workingDir=self.path)
-        self.clone = phlsys_git.GitClone(self.path)
-
-    def _createCommitNewFile(self, filename):
-        phlsys_subprocess.run_commands(
-            "touch " + os.path.join(self.path, filename))
-        self.clone.call("add", filename)
-        self.clone.call("commit", "-a", "-m", filename)
-
-    def testSimpleFork(self):
-        self._createCommitNewFile("README")
-        self.clone.call("branch", "fork")
-        self._createCommitNewFile("ONLY_MASTER")
-        self.clone.call("checkout", "fork")
-        self._createCommitNewFile("ONLY_FORK")
-        self._createCommitNewFile("ONLY_FORK2")
-        rawDiff = raw_diff_range_to_here(self.clone, "master")
-        rawDiff2 = raw_diff_range(self.clone, "master", "fork")
-        rawDiff3 = raw_diff_range(self.clone, "master", "fork", 1000)
-        self.assertEqual(
-            set(["ONLY_FORK", "ONLY_FORK2"]),
-            parse_filenames_from_raw_diff(rawDiff))
-        self.assertEqual(
-            set(["ONLY_FORK", "ONLY_FORK2"]),
-            parse_filenames_from_raw_diff(rawDiff2))
-        self.assertEqual(
-            set(["ONLY_FORK", "ONLY_FORK2"]),
-            parse_filenames_from_raw_diff(rawDiff3))
-
-    def tearDown(self):
-        phlsys_subprocess.run_commands("rm -rf " + self.path)
 
 
 #------------------------------------------------------------------------------
