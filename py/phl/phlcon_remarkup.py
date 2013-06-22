@@ -1,4 +1,20 @@
 """Helpers to easily generate properly formatted remarkup."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   code_block
+#   dict_to_table
+#   encased
+#   bold
+#   italic
+#   monospaced
+#   deleted
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 
 def code_block(message, lang=None, name=None, lines=None, isBad=False):

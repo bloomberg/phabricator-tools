@@ -1,4 +1,17 @@
 """Wrapper around 'git branch'"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   isTreeSame
+#   isIdentical
+#   getLocal
+#   getRemote
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 
 def _catFilePretty(clone, objectHash):

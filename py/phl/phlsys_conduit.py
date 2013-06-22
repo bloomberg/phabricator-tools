@@ -1,4 +1,24 @@
 """Wrapper to call Phabricator's Conduit API"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   ConduitException
+#   Conduit
+#   TestConduit
+#
+# Public Functions:
+#   act_as_user_context
+#   make_conduit_uri
+#   make_phab_test_conduit
+#
+# Public Assignments:
+#   SESSION_ERROR
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 from contextlib import contextmanager
 import hashlib

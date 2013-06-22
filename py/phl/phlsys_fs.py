@@ -1,4 +1,16 @@
 """Helpers for interacting with the filesystem."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   chdir_context
+#   tmpfile
+#   nostd
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 from contextlib import contextmanager
 import os

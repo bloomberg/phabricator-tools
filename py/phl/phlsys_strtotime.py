@@ -1,4 +1,15 @@
 """A poor substitute for PHP's strtotime function."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   describeDurationStringToTimeDelta
+#   durationStringToTimeDelta
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import datetime
 

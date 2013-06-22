@@ -1,4 +1,19 @@
 """Wrapper around 'git config'"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   TestLog
+#
+# Public Functions:
+#   setUsernameEmail
+#   getUsername
+#   getEmail
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import unittest
 

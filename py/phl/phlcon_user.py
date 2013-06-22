@@ -1,4 +1,27 @@
 """Wrapper to call Phabricator's users Conduit API"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   TestUser
+#
+# Public Functions:
+#   is_no_such_error
+#   query_user_from_email
+#   query_users_from_emails
+#   query_users_from_phids
+#   query_users_from_usernames
+#   query_usernames_from_phids
+#   make_username_phid_dict
+#   make_phid_username_dict
+#
+# Public Assignments:
+#   QueryResponse
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import unittest
 

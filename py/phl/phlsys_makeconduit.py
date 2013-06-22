@@ -4,6 +4,20 @@ Can try to examine './.arcconfig' and '~/.arcrc' if not enough information is
 provided.
 
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   InsufficientInfoException
+#
+# Public Functions:
+#   makeConduit
+#   getUriUserCertificateExplanation
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import difflib
 

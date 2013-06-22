@@ -1,4 +1,18 @@
 """Wrapper around 'git push'"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   pushAsymmetricalForce
+#   pushAsymmetrical
+#   push
+#   moveAsymmetrical
+#   delete
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 
 def pushAsymmetricalForce(clone, localBranch, remoteBranch, remoteName):

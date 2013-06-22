@@ -2,6 +2,21 @@
 # encoding: utf-8
 
 """Conduit data for the default Phabricator install."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Assignments:
+#   Account
+#   TEST_URI
+#   ALICE
+#   BOB
+#   PHAB
+#   notauser
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 # TODO: add emails too
 

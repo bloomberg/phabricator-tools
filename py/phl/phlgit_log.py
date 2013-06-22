@@ -1,4 +1,30 @@
 """Wrapper around 'git log'"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   TestLog
+#
+# Public Functions:
+#   getRangeToHereHashes
+#   getLastNCommitHashes
+#   getLastCommitHash
+#   getLastNCommitHashesFromRef
+#   getLastCommitHashFromRef
+#   getRangeHashes
+#   makeRevisionFromFullMessage
+#   makeRevisionFromHash
+#   makeRevisionsFromHashes
+#   getAuthorNamesEmailsFromHashes
+#   getRangeToHereRawBody
+#
+# Public Assignments:
+#   Revision
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import collections
 import os

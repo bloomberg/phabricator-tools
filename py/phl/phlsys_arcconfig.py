@@ -1,4 +1,16 @@
 """Wrapper to integrate with Arcanist's .arcconfig file"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   find_arcconfig
+#   load
+#   get_arcconfig
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import json
 import os

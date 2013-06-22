@@ -1,4 +1,38 @@
 """Wrapper to call Phabricator's Differential Conduit API"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   ReviewStates
+#   Action
+#   MessageFields
+#
+# Public Functions:
+#   create_raw_diff
+#   create_diff
+#   parse_commit_message
+#   create_revision
+#   query
+#   get_revision_status
+#   update_revision
+#   create_comment
+#   get_commit_message
+#   close
+#
+# Public Assignments:
+#   AUTHOR_ACTIONS
+#   REVIEWER_ACTIONS
+#   USER_ACTIONS
+#   CreateRawDiffResponse
+#   GetDiffIdResponse
+#   ParseCommitMessageResponse
+#   RevisionResponse
+#   QueryResponse
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import phlsys_dictutil
 import phlsys_namedtuple

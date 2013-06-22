@@ -1,4 +1,22 @@
 """Interact with other programs using command-line semantics."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   Error
+#   CalledProcessError
+#
+# Public Functions:
+#   run
+#   run_commands
+#
+# Public Assignments:
+#   RunResult
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import collections
 import subprocess

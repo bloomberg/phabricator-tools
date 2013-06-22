@@ -1,4 +1,19 @@
 """Wrapper around 'git diff'"""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   TestDiff
+#
+# Public Functions:
+#   rawDiffRangeToHere
+#   rawDiffRange
+#   parseFilenamesFromRawDiff
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import os
 import re

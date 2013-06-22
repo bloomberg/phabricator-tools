@@ -10,6 +10,19 @@ that the client can continue to function when the schema changes within defined
 parameters.
 
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   Error
+#
+# Public Functions:
+#   make_named_tuple
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import collections
 import warnings

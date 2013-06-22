@@ -1,4 +1,19 @@
 """Conveniently schedule unreliable tasks, retry them after a delay."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Classes:
+#   DelayedRetryNotifyOperation
+#
+# Public Functions:
+#   loopForever
+#   makeTimedQueue
+#   loopOnce
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import phlsys_timedqueue
 

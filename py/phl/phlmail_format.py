@@ -1,4 +1,14 @@
 """Format valid mime-text suitable for piping into sendmail."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   Text
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import types
 from email.mime.text import MIMEText
