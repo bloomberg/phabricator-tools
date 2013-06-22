@@ -5,20 +5,20 @@
 # phlgit_log
 #
 # Public Classes:
-#   TestLog
+#   Test
 #
 # Public Functions:
-#   getRangeToHereHashes
-#   getLastNCommitHashes
-#   getLastCommitHash
-#   getLastNCommitHashesFromRef
-#   getLastCommitHashFromRef
-#   getRangeHashes
-#   makeRevisionFromFullMessage
-#   makeRevisionFromHash
-#   makeRevisionsFromHashes
-#   getAuthorNamesEmailsFromHashes
-#   getRangeToHereRawBody
+#   get_range_to_here_hashes
+#   get_last_n_commit_hashes
+#   get_last_commit_hash
+#   get_last_n_commit_hashes_from_ref
+#   get_last_commit_hash_from_ref
+#   get_range_hashes
+#   make_revision_from_full_message
+#   make_revision_from_hash
+#   make_revisions_from_hashes
+#   get_author_names_emails_from_hashes
+#   get_range_to_here_raw_body
 #
 # Public Assignments:
 #   Revision
@@ -56,7 +56,7 @@ Revision = collections.namedtuple(
     ])
 
 
-def getRangeToHereHashes(clone, start):
+def get_range_to_here_hashes(clone, start):
     """Return a list of strings corresponding to commits from 'start' to here.
 
     The list begins with the revision closest to but not including 'start'.
@@ -76,7 +76,7 @@ def getRangeToHereHashes(clone, start):
     return hashes
 
 
-def getLastNCommitHashes(clone, n):
+def get_last_n_commit_hashes(clone, n):
     """Return a list of strings corresponding to the last commits.
 
     The list begins with the oldest revision.
@@ -87,10 +87,10 @@ def getLastNCommitHashes(clone, n):
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
-    return getLastNCommitHashesFromRef(clone, n, 'HEAD')
+    return get_last_n_commit_hashes_from_ref(clone, n, 'HEAD')
 
 
-def getLastCommitHash(clone):
+def get_last_commit_hash(clone):
     """Return a string corresponding to the last commit ('HEAD').
 
     Raise a ValueError if the returned value is not valid hexadecimal.
@@ -99,10 +99,10 @@ def getLastCommitHash(clone):
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
-    return getLastCommitHashFromRef(clone, 'HEAD')
+    return get_last_commit_hash_from_ref(clone, 'HEAD')
 
 
-def getLastNCommitHashesFromRef(clone, n, ref):
+def get_last_n_commit_hashes_from_ref(clone, n, ref):
     """Return a list of strings corresponding to the last 'n' commits at 'ref'.
 
     The list begins with the oldest revision.
@@ -126,7 +126,7 @@ def getLastNCommitHashesFromRef(clone, n, ref):
     return hashes
 
 
-def getLastCommitHashFromRef(clone, ref):
+def get_last_commit_hash_from_ref(clone, ref):
     """Return a string corresponding to the commit referred to by 'ref'.
 
     :clone: supports 'call("log")' with git log parameters
@@ -134,10 +134,10 @@ def getLastCommitHashFromRef(clone, ref):
     :returns: a string corresponding to the commit referred to by 'ref'
 
     """
-    return getLastNCommitHashesFromRef(clone, 1, ref)[0]
+    return get_last_n_commit_hashes_from_ref(clone, 1, ref)[0]
 
 
-def getRangeHashes(clone, start, end):
+def get_range_hashes(clone, start, end):
     """Return a list of strings corresponding to commits from 'start' to 'end'.
 
     The list begins with the revision closest to but not including 'start'.
@@ -159,7 +159,7 @@ def getRangeHashes(clone, start, end):
     return hashes
 
 
-def makeRevisionFromFullMessage(message):
+def make_revision_from_full_message(message):
     """Return a 'phlgit_log__Revision' based on the provided 'message'.
 
     Raise an Exception if the message doesn't parse successfully.
@@ -179,7 +179,7 @@ def makeRevisionFromFullMessage(message):
         message='\n'.join(lines[6:]))
 
 
-def makeRevisionFromHash(clone, commitHash):
+def make_revision_from_hash(clone, commitHash):
     """Return a 'phlgit_log__Revision' based on 'commitHash' from the clone.
     Raise an exception if the clone does not return a valid FullMessage from
     the commitHash
@@ -191,11 +191,11 @@ def makeRevisionFromHash(clone, commitHash):
     """
     fmt = "%H%n%ae%n%an%n%ce%n%cn%n%s%n%b"
     fullMessage = clone.call("log", commitHash + "^!", "--format=" + fmt)
-    revision = makeRevisionFromFullMessage(fullMessage)
+    revision = make_revision_from_full_message(fullMessage)
     return revision
 
 
-def makeRevisionsFromHashes(clone, hashes):
+def make_revisions_from_hashes(clone, hashes):
     """Return a list of 'phlgit_log__Revision' from 'hashes'.
     Raise an exception if the clone does not return a valid FullMessage from
     any of 'hashes'.
@@ -204,11 +204,11 @@ def makeRevisionsFromHashes(clone, hashes):
     :returns: a list of 'phlgit_log__Revision'
 
     """
-    revisions = [makeRevisionFromHash(clone, h) for h in hashes]
+    revisions = [make_revision_from_hash(clone, h) for h in hashes]
     return revisions
 
 
-def getAuthorNamesEmailsFromHashes(clone, hashes):
+def get_author_names_emails_from_hashes(clone, hashes):
     """Return list of (name, email) of the committers in 'hashes'.
 
     Authors will only appear in the list once, at their earliest appearance.
@@ -224,7 +224,7 @@ def getAuthorNamesEmailsFromHashes(clone, hashes):
     :returns: a list of unique committer emails in commit order from 'start..'
 
     """
-    revisions = makeRevisionsFromHashes(clone, hashes)
+    revisions = make_revisions_from_hashes(clone, hashes)
     observedEmails = set()
     uniqueAuthors = []
     for r in revisions:
@@ -236,16 +236,16 @@ def getAuthorNamesEmailsFromHashes(clone, hashes):
     return uniqueAuthors
 
 
-def getRangeToHereRawBody(clone, start):
+def get_range_to_here_raw_body(clone, start):
     # TODO: we actually want something that can return an list of bodies
     # TODO: '-n ' '1' is a hack until we return a list
     return clone.call("log", start + "..", "--format=format:%B", "-n", "1")
 
 
-class TestLog(unittest.TestCase):
+class Test(unittest.TestCase):
 
     def __init__(self, data):
-        super(TestLog, self).__init__(data)
+        super(Test, self).__init__(data)
         self.path = "phlgit_diff_TestDiff"
         self.clone = None
         self.authorName = "No one"
@@ -279,36 +279,36 @@ class TestLog(unittest.TestCase):
                 "--author", self.author)
 
 #     def testNoCommits(self):
-#         hashes = getRangeToHereHashes(self.clone, "HEAD")
+#         hashes = get_range_to_here_hashes(self.clone, "HEAD")
 #         self.assertIsNotNone(hashes)
 #         self.assertTrue(not hashes)
 #         self.assertIsInstance(hashes, list)
-#         head = getLastCommitHash(self.clone)
+#         head = get_last_commit_hash(self.clone)
 #         self.assertIsNone(head)
-#         head2 = getLastNCommitHashes(self.clone, 1)
+#         head2 = get_last_n_commit_hashes(self.clone, 1)
 #         self.assertIsNotNone(head2)
 #         self.assertEqual(head, head2[0])
 
     def testOneCommit(self):
         self._createCommitNewFile("README")
-        hashes = getRangeToHereHashes(self.clone, "HEAD")
+        hashes = get_range_to_here_hashes(self.clone, "HEAD")
         self.assertIsNotNone(hashes)
         self.assertTrue(not hashes)
         self.assertIsInstance(hashes, list)
-        head = getLastCommitHash(self.clone)
+        head = get_last_commit_hash(self.clone)
         self.assertIsNotNone(head)
-        head2 = getLastNCommitHashes(self.clone, 1)
+        head2 = get_last_n_commit_hashes(self.clone, 1)
         self.assertIsNotNone(head2)
         self.assertEqual(head, head2[0])
-        self.assertListEqual(getLastNCommitHashes(self.clone, 0), [])
-        self.assertRaises(ValueError, getLastNCommitHashes, self.clone, 2)
+        self.assertListEqual(get_last_n_commit_hashes(self.clone, 0), [])
+        self.assertRaises(ValueError, get_last_n_commit_hashes, self.clone, 2)
 
     def testTwoCommits(self):
         self._createCommitNewFile("README")
         self._createCommitNewFile("README2")
-        head = getLastCommitHash(self.clone)
+        head = get_last_commit_hash(self.clone)
         self.assertIsNotNone(head)
-        hashes = getLastNCommitHashes(self.clone, 2)
+        hashes = get_last_n_commit_hashes(self.clone, 2)
         self.assertIsNotNone(hashes)
         self.assertEqual(head, hashes[-1])
         self.assertListEqual(hashes, hashes)
@@ -321,23 +321,23 @@ class TestLog(unittest.TestCase):
         self._createCommitNewFile("ONLY_FORK", "ONLY_FORK", "BODY\nBODY")
         self._createCommitNewFile("ONLY_FORK2")
 
-        log = getRangeToHereRawBody(self.clone, "master")
+        log = get_range_to_here_raw_body(self.clone, "master")
         self.assertIn("ONLY_FORK", log)
         self.assertNotIn("ONLY_MASTER", log)
         self.assertNotIn("README", log)
 
-        hashes = getRangeToHereHashes(self.clone, "master")
-        hashes2 = getRangeHashes(self.clone, "master", "fork")
+        hashes = get_range_to_here_hashes(self.clone, "master")
+        hashes2 = get_range_hashes(self.clone, "master", "fork")
         self.assertListEqual(hashes, hashes2)
-        r0 = makeRevisionFromHash(self.clone, hashes[0])
+        r0 = make_revision_from_hash(self.clone, hashes[0])
         self.assertEqual(r0.subject, "ONLY_FORK")
         self.assertEqual(r0.message, "BODY\nBODY\n")
-        r1 = makeRevisionFromHash(self.clone, hashes[1])
+        r1 = make_revision_from_hash(self.clone, hashes[1])
         self.assertEqual(r1.subject, "ONLY_FORK2")
         self.assertIsNotNone(r1.message)
         self.assertIsInstance(r1.message, str)
 
-        committers = getAuthorNamesEmailsFromHashes(self.clone, hashes)
+        committers = get_author_names_emails_from_hashes(self.clone, hashes)
         self.assertEqual(len(committers), 1)
         self.assertEqual(committers[0], (self.authorName, self.authorEmail))
 

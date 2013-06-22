@@ -22,11 +22,12 @@ import abdt_exception
 
 
 def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
-    hashes = phlgit_log.getRangeHashes(clone, base, branch)
+    hashes = phlgit_log.get_range_hashes(clone, base, branch)
     if not hashes:
         raise abdt_exception.AbdUserException("no history to diff")
     commit = hashes[-1]
-    committer = phlgit_log.getAuthorNamesEmailsFromHashes(clone, [commit])[0]
+    committer = phlgit_log.get_author_names_emails_from_hashes(
+        clone, [commit])[0]
     name = committer[0]
     email = committer[1]
     user = phlcon_user.query_users_from_emails(conduit, [email])[0]
@@ -38,13 +39,13 @@ def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
 
 def getAnyUserFromBranch(clone, conduit, base, branch):
     if phlgitu_ref.parseRefHash(clone, base) is None:
-        hashes = phlgit_log.getLastNCommitHashesFromRef(clone, 1, branch)
+        hashes = phlgit_log.get_last_n_commit_hashes_from_ref(clone, 1, branch)
     else:
-        hashes = phlgit_log.getRangeHashes(clone, base, branch)
+        hashes = phlgit_log.get_range_hashes(clone, base, branch)
 
     if not hashes:
-        hashes = phlgit_log.getLastNCommitHashesFromRef(clone, 1, branch)
-    committers = phlgit_log.getAuthorNamesEmailsFromHashes(clone, hashes)
+        hashes = phlgit_log.get_last_n_commit_hashes_from_ref(clone, 1, branch)
+    committers = phlgit_log.get_author_names_emails_from_hashes(clone, hashes)
     emails = [committer[1] for committer in committers]
     users = phlcon_user.query_users_from_emails(conduit, emails)
     for user in users:
@@ -62,7 +63,7 @@ def getFieldsFromCommitHash(conduit, clone, commit_hash, defaultTestPlan=None):
     :returns: a phlcon_differential.ParseCommitMessageResponse
 
     """
-    revision = phlgit_log.makeRevisionFromHash(clone, commit_hash)
+    revision = phlgit_log.make_revision_from_hash(clone, commit_hash)
     message = revision.subject + "\n"
     message += "\n"
     message += revision.message + "\n"

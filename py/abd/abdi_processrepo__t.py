@@ -204,8 +204,9 @@ class Test(unittest.TestCase):
         with phlsys_fs.chdir_context("developer"):
             runCommands("git fetch -p", "git checkout master")
             clone = phlsys_git.GitClone(".")
-            head = phlgit_log.getLastCommitHash(clone)
-            authors = phlgit_log.getAuthorNamesEmailsFromHashes(clone, [head])
+            head = phlgit_log.get_last_commit_hash(clone)
+            authors = phlgit_log.get_author_names_emails_from_hashes(
+                clone, [head])
             author = authors[0]
             name = author[0]
             email = author[1]

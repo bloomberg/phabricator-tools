@@ -75,7 +75,7 @@ def createReview(conduit, gitContext, review_branch):
 
     used_default_test_plan = False
 
-    hashes = phlgit_log.getRangeHashes(
+    hashes = phlgit_log.get_range_hashes(
         clone, review_branch.remote_base, review_branch.remote_branch)
     commit = hashes[-1]
     parsed = abdt_conduitgit.getFieldsFromCommitHash(
@@ -169,8 +169,8 @@ def createDifferentialReview(
 
 
 def makeMessageDigest(clone, base, branch):
-    hashes = phlgit_log.getRangeHashes(clone, base, branch)
-    revisions = phlgit_log.makeRevisionsFromHashes(clone, hashes)
+    hashes = phlgit_log.get_range_hashes(clone, base, branch)
+    revisions = phlgit_log.make_revisions_from_hashes(clone, hashes)
     message = revisions[0].subject + "\n\n"
     for r in revisions:
         message += r.message
