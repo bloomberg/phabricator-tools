@@ -42,6 +42,19 @@ output formats:
             "commits": [],
             ...
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   humanTimeSince
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import datetime
 import json

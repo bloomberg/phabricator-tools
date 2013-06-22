@@ -10,6 +10,18 @@ usage examples:
     comment on revisions 1 and 2, reading the message from 'mymessage':
     $ arcyon comment 1 2 --message-file mymessage
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import argparse
 import sys

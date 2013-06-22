@@ -5,6 +5,16 @@ dedicated command-line tool. This should make it easier to write shell scripts
 which extend Phabricator.
 
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   main
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 _USAGE_EXAMPLES = """
 usage examples:

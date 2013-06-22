@@ -9,6 +9,18 @@ usage examples:
     $ arcyon update-revision 99 'fix review issues' -d 2
     99
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import argparse
 

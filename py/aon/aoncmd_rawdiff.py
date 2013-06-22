@@ -16,6 +16,18 @@ usage examples:
     $ arcyon raw-diff mydiff
     99
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import argparse
 import sys

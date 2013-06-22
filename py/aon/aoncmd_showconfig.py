@@ -1,4 +1,16 @@
 """show the configuration as discovered from the current directory."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import phlsys_makeconduit
 

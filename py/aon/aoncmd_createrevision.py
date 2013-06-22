@@ -16,6 +16,18 @@ usage examples:
     $ arcyon create-revision -d 1 -t title -p test -r reviewer -c cc
     99
 """
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
 import argparse
 
