@@ -33,24 +33,6 @@ e.g. say 'poke' on all open reviews not updated for 2 weeks
 
     $ arcyon query --min-update-age "2 weeks" --status-type open | arcyon comment --ids-file - -m 'poke'
 
-Hands-free Differential reviews with Arcyd
-------------------------------------------
-
-This is a daemon which watches Git repositories and automatically creates
-reviews, then lands them when accepted.
-
-Here is an example of someone working with a repository which is watched
-by Arcyd:
-
-    $ git checkout -b feature/mywork
-    .. do work and commit ..
-    $ git push origin feature/mywork:ph-review/mywork/master
-
-    .. Arcyd sees 'ph-review' branch, creates a review based on commits ..
-
-    .. the reviewer approves ..
-    .. Arcyd sees approval, lands the changes on master, deletes branch ..
-
 Install Phabricator in one step
 -------------------------------
 

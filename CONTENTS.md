@@ -14,7 +14,6 @@ Here are all the end-products you might wish to use from this repository,
 it's probably most convienient to create a symbolic link to them or add
 the bin directory to $PATH.
 
-* `arcyd` - the Arcanist Git branch-watching daemon
 * `phab-ping` - a simple tool to check the responsiveness of your Phabricator
 * `arcyon` - a wrapper around Conduit API to aid scripting
  
