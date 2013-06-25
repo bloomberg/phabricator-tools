@@ -89,7 +89,7 @@ and reports how long Phabricator takes to respond.
 Contacts
 --------
 
-Angelos Evripiotis (jevripio@bloomberg.net)
+Angelos Evripiotis (jevripiotis@bloomberg.net)
 
 Credits and Acknowledgements
 ----------------------------
