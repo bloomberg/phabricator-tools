@@ -2,7 +2,7 @@
 set -e # exit immediately on error
 
 libscripts=$(find py/ -iname '*.py' |  tr '\n' ' ')
-allscripts="bin/* meta/docgen/*.py $libscripts"
+allscripts="$(ls bin/* meta/docgen/*.py) $libscripts"
 
 ## please install pychecker with sudo apt-get install pychecker
 # TODO: find workaround for borked import detection
@@ -23,7 +23,7 @@ diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 # copyright
 set +e
 
-git grep -L "Copyright (C) 2012 Bloomberg L.P." $allscripts
+GIT_PAGER='' git grep -L "Copyright (C) 2012 Bloomberg L.P." $allscripts
 if [ $? -ne 1 ]
 then
     echo -- above files are missing copyright notice --
