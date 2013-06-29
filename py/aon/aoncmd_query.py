@@ -50,7 +50,6 @@ output formats:
 # Public Functions:
 #   getFromfilePrefixChars
 #   setupParser
-#   humanTimeSince
 #   process
 #
 # -----------------------------------------------------------------------------
@@ -230,9 +229,11 @@ def setupParser(parser):
     aont_conduitargs.addArguments(parser)
 
 
-def humanTimeSince(dt):
-    elapsed = datetime.datetime.now() - dt
-    return phlsys_timedeltatostr.quantized(elapsed)
+def _set_human_times_since(r, kind, since):
+    r[u"humanTimeSinceDate" + kind] = phlsys_timedeltatostr.quantized(since)
+    r[u"daysSinceDate" + kind] = phlsys_timedeltatostr.in_days(since)
+    r[u"weeksSinceDate" + kind] = phlsys_timedeltatostr.in_weeks(since)
+    r[u"monthsSinceDate" + kind] = phlsys_timedeltatostr.in_months(since)
 
 
 def _process_user_fields(me, conduit, args):
@@ -344,11 +345,20 @@ def _exclude_on_update_age(args, results):
 
 
 def _set_human_times(results):
+    now = datetime.datetime.now()
     for r in results:
-        r[u"humanTimeSinceDateModified"] = humanTimeSince(
-            datetime.datetime.fromtimestamp(float(r["dateModified"])))
-        r[u"humanTimeSinceDateCreated"] = humanTimeSince(
-            datetime.datetime.fromtimestamp(float(r["dateCreated"])))
+        date_created = datetime.datetime.fromtimestamp(float(r["dateCreated"]))
+        date_modified = datetime.datetime.fromtimestamp(
+            float(r["dateModified"]))
+
+        since_modified = now - date_modified
+        since_created = now - date_created
+
+        _set_human_times_since(r, 'Modified', since_modified)
+        _set_human_times_since(r, 'Created', since_created)
+
+        r[u"humanDateModified"] = str(date_modified)
+        r[u"humanDateCreated"] = str(date_created)
 
 
 def _output_results(args, results):
