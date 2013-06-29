@@ -65,6 +65,7 @@ import sys
 import textwrap
 
 import phlcon_user
+import phlsys_dictutil
 import phlsys_strtotime
 import phlsys_timedeltatostr
 import phlsys_makeconduit
@@ -234,22 +235,19 @@ def humanTimeSince(dt):
     return phlsys_timedeltatostr.quantized(elapsed)
 
 
-def process(args):
-    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
-    me = conduit.get_user()
-
+def _process_user_fields(me, conduit, args):
     d = {}
 
-    def processUserField(name, param, add_me):
+    def process_user_field(name, param, add_me):
         d[name] = param
         if add_me:
             d[name].append(me)
 
-    processUserField("authors", args.authors, args.author_me)
-    processUserField("reviewers", args.reviewers, args.reviewer_me)
-    processUserField("ccs", args.ccs, args.cc_me)
-    processUserField("subscribers", args.subscribers, args.subscriber_me)
-    processUserField(
+    process_user_field("authors", args.authors, args.author_me)
+    process_user_field("reviewers", args.reviewers, args.reviewer_me)
+    process_user_field("ccs", args.ccs, args.cc_me)
+    process_user_field("subscribers", args.subscribers, args.subscriber_me)
+    process_user_field(
         "responsibleUsers",
         args.responsible_users,
         args.responsible_me)
@@ -264,9 +262,14 @@ def process(args):
     # XXX: check for bad userToPhid
     for key in d.iterkeys():
         d[key] = [userToPhid[u] for u in d[key]]
+    return d
 
-    if args.ids:
-        d["ids"] = args.ids
+
+def _set_options(args, d):
+    phlsys_dictutil.set_if_true(d, 'ids', args.ids)
+    phlsys_dictutil.set_if_true(d, 'arcanistProjects', args.arcanist_projects)
+    phlsys_dictutil.set_if_true(d, 'limit', args.max_results)
+    phlsys_dictutil.set_if_true(d, 'offset', args.offset_results)
 
     if args.ids_stdin:
         ids = [int(i) for i in " ".join(sys.stdin.readlines()).split()]
@@ -275,82 +278,80 @@ def process(args):
     if args.status_type:
         d["status"] = "status-" + args.status_type
 
-    if args.arcanist_projects:
-        d["arcanistProjects"] = args.arcanist_projects
 
-    if args.max_results:
-        d["limit"] = args.max_results
+def process(args):
+    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+    me = conduit.get_user()
 
-    if args.offset_results:
-        d["offset"] = args.offset_results
+    d = _process_user_fields(me, conduit, args)
+    _set_options(args, d)
 
     # perform the query
     results = conduit.call("differential.query", d)
 
-    # apply filters
-
     if args.statuses:
-        new_results = []
-        for r in results:
-            if r["statusName"] in args.statuses:
-                new_results.append(r)
-        results = new_results
+        results = [r for r in results if r["statusName"] in args.statuses]
 
-    if args.update_min_age:
-        now = datetime.datetime.now()
-        new_results = []
-        for r in results:
-            modified = datetime.datetime.fromtimestamp(
-                float(r["dateModified"]))
-            age = now - modified
-            if age >= args.update_min_age:
-                new_results.append(r)
-        results = new_results
-
-    if args.update_max_age:
-        now = datetime.datetime.now()
-        new_results = []
-        for r in results:
-            modified = datetime.datetime.fromtimestamp(
-                float(r["dateModified"]))
-            age = now - modified
-            if age <= args.update_max_age:
-                new_results.append(r)
-        results = new_results
-
-    # apply transformations
+    if args.update_min_age or args.update_max_age:
+        results = _exclude_on_update_age(args, results)
 
     if args.translate:
         # gather user PHIDs
-        user_phids = set()
-        for r in results:
-            user_phids.add(r["authorPHID"])
-            for u in r["ccs"]:
-                user_phids.add(u)
-            for u in r["reviewers"]:
-                user_phids.add(u)
+        _translate_user_phids(conduit, results)
 
-        # get the names back
-        phidToUser = {}
-        user_phids = list(user_phids)
-        if user_phids:
-            phidToUser = phlcon_user.make_phid_username_dict(
-                conduit, user_phids)
+    _set_human_times(results)
 
-        # do the translation
-        for r in results:
-            r[u"authorUsername"] = phidToUser[r["authorPHID"]]
-            r[u"ccUsernames"] = [phidToUser[u] for u in r["ccs"]]
-            r[u"reviewerUsernames"] = [phidToUser[u] for u in r["reviewers"]]
+    _output_results(args, results)
 
+
+def _translate_user_phids(conduit, results):
+    # gather user PHIDs
+    user_phids = set()
+    for r in results:
+        user_phids.add(r["authorPHID"])
+        for u in r["ccs"]:
+            user_phids.add(u)
+        for u in r["reviewers"]:
+            user_phids.add(u)
+
+    # get the names back
+    phidToUser = {}
+    user_phids = list(user_phids)
+    if user_phids:
+        phidToUser = phlcon_user.make_phid_username_dict(
+            conduit, user_phids)
+
+    # do the translation
+    for r in results:
+        r[u"authorUsername"] = phidToUser[r["authorPHID"]]
+        r[u"ccUsernames"] = [phidToUser[u] for u in r["ccs"]]
+        r[u"reviewerUsernames"] = [phidToUser[u] for u in r["reviewers"]]
+
+
+def _exclude_on_update_age(args, results):
+    now = datetime.datetime.now()
+
+    def get_age(r):
+        return now - datetime.datetime.fromtimestamp(float(r["dateModified"]))
+
+    if args.update_min_age:
+        results = [r for r in results if get_age(r) >= args.update_min_age]
+
+    if args.update_max_age:
+        results = [r for r in results if get_age(r) <= args.update_max_age]
+
+    return results
+
+
+def _set_human_times(results):
     for r in results:
         r[u"humanTimeSinceDateModified"] = humanTimeSince(
             datetime.datetime.fromtimestamp(float(r["dateModified"])))
         r[u"humanTimeSinceDateCreated"] = humanTimeSince(
             datetime.datetime.fromtimestamp(float(r["dateCreated"])))
 
-    # output results
 
+def _output_results(args, results):
     if not args.format_type and not args.format_string:
         args.format_type = "short"
     if args.format_type:
@@ -368,7 +369,8 @@ def process(args):
                 print shortTemplate.safe_substitute(x)
         else:
             raise Exception("unsupported format")
-    else:
+    else:  # args.format_string
+        assert args.format_string
         template = string.Template(args.format_string)
         for x in results:
             print template.safe_substitute(x)
