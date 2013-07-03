@@ -4,12 +4,187 @@
 # -----------------------------------------------------------------------------
 # phlsys_timedeltatostr
 #
+# Public Classes:
+#   UnitToSeconds
+#
 # Public Functions:
+#   in_custom_unit
+#   in_named_unit
+#   in_days
+#   in_weeks
+#   in_months
+#   in_years
 #   quantized
+#
+# Public Assignments:
+#   UNIT_TO_SECONDS
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
+
+
+class UnitToSeconds(object):  # XXX: will derive from Enum in Python 3.4+
+    year = 60 * 60 * 24 * 365  # XXX: based on average days per year
+    month = 60 * 60 * 24 * 30  # XXX: based on average days per month
+    week = 60 * 60 * 24 * 7
+    day = 60 * 60 * 24
+    hour = 60 * 60
+    minute = 60
+    second = 1
+
+
+UNIT_TO_SECONDS = {
+    "year": UnitToSeconds.year,
+    "month": UnitToSeconds.month,
+    "week": UnitToSeconds.week,
+    "day": UnitToSeconds.day,
+    "hour": UnitToSeconds.hour,
+    "minute": UnitToSeconds.minute,
+    "second": UnitToSeconds.second,
+}
+
+
+def in_custom_unit(td, seconds_per_unit, unit_name):
+    """Return a string describing the number of whole 'unit_name' in 'td'.
+
+    'seconds_per_unit' is used as the divisor to determine how many whole units
+    are present in 'td'.
+
+    If the number of units is other than 1, an 's' is appended to the name of
+    the unit to make it plural.
+
+    Usage examples:
+
+        24 hours in days
+        >>> import datetime; in_named_unit(
+        ...     datetime.timedelta(seconds=60*60*24), 'day')
+        '1 day'
+
+        50 hours in days
+        >>> import datetime; in_named_unit(
+        ...     datetime.timedelta(seconds=60*60*50), 'day')
+        '2 days'
+
+    :td: a datetime.timedelta
+    :returns: a string describing the supplied 'td'
+
+    """
+    seconds = td.total_seconds()
+    units = int(seconds / seconds_per_unit)  # use // in Python 3
+    if units != 1:
+        unit_name += 's'
+    return ' '.join([str(units), unit_name])
+
+
+def in_named_unit(td, unit_name):
+    """Return a string describing the number of whole 'unit_name' in 'td'.
+
+    'unit_name' is assumed to be a name that exists in UNIT_TO_SECONDS.
+
+    Usage examples:
+
+        24 hours in days
+        >>> import datetime; in_named_unit(
+        ...     datetime.timedelta(seconds=60*60*24), 'day')
+        '1 day'
+
+        50 hours in days
+        >>> import datetime; in_named_unit(
+        ...     datetime.timedelta(seconds=60*60*50), 'day')
+        '2 days'
+
+    :td: a datetime.timedelta
+    :returns: a string describing the supplied 'td'
+
+    """
+    return in_custom_unit(td, UNIT_TO_SECONDS[unit_name], unit_name)
+
+
+def in_days(td):
+    """Return a string describing the number of whole days in 'td'.
+
+    Usage examples:
+
+        24 hours
+        >>> import datetime; in_days(datetime.timedelta(seconds=60*60*24))
+        '1 day'
+
+        50 hours
+        >>> import datetime; in_days(datetime.timedelta(seconds=60*60*50))
+        '2 days'
+
+    :td: a datetime.timedelta
+    :returns: a string describing the supplied 'td'
+
+    """
+    return in_custom_unit(td, UnitToSeconds.day, 'day')
+
+
+def in_weeks(td):
+    """Return a string describing the number of whole weeks in 'td'.
+
+    Usage examples:
+
+        8 days
+        >>> import datetime; in_weeks(datetime.timedelta(seconds=60*60*24*8))
+        '1 week'
+
+        14 days
+        >>> import datetime; in_weeks(datetime.timedelta(seconds=60*60*24*14))
+        '2 weeks'
+
+    :td: a datetime.timedelta
+    :returns: a string describing the supplied 'td'
+
+    """
+    return in_custom_unit(td, UnitToSeconds.week, 'week')
+
+
+def in_months(td):
+    """Return a string describing the number of whole months in 'td'.
+
+    Note that the number of months is approximate, based on the average number
+    of days per month.
+
+    Usage examples:
+
+        40 days
+        >>> import datetime; in_months(datetime.timedelta(seconds=60*60*24*40))
+        '1 month'
+
+        80 days
+        >>> import datetime; in_months(datetime.timedelta(seconds=60*60*24*80))
+        '2 months'
+
+    :td: a datetime.timedelta
+    :returns: a string describing the supplied 'td'
+
+    """
+    return in_custom_unit(td, UnitToSeconds.month, 'month')
+
+
+def in_years(td):
+    """Return a string describing the number of whole years in 'td'.
+
+    Note that the number of years is approximate, based on the average number
+    of days per year.
+
+    Usage examples:
+
+        365 days
+        >>> import datetime; in_years(datetime.timedelta(seconds=60*60*24*365))
+        '1 year'
+
+        800 days
+        >>> import datetime; in_years(datetime.timedelta(seconds=60*60*24*800))
+        '2 years'
+
+    :td: a datetime.timedelta
+    :returns: a string describing the supplied 'td'
+
+    """
+    return in_custom_unit(td, UnitToSeconds.year, 'year')
 
 
 def quantized(td):
@@ -46,7 +221,6 @@ def quantized(td):
     :returns: a string describing the supplied 'td'
 
     """
-    remainder = td.total_seconds()
     buckets = [
         ("year", 60 * 60 * 24 * 365),
         ("month", 60 * 60 * 24 * 7 * 4),
@@ -57,13 +231,13 @@ def quantized(td):
         ("second", 1),
     ]
 
+    remainder = td.total_seconds()
     for (unit_name, seconds_per_unit) in buckets:
-        units, remainder = divmod(remainder, seconds_per_unit)
+        units = int(remainder / seconds_per_unit)
         if units >= 1:
-            int_units = int(units)
             if units > 1:
                 unit_name += 's'
-            return str(int_units) + " " + unit_name
+            return str(units) + " " + unit_name
 
     return "no time"
 
