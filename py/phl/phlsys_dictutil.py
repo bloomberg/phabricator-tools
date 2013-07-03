@@ -8,6 +8,7 @@
 #   copy_dict_no_nones
 #   ensure_keys
 #   ensure_keys_default
+#   set_if_true
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -74,6 +75,37 @@ def ensure_keys_default(dic, default, keys):
     for k in keys:
         if k not in dic:
             dic[k] = copy.deepcopy(default)
+
+
+def set_if_true(dic, key, value):
+    """Set the supplied 'key' to 'value' if 'value'.
+
+    Can be used to simplify code like this:
+
+        >>> d = {}
+        >>> myvalue = None
+        >>> if myvalue:
+        ...     d['bananas'] = myvalue
+
+    Usage examples:
+        >>> set_if_true(d, 'bananas', None)
+        >>> not 'bananas' in d
+        True
+
+        >>> set_if_true(d, 'bananas', 'we got em')
+        >>> 'bananas' in d
+        True
+        >>> d['bananas']
+        'we got em'
+
+    :dic: the dictionary to update
+    :key: the key to set
+    :value: the value to set 'key' to
+    :returns: None
+
+    """
+    if value:
+        dic[key] = value
 
 
 #------------------------------------------------------------------------------
