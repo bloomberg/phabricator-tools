@@ -4,6 +4,20 @@
 import os
 import sys
 
+# The code base currently depends on version 2.7 of Python, any earlier
+# than that and it won't have the requisite argparse feaures.  Any later
+# than that (3.x) and there are breaking changes in the syntax.
+#
+# Prevent nasty runtime surprises by enforcing version 2.7 as early as
+# possible.
+#
+# The version check itself will not work prior to Python version 2.0,
+# that's when sys.version_info was introduced.
+#
+if sys.version_info[:2] != (2, 7):
+    sys.stderr.write("You need python 2.7 to run this script\n")
+    exit(1)
+
 # append our module dirs to sys.path, which is the list of paths to search
 # for modules this is so we can import our libraries directly
 # N.B. this magic is only really passable up-front in the entrypoint module
