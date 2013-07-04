@@ -29,9 +29,7 @@ def copy_dict_no_nones(d):
     :returns: a copy of 'd' minus any keys mapping to 'None'
 
     """
-    clean = {}
-    clean.update((k, v) for k, v in d.iteritems() if v is not None)
-    return clean
+    return {k: v for k, v in d.iteritems() if v is not None}
 
 
 def ensure_keys(d, keys):

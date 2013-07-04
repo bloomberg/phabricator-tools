@@ -24,7 +24,7 @@ def make_remote(ref, remote):
         >>> make_remote("mywork", "github")
         'refs/remotes/github/mywork'
     """
-    return str("refs/remotes/" + remote + "/" + ref)
+    return "refs/remotes/" + remote + "/" + ref
 
 
 def make_local(ref):
@@ -35,7 +35,7 @@ def make_local(ref):
         'refs/heads/mywork'
     """
     # TODO: check that it isn't already fully qualified
-    return str("refs/heads/" + ref)
+    return "refs/heads/" + ref
 
 
 def parse_ref_hash(clone, ref):
