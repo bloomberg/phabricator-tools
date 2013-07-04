@@ -2,11 +2,11 @@
 trap 'echo FAILED; exit 1' ERR
 
 tempfile=`mktemp`
-arcyon query --format-string '$humanDateModified' --max-results 2000 > $tempfile
-arcyon query --format-string '$humanDateModified' --max-results 2000 --offset-results 2000 >> $tempfile
-arcyon query --format-string '$humanDateModified' --max-results 2000 --offset-results 4000 >> $tempfile
-arcyon query --format-string '$humanDateModified' --max-results 2000 --offset-results 6000 >> $tempfile
-arcyon query --format-string '$humanDateModified' --max-results 2000 --offset-results 8000 >> $tempfile
+arcyon query "$@" --format-string '$humanDateModified' --max-results 2000 > $tempfile
+arcyon query "$@" --format-string '$humanDateModified' --max-results 2000 --offset-results 2000 >> $tempfile
+arcyon query "$@" --format-string '$humanDateModified' --max-results 2000 --offset-results 4000 >> $tempfile
+arcyon query "$@" --format-string '$humanDateModified' --max-results 2000 --offset-results 6000 >> $tempfile
+arcyon query "$@" --format-string '$humanDateModified' --max-results 2000 --offset-results 8000 >> $tempfile
 
 echo "last update time, counts per date:"
 cut -f 1 -d' ' $tempfile | uniq -c

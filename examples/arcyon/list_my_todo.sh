@@ -7,9 +7,9 @@ trap 'echo FAILED; exit 1' ERR
 #TODO: $arcyon query --author-me --no-reviewers --status-type open --statuses 'Needs Review'
 
 echo Revisions you have authored:
-arcyon query --author-me --status-type open --statuses Accepted 'Needs Revision'
+arcyon query "$@" --author-me --status-type open --statuses Accepted 'Needs Revision'
 
 echo
 
 echo Revisions you are reviewing:
-arcyon query --reviewer-me --status-type open --statuses 'Needs Review'
+arcyon query "$@" --reviewer-me --status-type open --statuses 'Needs Review'

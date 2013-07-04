@@ -17,7 +17,7 @@ echo
 # let 'arcyon show-config' determine if the configuration is sufficient
 # it will print helpful error messages if not and exit non-zero
 trap 'echo;echo [FAILED]; exit 1' ERR
-arcyon show-config
+arcyon show-config "$@"
 
 echo
 echo [OK]

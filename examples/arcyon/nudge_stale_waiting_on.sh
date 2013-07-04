@@ -4,8 +4,8 @@
 trap 'echo FAILED; exit 1' ERR
 
 minage="2 days"
-ids1=`arcyon query --author-me --status-type open --statuses 'Needs Review' --format-type ids --update-min-age "$minage"`
-ids2=`arcyon query --reviewer-me --status-type open --statuses 'Needs Revision' --format-type ids --update-min-age "$minage"`
+ids1=`arcyon query "$@" --author-me --status-type open --statuses 'Needs Review' --format-type ids --update-min-age "$minage"`
+ids2=`arcyon query "$@" --reviewer-me --status-type open --statuses 'Needs Revision' --format-type ids --update-min-age "$minage"`
 
 echo "will comment 'nudge' on the following reviews:"
 ids=`echo $ids1 $ids2`
@@ -17,4 +17,4 @@ if [ ! "$choice" = "y" ]; then
     exit 2
 fi
 
-arcyon comment $ids -m 'nudge'
+arcyon comment $ids "$@" -m 'nudge'
