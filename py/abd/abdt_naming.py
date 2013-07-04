@@ -10,6 +10,7 @@
 # Public Functions:
 #   getReviewBranchPrefix
 #   getWorkingBranchPrefix
+#   getReservedBranchPrefix
 #   isStatusBad
 #   isStatusBadPreReview
 #   isStatusBadLand
@@ -67,6 +68,14 @@ def getWorkingBranchPrefix():
     # convention variables per-instance; will get the whole thing working
     # first and worry about that later.
     return "dev/phab/"
+
+
+def getReservedBranchPrefix():
+    # this may want to be configurable from the command-line, we'll probably
+    # want to wrap the functions in this module in a class and store the
+    # convention variables per-instance; will get the whole thing working
+    # first and worry about that later.
+    return "dev/phab/reserve"
 
 
 def isStatusBad(working_branch):
@@ -290,8 +299,9 @@ def getWorkingBranches(branch_list):
     """
     working_branch_list = []
     prefix = getWorkingBranchPrefix()
+    reserved = getReservedBranchPrefix()
     for branch in branch_list:
-        if branch.startswith(prefix):
+        if branch.startswith(prefix) and not branch.startswith(reserved):
             working_branch_list.append(
                 makeWorkingBranchFromName(branch))
     return working_branch_list

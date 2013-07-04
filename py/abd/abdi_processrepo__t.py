@@ -238,6 +238,14 @@ class Test(unittest.TestCase):
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
+    def test_withReservedBranch(self):
+        self._devCheckoutPushNewBranch("dev/phab/reserve")
+        self._devCheckoutPushNewBranch("ph-review/reserve/master")
+        self._devPushNewFile("reserve")
+        self._phabUpdateWithExpectations(total=1, bad=0)
+        self._acceptTheOnlyReview()
+        self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
+
     def test_noBaseWorkflow(self):
         self._devCheckoutPushNewBranch("ph-review/noBaseWorkflow")
         self._devPushNewFile("NEWFILE", has_plan=False)
