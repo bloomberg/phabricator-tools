@@ -15,18 +15,21 @@
 
 import phlsys_makeconduit
 
+import aont_conduitargs
+
 
 def getFromfilePrefixChars():
     return ""
 
 
 def setupParser(parser):
-    pass
+    aont_conduitargs.addArguments(parser)
 
 
-def process(_):
+def process(args):
     getExplanation = phlsys_makeconduit.get_uri_user_cert_explanation
-    uri, user, cert, explanation = getExplanation(None, None, None)
+    uri, user, cert, explanation = getExplanation(
+        args.uri, args.user, args.cert)
     print explanation
     print
     print "uri : ", uri
