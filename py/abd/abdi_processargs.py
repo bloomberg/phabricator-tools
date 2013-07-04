@@ -33,6 +33,7 @@ import phlsys_pluginmanager
 import phlsys_sendmail
 import phlsys_strtotime
 import phlsys_subprocess
+import phlsys_traceback
 import phlsys_tryloop
 
 import abdmail_mailer
@@ -187,6 +188,17 @@ def setup_sigterm_handler():
     signal.signal(signal.SIGTERM, HandleSigterm)
 
 
+def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
+    body = uname + "\n" + tb
+    body += str(body_prefix)
+    body += str(message)
+    print body
+    mailsender.send(
+        subject=str(subject),
+        message=body,
+        to_addresses=emails)
+
+
 def make_exception_message_handler(args, subject, body_prefix):
     uname = str(platform.uname())
     emails = args.sys_admin_emails
@@ -196,14 +208,15 @@ def make_exception_message_handler(args, subject, body_prefix):
         "arcyd@" + platform.node())
 
     def msg_exception(message):
-        body = uname + "\n" + traceback.format_exc()
-        body += str(body_prefix)
-        body += str(message)
-        print body
-        mailsender.send(
-            subject=str(subject),
-            message=body,
-            to_addresses=emails)
+        tb = traceback.format_exc()
+        _send_mail(
+            mailsender, emails, uname, subject, tb, body_prefix, message)
+
+        # now risk trying to make a more detailed exception mail
+        # (experimental, may fail)
+        tb = phlsys_traceback.format_exc()
+        _send_mail(
+            mailsender, emails, uname, subject, tb, body_prefix, message)
 
     return msg_exception
 

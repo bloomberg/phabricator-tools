@@ -97,6 +97,20 @@ setup_repos
 configure_arcyd
 run_arcyd
 
+# exercise the killfile route
+touch killfile
+trap ERR
+$arcyd \
+    process-repos \
+    --sys-admin-emails admin@server.test \
+    --sendmail-binary ${mail} \
+    --sendmail-type catchmail \
+    --repo-configs @repo_arcyd.cfg \
+    --sleep-secs 0 \
+    --kill-file killfile \
+    --no-loop
+trap "echo FAILED!; exit 1" ERR
+
 
 # create a review branch
 cd dev
