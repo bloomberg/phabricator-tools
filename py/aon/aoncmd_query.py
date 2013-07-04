@@ -122,6 +122,12 @@ def setupParser(parser):
              'of results, supply an offset of 100.  To see "page 3" of the '
              'results, supply an offset of 200 and so on.  Theres no way to '
              'count the total number of results at present.')
+    parser.add_argument(
+        '--order',
+        choices=['modified', 'created'],
+        default='modified',
+        help="specify the order for the server to return revisions to us. "
+             "In both cases it's 'most recent first'.")
 
     filters.add_argument(
         '--status-type',
@@ -286,6 +292,8 @@ def process(args):
 
     d = _process_user_fields(me, conduit, args)
     _set_options(args, d)
+
+    d["order"] = 'order-' + args.order
 
     # perform the query
     results = conduit.call("differential.query", d)
