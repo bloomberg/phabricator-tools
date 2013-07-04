@@ -3,12 +3,13 @@ set -x
 
 arcyon='../../bin/arcyon'
 
-id="$($arcyon create-revision -t title -p plan -f diff1)"
+id="$($arcyon create-revision -t title -p plan --summary ssss -f diff1)"
 $arcyon get-diff -r $id --ls
 $arcyon update-revision $id update -f diff2
 $arcyon get-diff -r $id --ls
 
 $arcyon query --format-type ids | grep $id
+$arcyon query --ids $id --format-string '$summary' | grep ssss
 $arcyon query --format-type ids --order created | grep $id
 $arcyon query --format-type ids --order modified | grep $id
 

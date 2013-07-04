@@ -146,7 +146,7 @@ def process(args):
     fields[MessageFields.title] = args.title
     fields[MessageFields.test_plan] = args.test_plan
     if args.summary:
-        d[MessageFields.summary] = args.summary
+        fields[MessageFields.summary] = args.summary
 
     d = {'diffid': diff_id, 'fields': fields}
 
