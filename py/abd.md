@@ -27,3 +27,6 @@ Define useful aggregates for interacting with git without passing alot.
 Naming conventions for abd
 * `abdt_workingbranch.py` -
 Git operations on working branches.
+
+-----
+*please note: this file is generated, edits will be lost*

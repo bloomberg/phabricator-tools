@@ -14,6 +14,9 @@ function write_group_doc {
         --docfile - \
         `find $dir -iname '*.py' | grep -v __t` \
         >> $mdfile
+    echo >> $mdfile
+    echo '-----' >> $mdfile
+    echo '*please note: this file is generated, edits will be lost*' >> $mdfile
 }
 
 write_group_doc abd

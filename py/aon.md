@@ -17,3 +17,6 @@ show the configuration as discovered from the current directory.
 Update an existing revision in differential.
 * `aont_conduitargs.py` -
 create an argparser for conduit paramters.
+
+-----
+*please note: this file is generated, edits will be lost*

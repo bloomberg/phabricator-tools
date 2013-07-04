@@ -65,3 +65,6 @@ Convert timedeltas to strings.
 Priority queue for objects with associated delays.
 * `phlsys_tryloop.py` -
 Conveniently retry exception-prone operations.
+
+-----
+*please note: this file is generated, edits will be lost*
