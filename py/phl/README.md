@@ -73,6 +73,8 @@ Interact with other programs using command-line semantics.
 Convert timedeltas to strings.
 * `phlsys_timedqueue.py` -
 Priority queue for objects with associated delays.
+* `phlsys_traceback.py` -
+Emit enhanced traceback strings with local variables.
 * `phlsys_tracedecorator.py` -
 Decorators for tracing out the execution of functions and methods.
 * `phlsys_tryloop.py` -
