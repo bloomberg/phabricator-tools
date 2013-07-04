@@ -3,10 +3,13 @@ trap 'echo FAILED; exit 1' ERR
 
 echo "last update time"
 tempfile=`mktemp`
-arcyon query --format-string '$humanTimeSinceDateModified' --max-results 1000 > $tempfile
-arcyon query --format-string '$humanTimeSinceDateModified' --max-results 1000 --offset-results 1000 >> $tempfile
-arcyon query --format-string '$humanTimeSinceDateModified' --max-results 1000 --offset-results 2000 >> $tempfile
+arcyon query --format-string '$humanTimeSinceDateModified' --max-results 2000 > $tempfile
+arcyon query --format-string '$humanTimeSinceDateModified' --max-results 2000 --offset-results 2000 >> $tempfile
+arcyon query --format-string '$humanTimeSinceDateModified' --max-results 2000 --offset-results 4000 >> $tempfile
+arcyon query --format-string '$humanTimeSinceDateModified' --max-results 2000 --offset-results 6000 >> $tempfile
+arcyon query --format-string '$humanTimeSinceDateModified' --max-results 2000 --offset-results 8000 >> $tempfile
+
 uniq -c $tempfile
 echo `wc -l < $tempfile` reviews considered
-echo "(n.b. counts up to last 3000 reviews or so only)"
+echo "(n.b. counts up to last 10,000 reviews or so only)"
 rm $tempfile
