@@ -90,7 +90,7 @@ def setupParser(parser):
 
 
 def process(args):
-    conduit = phlsys_makeconduit.make_conduit()
+    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
 
     if args.act_as_user:
         conduit.set_act_as_user(args.act_as_user)
