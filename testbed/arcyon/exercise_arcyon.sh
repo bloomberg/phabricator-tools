@@ -9,6 +9,8 @@ $arcyon update-revision $id update -f diff2
 $arcyon get-diff -r $id --ls
 
 $arcyon query --format-type ids | grep $id
+$arcyon query --format-type ids --order created | grep $id
+$arcyon query --format-type ids --order modified | grep $id
 
 diffid="$($arcyon raw-diff diff1)"
 diffid2="$($arcyon raw-diff diff2)"
