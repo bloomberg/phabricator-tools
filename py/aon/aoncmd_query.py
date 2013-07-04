@@ -88,6 +88,24 @@ def setupParser(parser):
         'output format parameters', 'choose one only, default is "short"')
     formats = fmts.add_mutually_exclusive_group()
 
+    _setupParserTopLevel(parser)
+    _setupParserFilters(filters, self_filters, user_filters, time_filters)
+
+    formats.add_argument(
+        '--format-type',
+        choices=['ids', 'short', 'python', 'json'],
+        help="see usage examples for sample output")
+    formats.add_argument(
+        '--format-string',
+        metavar='FORMAT',
+        type=str,
+        help="compose your own output format, e.g. '$id $title', see "
+                "usage examples for more details")
+
+    aont_conduitargs.addArguments(parser)
+
+
+def _setupParserTopLevel(parser):
     parser.add_argument(
         '--ids',
         type=int,
@@ -129,6 +147,8 @@ def setupParser(parser):
         help="specify the order for the server to return revisions to us. "
              "In both cases it's 'most recent first'.")
 
+
+def _setupParserFilters(filters, self_filters, user_filters, time_filters):
     filters.add_argument(
         '--status-type',
         type=str,
@@ -220,19 +240,6 @@ def setupParser(parser):
         type=phlsys_strtotime.duration_string_to_time_delta,
         metavar='AGE',
         help='include reviews which are at most AGE old.')
-
-    formats.add_argument(
-        '--format-type',
-        choices=['ids', 'short', 'python', 'json'],
-        help="see usage examples for sample output")
-    formats.add_argument(
-        '--format-string',
-        metavar='FORMAT',
-        type=str,
-        help="compose your own output format, e.g. '$id $title', see "
-                "usage examples for more details")
-
-    aont_conduitargs.addArguments(parser)
 
 
 def _set_human_times_since(r, kind, since):
