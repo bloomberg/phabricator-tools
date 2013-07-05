@@ -254,31 +254,26 @@ def land(conduit, wb, gitContext, branch):
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
-    with phlsys_conduit.act_as_user_context(conduit, user):
-        phlgit_checkout.new_branch_force_based_on(
-            clone, wb.base, wb.remote_base)
 
-        # compose the commit message
-        message = conduit.get_commit_message(wb.id)
+    phlgit_checkout.new_branch_force_based_on(clone, wb.base, wb.remote_base)
 
-        try:
-            with phlsys_fs.nostd():
-                squashMessage = phlgit_merge.squash(
-                    clone,
-                    wb.remote_branch,
-                    message,
-                    name + " <" + email + ">")
-        except phlsys_subprocess.CalledProcessError as e:
-            clone.call("reset", "--hard")  # fix the working copy
-            raise abdt_exception.LandingException(
-                '\n' + e.stdout, branch, wb.base)
+    # compose the commit message
+    message = conduit.get_commit_message(wb.id)
 
-        print "- pushing " + wb.remote_base
-        phlgit_push.push(clone, wb.base, gitContext.remote)
-        print "- deleting " + wb.branch
-        phlgit_push.delete(clone, wb.branch, gitContext.remote)
-        print "- deleting " + branch
-        phlgit_push.delete(clone, branch, gitContext.remote)
+    try:
+        with phlsys_fs.nostd():
+            squashMessage = phlgit_merge.squash(
+                clone, wb.remote_branch, message, name + " <" + email + ">")
+    except phlsys_subprocess.CalledProcessError as e:
+        clone.call("reset", "--hard")  # fix the working copy
+        raise abdt_exception.LandingException('\n' + e.stdout, branch, wb.base)
+
+    print "- pushing " + wb.remote_base
+    phlgit_push.push(clone, wb.base, gitContext.remote)
+    print "- deleting " + wb.branch
+    phlgit_push.delete(clone, wb.branch, gitContext.remote)
+    print "- deleting " + branch
+    phlgit_push.delete(clone, branch, gitContext.remote)
 
     print "- commenting on revision " + str(wb.id)
     commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
