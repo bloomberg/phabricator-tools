@@ -25,18 +25,19 @@ class Test(unittest.TestCase):
         super(Test, self).__init__(data)
         self.conduit = None
         self.reviewerConduit = None
+        self.test_data = None
 
     def setUp(self):
-        test_data = phldef_conduit
+        self.test_data = phldef_conduit
         self.conduit = phlsys_conduit.Conduit(
-            test_data.TEST_URI,
-            test_data.ALICE.user,
-            test_data.ALICE.certificate)
+            self.test_data.TEST_URI,
+            self.test_data.ALICE.user,
+            self.test_data.ALICE.certificate)
 
         self.reviewerConduit = phlsys_conduit.Conduit(
-            test_data.TEST_URI,
-            test_data.BOB.user,
-            test_data.BOB.certificate)
+            self.test_data.TEST_URI,
+            self.test_data.BOB.user,
+            self.test_data.BOB.certificate)
 
     def tearDown(self):
         pass
@@ -281,6 +282,29 @@ Test Plan: I proof-read it and it looked ok
     def testCanGetCommitMessage(self):
         revisionid = self._createRevision("testUpdateStrangeFields")
         phlcon_differential.get_commit_message(self.conduit, revisionid)
+
+    def testCreateEmptyRevision(self):
+        conduit = phlsys_conduit.Conduit(
+            self.test_data.TEST_URI,
+            self.test_data.PHAB.user,
+            self.test_data.PHAB.certificate)
+        author = phldef_conduit.ALICE.user
+        with phlsys_conduit.act_as_user_context(conduit, author):
+            revision_id = phlcon_differential.create_empty_revision(conduit)
+
+        revision_list = phlcon_differential.query(conduit, [revision_id])
+        self.assertEqual(len(revision_list), 1)
+
+    # XXX: re-instate when we have support for reviewers and ccs
+    # def testCreateEmptyRevisionReviewersCcs(self):
+    #     id = abdt_conduit.create_empty_revision(
+    #         self.conduit,
+    #         self.test_data.alice.user,
+    #         [self.test_data.bob.user],
+    #         [self.test_data.phab.user])
+    #     revision_list = phlcon_differential.query(self.conduit, [id])
+    #     self.assertEqual(len(revision_list), 1)
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

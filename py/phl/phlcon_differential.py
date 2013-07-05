@@ -20,6 +20,7 @@
 #   create_comment
 #   get_commit_message
 #   close
+#   create_empty_revision
 #
 # Public Assignments:
 #   AUTHOR_ACTIONS
@@ -300,6 +301,34 @@ def get_commit_message(conduit, revision_id):
 
 def close(conduit, revisionId):
     conduit.call('differential.close', {"revisionID": revisionId})
+
+
+def create_empty_revision(conduit):
+    """Return the revision id of a newly created empty revision.
+
+    :conduit: conduit to operate on
+    :return: revision id
+
+    """
+
+    empty_diff = "diff --git a/ b/"
+    diff_id = create_raw_diff(conduit, empty_diff).id
+    fields = {
+        "title": "empty revision",
+        "testPlan": "UNTESTED",
+    }
+
+    # TODO: add support for reviewers and ccs
+    # if reviewers:
+    #     assert not isinstance(reviewers, types.StringTypes)
+    #     fields["reviewers"] = reviewers
+    # if ccs:
+    #     assert not isinstance(ccs, types.StringTypes)
+    #     fields["ccs"] = ccs
+
+    revision = create_revision(conduit, diff_id, fields)
+
+    return revision.revisionid
 
 
 #------------------------------------------------------------------------------

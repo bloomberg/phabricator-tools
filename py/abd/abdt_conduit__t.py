@@ -1,12 +1,8 @@
 """Test suite for abdt_conduit"""
-
 import unittest
 
-import phlcon_differential
 import phldef_conduit
 import phlsys_conduit
-
-import abdt_conduit
 
 
 class Test(unittest.TestCase):
@@ -22,23 +18,6 @@ class Test(unittest.TestCase):
             self.test_data.TEST_URI,
             self.test_data.PHAB.user,
             self.test_data.PHAB.certificate)
-
-    def testCreateEmptyRevision(self):
-        revision_id = abdt_conduit.createEmptyRevision(
-            self.conduit, self.test_data.ALICE.user)
-
-        revision_list = phlcon_differential.query(self.conduit, [revision_id])
-        self.assertEqual(len(revision_list), 1)
-
-    # XXX: re-instate when we have support for reviewers and ccs
-    # def testCreateEmptyRevisionReviewersCcs(self):
-    #     id = abdt_conduit.createEmptyRevision(
-    #         self.conduit,
-    #         self.test_data.alice.user,
-    #         [self.test_data.bob.user],
-    #         [self.test_data.phab.user])
-    #     revision_list = phlcon_differential.query(self.conduit, [id])
-    #     self.assertEqual(len(revision_list), 1)
 
 
 #------------------------------------------------------------------------------

@@ -43,7 +43,6 @@ import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 import abdt_gittypes
-import abdt_conduit
 import abdt_conduitgit
 import abdt_workingbranch
 
@@ -314,7 +313,8 @@ def createFailedReview(conduit, gitContext, review_branch, exception):
         conduit,
         review_branch.remote_base,
         review_branch.remote_branch)
-    reviewid = abdt_conduit.createEmptyRevision(conduit, user)
+    with phlsys_conduit.act_as_user_context(conduit, user):
+        reviewid = phlcon_differential.create_empty_revision(conduit)
     wb = abdt_gittypes.makeGitWorkingBranchFromParts(
         abdt_naming.WB_STATUS_BAD_INREVIEW,
         review_branch.description,

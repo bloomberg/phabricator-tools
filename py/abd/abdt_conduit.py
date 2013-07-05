@@ -4,37 +4,9 @@
 # -----------------------------------------------------------------------------
 # abdt_conduit
 #
-# Public Functions:
-#   createEmptyRevision
-#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-
-import phlsys_conduit
-import phlcon_differential
-
-
-def createEmptyRevision(conduit, author):
-    empty_diff = "diff --git a/ b/"
-
-    with phlsys_conduit.act_as_user_context(conduit, author):
-        diff_id = phlcon_differential.create_raw_diff(conduit, empty_diff).id
-        fields = {
-            "title": "empty revision",
-            "testPlan": "UNTESTED",
-        }
-        # TODO: add support for reviewers and ccs
-        # if reviewers:
-        #     assert not isinstance(reviewers, types.StringTypes)
-        #     fields["reviewers"] = reviewers
-        # if ccs:
-        #     assert not isinstance(ccs, types.StringTypes)
-        #     fields["ccs"] = ccs
-        revision = phlcon_differential.create_revision(
-            conduit, diff_id, fields)
-        return revision.revisionid
-
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
