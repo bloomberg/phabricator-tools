@@ -58,6 +58,16 @@ class Conduit(object):
             revision = phlcon_differential.create_empty_revision(self._conduit)
         return revision
 
+    def get_commit_message(self, revisionid):
+        """Return the string commit message appropriate for supplied revision.
+
+        :revisionid: the id of the revision to create a message for
+        :returns: the string of the commit message
+
+        """
+        return phlcon_differential.get_commit_message(
+            self._conduit, revisionid)
+
     def create_revision(self, raw_diff, fields):
         """Return the id of a newly created revision based on specified args.
 

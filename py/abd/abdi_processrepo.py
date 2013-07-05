@@ -27,7 +27,6 @@
 # =============================================================================
 
 # XXX: probably too many imports
-import phlcon_differential
 import phlgit_branch
 import phlgit_checkout
 import phlgit_diff
@@ -255,13 +254,12 @@ def land(conduit, wb, gitContext, branch):
     print "landing " + wb.remote_branch + " onto " + wb.remote_base
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
-    d = phlcon_differential
     with phlsys_conduit.act_as_user_context(conduit, user):
         phlgit_checkout.new_branch_force_based_on(
             clone, wb.base, wb.remote_base)
 
         # compose the commit message
-        message = d.get_commit_message(conduit, wb.id)
+        message = conduit.get_commit_message(wb.id)
 
         try:
             with phlsys_fs.nostd():
