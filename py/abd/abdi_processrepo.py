@@ -142,29 +142,25 @@ def createDifferentialReview(
         clone, review_branch.branch, review_branch.remote_branch)
 
     with phlsys_conduit.act_as_user_context(conduit, user):
-        print "- creating diff"
-        diffid = phlcon_differential.create_raw_diff(conduit, rawDiff).id
-
         print "- creating revision"
-        review = phlcon_differential.create_revision(
-            conduit, diffid, parsed.fields)
-        print "- created " + str(review.revisionid)
+        revision_id = conduit.create_revision(rawDiff, parsed.fields)
+        print "- created " + str(revision_id)
 
         workingBranch = abdt_naming.makeWorkingBranchName(
             abdt_naming.WB_STATUS_OK,
             review_branch.description,
             review_branch.base,
-            review.revisionid)
+            revision_id)
 
         print "- pushing working branch: " + workingBranch
         phlgit_push.push_asymmetrical(
             clone, review_branch.branch, workingBranch, gitContext.remote)
 
-    print "- commenting on " + str(review.revisionid)
-    commenter = abdcmnt_commenter.Commenter(conduit, review.revisionid)
+    print "- commenting on " + str(revision_id)
+    commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
     commenter.createdReview(review_branch.branch, review_branch.base)
 
-    return review.revisionid
+    return revision_id
 
 
 def makeMessageDigest(clone, base, branch):
@@ -239,13 +235,10 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
         raise abdt_exception.LargeDiffException(
             "diff too big", len(rawDiff), MAX_DIFF_SIZE)
 
-    d = phlcon_differential
     used_default_test_plan = False
     with phlsys_conduit.act_as_user_context(conduit, author):
         print "- updating revision " + str(wb.id)
-        diffid = d.create_raw_diff(conduit, rawDiff).id
-        d.update_revision(
-            conduit, wb.id, diffid, [], "update")
+        conduit.update_revision(wb.id, rawDiff, "update")
 
     wb = abdt_workingbranch.pushStatus(
         gitContext,

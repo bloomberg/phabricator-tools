@@ -45,6 +45,37 @@ class Conduit(object):
         phlcon_differential.create_comment(
             self._conduit, revision, message, silent=silent)
 
+    def create_revision(self, raw_diff, fields):
+        """Return the id of a newly created revision based on specified args.
+
+        See phlcon_differential.MessageFields for some examples of valid input
+        for specified 'fields'.
+
+        :raw_diff: raw output string from e.g. 'git diff master...'
+        :fields: dict of string attributes, required: 'title' and 'testPlan'
+        :returns: id of created revision
+
+        """
+        diffid = phlcon_differential.create_raw_diff(
+            self._conduit, raw_diff).id
+        review = phlcon_differential.create_revision(
+            self._conduit, diffid, fields)
+        return review.revisionid
+
+    def update_revision(self, revisionid, raw_diff, message):
+        """Update an existing Differential revision with a new diff.
+
+        :revisionid: id of the Differential revision to update
+        :raw_diff: raw output string from e.g. 'git diff master...'
+        :message: string message to annotate the update event with
+        :returns: None
+
+        """
+        diffid = phlcon_differential.create_raw_diff(
+            self._conduit, raw_diff).id
+        phlcon_differential.update_revision(
+            self._conduit, revisionid, diffid, [], message)
+
     # XXX: until we replace all usage of phlsys_conduit, delegate missing
     #      functionality to it using getattr and setattr
 
