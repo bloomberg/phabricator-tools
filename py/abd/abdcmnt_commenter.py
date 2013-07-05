@@ -11,7 +11,6 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import phlcon_differential
 import phlcon_remarkup
 
 import abdt_exception
@@ -104,8 +103,7 @@ class Commenter(object):
         self._createComment(message, silent=True)
 
     def _createComment(self, message, silent=False):
-        phlcon_differential.create_comment(
-            self._conduit, self._revision_id, message, silent=silent)
+        self._conduit.create_comment(self._revision_id, message, silent=silent)
 
     def _commitMessageParseException(self, e):
         message = "errors were encountered, see below.\n"
