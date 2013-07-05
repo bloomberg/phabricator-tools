@@ -6,7 +6,6 @@ import abdmail_mailer
 import phlmail_mocksender
 import abdt_commitmessage
 import abdt_naming
-import phlcon_differential
 import phldef_conduit
 import phlgit_branch
 import phlgit_config
@@ -179,15 +178,13 @@ class Test(unittest.TestCase):
         wb = wbList[0]
         return wb.id
 
-    def _actOnTheOnlyReview(self, user, action):
-        # accept the review
-        reviewid = self._getTheOnlyReviewId()
-        with phlsys_conduit.act_as_user_context(self.conduit, user):
-            phlcon_differential.create_comment(
-                self.conduit, reviewid, action=action)
-
     def _acceptTheOnlyReview(self):
-        self._actOnTheOnlyReview(self.reviewer, "accept")
+        reviewid = self._getTheOnlyReviewId()
+        self.conduit.accept_revision_as_user(reviewid, self.reviewer)
+
+    def _abandonTheOnlyReview(self):
+        reviewid = self._getTheOnlyReviewId()
+        self.conduit.abandon_revision(reviewid)
 
     def test_nothingToDo(self):
         # nothing to process
@@ -283,7 +280,7 @@ class Test(unittest.TestCase):
         self._devCheckoutPushNewBranch("ph-review/abandonedWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
-        self._actOnTheOnlyReview(self.author_account.user, "abandon")
+        self._abandonTheOnlyReview()
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -373,13 +370,8 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
 
         reviewid = self._getTheOnlyReviewId()
-        with phlsys_conduit.act_as_user_context(
-                self.conduit,
-                phldef_conduit.ALICE.user) as conduit:
-            phlcon_differential.create_comment(
-                conduit,
-                reviewid,
-                action=phlcon_differential.Action.claim)
+        self.conduit.commandeer_revision_as_user(
+            reviewid, phldef_conduit.ALICE.user)
 
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -392,13 +384,8 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
 
         reviewid = self._getTheOnlyReviewId()
-        with phlsys_conduit.act_as_user_context(
-                self.conduit,
-                phldef_conduit.PHAB.user) as conduit:
-            phlcon_differential.create_comment(
-                conduit,
-                reviewid,
-                action=phlcon_differential.Action.claim)
+        self.conduit.commandeer_revision_as_user(
+            reviewid, phldef_conduit.PHAB.user)
 
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
