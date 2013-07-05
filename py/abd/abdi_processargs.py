@@ -23,6 +23,8 @@ import phlsys_fs
 import phlsys_subprocess
 import phlsys_tryloop
 
+import abdt_conduit
+
 
 def run_once(args, out):
     sender = phlmail_sender.MailSender(
@@ -84,8 +86,9 @@ def run_once(args, out):
     phlsys_tryloop.try_loop_delay(connect, delays, onException=on_exception)
 
     out.display("process (" + args.repo_desc + "): ")
+    arcyd_conduit = abdt_conduit.Conduit(conduit[0])
     abdi_processrepo.processUpdatedRepo(
-        conduit[0], args.repo_path, "origin", mailer)
+        arcyd_conduit, args.repo_path, "origin", mailer)
 
     if args.ok_touch_path:
         try:

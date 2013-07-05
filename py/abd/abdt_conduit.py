@@ -1,12 +1,56 @@
-"""Convenience functions for deailing with Phabricator's Conduit api."""
+"""Abstraction for Arcyd's conduit operations.
+
+Intended to be a full replacement for phlsys_conduit in Arcyd code, providing
+high-level functions for operations.
+
+Until we've replace all existing Conduit.call() calls then we need to duplicate
+that functionality too.
+
+"""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
 # abdt_conduit
 #
+# Public Classes:
+#   Conduit
+#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
+
+import phlcon_differential
+
+
+class Conduit(object):
+    def __init__(self, conduit):
+        """Initialise a new Conduit.
+
+        :conduit: a phlsys_conduit to delegate to
+        :returns: None
+
+        """
+        super(Conduit, self).__init__()
+        self._conduit = conduit
+
+    def create_comment(self, revision, message, silent=False):
+        """Make a comment on the specified 'revision'.
+
+        :revision: id of the revision to comment on
+        :message: the string message to leave as a comment, may be empty
+        :silent: mail notifications won't be sent if False
+        :returns: None
+
+        """
+        phlcon_differential.create_comment(
+            self._conduit, revision, message, silent=silent)
+
+    # XXX: until we replace all usage of phlsys_conduit, delegate missing
+    #      functionality to it using getattr and setattr
+
+    def __getattr__(self, attr):
+        return getattr(self._conduit, attr)
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

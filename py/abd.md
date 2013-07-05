@@ -16,7 +16,7 @@ Send mails to interested parties about pre-specified conditions.
 * `abdt_commitmessage.py` -
 Operations on git commit message strings.
 * `abdt_conduit.py` -
-Convenience functions for deailing with Phabricator's Conduit api.
+Abstraction for Arcyd's conduit operations.
 * `abdt_conduitgit.py` -
 Operations combining conduit with git.
 * `abdt_exception.py` -

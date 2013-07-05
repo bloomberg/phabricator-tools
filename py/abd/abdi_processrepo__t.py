@@ -16,6 +16,7 @@ import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 import abdi_processrepo
+import abdt_conduit
 
 # factors affecting a review:
 #  age of the revisions
@@ -83,10 +84,12 @@ class Test(unittest.TestCase):
         with phlsys_fs.chdir_context("phab"):
             runCommands("git fetch origin -p")
 
-        self.conduit = phlsys_conduit.Conduit(
+        sys_conduit = phlsys_conduit.Conduit(
             phldef_conduit.TEST_URI,
             phldef_conduit.PHAB.user,
             phldef_conduit.PHAB.certificate)
+
+        self.conduit = abdt_conduit.Conduit(sys_conduit)
 
         self.mock_sender = phlmail_mocksender.MailSender()
         self.mailer = abdmail_mailer.Mailer(
