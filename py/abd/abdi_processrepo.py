@@ -185,7 +185,6 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
         wb = updateInReview(conduit, wb, gitContext, rb)
     elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
         d = phlcon_differential
-        status = d.get_revision_status(conduit, wb.id)
         try:
             print "try updating bad branch"
             verifyReviewBranchBase(gitContext, reviewBranch)
