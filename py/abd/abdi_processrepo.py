@@ -296,19 +296,16 @@ def createFailedReview(conduit, gitContext, review_branch, exception):
         conduit,
         review_branch.remote_base,
         review_branch.remote_branch)
-    with phlsys_conduit.act_as_user_context(conduit, user):
-        reviewid = phlcon_differential.create_empty_revision(conduit)
+    reviewid = conduit.create_empty_revision_as_user(user)
     wb = abdt_gittypes.makeGitWorkingBranchFromParts(
         abdt_naming.WB_STATUS_BAD_INREVIEW,
         review_branch.description,
         review_branch.base,
         reviewid,
         gitContext.remote)
-    commenter = abdcmnt_commenter.Commenter(
-        conduit, reviewid)
+    commenter = abdcmnt_commenter.Commenter(conduit, reviewid)
     commenter.failedCreateReview(review_branch.branch, exception)
-    abdt_workingbranch.pushBadInReview(
-        gitContext, review_branch, wb)
+    abdt_workingbranch.pushBadInReview(gitContext, review_branch, wb)
 
 
 def tryCreateReview(mailer, conduit, gitContext, review_branch, mail_on_fail):

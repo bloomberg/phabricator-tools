@@ -47,6 +47,17 @@ class Conduit(object):
         phlcon_differential.create_comment(
             self._conduit, revision, message, silent=silent)
 
+    def create_empty_revision_as_user(self, username):
+        """Return the id of a newly created empty revision as 'username'.
+
+        :username: username for the author of the revision
+        :returns: id of created revision
+
+        """
+        with phlsys_conduit.act_as_user_context(self._conduit, username):
+            revision = phlcon_differential.create_empty_revision(self._conduit)
+        return revision
+
     def create_revision(self, raw_diff, fields):
         """Return the id of a newly created revision based on specified args.
 
