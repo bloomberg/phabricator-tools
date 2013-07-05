@@ -27,9 +27,6 @@
 # =============================================================================
 
 # XXX: probably too many imports
-import abdcmnt_commenter
-import abdt_exception
-import abdt_naming
 import phlcon_differential
 import phlcon_user
 import phlgit_branch
@@ -42,8 +39,12 @@ import phlsys_conduit
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
-import abdt_gittypes
+
+import abdcmnt_commenter
 import abdt_conduitgit
+import abdt_exception
+import abdt_gittypes
+import abdt_naming
 import abdt_workingbranch
 
 # TODO: split into appropriate modules
