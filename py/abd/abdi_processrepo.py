@@ -33,7 +33,6 @@ import phlgit_diff
 import phlgit_log
 import phlgit_merge
 import phlgit_push
-import phlsys_conduit
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
@@ -140,20 +139,19 @@ def createDifferentialReview(
     phlgit_checkout.new_branch_force_based_on(
         clone, review_branch.branch, review_branch.remote_branch)
 
-    with phlsys_conduit.act_as_user_context(conduit, user):
-        print "- creating revision"
-        revision_id = conduit.create_revision(rawDiff, parsed.fields)
-        print "- created " + str(revision_id)
+    print "- creating revision"
+    revision_id = conduit.create_revision_as_user(rawDiff, parsed.fields, user)
+    print "- created " + str(revision_id)
 
-        workingBranch = abdt_naming.makeWorkingBranchName(
-            abdt_naming.WB_STATUS_OK,
-            review_branch.description,
-            review_branch.base,
-            revision_id)
+    workingBranch = abdt_naming.makeWorkingBranchName(
+        abdt_naming.WB_STATUS_OK,
+        review_branch.description,
+        review_branch.base,
+        revision_id)
 
-        print "- pushing working branch: " + workingBranch
-        phlgit_push.push_asymmetrical(
-            clone, review_branch.branch, workingBranch, gitContext.remote)
+    print "- pushing working branch: " + workingBranch
+    phlgit_push.push_asymmetrical(
+        clone, review_branch.branch, workingBranch, gitContext.remote)
 
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)

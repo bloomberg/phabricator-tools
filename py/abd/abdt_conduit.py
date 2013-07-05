@@ -68,7 +68,7 @@ class Conduit(object):
         return phlcon_differential.get_commit_message(
             self._conduit, revisionid)
 
-    def create_revision(self, raw_diff, fields):
+    def create_revision_as_user(self, raw_diff, fields, username):
         """Return the id of a newly created revision based on specified args.
 
         See phlcon_differential.MessageFields for some examples of valid input
@@ -76,13 +76,15 @@ class Conduit(object):
 
         :raw_diff: raw output string from e.g. 'git diff master...'
         :fields: dict of string attributes, required: 'title' and 'testPlan'
+        :username: username for the author of the revision
         :returns: id of created revision
 
         """
-        diffid = phlcon_differential.create_raw_diff(
-            self._conduit, raw_diff).id
-        review = phlcon_differential.create_revision(
-            self._conduit, diffid, fields)
+        with phlsys_conduit.act_as_user_context(self._conduit, username):
+            diffid = phlcon_differential.create_raw_diff(
+                self._conduit, raw_diff).id
+            review = phlcon_differential.create_revision(
+                self._conduit, diffid, fields)
         return review.revisionid
 
     def _get_author_user(self, revisionid):
