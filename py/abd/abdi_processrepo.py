@@ -184,7 +184,6 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
         verifyReviewBranchBase(gitContext, reviewBranch)
         wb = updateInReview(conduit, wb, gitContext, rb)
     elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
-        d = phlcon_differential
         try:
             print "try updating bad branch"
             verifyReviewBranchBase(gitContext, reviewBranch)
@@ -193,9 +192,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
             print "still bad"
 
     if not abdt_naming.isStatusBad(wb):
-        d = phlcon_differential
-        status = d.get_revision_status(conduit, wb.id)
-        if int(status) == d.ReviewStates.accepted:
+        if conduit.is_review_accepted(wb.id):
             verifyReviewBranchBase(gitContext, reviewBranch)
             land(conduit, wb, gitContext, reviewBranch.branch)
             # TODO: we probably want to do a better job of cleaning up locally

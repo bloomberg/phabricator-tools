@@ -71,6 +71,17 @@ class Conduit(object):
             self._conduit, [revision.authorPHID])[0]
         return author_user
 
+    def is_review_accepted(self, revisionid):
+        """Return True if the supplied 'revisionid' is in 'accepted' status.
+
+        :revisionid: id of the Differential revision to query
+        :returns: True if accepted
+
+        """
+        status = phlcon_differential.get_revision_status(
+            self._conduit, revisionid)
+        return int(status) == phlcon_differential.ReviewStates.accepted
+
     def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.
 
