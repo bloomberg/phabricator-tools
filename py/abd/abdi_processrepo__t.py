@@ -8,7 +8,7 @@ import phlgit_branch
 import phlgit_config
 import phlgit_log
 import phlmail_mocksender
-import phlsys_conduit
+#import phlsys_conduit
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
@@ -16,7 +16,8 @@ import phlsys_subprocess
 import abdi_processrepo
 import abdmail_mailer
 import abdt_commitmessage
-import abdt_conduit
+#import abdt_conduit
+import abdt_conduitmock
 import abdt_naming
 
 # factors affecting a review:
@@ -88,12 +89,13 @@ class Test(unittest.TestCase):
         with phlsys_fs.chdir_context("phab"):
             runCommands("git fetch origin -p")
 
-        sys_conduit = phlsys_conduit.Conduit(
-            phldef_conduit.TEST_URI,
-            phldef_conduit.PHAB.user,
-            phldef_conduit.PHAB.certificate)
+        # sys_conduit = phlsys_conduit.Conduit(
+        #     phldef_conduit.TEST_URI,
+        #     phldef_conduit.PHAB.user,
+        #     phldef_conduit.PHAB.certificate)
 
-        self.conduit = abdt_conduit.Conduit(sys_conduit)
+        #self.conduit = abdt_conduit.Conduit(sys_conduit)
+        self.conduit = abdt_conduitmock.ConduitMock()
 
         self.mock_sender = phlmail_mocksender.MailSender()
         self.mailer = abdmail_mailer.Mailer(

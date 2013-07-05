@@ -302,9 +302,13 @@ def tryCreateReview(mailer, conduit, gitContext, review_branch, mail_on_fail):
     try:
         createReview(conduit, gitContext, review_branch)
     except abdt_exception.AbdUserException as e:
+        print "failed to create:"
+        print e
         try:
             createFailedReview(conduit, gitContext, review_branch, e)
         except abdt_exception.NoUsersOnBranchException as e:
+            print "failed to create failed review:"
+            print e
             abdt_workingbranch.pushBadPreReview(
                 gitContext, review_branch)
             if mail_on_fail:

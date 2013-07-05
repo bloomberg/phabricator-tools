@@ -1,34 +1,21 @@
-"""Abstraction for Arcyd's conduit operations."""
+"""Abstract Base Class for the 'conduit' abstraction."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdt_conduit
+# abdt_conduitabc
 #
 # Public Classes:
-#   Conduit
+#   ConduitAbc
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import phlcon_differential
-import phlcon_user
-import phlsys_conduit
-
-import abdt_conduitabc
+import abc
 
 
-class Conduit(abdt_conduitabc.ConduitAbc):
-
-    def __init__(self, conduit):
-        """Initialise a new Conduit.
-
-        :conduit: a phlsys_conduit to delegate to
-        :returns: None
-
-        """
-        super(Conduit, self).__init__()
-        self._conduit = conduit
+class ConduitAbc(object):
+    __metaclass__ = abc.ABCMeta
 
     def create_comment(self, revision, message, silent=False):
         """Make a comment on the specified 'revision'.
@@ -39,8 +26,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        phlcon_differential.create_comment(
-            self._conduit, revision, message, silent=silent)
+        pass
 
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
@@ -49,9 +35,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: id of created revision
 
         """
-        with phlsys_conduit.act_as_user_context(self._conduit, username):
-            revision = phlcon_differential.create_empty_revision(self._conduit)
-        return revision
+        pass
 
     def get_commit_message(self, revisionid):
         """Return the string commit message appropriate for supplied revision.
@@ -60,8 +44,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: the string of the commit message
 
         """
-        return phlcon_differential.get_commit_message(
-            self._conduit, revisionid)
+        pass
 
     def create_revision_as_user(self, raw_diff, fields, username):
         """Return the id of a newly created revision based on specified args.
@@ -75,12 +58,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: id of created revision
 
         """
-        with phlsys_conduit.act_as_user_context(self._conduit, username):
-            diffid = phlcon_differential.create_raw_diff(
-                self._conduit, raw_diff).id
-            review = phlcon_differential.create_revision(
-                self._conduit, diffid, fields)
-        return review.revisionid
+        pass
 
     def query_users_from_emails(self, emails):
         """Return a list of username strings based on the provided emails.
@@ -92,7 +70,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: a list of strings corresponding to Phabricator usernames
 
         """
-        return phlcon_user.query_users_from_emails(self._conduit, emails)
+        pass
 
     def parse_commit_message(self, message):
         """Return a ParseCommitMessageResponse based on 'message'.
@@ -101,14 +79,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: a phlcon_differential.ParseCommitMessageResponse
 
         """
-        return phlcon_differential.parse_commit_message(self._conduit, message)
-
-    def _get_author_user(self, revisionid):
-        # TODO: these queries are very expensive, cache them
-        revision = phlcon_differential.query(self._conduit, [revisionid])[0]
-        author_user = phlcon_user.query_usernames_from_phids(
-            self._conduit, [revision.authorPHID])[0]
-        return author_user
+        pass
 
     def is_review_accepted(self, revisionid):
         """Return True if the supplied 'revisionid' is in 'accepted' status.
@@ -117,9 +88,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: True if accepted
 
         """
-        status = phlcon_differential.get_revision_status(
-            self._conduit, revisionid)
-        return int(status) == phlcon_differential.ReviewStates.accepted
+        pass
 
     def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.
@@ -130,12 +99,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        author_user = self._get_author_user(revisionid)
-        with phlsys_conduit.act_as_user_context(self._conduit, author_user):
-            diffid = phlcon_differential.create_raw_diff(
-                self._conduit, raw_diff).id
-            phlcon_differential.update_revision(
-                self._conduit, revisionid, diffid, [], message)
+        pass
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
@@ -144,12 +108,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        author_user = self._get_author_user(revisionid)
-        with phlsys_conduit.act_as_user_context(self._conduit, author_user):
-            phlcon_differential.create_comment(
-                self._conduit,
-                revisionid,
-                action=phlcon_differential.Action.rethink)
+        pass
 
     def close_revision(self, revisionid):
         """Set an existing Differential revision to 'closed'.
@@ -158,9 +117,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        author_user = self._get_author_user(revisionid)
-        with phlsys_conduit.act_as_user_context(self._conduit, author_user):
-            phlcon_differential.close(self._conduit, revisionid)
+        pass
 
     def abandon_revision(self, revisionid):
         """Set an existing Differential revision to 'abandoned'.
@@ -169,12 +126,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        author_user = self._get_author_user(revisionid)
-        with phlsys_conduit.act_as_user_context(self._conduit, author_user):
-            phlcon_differential.create_comment(
-                self._conduit,
-                revisionid,
-                action=phlcon_differential.Action.abandon)
+        pass
 
     def accept_revision_as_user(self, revisionid, username):
         """Set an existing Differential revision to 'closed'.
@@ -184,11 +136,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        with phlsys_conduit.act_as_user_context(self._conduit, username):
-            phlcon_differential.create_comment(
-                self._conduit,
-                revisionid,
-                action=phlcon_differential.Action.accept)
+        pass
 
     def commandeer_revision_as_user(self, revisionid, username):
         """Change the author of a revision to the specified 'username'.
@@ -198,11 +146,7 @@ class Conduit(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        with phlsys_conduit.act_as_user_context(self._conduit, username):
-            phlcon_differential.create_comment(
-                self._conduit,
-                revisionid,
-                action=phlcon_differential.Action.claim)
+        pass
 
 
 #------------------------------------------------------------------------------

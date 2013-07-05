@@ -17,8 +17,12 @@ Send mails to interested parties about pre-specified conditions.
 Operations on git commit message strings.
 * `abdt_conduit.py` -
 Abstraction for Arcyd's conduit operations.
+* `abdt_conduitabc.py` -
+Abstract Base Class for the 'conduit' abstraction.
 * `abdt_conduitgit.py` -
 Operations combining conduit with git.
+* `abdt_conduitmock.py` -
+Abstraction for Arcyd's conduit operations.
 * `abdt_exception.py` -
 Exception hierarchy for abd user and system errors.
 * `abdt_gittypes.py` -
