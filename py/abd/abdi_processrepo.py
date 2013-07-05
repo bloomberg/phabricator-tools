@@ -173,7 +173,7 @@ def makeMessageDigest(clone, base, branch):
     return message
 
 
-def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
+def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     rb = reviewBranch
     wb = workingBranch
 
@@ -182,14 +182,14 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
     if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
         print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
-        wb = updateInReview(conduit, wb, gitContext, rb, author)
+        wb = updateInReview(conduit, wb, gitContext, rb)
     elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
         d = phlcon_differential
         status = d.get_revision_status(conduit, wb.id)
         try:
             print "try updating bad branch"
             verifyReviewBranchBase(gitContext, reviewBranch)
-            updateInReview(conduit, wb, gitContext, rb, author)
+            updateInReview(conduit, wb, gitContext, rb)
         except abdt_exception.AbdUserException:
             print "still bad"
 
@@ -204,7 +204,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
             print "do nothing"
 
 
-def updateInReview(conduit, wb, gitContext, review_branch, author):
+def updateInReview(conduit, wb, gitContext, review_branch):
     remoteBranch = review_branch.remote_branch
     clone = gitContext.clone
 
@@ -237,9 +237,8 @@ def updateInReview(conduit, wb, gitContext, review_branch, author):
             "diff too big", len(rawDiff), MAX_DIFF_SIZE)
 
     used_default_test_plan = False
-    with phlsys_conduit.act_as_user_context(conduit, author):
-        print "- updating revision " + str(wb.id)
-        conduit.update_revision(wb.id, rawDiff, "update")
+    print "- updating revision " + str(wb.id)
+    conduit.update_revision(wb.id, rawDiff, "update")
 
     wb = abdt_workingbranch.pushStatus(
         gitContext,
@@ -363,27 +362,18 @@ def processUpdatedBranch(
                 mail_on_fail=hasChanged)
         else:
             print "update review for " + review_branch.branch
-            revision = phlcon_differential.query(
-                conduit, [working_branch.id])[0]
-            author_user = phlcon_user.query_usernames_from_phids(
-                conduit, [revision.authorPHID])[0]
             try:
                 updateReview(
                     conduit,
                     gitContext,
                     review_branch,
-                    working_branch,
-                    author_user)
+                    working_branch)
             except abdte.LandingException as e:
                 print "landing exception"
                 abdt_workingbranch.pushBadLand(
                     gitContext, review_branch, working_branch)
                 commenter.exception(e)
-                with phlsys_conduit.act_as_user_context(conduit, author_user):
-                    phlcon_differential.create_comment(
-                        conduit,
-                        working_branch.id,
-                        action=phlcon_differential.Action.rethink)
+                conduit.set_requires_revision(working_branch.id)
             except abdte.AbdUserException as e:
                 print "user exception"
                 abdt_workingbranch.pushBadInReview(
