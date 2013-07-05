@@ -112,6 +112,17 @@ class Conduit(object):
                 revisionid,
                 action=phlcon_differential.Action.rethink)
 
+    def close_revision(self, revisionid):
+        """Set an existing Differential revision to 'closed'.
+
+        :revisionid: id of the Differential revision to close
+        :returns: None
+
+        """
+        author_user = self._get_author_user(revisionid)
+        with phlsys_conduit.act_as_user_context(self._conduit, author_user):
+            phlcon_differential.close(self._conduit, revisionid)
+
     # XXX: until we replace all usage of phlsys_conduit, delegate missing
     #      functionality to it using getattr and setattr
 

@@ -28,7 +28,6 @@
 
 # XXX: probably too many imports
 import phlcon_differential
-import phlcon_user
 import phlgit_branch
 import phlgit_checkout
 import phlgit_diff
@@ -287,12 +286,7 @@ def land(conduit, wb, gitContext, branch):
     commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
     commenter.landedReview(branch, wb.base, squashMessage)
 
-    authorPHID = d.query(conduit, [wb.id])[0].authorPHID
-    authorUser = phlcon_user.query_usernames_from_phids(
-        conduit, [authorPHID])[0]
-    # TODO: there's a potential race condition on the author here
-    with phlsys_conduit.act_as_user_context(conduit, authorUser):
-        d.close(conduit, wb.id)
+    conduit.close_revision(wb.id)
     # TODO: we probably want to do a better job of cleaning up locally
 
 
