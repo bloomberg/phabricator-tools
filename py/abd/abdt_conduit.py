@@ -1,12 +1,4 @@
-"""Abstraction for Arcyd's conduit operations.
-
-Intended to be a full replacement for phlsys_conduit in Arcyd code, providing
-high-level functions for operations.
-
-Until we've replace all existing Conduit.call() calls then we need to duplicate
-that functionality too.
-
-"""
+"""Abstraction for Arcyd's conduit operations."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -86,6 +78,27 @@ class Conduit(object):
             review = phlcon_differential.create_revision(
                 self._conduit, diffid, fields)
         return review.revisionid
+
+    def query_users_from_emails(self, emails):
+        """Return a list of username strings based on the provided emails.
+
+        If an email does not correspond to a username then None is inserted in
+        its place.
+
+        :emails: a list of strings corresponding to user email addresses
+        :returns: a list of strings corresponding to Phabricator usernames
+
+        """
+        return phlcon_user.query_users_from_emails(self._conduit, emails)
+
+    def parse_commit_message(self, message):
+        """Return a ParseCommitMessageResponse based on 'message'.
+
+        :message: a string message to parse
+        :returns: a phlcon_differential.ParseCommitMessageResponse
+
+        """
+        return phlcon_differential.parse_commit_message(self._conduit, message)
 
     def _get_author_user(self, revisionid):
         # TODO: these queries are very expensive, cache them
@@ -187,12 +200,6 @@ class Conduit(object):
                 self._conduit,
                 revisionid,
                 action=phlcon_differential.Action.claim)
-
-    # XXX: until we replace all usage of phlsys_conduit, delegate missing
-    #      functionality to it using getattr and setattr
-
-    def __getattr__(self, attr):
-        return getattr(self._conduit, attr)
 
 
 #------------------------------------------------------------------------------

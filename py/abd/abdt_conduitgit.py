@@ -13,8 +13,6 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import phlcon_differential
-import phlcon_user
 import phlgit_log
 import phlgitu_ref
 
@@ -30,7 +28,7 @@ def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
         clone, [commit])[0]
     name = committer[0]
     email = committer[1]
-    user = phlcon_user.query_users_from_emails(conduit, [email])[0]
+    user = conduit.query_users_from_emails([email])[0]
     if not user:
         raise abdt_exception.AbdUserException(
             "first committer is not a Phabricator user")
@@ -47,7 +45,7 @@ def getAnyUserFromBranch(clone, conduit, base, branch):
         hashes = phlgit_log.get_last_n_commit_hashes_from_ref(clone, 1, branch)
     committers = phlgit_log.get_author_names_emails_from_hashes(clone, hashes)
     emails = [committer[1] for committer in committers]
-    users = phlcon_user.query_users_from_emails(conduit, emails)
+    users = conduit.query_users_from_emails(emails)
     for user in users:
         if user:
             return user
@@ -67,15 +65,14 @@ def getFieldsFromCommitHash(conduit, clone, commit_hash, defaultTestPlan=None):
     message = revision.subject + "\n"
     message += "\n"
     message += revision.message + "\n"
-    parsed = phlcon_differential.parse_commit_message(conduit, message)
+    parsed = conduit.parse_commit_message(message)
 
     testPlan = "testPlan"
     if defaultTestPlan is not None:
         if parsed.fields is not None:
             if not testPlan in parsed.fields or not parsed.fields[testPlan]:
                 message += "Test Plan:\n" + defaultTestPlan
-                parsed = phlcon_differential.parse_commit_message(
-                    conduit, message)
+                parsed = conduit.parse_commit_message(message)
 
     return parsed
 
