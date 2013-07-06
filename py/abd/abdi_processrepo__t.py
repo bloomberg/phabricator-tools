@@ -4,9 +4,6 @@ import os
 import unittest
 
 import phldef_conduit
-import phlgit_branch
-import phlgit_config
-import phlgit_log
 import phlmail_mocksender
 #import phlsys_conduit
 import phlsys_fs
@@ -18,6 +15,7 @@ import abdmail_mailer
 import abdt_commitmessage
 #import abdt_conduit
 import abdt_conduitmock
+import abdt_git
 import abdt_naming
 
 # factors affecting a review:
@@ -77,7 +75,8 @@ class Test(unittest.TestCase):
             "git clone devgit phab",
         )
 
-        self.clone = phlsys_git.GitClone("phab")
+        clone = phlsys_git.GitClone("phab")
+        self.clone = abdt_git.Clone(clone)
 
         self._devSetAuthorAccount(self.author_account)
         self._phabSetAuthorAccount(phldef_conduit.PHAB)
@@ -105,12 +104,12 @@ class Test(unittest.TestCase):
             "http://phabricator.server.fake/")
 
     def _countPhabWorkingBranches(self):
-        branches = phlgit_branch.get_remote(self.clone, "origin")
+        branches = self.clone.get_remote_branches("origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         return len(wbList)
 
     def _countPhabBadWorkingBranches(self):
-        branches = phlgit_branch.get_remote(self.clone, "origin")
+        branches = self.clone.get_remote_branches("origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         numBadBranches = 0
         for wb in wbList:
@@ -148,11 +147,11 @@ class Test(unittest.TestCase):
 
     def _devSetAuthorAccount(self, account):
         devClone = phlsys_git.GitClone("developer")
-        phlgit_config.set_username_email(devClone, account.user, account.email)
+        clone = abdt_git.Clone(devClone)
+        clone.set_name_email(account.user, account.email)
 
     def _phabSetAuthorAccount(self, account):
-        phlgit_config.set_username_email(
-            self.clone, account.user, account.email)
+        self.clone.set_name_email(account.user, account.email)
 
     def _devResetBranchToMaster(self, branch):
         with phlsys_fs.chdir_context("developer"):
@@ -173,7 +172,7 @@ class Test(unittest.TestCase):
             runCommands("git push")
 
     def _getTheOnlyReviewId(self):
-        branches = phlgit_branch.get_remote(self.clone, "origin")
+        branches = self.clone.get_remote_branches("origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         self.assertEqual(len(wbList), 1)
         wb = wbList[0]
@@ -200,19 +199,6 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
-
-        # check the author on master
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git fetch -p", "git checkout master")
-            clone = phlsys_git.GitClone(".")
-            head = phlgit_log.get_last_commit_hash(clone)
-            authors = phlgit_log.get_author_names_emails_from_hashes(
-                clone, [head])
-            author = authors[0]
-            name = author[0]
-            email = author[1]
-            self.assertEqual(self.author_account.user, name)
-            self.assertEqual(self.author_account.email, email)
 
     def test_badMsgWorkflow(self):
         self._devCheckoutPushNewBranch("ph-review/badMsgWorkflow/master")

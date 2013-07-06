@@ -27,12 +27,6 @@
 # =============================================================================
 
 # XXX: probably too many imports
-import phlgit_branch
-import phlgit_checkout
-import phlgit_diff
-import phlgit_log
-import phlgit_merge
-import phlgit_push
 import phlsys_fs
 import phlsys_subprocess
 
@@ -71,8 +65,8 @@ def createReview(conduit, gitContext, review_branch):
 
     used_default_test_plan = False
 
-    hashes = phlgit_log.get_range_hashes(
-        clone, review_branch.remote_base, review_branch.remote_branch)
+    hashes = clone.get_range_hashes(
+        review_branch.remote_base, review_branch.remote_branch)
     commit = hashes[-1]
     parsed = abdt_conduitgit.getFieldsFromCommitHash(
         conduit, clone, commit)
@@ -90,24 +84,22 @@ def createReview(conduit, gitContext, review_branch):
                     review_branch.remote_base,
                     review_branch.remote_branch))
 
-    rawDiff = phlgit_diff.raw_diff_range(
-        clone,
+    rawDiff = clone.raw_diff_range(
         review_branch.remote_base,
         review_branch.remote_branch,
         _DIFF_CONTEXT_LINES)
 
     # if the diff is too big then regen with less context
     if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone,
+        rawDiff = clone.raw_diff_range(
             review_branch.remote_base,
             review_branch.remote_branch,
             _LESS_DIFF_CONTEXT_LINES)
 
     # if the diff is still too big then regen with no context
     if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone, review_branch.remote_base, review_branch.remote_branch)
+        rawDiff = clone.raw_diff_range(
+            review_branch.remote_base, review_branch.remote_branch)
 
     # if the diff is still too big then error
     if len(rawDiff) >= MAX_DIFF_SIZE:
@@ -135,8 +127,8 @@ def verifyReviewBranchBase(gitContext, review_branch):
 def createDifferentialReview(
         conduit, user, parsed, gitContext, review_branch, rawDiff):
     clone = gitContext.clone
-    phlgit_checkout.new_branch_force_based_on(
-        clone, review_branch.branch, review_branch.remote_branch)
+    clone.checkout_forced_new_branch(
+        review_branch.branch, review_branch.remote_branch)
 
     print "- creating revision"
     revision_id = conduit.create_revision_as_user(rawDiff, parsed.fields, user)
@@ -149,8 +141,8 @@ def createDifferentialReview(
         revision_id)
 
     print "- pushing working branch: " + workingBranch
-    phlgit_push.push_asymmetrical(
-        clone, review_branch.branch, workingBranch, gitContext.remote)
+    clone.push_asymmetrical(
+        review_branch.branch, workingBranch, gitContext.remote)
 
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
@@ -160,8 +152,8 @@ def createDifferentialReview(
 
 
 def makeMessageDigest(clone, base, branch):
-    hashes = phlgit_log.get_range_hashes(clone, base, branch)
-    revisions = phlgit_log.make_revisions_from_hashes(clone, hashes)
+    hashes = clone.get_range_hashes(base, branch)
+    revisions = clone.make_revisions_from_hashes(hashes)
     message = revisions[0].subject + "\n\n"
     for r in revisions:
         message += r.message
@@ -173,8 +165,7 @@ def updateReview(conduit, gitContext, reviewBranch, workingBranch):
     wb = workingBranch
 
     clone = gitContext.clone
-    isBranchIdentical = phlgit_branch.is_identical
-    if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
+    if not clone.is_identical(rb.remote_branch, wb.remote_branch):
         print "changes on branch"
         verifyReviewBranchBase(gitContext, reviewBranch)
         wb = updateInReview(conduit, wb, gitContext, rb)
@@ -202,8 +193,8 @@ def updateInReview(conduit, wb, gitContext, review_branch):
     print "updateInReview"
 
     print "- creating diff"
-    rawDiff = phlgit_diff.raw_diff_range(
-        clone, wb.remote_base, remoteBranch, _DIFF_CONTEXT_LINES)
+    rawDiff = clone.raw_diff_range(
+        wb.remote_base, remoteBranch, _DIFF_CONTEXT_LINES)
     if not rawDiff:
         raise abdt_exception.AbdUserException(
             "no difference from " + wb.base + " to " + wb.branch)
@@ -212,15 +203,15 @@ def updateInReview(conduit, wb, gitContext, review_branch):
     # used_less_context = False
     if len(rawDiff) >= MAX_DIFF_SIZE:
         # used_less_context = True
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone, wb.remote_base, remoteBranch, _LESS_DIFF_CONTEXT_LINES)
+        rawDiff = clone.raw_diff_range(
+            wb.remote_base, remoteBranch, _LESS_DIFF_CONTEXT_LINES)
 
     # if the diff is still too big then regen with no context
     # used_no_context = False
     if len(rawDiff) >= MAX_DIFF_SIZE:
         # used_no_context = True
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone, wb.remote_base, remoteBranch)
+        rawDiff = clone.raw_diff_range(
+            wb.remote_base, remoteBranch)
 
     # if the diff is still too big then error
     if len(rawDiff) >= MAX_DIFF_SIZE:
@@ -252,25 +243,25 @@ def land(conduit, wb, gitContext, branch):
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         clone, conduit, wb.remote_base, wb.remote_branch)
 
-    phlgit_checkout.new_branch_force_based_on(clone, wb.base, wb.remote_base)
+    clone.checkout_forced_new_branch(wb.base, wb.remote_base)
 
     # compose the commit message
     message = conduit.get_commit_message(wb.id)
 
     try:
         with phlsys_fs.nostd():
-            squashMessage = phlgit_merge.squash(
-                clone, wb.remote_branch, message, name + " <" + email + ">")
+            squashMessage = clone.squash_merge(
+                wb.remote_branch, message, name, email)
     except phlsys_subprocess.CalledProcessError as e:
         clone.call("reset", "--hard")  # fix the working copy
         raise abdt_exception.LandingException('\n' + e.stdout, branch, wb.base)
 
     print "- pushing " + wb.remote_base
-    phlgit_push.push(clone, wb.base, gitContext.remote)
+    clone.push(wb.base, gitContext.remote)
     print "- deleting " + wb.branch
-    phlgit_push.delete(clone, wb.branch, gitContext.remote)
+    clone.delete(wb.branch, gitContext.remote)
     print "- deleting " + branch
-    phlgit_push.delete(clone, branch, gitContext.remote)
+    clone.delete(branch, gitContext.remote)
 
     print "- commenting on revision " + str(wb.id)
     commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
@@ -326,13 +317,11 @@ def processUpdatedBranch(
     else:
         commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
         if abdt_naming.isStatusBadPreReview(working_branch):
-            hasChanged = not phlgit_branch.is_identical(
-                gitContext.clone,
+            hasChanged = not gitContext.clone.is_identical(
                 review_branch.remote_branch,
                 working_branch.remote_branch)
             print "try again to create review for " + review_branch.branch
-            phlgit_push.delete(
-                gitContext.clone,
+            gitContext.clone.delete(
                 working_branch.branch,
                 gitContext.remote)
             tryCreateReview(
@@ -375,11 +364,11 @@ def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
                 commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
                 commenter.abandonedBranch(rb)
                 # TODO: abandon the associated revision if not already
-            phlgit_push.delete(clone, wb.branch, remote)
+            clone.delete(wb.branch, remote)
 
 
 def processUpdatedRepo(conduit, clone, remote, mailer):
-    remote_branches = phlgit_branch.get_remote(clone, remote)
+    remote_branches = clone.get_remote_branches(remote)
     gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
     wbList = abdt_naming.getWorkingBranches(remote_branches)
     makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch

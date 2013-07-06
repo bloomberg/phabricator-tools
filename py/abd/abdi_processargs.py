@@ -25,6 +25,7 @@ import phlsys_subprocess
 import phlsys_tryloop
 
 import abdt_conduit
+import abdt_git
 
 
 def run_once(args, out):
@@ -86,11 +87,13 @@ def run_once(args, out):
 
     phlsys_tryloop.try_loop_delay(connect, delays, onException=on_exception)
 
+    clone = phlsys_git.GitClone(args.repo_path)
+
     out.display("process (" + args.repo_desc + "): ")
     arcyd_conduit = abdt_conduit.Conduit(conduit[0])
-    clone = phlsys_git.GitClone(args.repo_path)
+    arcyd_clone = abdt_git.Clone(clone)
     abdi_processrepo.processUpdatedRepo(
-        arcyd_conduit, clone, "origin", mailer)
+        arcyd_conduit, arcyd_clone, "origin", mailer)
 
     if args.ok_touch_path:
         try:

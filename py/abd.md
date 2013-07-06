@@ -25,6 +25,8 @@ Operations combining conduit with git.
 Abstraction for Arcyd's conduit operations.
 * `abdt_exception.py` -
 Exception hierarchy for abd user and system errors.
+* `abdt_git.py` -
+Abstraction for Arcyd's git operations.
 * `abdt_gittypes.py` -
 Define useful aggregates for interacting with git without passing alot.
 * `abdt_naming.py` -
