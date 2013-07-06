@@ -408,7 +408,6 @@ class Test(unittest.TestCase):
         lots = "h\n" * 1 * 1024 * 1024
         self._devPushNewFile("NEWFILE", contents=lots)
         self._phabUpdateWithExpectations(total=1, bad=1)
-        self._phabUpdateWithExpectations(total=1, bad=1)
 
     def test_hugeUpdateToReview(self):
         self._devCheckoutPushNewBranch("ph-review/hugeUpdateReview/master")
@@ -416,7 +415,6 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
         lots = "h\n" * 1 * 1024 * 1024
         self._devPushNewFile("NEWFILE2", contents=lots)
-        self._phabUpdateWithExpectations(total=1, bad=1)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
     # TODO: test landing when origin has been updated underneath us
