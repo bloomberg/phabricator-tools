@@ -19,6 +19,7 @@ import phlsys_sendmail
 import phlmail_sender
 import abdmail_mailer
 import phlsys_conduit
+import phlsys_git
 import phlsys_fs
 import phlsys_subprocess
 import phlsys_tryloop
@@ -87,8 +88,9 @@ def run_once(args, out):
 
     out.display("process (" + args.repo_desc + "): ")
     arcyd_conduit = abdt_conduit.Conduit(conduit[0])
+    clone = phlsys_git.GitClone(args.repo_path)
     abdi_processrepo.processUpdatedRepo(
-        arcyd_conduit, args.repo_path, "origin", mailer)
+        arcyd_conduit, clone, "origin", mailer)
 
     if args.ok_touch_path:
         try:

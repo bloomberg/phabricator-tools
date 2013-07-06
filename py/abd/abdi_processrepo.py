@@ -34,7 +34,6 @@ import phlgit_log
 import phlgit_merge
 import phlgit_push
 import phlsys_fs
-import phlsys_git
 import phlsys_subprocess
 
 import abdcmnt_commenter
@@ -375,8 +374,7 @@ def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
             phlgit_push.delete(clone, wb.branch, remote)
 
 
-def processUpdatedRepo(conduit, path, remote, mailer):
-    clone = phlsys_git.GitClone(path)
+def processUpdatedRepo(conduit, clone, remote, mailer):
     remote_branches = phlgit_branch.get_remote(clone, remote)
     gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
     wbList = abdt_naming.getWorkingBranches(remote_branches)

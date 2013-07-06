@@ -43,6 +43,7 @@ class Test(unittest.TestCase):
         self.author_account = phldef_conduit.BOB
         self._saved_path = None
         self.conduit = None
+        self.clone = None
         self.mailer = None
         self.mock_sender = None
 
@@ -75,6 +76,8 @@ class Test(unittest.TestCase):
             "git clone devgit phab",
         )
 
+        self.clone = phlsys_git.GitClone("phab")
+
         self._devSetAuthorAccount(self.author_account)
         self._phabSetAuthorAccount(phldef_conduit.PHAB)
 
@@ -100,16 +103,12 @@ class Test(unittest.TestCase):
             "http://phabricator.server.fake/")
 
     def _countPhabWorkingBranches(self):
-        with phlsys_fs.chdir_context("phab"):
-            clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.get_remote(clone, "origin")
+        branches = phlgit_branch.get_remote(self.clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         return len(wbList)
 
     def _countPhabBadWorkingBranches(self):
-        with phlsys_fs.chdir_context("phab"):
-            clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.get_remote(clone, "origin")
+        branches = phlgit_branch.get_remote(self.clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         numBadBranches = 0
         for wb in wbList:
@@ -121,12 +120,12 @@ class Test(unittest.TestCase):
         with phlsys_fs.chdir_context("phab"):
             runCommands("git fetch origin -p")
         abdi_processrepo.processUpdatedRepo(
-            self.conduit, "phab", "origin", self.mailer)
+            self.conduit, self.clone, "origin", self.mailer)
 
     def _phabUpdateWithExpectationsHelper(
             self, total=None, bad=None, emails=None):
         abdi_processrepo.processUpdatedRepo(
-            self.conduit, "phab", "origin", self.mailer)
+            self.conduit, self.clone, "origin", self.mailer)
         if total is not None:
             self.assertEqual(self._countPhabWorkingBranches(), total)
         if bad is not None:
@@ -150,8 +149,8 @@ class Test(unittest.TestCase):
         phlgit_config.set_username_email(devClone, account.user, account.email)
 
     def _phabSetAuthorAccount(self, account):
-        devClone = phlsys_git.GitClone("phab")
-        phlgit_config.set_username_email(devClone, account.user, account.email)
+        phlgit_config.set_username_email(
+            self.clone, account.user, account.email)
 
     def _devResetBranchToMaster(self, branch):
         with phlsys_fs.chdir_context("developer"):
@@ -172,9 +171,7 @@ class Test(unittest.TestCase):
             runCommands("git push")
 
     def _getTheOnlyReviewId(self):
-        with phlsys_fs.chdir_context("phab"):
-            clone = phlsys_git.GitClone(".")
-            branches = phlgit_branch.get_remote(clone, "origin")
+        branches = phlgit_branch.get_remote(self.clone, "origin")
         wbList = abdt_naming.getWorkingBranches(branches)
         self.assertEqual(len(wbList), 1)
         wb = wbList[0]
@@ -191,7 +188,7 @@ class Test(unittest.TestCase):
     def test_nothingToDo(self):
         # nothing to process
         abdi_processrepo.processUpdatedRepo(
-            self.conduit, "phab", "origin", self.mailer)
+            self.conduit, self.clone, "origin", self.mailer)
 
     def test_simpleWorkflow(self):
         self._devCheckoutPushNewBranch("ph-review/simpleWorkflow/master")
