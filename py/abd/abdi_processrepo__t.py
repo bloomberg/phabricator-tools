@@ -2,20 +2,22 @@
 
 import os
 import unittest
-import abdmail_mailer
-import phlmail_mocksender
-import abdt_commitmessage
-import abdt_naming
+
 import phldef_conduit
 import phlgit_branch
 import phlgit_config
 import phlgit_log
+import phlmail_mocksender
 import phlsys_conduit
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
+
 import abdi_processrepo
+import abdmail_mailer
+import abdt_commitmessage
 import abdt_conduit
+import abdt_naming
 
 # factors affecting a review:
 #  age of the revisions
