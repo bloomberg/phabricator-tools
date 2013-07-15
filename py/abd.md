@@ -33,6 +33,8 @@ Define useful aggregates for interacting with git without passing alot.
 Naming conventions for abd
 * `abdt_workingbranch.py` -
 Git operations on working branches.
+* `abdtst_devphabgit.py` -
+Support for testing developer / phab interactions.
 
 -----
 *please note: this file is generated, edits will be lost*

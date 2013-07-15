@@ -1,22 +1,18 @@
 """Test suite for abdi_processrepo."""
-
-import os
 import unittest
 
 import phldef_conduit
 import phlmail_mocksender
-#import phlsys_conduit
-import phlsys_fs
-import phlsys_git
-import phlsys_subprocess
 
 import abdi_processrepo
 import abdmail_mailer
-import abdt_commitmessage
-#import abdt_conduit
 import abdt_conduitmock
-import abdt_git
 import abdt_naming
+import abdtst_devphabgit
+
+#import phlsys_conduit
+
+#import abdt_conduit
 
 # factors affecting a review:
 #  age of the revisions
@@ -30,63 +26,27 @@ import abdt_naming
 #  availability of the phabricator instance
 
 
-def runCommands(*commands):
-    phlsys_subprocess.run_commands(*commands)
-
-
 class Test(unittest.TestCase):
 
     def __init__(self, data):
         super(Test, self).__init__(data)
         self.reviewer = phldef_conduit.ALICE.user
         self.author_account = phldef_conduit.BOB
-        self._saved_path = None
         self.conduit = None
         self.clone = None
+        self.dev_phab = None
         self.mailer = None
         self.mock_sender = None
 
-    def _gitCommitAll(self, subject, testPlan, reviewer):
-        reviewers = [reviewer] if reviewer else None
-        message = abdt_commitmessage.make(subject, None, testPlan, reviewers)
-        phlsys_subprocess.run("git", "commit", "-a", "-F", "-", stdin=message)
-
-    def _createCommitNewFileRaw(
-            self, filename, testPlan=None, reviewer=None, contents=""):
-        with open(filename, "w") as f:
-            f.write(contents)
-        runCommands("git add " + filename)
-        self._gitCommitAll("add " + filename, testPlan, reviewer)
-
-    def _createCommitNewFile(self, filename, reviewer):
-        runCommands("touch " + filename)
-        runCommands("git add " + filename)
-        self._gitCommitAll("add " + filename, "test plan", reviewer)
-
     def setUp(self):
-        # TODO: just make a temp dir
-        runCommands("rm -rf abd-test")
-        runCommands("mkdir abd-test")
-        self._saved_path = os.getcwd()
-        os.chdir("abd-test")
-        runCommands(
-            "git --git-dir=devgit init --bare",
-            "git clone devgit developer",
-            "git clone devgit phab",
-        )
+        self.dev_phab = abdtst_devphabgit.Collaboration(
+            self.author_account, phldef_conduit.PHAB)
 
-        clone = phlsys_git.GitClone("phab")
-        self.clone = abdt_git.Clone(clone)
+        self.clone = self.dev_phab.clone
 
-        self._devSetAuthorAccount(self.author_account)
-        self._phabSetAuthorAccount(phldef_conduit.PHAB)
-
-        with phlsys_fs.chdir_context("developer"):
-            self._createCommitNewFile("README", self.reviewer)
-            runCommands("git push origin master")
-
-        with phlsys_fs.chdir_context("phab"):
-            runCommands("git fetch origin -p")
+        self.dev_phab.dev_commit_new_file("README")
+        self.dev_phab.dev_push_branch("master")
+        self.dev_phab.phab_fetch()
 
         # sys_conduit = phlsys_conduit.Conduit(
         #     phldef_conduit.TEST_URI,
@@ -103,23 +63,8 @@ class Test(unittest.TestCase):
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
 
-    def _countPhabWorkingBranches(self):
-        branches = self.clone.get_remote_branches("origin")
-        wbList = abdt_naming.getWorkingBranches(branches)
-        return len(wbList)
-
-    def _countPhabBadWorkingBranches(self):
-        branches = self.clone.get_remote_branches("origin")
-        wbList = abdt_naming.getWorkingBranches(branches)
-        numBadBranches = 0
-        for wb in wbList:
-            if abdt_naming.isStatusBad(wb):
-                numBadBranches += 1
-        return numBadBranches
-
     def _phabUpdate(self):
-        with phlsys_fs.chdir_context("phab"):
-            runCommands("git fetch origin -p")
+        self.dev_phab.phab_fetch()
         abdi_processrepo.processUpdatedRepo(
             self.conduit, self.clone, "origin", self.mailer)
 
@@ -128,15 +73,16 @@ class Test(unittest.TestCase):
         abdi_processrepo.processUpdatedRepo(
             self.conduit, self.clone, "origin", self.mailer)
         if total is not None:
-            self.assertEqual(self._countPhabWorkingBranches(), total)
+            self.assertEqual(
+                self.dev_phab.count_phab_working_branches(), total)
         if bad is not None:
-            self.assertEqual(self._countPhabBadWorkingBranches(), bad)
+            self.assertEqual(
+                self.dev_phab.count_phab_bad_working_branches(), bad)
         if emails is not None:
             self.assertEqual(len(self.mock_sender.mails), emails)
 
     def _phabUpdateWithExpectations(self, total=None, bad=None, emails=None):
-        with phlsys_fs.chdir_context("phab"):
-            runCommands("git fetch origin -p")
+        self.dev_phab.phab_fetch()
 
         # multiple updates should have the same result if we are
         # not fetching and assuming the data in Phabricator
@@ -146,30 +92,17 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectationsHelper(total, bad, emails)
 
     def _devSetAuthorAccount(self, account):
-        devClone = phlsys_git.GitClone("developer")
-        clone = abdt_git.Clone(devClone)
-        clone.set_name_email(account.user, account.email)
+        self.dev_phab.dev_clone.set_name_email(account.user, account.email)
 
     def _phabSetAuthorAccount(self, account):
         self.clone.set_name_email(account.user, account.email)
 
-    def _devResetBranchToMaster(self, branch):
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git reset origin/master --hard")
-            runCommands("git push -u origin " + branch + " --force")
-
-    def _devCheckoutPushNewBranch(self, branch):
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git checkout -b " + branch)
-            runCommands("git push -u origin " + branch)
-
     def _devPushNewFile(
             self, filename, has_reviewer=True, has_plan=True, contents=""):
-        with phlsys_fs.chdir_context("developer"):
-            reviewer = self.reviewer if has_reviewer else None
-            plan = "testplan" if has_plan else None
-            self._createCommitNewFileRaw(filename, plan, reviewer, contents)
-            runCommands("git push")
+        reviewer = self.reviewer if has_reviewer else None
+        plan = "testplan" if has_plan else None
+        self.dev_phab.dev_commit_new_file(filename, plan, reviewer, contents)
+        self.dev_phab.dev_push()
 
     def _getTheOnlyReviewId(self):
         branches = self.clone.get_remote_branches("origin")
@@ -192,7 +125,8 @@ class Test(unittest.TestCase):
             self.conduit, self.clone, "origin", self.mailer)
 
     def test_simpleWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/simpleWorkflow/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/simpleWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
@@ -201,48 +135,50 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_badMsgWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/badMsgWorkflow/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/badMsgWorkflow/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_noReviewerWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/noReviewerWorkflow/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/noReviewerWorkflow/master")
         self._devPushNewFile("NEWFILE", has_reviewer=False)
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_badBaseWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/badBaseWorkflow/blaster")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/badBaseWorkflow/blaster")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git push origin :ph-review/badBaseWorkflow/blaster")
+        self.dev_phab.dev_push_delete_branch(
+            "ph-review/badBaseWorkflow/blaster")
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_withReservedBranch(self):
-        self._devCheckoutPushNewBranch("dev/phab/reserve")
-        self._devCheckoutPushNewBranch("ph-review/reserve/master")
+        self.dev_phab.dev_checkout_push_new_branch("dev/phab/reserve")
+        self.dev_phab.dev_checkout_push_new_branch("ph-review/reserve/master")
         self._devPushNewFile("reserve")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_noBaseWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/noBaseWorkflow")
+        self.dev_phab.dev_checkout_push_new_branch("ph-review/noBaseWorkflow")
         self._devPushNewFile("NEWFILE", has_plan=False)
 
         # TODO: handle no base properly
         # self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git push origin :ph-review/noBaseWorkflow")
+        self.dev_phab.dev_push_delete_branch("ph-review/noBaseWorkflow")
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
@@ -251,12 +187,14 @@ class Test(unittest.TestCase):
 
     def test_badAuthorWorkflow(self):
         self._devSetAuthorAccount(phldef_conduit.NOTAUSER)
-        self._devCheckoutPushNewBranch("ph-review/badAuthorWorkflow/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/badAuthorWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=1, emails=1)
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=1, emails=2)
-        self._devResetBranchToMaster("ph-review/badAuthorWorkflow/master")
+        self.dev_phab.dev_reset_branch_to_master(
+            "ph-review/badAuthorWorkflow/master")
         self._devSetAuthorAccount(self.author_account)
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0, emails=2)
@@ -264,7 +202,8 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0, emails=2)
 
     def test_abandonedWorkflow(self):
-        self._devCheckoutPushNewBranch("ph-review/abandonedWorkflow/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/abandonedWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._abandonTheOnlyReview()
@@ -275,84 +214,81 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_emptyMergeWorkflow(self):
-        self._devCheckoutPushNewBranch("temp/emptyMerge/master")
+        self.dev_phab.dev_checkout_push_new_branch("temp/emptyMerge/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to master and land a conflicting change
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git checkout master")
-        self._devCheckoutPushNewBranch("ph-review/emptyMerge/master")
+        self.dev_phab.dev_checkout("master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/emptyMerge/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to original and try to push and land
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git checkout temp/emptyMerge/master")
-        self._devCheckoutPushNewBranch("ph-review/emptyMerge2/master")
+        self.dev_phab.dev_checkout("temp/emptyMerge/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # 'resolve' by abandoning our change
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git push origin :ph-review/emptyMerge2/master")
+        self.dev_phab.dev_push_delete_branch("ph-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_mergeConflictWorkflow(self):
-        self._devCheckoutPushNewBranch("temp/mergeConflict/master")
+        self.dev_phab.dev_checkout_push_new_branch("temp/mergeConflict/master")
         self._devPushNewFile("NEWFILE", contents="hello")
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to master and land a conflicting change
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git checkout master")
-        self._devCheckoutPushNewBranch("ph-review/mergeConflict/master")
+        self.dev_phab.dev_checkout("master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/mergeConflict/master")
         self._devPushNewFile("NEWFILE", contents="goodbye")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0)
 
         # move back to original and try to push and land
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git checkout temp/mergeConflict/master")
-        self._devCheckoutPushNewBranch("ph-review/mergeConflict2/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/mergeConflict2/master",
+            base="temp/mergeConflict/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # 'resolve' by forcing our change through
         print "force our change"
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git fetch -p")
-            runCommands("git merge origin/master -s ours")
-            runCommands("git push origin ph-review/mergeConflict2/master")
+        self.dev_phab.dev_fetch()
+        self.dev_phab.dev_merge_keep_ours("origin/master")
+        self.dev_phab.dev_push_branch("ph-review/mergeConflict2/master")
+
         print "update again"
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_changeAlreadyMergedOnBase(self):
-        self._devCheckoutPushNewBranch("landing_branch")
+        self.dev_phab.dev_checkout_push_new_branch("landing_branch")
         self._devPushNewFile("NEWFILE")
-        self._devCheckoutPushNewBranch(
+        self.dev_phab.dev_checkout_push_new_branch(
             "ph-review/alreadyMerged/landing_branch")
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # reset the landing branch back to master to resolve
-        with phlsys_fs.chdir_context("developer"):
-            runCommands("git checkout landing_branch")
-            runCommands("git reset origin/master --hard")
-            runCommands("git push origin landing_branch --force")
+        self.dev_phab.dev_reset_branch_to_master("landing_branch")
 
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_commandeeredUpdate(self):
-        self._devCheckoutPushNewBranch("ph-review/commandeeredUpdate/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/commandeeredUpdate/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
 
@@ -364,7 +300,8 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=0)
 
     def test_commandeeredLand(self):
-        self._devCheckoutPushNewBranch("ph-review/commandeeredLand/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/commandeeredLand/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
@@ -378,13 +315,15 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_createHugeReview(self):
-        self._devCheckoutPushNewBranch("ph-review/createHugeReview/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/createHugeReview/master")
         lots = "h\n" * 1 * 1024 * 1024
         self._devPushNewFile("NEWFILE", contents=lots)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
     def test_hugeUpdateToReview(self):
-        self._devCheckoutPushNewBranch("ph-review/hugeUpdateReview/master")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "ph-review/hugeUpdateReview/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         lots = "h\n" * 1 * 1024 * 1024
@@ -395,8 +334,7 @@ class Test(unittest.TestCase):
     # TODO: test landing when dependent review hasn't been landed
 
     def tearDown(self):
-        os.chdir(self._saved_path)
-        runCommands("rm -rf abd-test")
+        self.dev_phab.close()
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
