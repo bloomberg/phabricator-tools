@@ -3,16 +3,15 @@ import unittest
 
 import phldef_conduit
 import phlmail_mocksender
+#import phlsys_conduit
 
 import abdi_processrepo
 import abdmail_mailer
+#import abdt_conduit
 import abdt_conduitmock
 import abdt_naming
 import abdtst_devphabgit
 
-#import phlsys_conduit
-
-#import abdt_conduit
 
 # factors affecting a review:
 #  age of the revisions
