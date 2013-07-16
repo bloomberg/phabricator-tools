@@ -141,8 +141,7 @@ def createDifferentialReview(
         revision_id)
 
     print "- pushing working branch: " + workingBranch
-    clone.push_asymmetrical(
-        review_branch.branch, workingBranch, gitContext.remote)
+    clone.push_asymmetrical(review_branch.branch, workingBranch)
 
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
@@ -257,11 +256,11 @@ def land(conduit, wb, gitContext, branch):
         raise abdt_exception.LandingException('\n' + e.stdout, branch, wb.base)
 
     print "- pushing " + wb.remote_base
-    clone.push(wb.base, gitContext.remote)
+    clone.push(wb.base)
     print "- deleting " + wb.branch
-    clone.delete(wb.branch, gitContext.remote)
+    clone.push_delete(wb.branch)
     print "- deleting " + branch
-    clone.delete(branch, gitContext.remote)
+    clone.push_delete(branch)
 
     print "- commenting on revision " + str(wb.id)
     commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
@@ -321,9 +320,8 @@ def processUpdatedBranch(
                 review_branch.remote_branch,
                 working_branch.remote_branch)
             print "try again to create review for " + review_branch.branch
-            gitContext.clone.delete(
-                working_branch.branch,
-                gitContext.remote)
+            gitContext.clone.push_delete(
+                working_branch.branch)
             tryCreateReview(
                 mailer,
                 conduit,
@@ -351,7 +349,7 @@ def processUpdatedBranch(
                 commenter.exception(e)
 
 
-def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
+def processAbandonedBranches(conduit, clone, wbList, remote_branches):
     for wb in wbList:
         rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(wb)
         if rb not in remote_branches:
@@ -364,17 +362,17 @@ def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
                 commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
                 commenter.abandonedBranch(rb)
                 # TODO: abandon the associated revision if not already
-            clone.delete(wb.branch, remote)
+            clone.push_delete(wb.branch)
 
 
 def processUpdatedRepo(conduit, clone, remote, mailer):
-    remote_branches = clone.get_remote_branches(remote)
+    remote_branches = clone.get_remote_branches()
     gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
     wbList = abdt_naming.getWorkingBranches(remote_branches)
     makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
     rbDict = dict((makeRb(wb), wb) for wb in wbList)
 
-    processAbandonedBranches(conduit, clone, remote, wbList, remote_branches)
+    processAbandonedBranches(conduit, clone, wbList, remote_branches)
 
     for b in remote_branches:
         if abdt_naming.isReviewBranchPrefixed(b):

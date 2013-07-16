@@ -17,7 +17,6 @@ import abdt_commitmessage
 import abdt_git
 import abdt_naming
 import phlsys_fs
-import phlsys_git
 import phlsys_subprocess
 
 
@@ -35,13 +34,11 @@ class Collaboration(object):
             "git clone devgit phab",
         )
 
-        clone = phlsys_git.GitClone("phab")
         self._phab_wdir = os.path.abspath("phab")
-        self.clone = abdt_git.Clone(clone)
+        self.clone = abdt_git.Clone("phab", "origin")
 
-        clone = phlsys_git.GitClone("developer")
         self._dev_wdir = os.path.abspath("developer")
-        self.dev_clone = abdt_git.Clone(clone)
+        self.dev_clone = abdt_git.Clone("developer", "origin")
 
         self.clone.set_name_email(phab.user, phab.email)
         self.dev_clone.set_name_email(author.user, author.email)
@@ -111,12 +108,12 @@ class Collaboration(object):
             self._run_commands("git fetch origin -p")
 
     def count_phab_working_branches(self):
-        branches = self.clone.get_remote_branches("origin")
+        branches = self.clone.get_remote_branches()
         wbList = abdt_naming.getWorkingBranches(branches)
         return len(wbList)
 
     def count_phab_bad_working_branches(self):
-        branches = self.clone.get_remote_branches("origin")
+        branches = self.clone.get_remote_branches()
         wbList = abdt_naming.getWorkingBranches(branches)
         numBadBranches = 0
         for wb in wbList:

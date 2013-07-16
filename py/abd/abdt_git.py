@@ -18,11 +18,12 @@ import phlgit_diff
 import phlgit_log
 import phlgit_merge
 import phlgit_push
+import phlsys_git
 
 
 class Clone(object):
 
-    def __init__(self, clone):
+    def __init__(self, working_dir, remote):
         """Initialise a new Clone.
 
         :clone: a phlsys_git.Clone to delegate to
@@ -30,7 +31,8 @@ class Clone(object):
 
         """
         super(Clone, self).__init__()
-        self._clone = clone
+        self._clone = phlsys_git.GitClone(working_dir)
+        self._remote = remote
 
     def is_identical(self, branch1, branch2):
         """Return True if the branches point to the same commit.
@@ -42,15 +44,13 @@ class Clone(object):
         """
         return phlgit_branch.is_identical(self._clone, branch1, branch2)
 
-    # TODO: internalize 'remote' to remove this parameter
-    def get_remote_branches(self, remote):
+    def get_remote_branches(self):
         """Return a list of string names of remote branches.
 
-        :remote: string name of remote to query
         :returns: list of string names
 
         """
-        return phlgit_branch.get_remote(self._clone, remote)
+        return phlgit_branch.get_remote(self._clone, self._remote)
 
     def checkout_forced_new_branch(self, new_name, based_on):
         """Overwrite and checkout 'new_name' as a new branch from 'based_on'.
@@ -121,40 +121,34 @@ class Clone(object):
             message,
             author_name + " <" + author_email + ">")
 
-    # TODO: internalize 'remote' to remove this parameter
-    def push_asymmetrical(self, local_branch, remote_branch, remote):
-        """Push 'local_branch' as 'remote_branch' to 'remote'.
+    def push_asymmetrical(self, local_branch, remote_branch):
+        """Push 'local_branch' as 'remote_branch' to the remote.
 
         :local_branch: string name of the branch to push
         :remote_branch: string name of the branch on the remote
-        :remote: string name of the remote
         :returns: None
 
         """
         phlgit_push.push_asymmetrical(
-            self._clone, local_branch, remote_branch, remote)
+            self._clone, local_branch, remote_branch, self._remote)
 
-    # TODO: internalize 'remote' to remove this parameter
-    def push(self, branch, remote):
-        """Push 'branch' to 'remote'.
+    def push(self, branch):
+        """Push 'branch' to the remote.
 
         :branch: string name of the branch to push
-        :remote: string name of the remote
         :returns: None
 
         """
-        phlgit_push.push(self._clone, branch, remote)
+        phlgit_push.push(self._clone, branch, self._remote)
 
-    # TODO: internalize 'remote' to remove this parameter
-    def delete(self, branch, remote):
-        """Delete 'branch' from the specified remote.
+    def push_delete(self, branch):
+        """Delete 'branch' from the remote.
 
         :branch: string name of the branch
-        :remote: string name of the remote
         :returns: None
 
         """
-        phlgit_push.delete(self._clone, branch, remote)
+        phlgit_push.delete(self._clone, branch, self._remote)
 
     def set_name_email(self, name, email):
         """Return output from Git performing a squash merge.

@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         self.dev_phab.dev_push()
 
     def _getTheOnlyReviewId(self):
-        branches = self.clone.get_remote_branches("origin")
+        branches = self.clone.get_remote_branches()
         wbList = abdt_naming.getWorkingBranches(branches)
         self.assertEqual(len(wbList), 1)
         wb = wbList[0]
