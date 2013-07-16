@@ -9,14 +9,13 @@
 #   createReview
 #   verifyReviewBranchBase
 #   createDifferentialReview
-#   makeMessageDigest
 #   updateReview
 #   updateInReview
 #   land
 #   createFailedReview
 #   tryCreateReview
 #   processUpdatedBranch
-#   processAbandonedBranches
+#   processAbandonedBranch
 #   processUpdatedRepo
 #
 # Public Assignments:
@@ -26,23 +25,15 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-# XXX: probably too many imports
-import phlsys_fs
-import phlsys_subprocess
-
 import abdcmnt_commenter
 import abdt_conduitgit
 import abdt_exception
-import abdt_gittypes
 import abdt_naming
-import abdt_workingbranch
 
 # TODO: split into appropriate modules
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 MAX_DIFF_SIZE = 1.5 * 1024 * 1024
-_DIFF_CONTEXT_LINES = 1000
-_LESS_DIFF_CONTEXT_LINES = 100
 
 
 def isBasedOn(name, base):
@@ -50,68 +41,40 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(conduit, gitContext, review_branch):
-    clone = gitContext.clone
-    verifyReviewBranchBase(gitContext, review_branch)
+def createReview(conduit, branch):
+    branch.verify_review_branch_base()
 
     # TODO: we should also cc other users on the branch
     # TODO: if there are emails that don't match up to users then we should
     #       note that on the review and perhaps use the mailer to notify them
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
-        clone, conduit, review_branch.remote_base,
-        review_branch.remote_branch)
+        conduit, branch)
 
     print "- author: " + user
 
     used_default_test_plan = False
 
-    hashes = clone.get_range_hashes(
-        review_branch.remote_base, review_branch.remote_branch)
-    commit = hashes[-1]
-    parsed = abdt_conduitgit.getFieldsFromCommitHash(
-        conduit, clone, commit)
+    parsed = abdt_conduitgit.getFieldsFromBranch(conduit, branch)
     if parsed.errors:
         used_default_test_plan = True
-        parsed = abdt_conduitgit.getFieldsFromCommitHash(
-            conduit, clone, commit, _DEFAULT_TEST_PLAN)
+        parsed = abdt_conduitgit.getFieldsFromBranch(
+            conduit, branch, _DEFAULT_TEST_PLAN)
         if parsed.errors:
             print parsed
             raise abdt_exception.CommitMessageParseException(
                 errors=parsed.errors,
                 fields=parsed.fields,
-                digest=makeMessageDigest(
-                    clone,
-                    review_branch.remote_base,
-                    review_branch.remote_branch))
+                digest=branch.make_message_digest())
 
-    rawDiff = clone.raw_diff_range(
-        review_branch.remote_base,
-        review_branch.remote_branch,
-        _DIFF_CONTEXT_LINES)
-
-    # if the diff is too big then regen with less context
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = clone.raw_diff_range(
-            review_branch.remote_base,
-            review_branch.remote_branch,
-            _LESS_DIFF_CONTEXT_LINES)
-
-    # if the diff is still too big then regen with no context
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = clone.raw_diff_range(
-            review_branch.remote_base, review_branch.remote_branch)
-
-    # if the diff is still too big then error
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        raise abdt_exception.LargeDiffException(
-            "diff too big", len(rawDiff), MAX_DIFF_SIZE)
+    rawDiff = branch.make_raw_diff()
 
     revisionid = createDifferentialReview(
-        conduit, user, parsed, gitContext, review_branch, rawDiff)
+        conduit, user, parsed, branch, rawDiff)
 
     if used_default_test_plan:
         commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
-        commenter.usedDefaultTestPlan(review_branch.branch, _DEFAULT_TEST_PLAN)
+        commenter.usedDefaultTestPlan(
+            branch.review_branch_name(), _DEFAULT_TEST_PLAN)
 
 
 def verifyReviewBranchBase(gitContext, review_branch):
@@ -124,272 +87,171 @@ def verifyReviewBranchBase(gitContext, review_branch):
             "' is not based on '" + review_branch.base + "'")
 
 
-def createDifferentialReview(
-        conduit, user, parsed, gitContext, review_branch, rawDiff):
-    clone = gitContext.clone
-    clone.checkout_forced_new_branch(
-        review_branch.branch, review_branch.remote_branch)
-
+def createDifferentialReview(conduit, user, parsed, branch, rawDiff):
     print "- creating revision"
     revision_id = conduit.create_revision_as_user(rawDiff, parsed.fields, user)
     print "- created " + str(revision_id)
-
-    workingBranch = abdt_naming.makeWorkingBranchName(
-        abdt_naming.WB_STATUS_OK,
-        review_branch.description,
-        review_branch.base,
-        revision_id)
-
-    print "- pushing working branch: " + workingBranch
-    clone.push_asymmetrical(review_branch.branch, workingBranch)
+    branch.push_ok_new_review(revision_id)
 
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
-    commenter.createdReview(review_branch.branch, review_branch.base)
+    commenter.createdReview(
+        branch.review_branch_name(),
+        branch.base_branch_name())
 
     return revision_id
 
 
-def makeMessageDigest(clone, base, branch):
-    hashes = clone.get_range_hashes(base, branch)
-    revisions = clone.make_revisions_from_hashes(hashes)
-    message = revisions[0].subject + "\n\n"
-    for r in revisions:
-        message += r.message
-    return message
-
-
-def updateReview(conduit, gitContext, reviewBranch, workingBranch):
-    rb = reviewBranch
-    wb = workingBranch
-
-    clone = gitContext.clone
-    if not clone.is_identical(rb.remote_branch, wb.remote_branch):
+def updateReview(conduit, branch):
+    if branch.has_new_commits():
         print "changes on branch"
-        verifyReviewBranchBase(gitContext, reviewBranch)
-        wb = updateInReview(conduit, wb, gitContext, rb)
-    elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
+        branch.verify_review_branch_base()
+        updateInReview(conduit, branch)
+    elif branch.is_status_bad() and not branch.is_status_bad_land():
         try:
             print "try updating bad branch"
-            verifyReviewBranchBase(gitContext, reviewBranch)
-            updateInReview(conduit, wb, gitContext, rb)
+            branch.verify_review_branch_base()
+            updateInReview(conduit, branch)
         except abdt_exception.AbdUserException:
             print "still bad"
 
-    if not abdt_naming.isStatusBad(wb):
-        if conduit.is_review_accepted(wb.id):
-            verifyReviewBranchBase(gitContext, reviewBranch)
-            land(conduit, wb, gitContext, reviewBranch.branch)
+    if not branch.is_status_bad():
+        if conduit.is_review_accepted(branch.review_id_or_none()):
+            branch.verify_review_branch_base()
+            land(conduit, branch)
             # TODO: we probably want to do a better job of cleaning up locally
         else:
             print "do nothing"
 
 
-def updateInReview(conduit, wb, gitContext, review_branch):
-    remoteBranch = review_branch.remote_branch
-    clone = gitContext.clone
-
+def updateInReview(conduit, branch):
     print "updateInReview"
 
     print "- creating diff"
-    rawDiff = clone.raw_diff_range(
-        wb.remote_base, remoteBranch, _DIFF_CONTEXT_LINES)
-    if not rawDiff:
-        raise abdt_exception.AbdUserException(
-            "no difference from " + wb.base + " to " + wb.branch)
+    rawDiff = branch.make_raw_diff()
+    review_id = branch.review_id_or_none()
+    review_id_str = str(review_id)
 
-    # if the diff is too big then regen with less context
-    # used_less_context = False
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        # used_less_context = True
-        rawDiff = clone.raw_diff_range(
-            wb.remote_base, remoteBranch, _LESS_DIFF_CONTEXT_LINES)
+    print "- updating revision " + review_id_str
+    conduit.update_revision(review_id, rawDiff, "update")
 
-    # if the diff is still too big then regen with no context
-    # used_no_context = False
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        # used_no_context = True
-        rawDiff = clone.raw_diff_range(
-            wb.remote_base, remoteBranch)
+    branch.push_status(abdt_naming.WB_STATUS_OK)
 
-    # if the diff is still too big then error
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        raise abdt_exception.LargeDiffException(
-            "diff too big", len(rawDiff), MAX_DIFF_SIZE)
+    print "- commenting on revision " + review_id_str
+    commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+    commenter.updatedReview(branch.review_branch_name())
 
-    used_default_test_plan = False
-    print "- updating revision " + str(wb.id)
-    conduit.update_revision(wb.id, rawDiff, "update")
-
-    wb = abdt_workingbranch.pushStatus(
-        gitContext,
-        review_branch,
-        wb,
-        abdt_naming.WB_STATUS_OK)
-
-    print "- commenting on revision " + str(wb.id)
-    commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
-    commenter.updatedReview(review_branch.branch)
-    if used_default_test_plan:
-        commenter.usedDefaultTestPlan(wb.branch, _DEFAULT_TEST_PLAN)
-
-    return wb
+    return branch.tracking_branch()
 
 
-def land(conduit, wb, gitContext, branch):
-    clone = gitContext.clone
-    print "landing " + wb.remote_branch + " onto " + wb.remote_base
+def land(conduit, branch):
+    print "landing " + branch.tracking_branch_name()
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
-        clone, conduit, wb.remote_base, wb.remote_branch)
+        conduit, branch)
 
-    clone.checkout_forced_new_branch(wb.base, wb.remote_base)
+    review_id = branch.review_id_or_none()
 
     # compose the commit message
-    message = conduit.get_commit_message(wb.id)
+    message = conduit.get_commit_message(review_id)
 
-    try:
-        with phlsys_fs.nostd():
-            squashMessage = clone.squash_merge(
-                wb.remote_branch, message, name, email)
-    except phlsys_subprocess.CalledProcessError as e:
-        clone.call("reset", "--hard")  # fix the working copy
-        raise abdt_exception.LandingException('\n' + e.stdout, branch, wb.base)
+    squashMessage = branch.land(name, email, message)
 
-    print "- pushing " + wb.remote_base
-    clone.push(wb.base)
-    print "- deleting " + wb.branch
-    clone.push_delete(wb.branch)
-    print "- deleting " + branch
-    clone.push_delete(branch)
+    print "- commenting on revision " + str(review_id)
+    commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+    commenter.landedReview(
+        branch.review_branch_name(),
+        branch.tracking_branch().base,
+        squashMessage)
 
-    print "- commenting on revision " + str(wb.id)
-    commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
-    commenter.landedReview(branch, wb.base, squashMessage)
-
-    conduit.close_revision(wb.id)
+    conduit.close_revision(review_id)
     # TODO: we probably want to do a better job of cleaning up locally
 
 
-def createFailedReview(conduit, gitContext, review_branch, exception):
-    user = abdt_conduitgit.getAnyUserFromBranch(
-        gitContext.clone,
-        conduit,
-        review_branch.remote_base,
-        review_branch.remote_branch)
+def createFailedReview(conduit, branch, exception):
+    user = abdt_conduitgit.getAnyUserFromBranch(conduit, branch)
     reviewid = conduit.create_empty_revision_as_user(user)
-    wb = abdt_gittypes.makeGitWorkingBranchFromParts(
-        abdt_naming.WB_STATUS_BAD_INREVIEW,
-        review_branch.description,
-        review_branch.base,
-        reviewid,
-        gitContext.remote)
     commenter = abdcmnt_commenter.Commenter(conduit, reviewid)
-    commenter.failedCreateReview(review_branch.branch, exception)
-    abdt_workingbranch.pushBadInReview(gitContext, review_branch, wb)
+    commenter.failedCreateReview(branch.review_branch_name(), exception)
+    branch.push_new_bad_in_review(reviewid)
 
 
-def tryCreateReview(mailer, conduit, gitContext, review_branch, mail_on_fail):
+def tryCreateReview(mailer, conduit, branch, mail_on_fail):
     try:
-        createReview(conduit, gitContext, review_branch)
+        createReview(conduit, branch)
     except abdt_exception.AbdUserException as e:
         print "failed to create:"
         print e
         try:
-            createFailedReview(conduit, gitContext, review_branch, e)
+            createFailedReview(conduit, branch, e)
         except abdt_exception.NoUsersOnBranchException as e:
             print "failed to create failed review:"
             print e
-            abdt_workingbranch.pushBadPreReview(
-                gitContext, review_branch)
+            branch.push_bad_pre_review()
             if mail_on_fail:
                 mailer.noUsersOnBranch(
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def processUpdatedBranch(
-        mailer, conduit, gitContext, review_branch, working_branch):
+def processUpdatedBranch(mailer, conduit, branch):
     abdte = abdt_exception
-    if working_branch is None:
-        print "create review for " + review_branch.branch
+    review_branch_name = branch.review_branch_name()
+    if branch.is_new():
+        print "create review for " + review_branch_name
         tryCreateReview(
-            mailer, conduit, gitContext, review_branch, mail_on_fail=True)
+            mailer,
+            conduit,
+            branch,
+            mail_on_fail=True)
     else:
-        commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
-        if abdt_naming.isStatusBadPreReview(working_branch):
-            hasChanged = not gitContext.clone.is_identical(
-                review_branch.remote_branch,
-                working_branch.remote_branch)
-            print "try again to create review for " + review_branch.branch
-            gitContext.clone.push_delete(
-                working_branch.branch)
+        review_id = branch.review_id_or_none()
+        commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+        if branch.is_status_bad_pre_review():
+            print "try again to create review for " + review_branch_name
+            has_new_commits = branch.has_new_commits()
+            branch.push_delete_tracking_branch()
             tryCreateReview(
                 mailer,
                 conduit,
-                gitContext,
-                review_branch,
-                mail_on_fail=hasChanged)
+                branch,
+                mail_on_fail=has_new_commits)
         else:
-            print "update review for " + review_branch.branch
+            print "update review for " + review_branch_name
             try:
-                updateReview(
-                    conduit,
-                    gitContext,
-                    review_branch,
-                    working_branch)
+                updateReview(conduit, branch)
             except abdte.LandingException as e:
                 print "landing exception"
-                abdt_workingbranch.pushBadLand(
-                    gitContext, review_branch, working_branch)
+                branch.push_bad_land()
                 commenter.exception(e)
-                conduit.set_requires_revision(working_branch.id)
+                conduit.set_requires_revision(review_id)
             except abdte.AbdUserException as e:
                 print "user exception"
-                abdt_workingbranch.pushBadInReview(
-                    gitContext, review_branch, working_branch)
+                branch.push_bad_in_review()
                 commenter.exception(e)
 
 
-def processAbandonedBranches(conduit, clone, wbList, remote_branches):
-    for wb in wbList:
-        rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(wb)
-        if rb not in remote_branches:
-            print "delete abandoned branch: " + wb.branch
-            try:
-                revisionid = int(wb.id)
-            except ValueError:
-                pass
-            else:
-                commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
-                commenter.abandonedBranch(rb)
-                # TODO: abandon the associated revision if not already
-            clone.push_delete(wb.branch)
+def processAbandonedBranch(conduit, branch):
+    tracking_branch_name = branch.tracking_branch_name()
+    print "delete abandoned branch: " + tracking_branch_name
+    review_id = branch.review_id_or_none()
+    if review_id is not None:
+        commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+        commenter.abandonedBranch(branch.review_branch_name())
+        # TODO: abandon the associated revision if not already
+    branch.push_delete_tracking_branch()
 
 
-def processUpdatedRepo(conduit, clone, remote, mailer):
-    remote_branches = clone.get_remote_branches()
-    gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
-    wbList = abdt_naming.getWorkingBranches(remote_branches)
-    makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
-    rbDict = dict((makeRb(wb), wb) for wb in wbList)
+def processUpdatedRepo(conduit, clone, mailer):
+    managed_branches = clone.get_managed_branches()
 
-    processAbandonedBranches(conduit, clone, wbList, remote_branches)
-
-    for b in remote_branches:
-        if abdt_naming.isReviewBranchPrefixed(b):
-            review_branch = abdt_naming.makeReviewBranchFromName(b)
-            if review_branch is None:
-                # TODO: handle this case properly
-                continue
-
-            review_branch = abdt_gittypes.makeGitReviewBranch(
-                review_branch, remote)
-            working_branch = None
-            if b in rbDict.keys():
-                working_branch = rbDict[b]
-                working_branch = abdt_gittypes.makeGitWorkingBranch(
-                    working_branch, remote)
-            processUpdatedBranch(
-                mailer, conduit, gitContext, review_branch, working_branch)
+    for branch in managed_branches:
+        if branch.is_abandoned():
+            print "abandoned:", branch
+            processAbandonedBranch(conduit, branch)
+        elif branch.is_null():
+            pass  # TODO: should handle these
+        else:
+            print "pending:", branch.review_branch(), branch.tracking_branch()
+            processUpdatedBranch(mailer, conduit, branch)
 
 
 #------------------------------------------------------------------------------

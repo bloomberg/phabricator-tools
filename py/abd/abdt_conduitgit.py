@@ -7,25 +7,18 @@
 # Public Functions:
 #   getPrimaryNameEmailAndUserFromBranch
 #   getAnyUserFromBranch
-#   getFieldsFromCommitHash
+#   getFieldsFromBranch
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import phlgit_log
-import phlgitu_ref
-
 import abdt_exception
 
 
-def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
-    hashes = phlgit_log.get_range_hashes(clone, base, branch)
-    if not hashes:
-        raise abdt_exception.AbdUserException("no history to diff")
-    commit = hashes[-1]
-    committer = phlgit_log.get_author_names_emails_from_hashes(
-        clone, [commit])[0]
+def getPrimaryNameEmailAndUserFromBranch(conduit, branch):
+    names_emails = branch.get_author_names_emails()
+    committer = names_emails[-1]
     name = committer[0]
     email = committer[1]
     user = conduit.query_users_from_emails([email])[0]
@@ -35,33 +28,26 @@ def getPrimaryNameEmailAndUserFromBranch(clone, conduit, base, branch):
     return name, email, user
 
 
-def getAnyUserFromBranch(clone, conduit, base, branch):
-    if phlgitu_ref.parse_ref_hash(clone, base) is None:
-        hashes = phlgit_log.get_last_n_commit_hashes_from_ref(clone, 1, branch)
-    else:
-        hashes = phlgit_log.get_range_hashes(clone, base, branch)
-
-    if not hashes:
-        hashes = phlgit_log.get_last_n_commit_hashes_from_ref(clone, 1, branch)
-    committers = phlgit_log.get_author_names_emails_from_hashes(clone, hashes)
-    emails = [committer[1] for committer in committers]
+def getAnyUserFromBranch(conduit, branch):
+    emails = branch.get_any_author_emails()
     users = conduit.query_users_from_emails(emails)
     for user in users:
         if user:
             return user
-    raise abdt_exception.NoUsersOnBranchException(branch, base, emails)
+    raise abdt_exception.NoUsersOnBranchException(
+        branch.review_branch_name(), branch.base_branch_name(), emails)
 
 
-def getFieldsFromCommitHash(conduit, clone, commit_hash, defaultTestPlan=None):
-    """Return a ParseCommitMessageResponse based on the commit message.
+def getFieldsFromBranch(conduit, branch, defaultTestPlan=None):
+    """Return a ParseCommitMessageResponse based on the branch.
 
     :conduit: supports call()
-    :clone: supports call()
-    :commit_hash: a single commit hash to get the message from
+    :branch: the branch to get fields from
+    :defaultTestPlan: the test plan to go with if none discovered on branch
     :returns: a phlcon_differential.ParseCommitMessageResponse
 
     """
-    revision = phlgit_log.make_revision_from_hash(clone, commit_hash)
+    revision = branch.make_revision_from_tip()
     message = revision.subject + "\n"
     message += "\n"
     message += revision.message + "\n"
