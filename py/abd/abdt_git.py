@@ -281,8 +281,7 @@ class _ManagedBranch(object):
             self._tracking_branch)
 
     def has_new_commits(self):
-        return not phlgit_branch.is_identical(
-            self._clone,
+        return not self._clone.is_identical(
             self._review_branch.remote_branch,
             self._tracking_branch.remote_branch)
 
@@ -342,7 +341,7 @@ class _ManagedBranch(object):
             phlgitu_ref.make_local(self.tracking_branch_name()))
 
     def get_author_names_emails(self):
-        hashes = self.get_commit_hashes()
+        hashes = self._get_commit_hashes()
         return phlgit_log.get_author_names_emails_from_hashes(
             self._clone, hashes)
 
@@ -352,11 +351,7 @@ class _ManagedBranch(object):
             hashes = phlgit_log.get_last_n_commit_hashes_from_ref(
                 self._clone, 1, self._review_branch.remote_branch)
         else:
-            # TODO: use get_commit_hashes() instead, when non-raising
-            hashes = self._clone.get_range_hashes(
-                self._review_branch.remote_base,
-                self._review_branch.remote_branch)
-
+            hashes = self._get_commit_hashes()
         if not hashes:
             hashes = phlgit_log.get_last_n_commit_hashes_from_ref(
                 self._clone, 1, self._review_branch.remote_branch)
@@ -365,31 +360,28 @@ class _ManagedBranch(object):
         emails = [committer[1] for committer in committers]
         return emails
 
-    def get_commit_hashes(self):
+    def _get_commit_hashes(self):
         hashes = self._clone.get_range_hashes(
             self._review_branch.remote_base,
             self._review_branch.remote_branch)
-        # TODO: this doesn't belong here, move up and out
-        if not hashes:
-            raise abdt_exception.AbdUserException("no history to diff")
         return hashes
 
     def make_message_digest(self):
-        hashes = self.get_commit_hashes()
+        hashes = self._get_commit_hashes()
         revisions = self._clone.make_revisions_from_hashes(hashes)
         message = revisions[0].subject + "\n\n"
         for r in revisions:
             message += r.message
         return message
 
-    def make_raw_diff_with_context(self, context=None):
+    def _make_raw_diff_helper(self, context=None):
         return self._clone.raw_diff_range(
             self._review_branch.remote_base,
             self._review_branch.remote_branch,
             context)
 
     def make_raw_diff(self):
-        rawDiff = self.make_raw_diff_with_context(_DIFF_CONTEXT_LINES)
+        rawDiff = self._make_raw_diff_helper(_DIFF_CONTEXT_LINES)
 
         if not rawDiff:
             raise abdt_exception.AbdUserException(
@@ -401,11 +393,11 @@ class _ManagedBranch(object):
 
         # if the diff is too big then regen with less context
         if len(rawDiff) >= _MAX_DIFF_SIZE:
-            rawDiff = self.make_raw_diff_with_context(_LESS_DIFF_CONTEXT_LINES)
+            rawDiff = self._make_raw_diff_helper(_LESS_DIFF_CONTEXT_LINES)
 
         # if the diff is still too big then regen with no context
         if len(rawDiff) >= _MAX_DIFF_SIZE:
-            rawDiff = self.make_raw_diff_with_context()
+            rawDiff = self._make_raw_diff_helper()
 
         # if the diff is still too big then error
         if len(rawDiff) >= _MAX_DIFF_SIZE:
@@ -448,12 +440,17 @@ class _ManagedBranch(object):
         self._clone.push(self._tracking_branch.base)
         self._clone.push_delete(self._tracking_branch.branch)
         self._clone.push_delete(self.review_branch_name())
+        # TODO: we probably want to do a better job of cleaning up locally
 
         return result
 
-    def make_revision_from_tip(self):
-        hashes = self.get_commit_hashes()
-        return phlgit_log.make_revision_from_hash(self._clone, hashes[-1])
+    def get_commit_message_from_tip(self):
+        hashes = self._get_commit_hashes()
+        revision = phlgit_log.make_revision_from_hash(self._clone, hashes[-1])
+        message = revision.subject + "\n"
+        message += "\n"
+        message += revision.message + "\n"
+        return message
 
 
 #------------------------------------------------------------------------------

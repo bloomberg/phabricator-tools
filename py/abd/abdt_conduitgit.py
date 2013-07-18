@@ -18,6 +18,8 @@ import abdt_exception
 
 def getPrimaryNameEmailAndUserFromBranch(conduit, branch):
     names_emails = branch.get_author_names_emails()
+    if not names_emails:
+        raise abdt_exception.AbdUserException("no history to diff")
     committer = names_emails[-1]
     name = committer[0]
     email = committer[1]
@@ -47,10 +49,7 @@ def getFieldsFromBranch(conduit, branch, defaultTestPlan=None):
     :returns: a phlcon_differential.ParseCommitMessageResponse
 
     """
-    revision = branch.make_revision_from_tip()
-    message = revision.subject + "\n"
-    message += "\n"
-    message += revision.message + "\n"
+    message = branch.get_commit_message_from_tip()
     parsed = conduit.parse_commit_message(message)
 
     testPlan = "testPlan"

@@ -154,17 +154,16 @@ def land(conduit, branch):
     # compose the commit message
     message = conduit.get_commit_message(review_id)
 
-    squashMessage = branch.land(name, email, message)
+    land_message = branch.land(name, email, message)
 
     print "- commenting on revision " + str(review_id)
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.landedReview(
         branch.review_branch_name(),
         branch.tracking_branch().base,
-        squashMessage)
+        land_message)
 
     conduit.close_revision(review_id)
-    # TODO: we probably want to do a better job of cleaning up locally
 
 
 def createFailedReview(conduit, branch, exception):
