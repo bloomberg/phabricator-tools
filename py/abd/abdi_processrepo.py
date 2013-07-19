@@ -28,7 +28,6 @@
 import abdcmnt_commenter
 import abdt_conduitgit
 import abdt_exception
-import abdt_naming
 
 # TODO: split into appropriate modules
 
@@ -91,7 +90,7 @@ def createDifferentialReview(conduit, user, parsed, branch, rawDiff):
     print "- creating revision"
     revision_id = conduit.create_revision_as_user(rawDiff, parsed.fields, user)
     print "- created " + str(revision_id)
-    branch.push_ok_new_review(revision_id)
+    branch.mark_ok_new_review(revision_id)
 
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
@@ -135,7 +134,7 @@ def updateInReview(conduit, branch):
     print "- updating revision " + review_id_str
     conduit.update_revision(review_id, rawDiff, "update")
 
-    branch.push_status(abdt_naming.WB_STATUS_OK)
+    branch.mark_ok_in_review()
 
     print "- commenting on revision " + review_id_str
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
@@ -169,7 +168,7 @@ def createFailedReview(conduit, branch, exception):
     reviewid = conduit.create_empty_revision_as_user(user)
     commenter = abdcmnt_commenter.Commenter(conduit, reviewid)
     commenter.failedCreateReview(branch.review_branch_name(), exception)
-    branch.push_new_bad_in_review(reviewid)
+    branch.mark_new_bad_in_review(reviewid)
 
 
 def tryCreateReview(mailer, conduit, branch, mail_on_fail):
@@ -183,7 +182,7 @@ def tryCreateReview(mailer, conduit, branch, mail_on_fail):
         except abdt_exception.NoUsersOnBranchException as e:
             print "failed to create failed review:"
             print e
-            branch.push_bad_pre_review()
+            branch.mark_bad_pre_review()
             if mail_on_fail:
                 mailer.noUsersOnBranch(
                     e.review_branch_name, e.base_name, e.emails)
@@ -205,7 +204,7 @@ def processUpdatedBranch(mailer, conduit, branch):
         if branch.is_status_bad_pre_review():
             print "try again to create review for " + review_branch_name
             has_new_commits = branch.has_new_commits()
-            branch.push_delete_tracking_branch()
+            branch.clear_mark()
             tryCreateReview(
                 mailer,
                 conduit,
@@ -217,12 +216,12 @@ def processUpdatedBranch(mailer, conduit, branch):
                 updateReview(conduit, branch)
             except abdte.LandingException as e:
                 print "landing exception"
-                branch.push_bad_land()
+                branch.mark_bad_land()
                 commenter.exception(e)
                 conduit.set_requires_revision(review_id)
             except abdte.AbdUserException as e:
                 print "user exception"
-                branch.push_bad_in_review()
+                branch.mark_bad_in_review()
                 commenter.exception(e)
 
 
@@ -233,7 +232,7 @@ def processAbandonedBranch(conduit, branch):
         commenter = abdcmnt_commenter.Commenter(conduit, review_id)
         commenter.abandonedBranch(branch.review_branch_name())
         # TODO: abandon the associated revision if not already
-    branch.push_delete_tracking_branch()
+    branch.abandon()
 
 
 def processUpdatedRepo(conduit, clone, mailer):

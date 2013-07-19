@@ -22,13 +22,14 @@
 #    .make_raw_diff
 #    .verify_review_branch_base
 #    .get_commit_message_from_tip
-#    .push_delete_tracking_branch
-#    .push_bad_land
-#    .push_bad_in_review
-#    .push_new_bad_in_review
-#    .push_bad_pre_review
-#    .push_status
-#    .push_ok_new_review
+#    .abandon
+#    .clear_mark
+#    .mark_bad_land
+#    .mark_bad_in_review
+#    .mark_new_bad_in_review
+#    .mark_bad_pre_review
+#    .mark_ok_in_review
+#    .mark_ok_new_review
 #    .land
 #
 # -----------------------------------------------------------------------------
@@ -47,8 +48,6 @@ import phlsys_subprocess
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
 _DIFF_CONTEXT_LINES = 1000
 _LESS_DIFF_CONTEXT_LINES = 100
-
-# TODO: remove mention of git-specific operations, name for intention instead
 
 
 class ReviewTrackingBranchPair(object):
@@ -193,10 +192,16 @@ class ReviewTrackingBranchPair(object):
         message += revision.message + "\n"
         return message
 
-    def push_delete_tracking_branch(self):
+    def _push_delete_tracking_branch(self):
         self._clone.push_delete(self._tracking_branch.branch)
 
-    def push_bad_land(self):
+    def abandon(self):
+        self._push_delete_tracking_branch()
+
+    def clear_mark(self):
+        self._push_delete_tracking_branch()
+
+    def mark_bad_land(self):
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadLand(
@@ -204,7 +209,7 @@ class ReviewTrackingBranchPair(object):
             self._review_branch,
             self._tracking_branch)
 
-    def push_bad_in_review(self):
+    def mark_bad_in_review(self):
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadInReview(
@@ -212,7 +217,7 @@ class ReviewTrackingBranchPair(object):
             self._review_branch,
             self._tracking_branch)
 
-    def push_new_bad_in_review(self, review_id):
+    def mark_new_bad_in_review(self, review_id):
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         wb = abdt_gittypes.makeGitWorkingBranchFromParts(
@@ -222,14 +227,15 @@ class ReviewTrackingBranchPair(object):
             review_id,
             context.remote)
         self._tracking_branch = wb
-        self.push_bad_in_review()
+        self.mark_bad_in_review()
 
-    def push_bad_pre_review(self):
+    def mark_bad_pre_review(self):
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadPreReview(context, self._review_branch)
 
-    def push_status(self, status):
+    def mark_ok_in_review(self):
+        status = abdt_naming.WB_STATUS_OK
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         self._tracking_branch = abdt_workingbranch.pushStatus(
@@ -238,7 +244,7 @@ class ReviewTrackingBranchPair(object):
             self._tracking_branch,
             status)
 
-    def push_ok_new_review(self, revision_id):
+    def mark_ok_new_review(self, revision_id):
         self._tracking_branch = abdt_naming.makeWorkingBranchName(
             abdt_naming.WB_STATUS_OK,
             self._review_branch.description,
