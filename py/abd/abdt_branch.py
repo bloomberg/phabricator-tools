@@ -170,6 +170,8 @@ class ReviewTrackingBranchPair(object):
             raise abdt_exception.LargeDiffException(
                 "diff too big", len(rawDiff), _MAX_DIFF_SIZE)
 
+        return rawDiff
+
     def _is_based_on(self, name, base):
         # TODO: actually do this
         return True
