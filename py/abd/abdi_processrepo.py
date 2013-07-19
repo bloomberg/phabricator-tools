@@ -143,7 +143,7 @@ def updateInReview(conduit, branch):
 
 
 def land(conduit, branch):
-    print "landing " + branch.tracking_branch_name()
+    print "landing " + branch.review_branch_name()
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
         conduit, branch)
 
@@ -227,8 +227,7 @@ def processUpdatedBranch(mailer, conduit, branch):
 
 
 def processAbandonedBranch(conduit, branch):
-    tracking_branch_name = branch.tracking_branch_name()
-    print "delete abandoned branch: " + tracking_branch_name
+    print "untracking abandoned branch: " + branch.review_branch_name()
     review_id = branch.review_id_or_none()
     if review_id is not None:
         commenter = abdcmnt_commenter.Commenter(conduit, review_id)
@@ -242,7 +241,6 @@ def processUpdatedRepo(conduit, clone, mailer):
 
     for branch in managed_branches:
         if branch.is_abandoned():
-            print "abandoned:", branch.tracking_branch_name()
             processAbandonedBranch(conduit, branch)
         elif branch.is_null():
             pass  # TODO: should handle these

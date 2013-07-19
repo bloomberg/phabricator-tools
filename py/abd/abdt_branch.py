@@ -15,7 +15,6 @@
 #    .has_new_commits
 #    .base_branch_name
 #    .review_branch_name
-#    .tracking_branch_name
 #    .review_id_or_none
 #    .get_author_names_emails
 #    .get_any_author_emails
@@ -95,9 +94,6 @@ class ReviewTrackingBranchPair(object):
             return self._review_branch.branch
         return abdt_naming.makeReviewBranchNameFromWorkingBranch(
             self._tracking_branch)
-
-    def tracking_branch_name(self):
-        return self._tracking_branch.branch
 
     def review_id_or_none(self):
         if not self._tracking_branch:
@@ -198,7 +194,7 @@ class ReviewTrackingBranchPair(object):
         return message
 
     def push_delete_tracking_branch(self):
-        self._clone.push_delete(self.tracking_branch_name())
+        self._clone.push_delete(self._tracking_branch.branch)
 
     def push_bad_land(self):
         context = abdt_gittypes.GitContext(
@@ -254,7 +250,7 @@ class ReviewTrackingBranchPair(object):
             self._tracking_branch, self._clone.get_remote())
         self._clone.push_asymmetrical(
             self._review_branch.remote_branch,
-            phlgitu_ref.make_local(self.tracking_branch_name()))
+            phlgitu_ref.make_local(self._tracking_branch.branch))
 
     def land(self, author_name, author_email, message):
         self._clone.checkout_forced_new_branch(
