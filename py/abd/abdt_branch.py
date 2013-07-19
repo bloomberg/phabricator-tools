@@ -9,16 +9,22 @@
 #    .is_abandoned
 #    .is_null
 #    .is_new
-#    .base_branch_name
-#    .review_branch_name
-#    .tracking_branch_name
-#    .review_id_or_none
-#    .review_branch
-#    .tracking_branch
 #    .is_status_bad_pre_review
 #    .is_status_bad_land
 #    .is_status_bad
 #    .has_new_commits
+#    .base_branch_name
+#    .review_branch_name
+#    .tracking_branch_name
+#    .review_id_or_none
+#    .get_author_names_emails
+#    .get_any_author_emails
+#    .make_message_digest
+#    .make_raw_diff
+#    .verify_review_branch_base
+#    .get_commit_message_from_tip
+#    .review_branch
+#    .tracking_branch
 #    .push_delete_tracking_branch
 #    .push_bad_land
 #    .push_bad_in_review
@@ -26,13 +32,7 @@
 #    .push_bad_pre_review
 #    .push_status
 #    .push_ok_new_review
-#    .get_author_names_emails
-#    .get_any_author_emails
-#    .make_message_digest
-#    .make_raw_diff
-#    .verify_review_branch_base
 #    .land
-#    .get_commit_message_from_tip
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -50,6 +50,8 @@ _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
 _DIFF_CONTEXT_LINES = 1000
 _LESS_DIFF_CONTEXT_LINES = 100
 
+# TODO: remove mention of git-specific operations, name for intention instead
+
 
 class ReviewTrackingBranchPair(object):
 
@@ -66,6 +68,23 @@ class ReviewTrackingBranchPair(object):
 
     def is_new(self):
         return self._review_branch and not self._tracking_branch
+
+    def is_status_bad_pre_review(self):
+        return self._tracking_branch and abdt_naming.isStatusBadPreReview(
+            self._tracking_branch)
+
+    def is_status_bad_land(self):
+        return self._tracking_branch and abdt_naming.isStatusBadLand(
+            self._tracking_branch)
+
+    def is_status_bad(self):
+        return self._tracking_branch and abdt_naming.isStatusBad(
+            self._tracking_branch)
+
+    def has_new_commits(self):
+        return not self._clone.is_identical(
+            self._review_branch.remote_branch,
+            self._tracking_branch.remote_branch)
 
     def base_branch_name(self):
         if self._review_branch:
@@ -92,84 +111,6 @@ class ReviewTrackingBranchPair(object):
             pass
 
         return review_id
-
-    def review_branch(self):
-        return self._review_branch
-
-    def tracking_branch(self):
-        return self._tracking_branch
-
-    def is_status_bad_pre_review(self):
-        return self._tracking_branch and abdt_naming.isStatusBadPreReview(
-            self._tracking_branch)
-
-    def is_status_bad_land(self):
-        return self._tracking_branch and abdt_naming.isStatusBadLand(
-            self._tracking_branch)
-
-    def is_status_bad(self):
-        return self._tracking_branch and abdt_naming.isStatusBad(
-            self._tracking_branch)
-
-    def has_new_commits(self):
-        return not self._clone.is_identical(
-            self._review_branch.remote_branch,
-            self._tracking_branch.remote_branch)
-
-    def push_delete_tracking_branch(self):
-        self._clone.push_delete(self.tracking_branch_name())
-
-    def push_bad_land(self):
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        abdt_workingbranch.pushBadLand(
-            context, self.review_branch(), self.tracking_branch())
-
-    def push_bad_in_review(self):
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        abdt_workingbranch.pushBadInReview(
-            context, self.review_branch(), self.tracking_branch())
-
-    def push_new_bad_in_review(self, review_id):
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        wb = abdt_gittypes.makeGitWorkingBranchFromParts(
-            abdt_naming.WB_STATUS_BAD_INREVIEW,
-            self._review_branch.description,
-            self._review_branch.base,
-            review_id,
-            context.remote)
-        self._tracking_branch = wb
-        self.push_bad_in_review()
-
-    def push_bad_pre_review(self):
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        abdt_workingbranch.pushBadPreReview(context, self._review_branch)
-
-    def push_status(self, status):
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        self._tracking_branch = abdt_workingbranch.pushStatus(
-            context,
-            self._review_branch,
-            self._tracking_branch,
-            status)
-
-    def push_ok_new_review(self, revision_id):
-        self._tracking_branch = abdt_naming.makeWorkingBranchName(
-            abdt_naming.WB_STATUS_OK,
-            self._review_branch.description,
-            self._review_branch.base,
-            revision_id)
-        self._tracking_branch = abdt_naming.makeWorkingBranchFromName(
-            self._tracking_branch)
-        self._tracking_branch = abdt_gittypes.makeGitWorkingBranch(
-            self._tracking_branch, self._clone.get_remote())
-        self._clone.push_asymmetrical(
-            self._review_branch.remote_branch,
-            phlgitu_ref.make_local(self.tracking_branch_name()))
 
     def get_author_names_emails(self):
         hashes = self._get_commit_hashes()
@@ -249,6 +190,77 @@ class ReviewTrackingBranchPair(object):
                 "'" + self._review_branch.branch +
                 "' is not based on '" + self._review_branch.base + "'")
 
+    def get_commit_message_from_tip(self):
+        hashes = self._get_commit_hashes()
+        revision = phlgit_log.make_revision_from_hash(self._clone, hashes[-1])
+        message = revision.subject + "\n"
+        message += "\n"
+        message += revision.message + "\n"
+        return message
+
+    # TODO: remove need for this
+    def review_branch(self):
+        return self._review_branch
+
+    # TODO: remove need for this
+    def tracking_branch(self):
+        return self._tracking_branch
+
+    def push_delete_tracking_branch(self):
+        self._clone.push_delete(self.tracking_branch_name())
+
+    def push_bad_land(self):
+        context = abdt_gittypes.GitContext(
+            self._clone, self._clone.get_remote(), None)
+        abdt_workingbranch.pushBadLand(
+            context, self.review_branch(), self.tracking_branch())
+
+    def push_bad_in_review(self):
+        context = abdt_gittypes.GitContext(
+            self._clone, self._clone.get_remote(), None)
+        abdt_workingbranch.pushBadInReview(
+            context, self.review_branch(), self.tracking_branch())
+
+    def push_new_bad_in_review(self, review_id):
+        context = abdt_gittypes.GitContext(
+            self._clone, self._clone.get_remote(), None)
+        wb = abdt_gittypes.makeGitWorkingBranchFromParts(
+            abdt_naming.WB_STATUS_BAD_INREVIEW,
+            self._review_branch.description,
+            self._review_branch.base,
+            review_id,
+            context.remote)
+        self._tracking_branch = wb
+        self.push_bad_in_review()
+
+    def push_bad_pre_review(self):
+        context = abdt_gittypes.GitContext(
+            self._clone, self._clone.get_remote(), None)
+        abdt_workingbranch.pushBadPreReview(context, self._review_branch)
+
+    def push_status(self, status):
+        context = abdt_gittypes.GitContext(
+            self._clone, self._clone.get_remote(), None)
+        self._tracking_branch = abdt_workingbranch.pushStatus(
+            context,
+            self._review_branch,
+            self._tracking_branch,
+            status)
+
+    def push_ok_new_review(self, revision_id):
+        self._tracking_branch = abdt_naming.makeWorkingBranchName(
+            abdt_naming.WB_STATUS_OK,
+            self._review_branch.description,
+            self._review_branch.base,
+            revision_id)
+        self._tracking_branch = abdt_naming.makeWorkingBranchFromName(
+            self._tracking_branch)
+        self._tracking_branch = abdt_gittypes.makeGitWorkingBranch(
+            self._tracking_branch, self._clone.get_remote())
+        self._clone.push_asymmetrical(
+            self._review_branch.remote_branch,
+            phlgitu_ref.make_local(self.tracking_branch_name()))
+
     def land(self, author_name, author_email, message):
         self._clone.checkout_forced_new_branch(
             self._tracking_branch.base,
@@ -274,14 +286,6 @@ class ReviewTrackingBranchPair(object):
         # TODO: we probably want to do a better job of cleaning up locally
 
         return result
-
-    def get_commit_message_from_tip(self):
-        hashes = self._get_commit_hashes()
-        revision = phlgit_log.make_revision_from_hash(self._clone, hashes[-1])
-        message = revision.subject + "\n"
-        message += "\n"
-        message += revision.message + "\n"
-        return message
 
 
 #------------------------------------------------------------------------------
