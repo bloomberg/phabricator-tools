@@ -20,6 +20,11 @@ sfood $libscripts --internal > meta/package_deps/deps
 ./meta/package_deps/process.py meta/package_deps/deps meta/package_deps/file-deps meta/package_deps/package-deps
 diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 
+###############################################################################
+# check for unused components
+###############################################################################
+(cd meta/package_deps; ./check_no_dead_files.sh)
+
 # copyright
 set +e
 
