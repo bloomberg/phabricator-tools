@@ -6,6 +6,9 @@
 #
 # Public Classes:
 #   MailSender
+#    .send
+#    .mailboxes
+#    .mails
 #
 # Public Assignments:
 #   Mail

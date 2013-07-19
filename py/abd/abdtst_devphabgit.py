@@ -6,6 +6,20 @@
 #
 # Public Classes:
 #   Collaboration
+#    .close
+#    .dev_commit_all
+#    .dev_commit_new_file
+#    .dev_push_branch
+#    .dev_push
+#    .dev_push_delete_branch
+#    .dev_checkout
+#    .dev_reset_branch_to_master
+#    .dev_checkout_push_new_branch
+#    .dev_fetch
+#    .dev_merge_keep_ours
+#    .phab_fetch
+#    .count_phab_working_branches
+#    .count_phab_bad_working_branches
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

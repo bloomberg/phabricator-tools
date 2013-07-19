@@ -7,6 +7,12 @@
 # Public Classes:
 #   ConduitException
 #   Conduit
+#    .set_act_as_user
+#    .clear_act_as_user
+#    .get_act_as_user
+#    .get_user
+#    .call
+#    .ping
 #
 # Public Functions:
 #   act_as_user_context

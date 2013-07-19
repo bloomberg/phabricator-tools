@@ -6,6 +6,19 @@
 #
 # Public Classes:
 #   ConduitMock
+#    .create_comment
+#    .create_empty_revision_as_user
+#    .get_commit_message
+#    .create_revision_as_user
+#    .query_users_from_emails
+#    .parse_commit_message
+#    .is_review_accepted
+#    .update_revision
+#    .set_requires_revision
+#    .close_revision
+#    .abandon_revision
+#    .accept_revision_as_user
+#    .commandeer_revision_as_user
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

@@ -6,6 +6,13 @@
 #
 # Public Classes:
 #   Commenter
+#    .exception
+#    .failedCreateReview
+#    .createdReview
+#    .updatedReview
+#    .landedReview
+#    .abandonedBranch
+#    .usedDefaultTestPlan
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

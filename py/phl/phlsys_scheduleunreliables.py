@@ -6,6 +6,8 @@
 #
 # Public Classes:
 #   DelayedRetryNotifyOperation
+#    .do
+#    .getDelay
 #
 # Public Functions:
 #   loop_forever

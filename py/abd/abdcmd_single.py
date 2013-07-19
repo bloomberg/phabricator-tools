@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   DelayedRetrySleepOperation
+#    .do
 #
 # Public Functions:
 #   getFromfilePrefixChars

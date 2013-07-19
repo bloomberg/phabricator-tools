@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   TestNaming
+#    .test
 #
 # Public Functions:
 #   getReviewBranchPrefix

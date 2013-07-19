@@ -6,8 +6,10 @@
 #
 # Public Classes:
 #   DelayedRetrySleepOperation
+#    .do
 #   ResetFileException
 #   FileCheckOperation
+#    .do
 #
 # Public Functions:
 #   getFromfilePrefixChars

@@ -6,6 +6,9 @@
 #
 # Public Classes:
 #   Sendmail
+#    .set_default_binary
+#    .set_default_params_from_type
+#    .send
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

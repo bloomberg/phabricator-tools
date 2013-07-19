@@ -6,6 +6,20 @@
 #
 # Public Classes:
 #   Clone
+#    .is_identical
+#    .get_remote_branches
+#    .checkout_forced_new_branch
+#    .raw_diff_range
+#    .get_range_hashes
+#    .make_revisions_from_hashes
+#    .squash_merge
+#    .push_asymmetrical
+#    .push
+#    .push_delete
+#    .set_name_email
+#    .call
+#    .get_remote
+#    .get_managed_branches
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

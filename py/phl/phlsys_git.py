@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   GitClone
+#    .call
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

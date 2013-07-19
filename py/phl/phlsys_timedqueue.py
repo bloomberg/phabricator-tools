@@ -11,6 +11,8 @@ Usage example:
 #
 # Public Classes:
 #   TimedQueue
+#    .push
+#    .pop_expired
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
