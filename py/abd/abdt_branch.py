@@ -23,8 +23,6 @@
 #    .make_raw_diff
 #    .verify_review_branch_base
 #    .get_commit_message_from_tip
-#    .review_branch
-#    .tracking_branch
 #    .push_delete_tracking_branch
 #    .push_bad_land
 #    .push_bad_in_review
@@ -41,6 +39,7 @@ import abdt_exception
 import abdt_gittypes
 import abdt_naming
 import abdt_workingbranch
+
 import phlgit_log
 import phlgitu_ref
 import phlsys_fs
@@ -198,14 +197,6 @@ class ReviewTrackingBranchPair(object):
         message += revision.message + "\n"
         return message
 
-    # TODO: remove need for this
-    def review_branch(self):
-        return self._review_branch
-
-    # TODO: remove need for this
-    def tracking_branch(self):
-        return self._tracking_branch
-
     def push_delete_tracking_branch(self):
         self._clone.push_delete(self.tracking_branch_name())
 
@@ -213,13 +204,17 @@ class ReviewTrackingBranchPair(object):
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadLand(
-            context, self.review_branch(), self.tracking_branch())
+            context,
+            self._review_branch,
+            self._tracking_branch)
 
     def push_bad_in_review(self):
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadInReview(
-            context, self.review_branch(), self.tracking_branch())
+            context,
+            self._review_branch,
+            self._tracking_branch)
 
     def push_new_bad_in_review(self, review_id):
         context = abdt_gittypes.GitContext(

@@ -141,8 +141,6 @@ def updateInReview(conduit, branch):
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.updatedReview(branch.review_branch_name())
 
-    return branch.tracking_branch()
-
 
 def land(conduit, branch):
     print "landing " + branch.tracking_branch_name()
@@ -160,7 +158,7 @@ def land(conduit, branch):
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.landedReview(
         branch.review_branch_name(),
-        branch.tracking_branch().base,
+        branch.base_branch_name(),
         land_message)
 
     conduit.close_revision(review_id)
@@ -244,12 +242,12 @@ def processUpdatedRepo(conduit, clone, mailer):
 
     for branch in managed_branches:
         if branch.is_abandoned():
-            print "abandoned:", branch
+            print "abandoned:", branch.tracking_branch_name()
             processAbandonedBranch(conduit, branch)
         elif branch.is_null():
             pass  # TODO: should handle these
         else:
-            print "pending:", branch.review_branch(), branch.tracking_branch()
+            print "pending:", branch.review_branch_name()
             processUpdatedBranch(mailer, conduit, branch)
 
 
