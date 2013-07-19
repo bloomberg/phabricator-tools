@@ -13,6 +13,8 @@ Process the arguments for a single repository and execute.
 abd automates the creation and landing of reviews from branches
 * `abdmail_mailer.py` -
 Send mails to interested parties about pre-specified conditions.
+* `abdt_branch.py` -
+Implement operations for branch-based reviews.
 * `abdt_commitmessage.py` -
 Operations on git commit message strings.
 * `abdt_conduit.py` -
