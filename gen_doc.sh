@@ -1,9 +1,25 @@
-# generate documentation
+###############################################################################
+## generate documentation #####################################################
+#                                                                             #
+# The following operations are performed:                                     #
+# :o update 'contents block' documentation at the top of each component       #
+# :o update package group documentation .md files                             #
+#                                                                             #
+###############################################################################
+
 set -e # exit immediately on error
+
+###############################################################################
+# update 'contents block' documentation at the top of each component
+###############################################################################
 
 python meta/docgen/updatemodcontents.py \
     --force-insert \
     `find py/phl py/abd py/aon py/pig meta/docgen -iname '*.py' | grep -v __t`
+
+###############################################################################
+# update package group documentation .md files
+###############################################################################
 
 function write_group_doc {
     group=$1
@@ -45,4 +61,3 @@ write_group_doc pig
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
 #------------------------------- END-OF-FILE ----------------------------------
-

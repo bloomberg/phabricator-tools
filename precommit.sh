@@ -1,9 +1,30 @@
-# do tests in order of time to execute
+###############################################################################
+## pre-commit operations and tests ############################################
+#                                                                             #
+# Run this script after adding all your changes to the index but preferably   #
+# before committing them.                                                     #
+#                                                                             #
+# The script may make changes to the code, for example when generating        #
+# documentation comment blocks.                                               #
+#                                                                             #
+# The following operations are performed:                                     #
+# :o  check the working copy is clean                                         #
+# :o  refresh documentation                                                   #
+# :o  check the working copy is clean                                         #
+# :o  perform static analysis                                                 #
+# :o  perform runtime tests                                                   #
+#                                                                             #
+###############################################################################
+
+# in the event of an error, print 'FAIL' and exit with code 1
 trap 'echo FAIL; exit 1' ERR
 
 # cd to the dir of this script, so we can run scripts in the same dir
 cd "$(dirname "$0")"
 
+###############################################################################
+# check that the working copy is clean
+###############################################################################
 trap - ERR
 git diff --exit-code
 if [ "$?" -ne 0 ]; then
@@ -20,8 +41,14 @@ if [ "$?" -ne 0 ]; then
 fi
 trap 'echo FAIL; exit 1' ERR
 
+###############################################################################
+# refresh the documentation
+###############################################################################
 ./gen_doc.sh
 
+###############################################################################
+# check that the working copy is clean after refreshing documentation
+###############################################################################
 trap - ERR
 git diff --exit-code
 if [ "$?" -ne 0 ]; then
@@ -32,5 +59,12 @@ if [ "$?" -ne 0 ]; then
 fi
 trap 'echo FAIL; exit 1' ERR
 
+###############################################################################
+# perform static analysis
+###############################################################################
 ./static_tests.sh
+
+###############################################################################
+# perform run-time tests (unit-tests etc.)
+###############################################################################
 ./runtime_tests.sh
