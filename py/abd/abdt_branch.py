@@ -53,48 +53,65 @@ _LESS_DIFF_CONTEXT_LINES = 100
 class ReviewTrackingBranchPair(object):
 
     def __init__(self, clone, review_branch, tracking_branch):
+        """Create a new relationship tracker for the supplied branch names.
+
+        :clone: a Git clone to delegate to
+        :review_branch: the string name of the author's branch
+        :tracking_branch: the string name of Arcyd's branch
+
+        """
         self._clone = clone
         self._review_branch = review_branch
         self._tracking_branch = tracking_branch
 
     def is_abandoned(self):
+        """Return True if the author's branch no longer exists."""
         return not self._review_branch and self._tracking_branch
 
     def is_null(self):
+        """Return True if we don't have any data."""
         return not self._review_branch and not self._tracking_branch
 
     def is_new(self):
+        """Return True if we haven't marked the author's branch."""
         return self._review_branch and not self._tracking_branch
 
     def is_status_bad_pre_review(self):
+        """Return True if the author's branch is marked 'bad pre-review'."""
         return self._tracking_branch and abdt_naming.isStatusBadPreReview(
             self._tracking_branch)
 
     def is_status_bad_land(self):
+        """Return True if the author's branch is marked 'bad land'."""
         return self._tracking_branch and abdt_naming.isStatusBadLand(
             self._tracking_branch)
 
     def is_status_bad(self):
+        """Return True if the author's branch is marked any bad status."""
         return self._tracking_branch and abdt_naming.isStatusBad(
             self._tracking_branch)
 
     def has_new_commits(self):
+        """Return True if the author's branch is different since marked."""
         return not self._clone.is_identical(
             self._review_branch.remote_branch,
             self._tracking_branch.remote_branch)
 
     def base_branch_name(self):
+        """Return the string name of the branch the review will land on."""
         if self._review_branch:
             return self._review_branch.base
         return self._tracking_branch.base
 
     def review_branch_name(self):
+        """Return the string name of the branch the review is based on."""
         if self._review_branch:
             return self._review_branch.branch
         return abdt_naming.makeReviewBranchNameFromWorkingBranch(
             self._tracking_branch)
 
     def review_id_or_none(self):
+        """Return the int id of the review or 'None' if there isn't one."""
         if not self._tracking_branch:
             return None
 
@@ -107,11 +124,20 @@ class ReviewTrackingBranchPair(object):
         return review_id
 
     def get_author_names_emails(self):
+        """Return a list of (name, email) tuples from the branch."""
         hashes = self._get_commit_hashes()
         return phlgit_log.get_author_names_emails_from_hashes(
             self._clone, hashes)
 
     def get_any_author_emails(self):
+        """Return a list of (name, email) tuples from the branch.
+
+        If the branch has an invalid base or has no history against the base
+        then return information from the commit pointed to by the branch.
+
+        Useful if 'get_author_names_emails' fails.
+
+        """
         if phlgitu_ref.parse_ref_hash(
                 self._clone, self._review_branch.remote_base) is None:
             hashes = phlgit_log.get_last_n_commit_hashes_from_ref(
@@ -133,6 +159,13 @@ class ReviewTrackingBranchPair(object):
         return hashes
 
     def make_message_digest(self):
+        """Return a string digest of the commit messages on the branch.
+
+        The digest is comprised of the title from the earliest commit unique
+        to the branch and all of the message bodies from the unique commits on
+        the branch.
+
+        """
         hashes = self._get_commit_hashes()
         revisions = self._clone.make_revisions_from_hashes(hashes)
         message = revisions[0].subject + "\n\n"
@@ -147,6 +180,12 @@ class ReviewTrackingBranchPair(object):
             context)
 
     def make_raw_diff(self):
+        """Return a string raw diff of the changes on the branch.
+
+        If the diff would exceed the _MAX_DIFF_SIZE then take measures to
+        reduce the diff size by reducing the amount of context.
+
+        """
         rawDiff = self._make_raw_diff_helper(_DIFF_CONTEXT_LINES)
 
         if not rawDiff:
@@ -177,6 +216,7 @@ class ReviewTrackingBranchPair(object):
         return True
 
     def verify_review_branch_base(self):
+        """Raise exception if review branch has invalid base."""
         if self._review_branch.base not in self._clone.get_remote_branches():
             raise abdt_exception.MissingBaseException(
                 self._review_branch.branch, self._review_branch.base)
@@ -187,6 +227,7 @@ class ReviewTrackingBranchPair(object):
                 "' is not based on '" + self._review_branch.base + "'")
 
     def get_commit_message_from_tip(self):
+        """Return string commit message from latest commit on branch."""
         hashes = self._get_commit_hashes()
         revision = phlgit_log.make_revision_from_hash(self._clone, hashes[-1])
         message = revision.subject + "\n"
@@ -198,12 +239,16 @@ class ReviewTrackingBranchPair(object):
         self._clone.push_delete(self._tracking_branch.branch)
 
     def abandon(self):
+        """Remove information associated with the abandoned review branch."""
+        # TODO: raise if the branch is not actually abandoned
         self._push_delete_tracking_branch()
 
     def clear_mark(self):
+        """Clear status and last commit associated with the review branch."""
         self._push_delete_tracking_branch()
 
     def mark_bad_land(self):
+        """Mark the current version of the review branch as 'bad land'."""
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadLand(
@@ -212,6 +257,7 @@ class ReviewTrackingBranchPair(object):
             self._tracking_branch)
 
     def mark_bad_in_review(self):
+        """Mark the current version of the review branch as 'bad in review'."""
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadInReview(
@@ -220,6 +266,7 @@ class ReviewTrackingBranchPair(object):
             self._tracking_branch)
 
     def mark_new_bad_in_review(self, review_id):
+        """Mark the current version of the review branch as 'bad in review'."""
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         wb = abdt_gittypes.makeGitWorkingBranchFromParts(
@@ -232,11 +279,13 @@ class ReviewTrackingBranchPair(object):
         self.mark_bad_in_review()
 
     def mark_bad_pre_review(self):
+        """Mark this version of the review branch as 'bad pre review'."""
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
         abdt_workingbranch.pushBadPreReview(context, self._review_branch)
 
     def mark_ok_in_review(self):
+        """Mark this version of the review branch as 'ok in review'."""
         status = abdt_naming.WB_STATUS_OK
         context = abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), None)
@@ -247,6 +296,7 @@ class ReviewTrackingBranchPair(object):
             status)
 
     def mark_ok_new_review(self, revision_id):
+        """Mark this version of the review branch as 'ok in review'."""
         self._tracking_branch = abdt_naming.makeWorkingBranchName(
             abdt_naming.WB_STATUS_OK,
             self._review_branch.description,
@@ -261,6 +311,7 @@ class ReviewTrackingBranchPair(object):
             phlgitu_ref.make_local(self._tracking_branch.branch))
 
     def land(self, author_name, author_email, message):
+        """Integrate the branch into the base and remove the review branch."""
         self._clone.checkout_forced_new_branch(
             self._tracking_branch.base,
             self._tracking_branch.remote_base)
