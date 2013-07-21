@@ -4,6 +4,7 @@
 # The following operations are performed:                                     #
 # :o autopep8 (linter)                                                        #
 # :o docformatter (linter)                                                    #
+# :o sortimports (linter)                                                     #
 #                                                                             #
 ###############################################################################
 
@@ -25,6 +26,11 @@ autopep8 --in-place $allscripts
 # docformatter
 ###############################################################################
 docformatter -i $allscripts
+
+###############################################################################
+# sort imports
+###############################################################################
+python meta/autofix/sortimports.py $libscripts
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

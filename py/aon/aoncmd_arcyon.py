@@ -47,10 +47,10 @@ import phlsys_subcommand
 import aoncmd_comment
 import aoncmd_createrevision
 import aoncmd_getdiff
+import aoncmd_query
 import aoncmd_rawdiff
 import aoncmd_showconfig
 import aoncmd_updaterevision
-import aoncmd_query
 
 
 def main():

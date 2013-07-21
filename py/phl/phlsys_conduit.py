@@ -26,7 +26,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-from contextlib import contextmanager
+import contextlib
 import hashlib
 import json
 import logging
@@ -41,7 +41,7 @@ import phldef_conduit
 # TODO: allow connections without specifying user details where possible
 
 
-@contextmanager
+@contextlib.contextmanager
 def act_as_user_context(conduit, user):
     """Manage the context of impersonating another user.
 

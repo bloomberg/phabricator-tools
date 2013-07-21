@@ -106,12 +106,12 @@ import signal
 import sys
 import traceback
 
-import abdcmd_single
 import abdcmd_multi
+import abdcmd_single
 import phlmail_sender
 import phlsys_sendmail
-import phlsys_subcommand
 import phlsys_strtotime
+import phlsys_subcommand
 
 
 def main():

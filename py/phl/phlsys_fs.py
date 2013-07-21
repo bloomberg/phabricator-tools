@@ -13,14 +13,14 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-from contextlib import contextmanager
+import contextlib
 import os
 import sys
 import tempfile
 
 
 # TODO: write a docstring with doctests when we have a tempdir helper
-@contextmanager
+@contextlib.contextmanager
 def chdir_context(newDir):
     savedPath = os.getcwd()
     os.chdir(newDir)
@@ -30,7 +30,7 @@ def chdir_context(newDir):
         os.chdir(savedPath)
 
 
-@contextmanager
+@contextlib.contextmanager
 def tmpfile(tmp_dir=None, suffix=''):
     "Create & remove tmp file"
     dir = tmp_dir or os.getenv('TMPDIR', '/tmp')
@@ -39,7 +39,7 @@ def tmpfile(tmp_dir=None, suffix=''):
     tmp_file.close()
 
 
-@contextmanager
+@contextlib.contextmanager
 def nostd(err=True):
     "Suppress stderr or stdout"
     class Devnull(object):

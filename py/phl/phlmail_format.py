@@ -11,8 +11,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import email.mime.text
 import types
-from email.mime.text import MIMEText
 
 # TODO: add support for multipart, including html etc.
 
@@ -30,7 +30,7 @@ def text(subject, message, from_address, to_addresses, cc_addresses=None):
 
     """
     assert not isinstance(to_addresses, types.StringTypes), "'to' is string"
-    msg = MIMEText(message)
+    msg = email.mime.text.MIMEText(message)
     msg['subject'] = subject
     msg['from'] = from_address
     msg['to'] = ', '.join(to_addresses)

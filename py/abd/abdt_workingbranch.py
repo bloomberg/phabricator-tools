@@ -14,10 +14,10 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import abdt_gittypes
 import abdt_naming
 import phlgit_push
 import phlgitu_ref
-import abdt_gittypes
 
 
 def pushStatus(gitContext, review_branch, working_branch, status):

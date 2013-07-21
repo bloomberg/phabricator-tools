@@ -15,11 +15,11 @@ import datetime
 import logging
 
 import abdi_processrepo
-import phlsys_sendmail
-import phlmail_sender
 import abdmail_mailer
+import phlmail_sender
 import phlsys_conduit
 import phlsys_fs
+import phlsys_sendmail
 import phlsys_subprocess
 import phlsys_tryloop
 

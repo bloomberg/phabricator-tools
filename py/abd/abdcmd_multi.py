@@ -23,13 +23,13 @@
 
 import argparse
 import functools
-import time
 import os
+import time
 
 import abdcmd_single
 import abdi_processargs
-import phlsys_statusline
 import phlsys_scheduleunreliables
+import phlsys_statusline
 
 
 def getFromfilePrefixChars():
