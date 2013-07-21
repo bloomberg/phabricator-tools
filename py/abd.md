@@ -31,6 +31,8 @@ Exception hierarchy for abd user and system errors.
 Abstraction for Arcyd's git operations.
 * `abdt_gittypes.py` -
 Define useful aggregates for interacting with git without passing alot.
+* `abdt_lander.py` -
+Callables for re-integrating branches upstream.
 * `abdt_naming.py` -
 Naming conventions for abd.
 * `abdt_workingbranch.py` -

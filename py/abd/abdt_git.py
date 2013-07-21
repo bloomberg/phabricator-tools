@@ -33,9 +33,10 @@ import phlgit_merge
 import phlgit_push
 import phlsys_git
 
-import abdt_gittypes
-import abdt_naming
 import abdt_branch
+import abdt_gittypes
+import abdt_lander
+import abdt_naming
 
 
 class Clone(object):
@@ -190,12 +191,15 @@ class Clone(object):
         rbDict = dict((makeRb(wb), wb) for wb in wbList)
 
         managed_branches = []
-        self._add_abandoned_branches(managed_branches, remote_branches, wbList)
-        self._add_paired_branches(managed_branches, remote_branches, rbDict)
+        lander = abdt_lander.squash
+        self._add_abandoned_branches(
+            managed_branches, remote_branches, wbList, lander)
+        self._add_paired_branches(
+            managed_branches, remote_branches, rbDict, lander)
         return managed_branches
 
     def _add_abandoned_branches(
-            self, abandoned_list, branches, working_branches):
+            self, abandoned_list, branches, working_branches, lander):
         for b in working_branches:
             rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(b)
             if rb not in branches:
@@ -203,10 +207,10 @@ class Clone(object):
                     b, self._remote)
                 abandoned_list.append(
                     abdt_branch.ReviewTrackingBranchPair(
-                        self, None, working_branch))
+                        self, None, working_branch, lander))
 
     def _add_paired_branches(
-            self, paired, branches, rb_to_wb):
+            self, paired, branches, rb_to_wb, lander):
         for b in branches:
             if abdt_naming.isReviewBranchPrefixed(b):
                 review_branch = abdt_naming.makeReviewBranchFromName(b)
@@ -224,7 +228,7 @@ class Clone(object):
 
                 paired.append(
                     abdt_branch.ReviewTrackingBranchPair(
-                        self, review_branch, working_branch))
+                        self, review_branch, working_branch, lander))
 
 
 #------------------------------------------------------------------------------

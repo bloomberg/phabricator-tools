@@ -1,11 +1,27 @@
-"""Wrapper around 'git merge'."""
+"""Callables for re-integrating branches upstream.
+
+This component provides a number of 'landers', which will re-integrate a
+feature branch back into the current branch, which is assumed to be upstream.
+
+In other words, the 'landers' land a supplied branch on the current branch.
+
+Landers have the interface:
+    def lander(clone, feature, author_name, author_email, message)
+
+On success the lander will return a string summary of the landing operation
+for a human to review.
+
+If the lander fails to land then it will raise a LanderException with details
+of the failure.
+
+"""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgit_merge
+# abdt_lander
 #
 # Public Classes:
-#   MergeException
+#   LanderException
 #
 # Public Functions:
 #   squash
@@ -13,30 +29,26 @@
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-# TODO: write test driver
-# TODO: distinguish between different error conditions
 
-import phlsys_fs
-import phlsys_subprocess
+import phlgit_merge
 
 
-class MergeException(Exception):
+class LanderException(Exception):
 
     def __init__(self, description):
-        super(MergeException, self).__init__(description)
+        super(LanderException, self).__init__(description)
 
 
-def squash(clone, source, message, author=None):
-    with phlsys_fs.nostd():
-        try:
-            clone.call("merge", "--squash", source)
-            if author:
-                result = clone.call(
-                    "commit", "-m", message, "--author", author)
-            else:
-                result = clone.call("commit", "-m", message)
-        except phlsys_subprocess.CalledProcessError as e:
-            raise MergeException(e.stdout)
+def squash(clone, source, author_name, author_email, message):
+    """Return the string output of squashing 'source' into current branch."""
+    try:
+        result = clone.squash_merge(
+            source,
+            message,
+            author_name,
+            author_email)
+    except phlgit_merge.MergeException as e:
+        raise LanderException(e)
 
     return result
 

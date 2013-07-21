@@ -35,16 +35,19 @@
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
+# TODO: write test driver
+
 import abdt_exception
 import abdt_gittypes
+import abdt_lander
 import abdt_naming
 import abdt_workingbranch
 
+# TODO: remove direct deps on phl
 import phlgit_log
 import phlgitu_ref
-import phlsys_fs
-import phlsys_subprocess
 
+# TODO: allow these to be passed in
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
 _DIFF_CONTEXT_LINES = 1000
 _LESS_DIFF_CONTEXT_LINES = 100
@@ -52,17 +55,19 @@ _LESS_DIFF_CONTEXT_LINES = 100
 
 class ReviewTrackingBranchPair(object):
 
-    def __init__(self, clone, review_branch, tracking_branch):
+    def __init__(self, clone, review_branch, tracking_branch, lander):
         """Create a new relationship tracker for the supplied branch names.
 
         :clone: a Git clone to delegate to
         :review_branch: the string name of the author's branch
         :tracking_branch: the string name of Arcyd's branch
+        :lander: a lander conformant to abdt_lander
 
         """
         self._clone = clone
         self._review_branch = review_branch
         self._tracking_branch = tracking_branch
+        self._lander = lander
 
     def is_abandoned(self):
         """Return True if the author's branch no longer exists."""
@@ -317,16 +322,16 @@ class ReviewTrackingBranchPair(object):
             self._tracking_branch.remote_base)
 
         try:
-            with phlsys_fs.nostd():
-                result = self._clone.squash_merge(
-                    self._tracking_branch.remote_branch,
-                    message,
-                    author_name,
-                    author_email)
-        except phlsys_subprocess.CalledProcessError as e:
+            result = self._lander(
+                self._clone,
+                self._tracking_branch.remote_branch,
+                author_name,
+                author_email,
+                message)
+        except abdt_lander.LanderException as e:
             self._clone.call("reset", "--hard")  # fix the working copy
             raise abdt_exception.LandingException(
-                '\n' + e.stdout,
+                str(e),
                 self.review_branch_name(),
                 self._tracking_branch.base)
 
