@@ -11,6 +11,8 @@
 # :o  check the working copy is clean                                         #
 # :o  refresh documentation                                                   #
 # :o  check the working copy is clean                                         #
+# :o  perform automatic fixes of minor code issues                            #
+# :o  check the working copy is clean                                         #
 # :o  perform static analysis                                                 #
 # :o  perform runtime tests                                                   #
 #                                                                             #
@@ -54,6 +56,24 @@ git diff --exit-code
 if [ "$?" -ne 0 ]; then
     echo
     echo The working copy is dirty after generating docs, please review and add
+    echo the changes before continuing.
+    exit -1
+fi
+trap 'echo FAIL; exit 1' ERR
+
+###############################################################################
+# perform automatic fixes of minor code issues
+###############################################################################
+./autofix.sh
+
+###############################################################################
+# check that the working copy is clean after autofix
+###############################################################################
+trap - ERR
+git diff --exit-code
+if [ "$?" -ne 0 ]; then
+    echo
+    echo The working copy is dirty after automatic fixes, please review and add
     echo the changes before continuing.
     exit -1
 fi

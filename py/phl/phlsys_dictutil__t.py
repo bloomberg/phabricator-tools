@@ -1,4 +1,4 @@
-"""Test suite for phlsys_dictutil"""
+"""Test suite for phlsys_dictutil."""
 
 import copy
 import unittest
@@ -30,6 +30,7 @@ import phlsys_dictutil
 
 
 class Test(unittest.TestCase):
+
     def setUp(self):
         pass
 

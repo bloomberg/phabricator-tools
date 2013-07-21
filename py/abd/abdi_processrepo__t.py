@@ -3,11 +3,11 @@ import unittest
 
 import phldef_conduit
 import phlmail_mocksender
-#import phlsys_conduit
+# import phlsys_conduit
 
 import abdi_processrepo
 import abdmail_mailer
-#import abdt_conduit
+# import abdt_conduit
 import abdt_conduitmock
 import abdt_naming
 import abdtst_devphabgit
@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         #     phldef_conduit.PHAB.user,
         #     phldef_conduit.PHAB.certificate)
 
-        #self.conduit = abdt_conduit.Conduit(sys_conduit)
+        # self.conduit = abdt_conduit.Conduit(sys_conduit)
         self.conduit = abdt_conduitmock.ConduitMock()
 
         self.mock_sender = phlmail_mocksender.MailSender()

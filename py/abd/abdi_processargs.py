@@ -77,7 +77,7 @@ def run_once(args, out):
     conduit = [None]
 
     def connect():
-        #nonlocal conduit # XXX: we'll rebind in python 3.x, instead of array
+        # nonlocal conduit # XXX: we'll rebind in python 3.x, instead of array
         conduit[0] = phlsys_conduit.Conduit(
             args.instance_uri,
             args.arcyd_user,

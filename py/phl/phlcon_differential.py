@@ -1,4 +1,4 @@
-"""Wrapper to call Phabricator's Differential Conduit API"""
+"""Wrapper to call Phabricator's Differential Conduit API."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -41,7 +41,7 @@ import phlsys_namedtuple
 
 
 # Enumerate the states that a Differential review can be in
-## from ArcanistRevisionDifferentialStatus.php:
+# from ArcanistRevisionDifferentialStatus.php:
 class ReviewStates(object):  # XXX: will derive from Enum in Python 3.4+
     needs_review = 0
     needs_revision = 1
@@ -51,7 +51,7 @@ class ReviewStates(object):  # XXX: will derive from Enum in Python 3.4+
 
 
 # Enumerate the actions that can be performed on a Differential review
-## from .../differential/constants/DifferentialAction.php:
+# from .../differential/constants/DifferentialAction.php:
 class Action(object):  # XXX: will derive from Enum in Python 3.4+
     close = 'commit'
     comment = 'none'
@@ -177,7 +177,7 @@ def create_diff(
         author_phid=None,
         arcanist_project=None,
         repository_uuid=None):
-    """@todo: Docstring for create_diff
+    """@todo: Docstring for create_diff.
 
     :conduit: conduit to operate on
     :changes_dict: changes response, 'changes' field of GetDiffResponse

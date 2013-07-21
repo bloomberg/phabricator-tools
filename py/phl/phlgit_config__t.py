@@ -1,4 +1,4 @@
-"""Test suite for phlgit_config"""
+"""Test suite for phlgit_config."""
 
 import unittest
 

@@ -1,4 +1,4 @@
-"""Wrapper to call Phabricator's Conduit API"""
+"""Wrapper to call Phabricator's Conduit API."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ def act_as_user_context(conduit, user):
 
 
 def make_conduit_uri(uri):
-    """Return the expected conduit uri based on the supplied 'uri'
+    """Return the expected conduit uri based on the supplied 'uri'.
 
     Usage examples:
         >>> make_conduit_uri('http://127.0.0.1')
@@ -118,7 +118,7 @@ def make_phab_test_conduit():
 class ConduitException(Exception):
 
     def __init__(self, method, error, errormsg, result, obj, uri, actAsUser):
-        """Construct from an error returned by conduit
+        """Construct from an error returned by conduit.
 
         :method: the conduit method that was being called
         :error: the type of error

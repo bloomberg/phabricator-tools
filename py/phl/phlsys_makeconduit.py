@@ -1,7 +1,7 @@
 """Create a conduit from the available information.
 
-Can try to examine './.arcconfig' and '~/.arcrc' if not enough information is
-provided.
+Can try to examine './.arcconfig' and '~/.arcrc' if not enough
+information is provided.
 
 """
 # =============================================================================

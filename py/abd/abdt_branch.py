@@ -161,9 +161,9 @@ class ReviewTrackingBranchPair(object):
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.
 
-        The digest is comprised of the title from the earliest commit unique
-        to the branch and all of the message bodies from the unique commits on
-        the branch.
+        The digest is comprised of the title from the earliest commit
+        unique to the branch and all of the message bodies from the
+        unique commits on the branch.
 
         """
         hashes = self._get_commit_hashes()
@@ -182,8 +182,8 @@ class ReviewTrackingBranchPair(object):
     def make_raw_diff(self):
         """Return a string raw diff of the changes on the branch.
 
-        If the diff would exceed the _MAX_DIFF_SIZE then take measures to
-        reduce the diff size by reducing the amount of context.
+        If the diff would exceed the _MAX_DIFF_SIZE then take measures
+        to reduce the diff size by reducing the amount of context.
 
         """
         rawDiff = self._make_raw_diff_helper(_DIFF_CONTEXT_LINES)

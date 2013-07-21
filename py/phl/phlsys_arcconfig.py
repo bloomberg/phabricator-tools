@@ -1,4 +1,4 @@
-"""Wrapper to integrate with Arcanist's .arcconfig file"""
+"""Wrapper to integrate with Arcanist's .arcconfig file."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------

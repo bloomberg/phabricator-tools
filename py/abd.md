@@ -10,7 +10,7 @@ Make pre-defined comments on Differential revisions.
 * `abdi_processargs.py` -
 Process the arguments for a single repository and execute.
 * `abdi_processrepo.py` -
-abd automates the creation and landing of reviews from branches
+abd automates the creation and landing of reviews from branches.
 * `abdmail_mailer.py` -
 Send mails to interested parties about pre-specified conditions.
 * `abdt_branch.py` -
@@ -32,7 +32,7 @@ Abstraction for Arcyd's git operations.
 * `abdt_gittypes.py` -
 Define useful aggregates for interacting with git without passing alot.
 * `abdt_naming.py` -
-Naming conventions for abd
+Naming conventions for abd.
 * `abdt_workingbranch.py` -
 Git operations on working branches.
 * `abdtst_devphabgit.py` -

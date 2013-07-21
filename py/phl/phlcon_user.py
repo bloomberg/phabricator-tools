@@ -1,4 +1,4 @@
-"""Wrapper to call Phabricator's users Conduit API"""
+"""Wrapper to call Phabricator's users Conduit API."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -33,10 +33,10 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
 
 
 def is_no_such_error(e):
-    """Return True if the supplied ConduitException is due to unrecognised user
+    """Return True if the supplied ConduitException is due to unknown user.
 
     :e: a ConduitException
-    :returns: True if the supplied ConduitException is due to unrecognised user
+    :returns: True if the supplied ConduitException is due to unknown user
 
     """
     errConduitCore = "ERR-CONDUIT-CORE"

@@ -1,4 +1,4 @@
-"""A simple wrapper to call sendmail-like binary"""
+"""A simple wrapper to call sendmail-like binary."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------

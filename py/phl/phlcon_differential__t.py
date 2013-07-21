@@ -1,4 +1,4 @@
-"""Test suite for phlcon_differential"""
+"""Test suite for phlcon_differential."""
 
 import unittest
 
@@ -21,6 +21,7 @@ import phlsys_conduit
 
 
 class Test(unittest.TestCase):
+
     def __init__(self, data):
         super(Test, self).__init__(data)
         self.conduit = None

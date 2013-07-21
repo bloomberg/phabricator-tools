@@ -44,6 +44,7 @@ class CalledProcessError(Error):
         stdout   -- string, the stdout output from the command
         stderr   -- string, the stderr output from the command
         exitcode -- int, the exitcode from the command
+
     """
 
     def __init__(self, cmd, stdin, stdout, stderr, exitcode, workingdir):

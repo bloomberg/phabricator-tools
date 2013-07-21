@@ -1,4 +1,4 @@
-"""Wrapper to integrate with Arcanist's ~/.arcrc file"""
+"""Wrapper to integrate with Arcanist's ~/.arcrc file."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------

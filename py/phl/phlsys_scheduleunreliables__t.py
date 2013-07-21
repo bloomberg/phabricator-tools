@@ -1,4 +1,4 @@
-"""Test suite for phlsys_scheduleunreliables"""
+"""Test suite for phlsys_scheduleunreliables."""
 
 import datetime
 import functools

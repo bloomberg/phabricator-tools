@@ -1,4 +1,4 @@
-"""abd automates the creation and landing of reviews from branches"""
+"""abd automates the creation and landing of reviews from branches."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------

@@ -15,6 +15,7 @@ usage examples:
     create a new raw diff by loading a file:
     $ arcyon raw-diff mydiff
     99
+
 """
 # =============================================================================
 # CONTENTS

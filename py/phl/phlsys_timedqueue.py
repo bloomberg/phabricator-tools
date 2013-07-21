@@ -3,6 +3,7 @@
 Usage example:
     >>> tq = TimedQueue(); tq.push('a', datetime.timedelta()); tq.pop_expired()
     ['a']
+
 """
 # =============================================================================
 # CONTENTS

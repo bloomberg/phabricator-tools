@@ -1,4 +1,4 @@
-"""Test suite for phlsys_tryloop"""
+"""Test suite for phlsys_tryloop."""
 
 import datetime
 import unittest

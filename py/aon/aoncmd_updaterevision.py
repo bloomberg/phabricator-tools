@@ -8,6 +8,7 @@ usage examples:
     update revision 99 from diff 2:
     $ arcyon update-revision 99 'fix review issues' -d 2
     99
+
 """
 # =============================================================================
 # CONTENTS

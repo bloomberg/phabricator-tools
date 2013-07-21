@@ -1,4 +1,4 @@
-"""Test suite for abdt_conduit"""
+"""Test suite for abdt_conduit."""
 import unittest
 
 import phldef_conduit

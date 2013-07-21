@@ -1,4 +1,4 @@
-"""Test suite for phlcon_user"""
+"""Test suite for phlcon_user."""
 
 import unittest
 
