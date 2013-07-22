@@ -2,7 +2,7 @@
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# sortimports
+# fiximports
 #
 # Public Classes:
 #   ProcessingException
@@ -14,6 +14,7 @@
 #   parse_imports
 #   group_imports
 #   push_current_group
+#   push_current_future_group
 #
 # Public Assignments:
 #   ParsedImport
@@ -30,7 +31,10 @@ import collections
 import os
 import sys
 
-ParsedImport = collections.namedtuple('ParsedImport', ['line', 'module'])
+ParsedImport = collections.namedtuple(
+    'ParsedImport', ['line', 'module', 'is_future'])
+
+_REQUIRED_FUTURE_IMPORTS = set([])
 
 
 class ProcessingException(Exception):
@@ -79,7 +83,7 @@ def rewrite_module(s, module_name):
         new_import_lines = []
         for g in groups:
             for i in g:
-                new_import_lines.append('import ' + i)
+                new_import_lines.append(i)
             new_import_lines.append('')
         new_import_lines.pop(-1)
 
@@ -95,14 +99,24 @@ def parse_imports(s):
     imports = []
     for c in ast.iter_child_nodes(module):
         if isinstance(c, ast.ImportFrom):
-            raise ProcessingException('ImportFrom on line ' + str(c.lineno))
+            fields = dict(ast.iter_fields(c))
+            from_module = fields['module']
+            if from_module != '__future__':
+                raise ProcessingException(
+                    'non-future ImportFrom on line ' + str(c.lineno))
+            names = [dict(ast.iter_fields(i))['name'] for i in fields['names']]
+            if len(names) != 1:
+                raise ProcessingException(
+                    'multiple imports on line ' + str(c.lineno))
+            imports.append(ParsedImport(c.lineno, names[0], True))
+
         if isinstance(c, ast.Import):
             fields = dict(ast.iter_fields(c))
             names = [dict(ast.iter_fields(i))['name'] for i in fields['names']]
             if len(names) != 1:
                 raise ProcessingException(
                     'multiple imports on line ' + str(c.lineno))
-            imports.append(ParsedImport(c.lineno, names[0]))
+            imports.append(ParsedImport(c.lineno, names[0], False))
 
     return imports
 
@@ -113,8 +127,16 @@ def group_imports(imports, module_name):
     package_group = module_name[0:3]
     package = module_name[0:module_name.index('_')]
 
+    # grab future imports
+    current_group = [i.module for i in imports if i.is_future]
+
+    # merge with required future imports
+    current_group = list(set(current_group) | _REQUIRED_FUTURE_IMPORTS)
+
     # grab the names of the modules into a new list
     imports = [i.module for i in imports]
+
+    push_current_future_group(groups, current_group, imports)
 
     # grab standard library imports
     current_group = [i for i in imports if not '_' in i]
@@ -140,8 +162,16 @@ def group_imports(imports, module_name):
 
 def push_current_group(groups, current_group, imports):
     if current_group:
-        groups.append(current_group)
         imports[:] = sorted(list(set(imports) - set(current_group)))
+        current_group = ['import ' + i for i in current_group]
+        groups.append(current_group)
+
+
+def push_current_future_group(groups, current_group, imports):
+    if current_group:
+        imports[:] = sorted(list(set(imports) - set(current_group)))
+        current_group = ['from __future__ import ' + i for i in current_group]
+        groups.append(current_group)
 
 
 if __name__ == "__main__":
