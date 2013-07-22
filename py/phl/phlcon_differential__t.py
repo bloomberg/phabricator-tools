@@ -2,9 +2,10 @@
 
 import unittest
 
-import phlcon_differential
 import phldef_conduit
 import phlsys_conduit
+
+import phlcon_differential
 
 #==============================================================================
 #                                   TEST PLAN

@@ -11,9 +11,9 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import abdt_exception
-
 import phlgit_diff
+
+import abdt_exception
 
 _LOTS_OF_DIFF_CONTEXT_LINES = 10000
 _LESS_DIFF_CONTEXT_LINES = 100

@@ -2,9 +2,10 @@
 
 import unittest
 
-import phlcon_user
 import phldef_conduit
 import phlsys_conduit
+
+import phlcon_user
 
 #==============================================================================
 #                                   TEST PLAN

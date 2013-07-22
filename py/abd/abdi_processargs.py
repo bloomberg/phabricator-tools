@@ -35,11 +35,12 @@ import phlsys_strtotime
 import phlsys_subprocess
 import phlsys_tryloop
 
-import abdi_processrepo
 import abdmail_mailer
 import abdt_conduit
 import abdt_git
 import abdt_reporeporter
+
+import abdi_processrepo
 
 
 def setup_parser(parser):

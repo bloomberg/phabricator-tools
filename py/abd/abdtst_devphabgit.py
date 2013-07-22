@@ -27,11 +27,12 @@
 
 import os
 
+import phlsys_fs
+import phlsys_subprocess
+
 import abdt_commitmessage
 import abdt_git
 import abdt_naming
-import phlsys_fs
-import phlsys_subprocess
 
 
 class Collaboration(object):

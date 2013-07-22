@@ -2,9 +2,10 @@
 
 import unittest
 
-import phlgit_config
 import phlsys_git
 import phlsys_subprocess
+
+import phlgit_config
 
 #==============================================================================
 #                                   TEST PLAN

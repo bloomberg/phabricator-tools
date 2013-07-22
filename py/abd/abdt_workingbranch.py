@@ -16,10 +16,11 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import abdt_gittypes
-import abdt_naming
 import phlgit_push
 import phlgitu_ref
+
+import abdt_gittypes
+import abdt_naming
 
 
 def push_bad_pre_review(gitContext, review_branch):

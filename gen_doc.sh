@@ -15,7 +15,7 @@ set -e # exit immediately on error
 
 python meta/docgen/updatemodcontents.py \
     --force-insert \
-    `find py/phl py/abd py/aon py/pig meta/docgen -iname '*.py' | grep -v __t`
+    `find py/phl py/abd py/aon py/pig meta/docgen meta/autofix -iname '*.py' | grep -v __t`
 
 ###############################################################################
 # update package group documentation .md files

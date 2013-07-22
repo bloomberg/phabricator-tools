@@ -30,9 +30,10 @@ Usage examples:
 import argparse
 import sys
 
-import aont_conduitargs
 import phlcon_paste
 import phlsys_makeconduit
+
+import aont_conduitargs
 
 
 def getFromfilePrefixChars():

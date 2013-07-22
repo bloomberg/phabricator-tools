@@ -3,12 +3,11 @@
 import types
 import unittest
 
+import phlcon_differential
 import phldef_conduit
 import phlmail_mocksender
 import phlsys_pluginmanager
 
-
-import abdi_processrepo
 import abdmail_mailer
 import abdt_branchmock
 import abdt_conduitmock
@@ -17,7 +16,7 @@ import abdt_naming
 import abdt_reporeportermock
 import abdtst_devphabgit
 
-import phlcon_differential
+import abdi_processrepo
 
 #==============================================================================
 #                                   TEST PLAN

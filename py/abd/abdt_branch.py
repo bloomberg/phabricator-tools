@@ -38,16 +38,15 @@
 # =============================================================================
 # TODO: write test driver
 
+import phlgit_log
+import phlgitu_ref
+
 import abdt_differ
 import abdt_exception
 import abdt_gittypes
 import abdt_lander
 import abdt_naming
 import abdt_workingbranch
-
-# TODO: remove direct deps on phl
-import phlgit_log
-import phlgitu_ref
 
 # TODO: allow this to be passed in
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024

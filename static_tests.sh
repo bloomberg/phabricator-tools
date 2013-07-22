@@ -17,7 +17,7 @@ cd "$(dirname "$0")"
 
 # distinguish between 'library' scripts and all scripts
 libscripts=$(find py/ -iname '*.py' |  tr '\n' ' ')
-allscripts="$(ls bin/* proto/* meta/docgen/*.py) $libscripts"
+allscripts="$(ls bin/* proto/* meta/docgen/*.py meta/autofix/*.py) $libscripts"
 
 ###############################################################################
 # pychecker

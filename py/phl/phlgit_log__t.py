@@ -15,9 +15,10 @@
 import os
 import unittest
 
-import phlgit_log
 import phlsys_git
 import phlsys_subprocess
+
+import phlgit_log
 
 
 class Test(unittest.TestCase):

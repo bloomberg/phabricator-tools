@@ -26,9 +26,10 @@ import functools
 import os
 import time
 
-import abdi_processargs
 import phlsys_scheduleunreliables
 import phlsys_statusline
+
+import abdi_processargs
 
 
 def getFromfilePrefixChars():
