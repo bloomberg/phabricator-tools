@@ -416,6 +416,13 @@ class Test(unittest.TestCase):
         self._phabUpdateWithExpectations(total=1, bad=1)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
+    def test_emptyCommit(self):
+        self._devCheckoutPushNewBranch("ph-review/repeat/master")
+        with phlsys_fs.chdir_context("developer"):
+            runCommands("git commit --allow-empty -m test_emptyCommit")
+            runCommands("git push origin ph-review/repeat/master")
+        self._phabUpdateWithExpectations(total=1, bad=1)
+
     # TODO: test landing when origin has been updated underneath us
     # TODO: test landing when dependent review hasn't been landed
 
