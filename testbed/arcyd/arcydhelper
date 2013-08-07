@@ -1,0 +1,162 @@
+#!/usr/bin/env python
+"""
+Interactively gets details from user to construct an arc style commit
+message, amend the last commit with the new message, generate and execute
+the push command to create the ph-review branch.
+"""
+import sys
+import subprocess
+import os
+import tempfile
+
+
+def getFileInput(msg):
+    try:
+        msgFile = tempfile.NamedTemporaryFile(delete=False)
+        msgFile.write("\n#%s" % msg)
+        fname = msgFile.name
+        msgFile.close()
+
+        subprocess.call(["vim", fname])
+        msgFile = open(fname)
+        msg = ""
+        for line in msgFile:
+            if line[0] is not "#":
+                msg += line
+        return msg
+    finally:
+        os.remove(fname)
+
+
+def main(argv=None):
+
+    order = [
+        "title", "summary", "test_plan",
+        "reviewers", "branch", "remote", "landing_branch", "msg_method"
+    ]
+
+    fields = {
+        "title": {
+            "prompt":       "revision title",
+        },
+        "summary": {
+            "prompt":       "Summary",
+            "multiline":    True
+        },
+        "test_plan": {
+            "prompt":       "Test plan",
+            "multiline":    True
+        },
+        "reviewers": {
+            "prompt":       "Reviewers",
+            "default":      ""
+        },
+        "branch": {
+            "prompt":       "Branch to be pushed"
+        },
+        "remote": {
+            "prompt":       "Remote to be pushed to",
+            "default":      "origin"
+        },
+        "landing_branch": {
+            "prompt":       "Branch to be diffed against and landed on",
+            "default":      "master"
+        },
+        "msg_method": {
+            "prompt":       "Create an empty commit for the new message (c)"
+                            " amend the message on the previous commit (a)",
+            "default":      "c"
+        }
+    }
+
+    p = subprocess.Popen(
+        ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+        stdout=subprocess.PIPE
+    )
+    fields["branch"]["default"] = p.stdout.readline()[:-1]
+
+    p = subprocess.Popen(
+        ["git", "log", "-1", "--pretty=%B"],
+        stdout=subprocess.PIPE
+    )
+    fields["title"]["default"] = '%s' % p.stdout.readline()[:-1]
+
+    for fieldName in order:
+        field = fields[fieldName]
+
+        if "multiline" in field:
+            field["entry"] = getFileInput(field["prompt"])
+
+        elif "default" in field:
+            field["entry"] = raw_input(
+                "%s [%s]" % (field["prompt"], field["default"]))
+
+            if not field["entry"]:
+                field["entry"] = field["default"]
+
+        else:
+            field["entry"] = raw_input(field["prompt"] + ":")
+
+        def getTupleFromFields(requestedFields):
+            entries = [fields[field]["entry"] for field in requestedFields]
+            return tuple(entries)
+
+    msg = """%s
+
+%s
+Test Plan: %s
+Reviewers: %s
+""" % getTupleFromFields(["title", "summary", "test_plan", "reviewers"])
+
+    if fields["msg_method"]["entry"] is "c":
+        if not subprocess.call(["git", "diff", "--cached", "--exit-code"]):
+            msgCommand = 'git commit --allow-empty -m "%s"' % msg
+        else:
+            exit("you cannot use the empty commit method "
+                 "with uncommited changes in your index")
+    else:
+        msgCommand = 'git commit --amend -m "%s"' % msg
+
+    pushCommand = "git push %s %s:ph-review/%s/%s" % getTupleFromFields(
+        ["remote", "branch", "branch", "landing_branch"])
+
+    print """######## NEW COMMIT MESSAGE #########
+%s
+########## PUSH COMMAND #############
+%s
+#####################################""" % (msg, pushCommand)
+
+    response = raw_input(
+        "\nDo you want to write the commit message and "
+        "push (p), just write message (m) or do nothing (N)?")
+    if response is "p" or response is "m":
+        subprocess.call(msgCommand, shell=True)
+        if response is "p":
+            subprocess.call(pushCommand, shell=True)
+    else:
+        print "nothing was done."
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+#------------------------------------------------------------------------------
+# Copyright (C) 2012 Bloomberg L.P.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+#------------------------------- END-OF-FILE ----------------------------------
