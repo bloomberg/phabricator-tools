@@ -24,7 +24,7 @@ python meta/docgen/updatemodcontents.py \
 function write_group_doc {
     group=$1
     dir="py/$group"
-    mdfile="py/$group.md"
+    mdfile="py/$group/README.md"
     echo "# $group" > $mdfile
     python meta/docgen/genmoddoc.py \
         --docfile - \
