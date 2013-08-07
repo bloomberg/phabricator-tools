@@ -112,13 +112,13 @@ class Test(unittest.TestCase):
 
     def _phabUpdate(self):
         self.dev_phab.phab_fetch()
-        abdi_processrepo.processUpdatedRepo(
-            self.conduit, self.clone, self.mailer)
+        abdi_processrepo.process_branches(
+            self.clone.get_managed_branches(), self.conduit, self.mailer)
 
     def _phabUpdateWithExpectationsHelper(
             self, total=None, bad=None, emails=None):
-        abdi_processrepo.processUpdatedRepo(
-            self.conduit, self.clone, self.mailer)
+        abdi_processrepo.process_branches(
+            self.clone.get_managed_branches(), self.conduit, self.mailer)
         if total is not None:
             self.assertEqual(
                 self.dev_phab.count_phab_working_branches(), total)
@@ -168,8 +168,8 @@ class Test(unittest.TestCase):
 
     def test_nothingToDo(self):
         # nothing to process
-        abdi_processrepo.processUpdatedRepo(
-            self.conduit, self.clone, self.mailer)
+        abdi_processrepo.process_branches(
+            self.clone.get_managed_branches(), self.conduit, self.mailer)
 
     def test_simpleWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(

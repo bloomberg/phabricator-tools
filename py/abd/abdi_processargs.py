@@ -89,8 +89,8 @@ def run_once(args, out):
     out.display("process (" + args.repo_desc + "): ")
     arcyd_conduit = abdt_conduit.Conduit(conduit[0])
     arcyd_clone = abdt_git.Clone(args.repo_path, "origin")
-    abdi_processrepo.processUpdatedRepo(
-        arcyd_conduit, arcyd_clone, mailer)
+    branches = arcyd_clone.get_managed_branches()
+    abdi_processrepo.process_branches(branches, arcyd_conduit, mailer)
 
     if args.ok_touch_path:
         try:

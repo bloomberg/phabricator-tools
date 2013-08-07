@@ -16,7 +16,7 @@
 #   tryCreateReview
 #   processUpdatedBranch
 #   processAbandonedBranch
-#   processUpdatedRepo
+#   process_branches
 #
 # Public Assignments:
 #   MAX_DIFF_SIZE
@@ -235,10 +235,8 @@ def processAbandonedBranch(conduit, branch):
     branch.abandon()
 
 
-def processUpdatedRepo(conduit, clone, mailer):
-    managed_branches = clone.get_managed_branches()
-
-    for branch in managed_branches:
+def process_branches(branches, conduit, mailer):
+    for branch in branches:
         if branch.is_abandoned():
             processAbandonedBranch(conduit, branch)
         elif branch.is_null():
