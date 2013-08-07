@@ -1,4 +1,5 @@
 """Test suite for abdi_processrepo."""
+
 import unittest
 
 import phldef_conduit
@@ -11,6 +12,53 @@ import abdmail_mailer
 import abdt_conduitmock
 import abdt_naming
 import abdtst_devphabgit
+
+
+#==============================================================================
+#                                   TEST PLAN
+#------------------------------------------------------------------------------
+# Here we detail the things we are concerned to test and specify which tests
+# cover those concerns.
+#
+# Concerns:
+# [  ] processUpdateRepo can create, update and land an uncomplicated review
+# [  ] processUpdateRepo can handle a review without test plan
+# [  ] processUpdateRepo can handle a review without initial reviewer
+# [  ] processUpdateRepo can handle a review without initial valid base
+# [  ] processUpdateRepo can handle a review without initial author
+# [  ] processUpdateRepo can abandon a review when the branch disappears
+# [  ] processUpdateRepo can handle a review with merge conflicts
+#
+# for testing 'branch'
+# [  ] XXX: withReservedBranch
+# [  ] XXX: emptyMergeWorkflow
+# [  ] XXX: mergeConflictWorkflow
+# [  ] XXX: changeAlreadyMergedOnBase
+# [  ] XXX: commandeeredLand
+# [  ] XXX: createHugeReview
+# [  ] XXX: hugeUpdateToReview
+
+# for testing 'conduit'
+# [  ] XXX: commandeeredUpdate
+# [  ] XXX: commandeeredLand
+# [  ] XXX: createHugeReview
+# [  ] XXX: hugeUpdateToReview
+#------------------------------------------------------------------------------
+# Tests:
+# [ A] test_A_Breathing
+# XXX: fill in the others
+#==============================================================================
+
+
+# class Test(unittest.TestCase):
+#     def setUp(self):
+#         pass
+#
+#     def tearDown(self):
+#         pass
+#
+#     def test_A_Breathing(self):
+#         pass
 
 
 # factors affecting a review:
