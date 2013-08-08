@@ -19,6 +19,8 @@
 #    .abandon_revision
 #    .accept_revision_as_user
 #    .commandeer_revision_as_user
+#    .is_unchanged
+#    .set_unchanged
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -69,6 +71,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
             phldef_conduit.PHAB.email))
         self._firstid = 101
         self._nextid = self._firstid
+        self._no_write_attempts = True
 
     def _assert_is_revision(self, revisionid):
         revisionid = int(revisionid)
@@ -95,6 +98,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
 
         self._assert_is_revision(revision)
         str(message)  # test that message can be converted to string
+        self._no_write_attempts = False
 
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
@@ -107,6 +111,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         revisionid = self._nextid
         self._nextid += 1
         self._revisions.append(_Revision(revisionid, username))
+        self._no_write_attempts = False
         return revisionid
 
     def get_commit_message(self, revisionid):
@@ -192,6 +197,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         """
         revision = self._get_revision(revisionid)
         revision.status = 'review'
+        self._no_write_attempts = False
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
@@ -203,6 +209,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         revision = self._get_revision(revisionid)
         assert revision.status != 'closed'
         revision.status = 'revision'
+        self._no_write_attempts = False
 
     def close_revision(self, revisionid):
         """Set an existing Differential revision to 'closed'.
@@ -214,6 +221,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         revision = self._get_revision(revisionid)
         assert revision.status == 'accepted'
         revision.status = 'revision'
+        self._no_write_attempts = False
 
     def abandon_revision(self, revisionid):
         """Set an existing Differential revision to 'abandoned'.
@@ -225,6 +233,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         revision = self._get_revision(revisionid)
         assert revision.status != 'closed'
         revision.status = 'abandoned'
+        self._no_write_attempts = False
 
     def accept_revision_as_user(self, revisionid, username):
         """Set an existing Differential revision to 'closed'.
@@ -239,6 +248,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         assert revision.status != 'closed'
         assert revision.author != username
         revision.status = 'accepted'
+        self._no_write_attempts = False
 
     def commandeer_revision_as_user(self, revisionid, username):
         """Change the author of a revision to the specified 'username'.
@@ -253,6 +263,16 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         assert revision.status != 'closed'
         assert revision.author != username
         revision.author = username
+        self._no_write_attempts = False
+
+    def is_unchanged(self):
+        """Return true if this conduit has not been written to."""
+        return self._no_write_attempts
+
+    def set_unchanged(self, value):
+        """Reset the unchanged status to the supplied 'value'."""
+        assert isinstance(value, bool)
+        return self._no_write_attempts
 
 
 #------------------------------------------------------------------------------

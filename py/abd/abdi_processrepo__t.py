@@ -21,6 +21,7 @@ import abdtst_devphabgit
 # cover those concerns.
 #
 # Concerns:
+# [ A] processUpdateRepo can handle the case of no branches
 # [  ] processUpdateRepo can create, update and land an uncomplicated review
 # [  ] processUpdateRepo can handle a review without test plan
 # [  ] processUpdateRepo can handle a review without initial reviewer
@@ -50,15 +51,30 @@ import abdtst_devphabgit
 #==============================================================================
 
 
-# class Test(unittest.TestCase):
-#     def setUp(self):
-#         pass
-#
-#     def tearDown(self):
-#         pass
-#
-#     def test_A_Breathing(self):
-#         pass
+class Test(unittest.TestCase):
+
+    def __init__(self, data):
+        super(Test, self).__init__(data)
+        self.conduit = None
+        self.mock_sender = None
+        self.mailer = None
+
+    def setUp(self):
+        self.conduit = abdt_conduitmock.ConduitMock()
+        self.mock_sender = phlmail_mocksender.MailSender()
+        self.mailer = abdmail_mailer.Mailer(
+            self.mock_sender,
+            ["admin@server.test"],
+            "http://server.fake/testrepo.git",
+            "http://phabricator.server.fake/")
+
+    def tearDown(self):
+        pass
+
+    def test_A_Breathing(self):
+        abdi_processrepo.process_branches([], self.conduit, self.mailer)
+        self.assertTrue(self.mock_sender.is_empty())
+        self.assertTrue(self.conduit.is_unchanged())
 
 
 # factors affecting a review:
@@ -73,10 +89,10 @@ import abdtst_devphabgit
 #  availability of the phabricator instance
 
 
-class Test(unittest.TestCase):
+class OldTest(unittest.TestCase):
 
     def __init__(self, data):
-        super(Test, self).__init__(data)
+        super(OldTest, self).__init__(data)
         self.reviewer = phldef_conduit.ALICE.user
         self.author_account = phldef_conduit.BOB
         self.conduit = None
