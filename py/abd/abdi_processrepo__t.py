@@ -23,7 +23,7 @@ import abdtst_devphabgit
 #
 # Concerns:
 # [ A] processUpdateRepo can handle the case of no branches
-# [  ] processUpdateRepo can create, update and land an uncomplicated review
+# [ B] processUpdateRepo can create, update and land an uncomplicated review
 # [  ] processUpdateRepo can handle a review without test plan
 # [  ] processUpdateRepo can handle a review without initial reviewer
 # [  ] processUpdateRepo can handle a review without initial valid base
@@ -48,6 +48,7 @@ import abdtst_devphabgit
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
+# [ B] test_B_Uncomplicated
 # XXX: fill in the others
 #==============================================================================
 
@@ -83,6 +84,15 @@ class Test(unittest.TestCase):
         branch = abdt_branchmock.create_simple_new_review()
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertFalse(branch.is_status_bad())
+        self.assertTrue(self.mock_sender.is_empty())
+        self.assertFalse(self.conduit_data.is_unchanged())
+        self.assertEqual(len(self.conduit_data.revisions), 1)
+
+        self.conduit_data.accept_the_only_review()
+        self.conduit_data.set_unchanged()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertEqual(len(self.conduit_data.revisions), 1)
+        self.assertTrue(self.conduit_data.revisions[0].is_closed())
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
 

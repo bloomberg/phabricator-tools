@@ -235,16 +235,19 @@ class ReviewBranchPairMock(object):
         """Remove information associated with the abandoned review branch."""
         assert self._is_abandoned
         self._status = None
+        self._has_new_commits = False
 
     @logged_call
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
         self._status = None
+        self._has_new_commits = True
 
     @logged_call
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
         self._status = abdt_naming.WB_STATUS_BAD_LAND
+        self._has_new_commits = False
 
     @logged_call
     def mark_bad_in_review(self):
@@ -252,6 +255,7 @@ class ReviewBranchPairMock(object):
         # XXX: from the existence of 'mark_new_bad_in_review' it seems like
         #      some checking is required here
         self._status = abdt_naming.WB_STATUS_BAD_INREVIEW
+        self._has_new_commits = False
 
     @logged_call
     def mark_new_bad_in_review(self, review_id):
@@ -259,11 +263,14 @@ class ReviewBranchPairMock(object):
         # XXX: from the existence of 'mark_bad_in_review' it seems like
         #      some checking is required here
         self._status = abdt_naming.WB_STATUS_BAD_INREVIEW
+        self._review_id = int(review_id)
+        self._has_new_commits = False
 
     @logged_call
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
         self._status = abdt_naming.WB_STATUS_BAD_PREREVIEW
+        self._has_new_commits = False
 
     @logged_call
     def mark_ok_in_review(self):
@@ -271,18 +278,22 @@ class ReviewBranchPairMock(object):
         #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
         self._status = abdt_naming.WB_STATUS_OK
+        self._has_new_commits = False
 
     @logged_call
-    def mark_ok_new_review(self, revision_id):
+    def mark_ok_new_review(self, review_id):
         # XXX: from the existence of 'mark_ok_in_review' it seems like
         #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
         self._status = abdt_naming.WB_STATUS_OK
+        self._review_id = int(review_id)
+        self._has_new_commits = False
 
     @logged_call
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
         self._status = None
+        return "landing message"
 
 
 #------------------------------------------------------------------------------

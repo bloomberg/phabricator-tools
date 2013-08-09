@@ -13,7 +13,9 @@
 #    .is_unchanged
 #    .set_changed
 #    .set_unchanged
+#    .accept_the_only_review
 #    .users
+#    .revisions
 #   ConduitMock
 #    .create_comment
 #    .create_empty_revision_as_user
@@ -46,6 +48,12 @@ class _Revision(object):
         self.revisionid = revisionid
         self.author = author
         self.status = 'review'
+
+    def set_accepted(self):
+        self.status = 'accepted'
+
+    def is_closed(self):
+        return self.status == 'closed'
 
 
 class _User(object):
@@ -118,9 +126,18 @@ class ConduitMockData(object):
         """Reset the unchanged status to the supplied 'value'."""
         self._no_write_attempts = True
 
+    def accept_the_only_review(self):
+        """Set the only review as accepted."""
+        assert len(self._revisions) == 1
+        self._revisions[0].set_accepted()
+
     @property
     def users(self):
         return self._users
+
+    @property
+    def revisions(self):
+        return self._revisions
 
 
 class ConduitMock(abdt_conduitabc.ConduitAbc):
@@ -257,7 +274,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         """
         revision = self._data.get_revision(revisionid)
         assert revision.status == 'accepted'
-        revision.status = 'revision'
+        revision.status = 'closed'
         self._data.set_changed()
 
     def abandon_revision(self, revisionid):
