@@ -15,6 +15,8 @@ abd automates the creation and landing of reviews from branches.
 Send mails to interested parties about pre-specified conditions.
 * `abdt_branch.py` -
 Implement operations for branch-based reviews.
+* `abdt_branchmock.py` -
+Implement mocked operations for branch-based reviews.
 * `abdt_commitmessage.py` -
 Operations on git commit message strings.
 * `abdt_conduit.py` -
