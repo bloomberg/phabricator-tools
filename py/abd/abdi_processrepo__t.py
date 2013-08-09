@@ -56,12 +56,14 @@ class Test(unittest.TestCase):
 
     def __init__(self, data):
         super(Test, self).__init__(data)
+        self.conduit_data = None
         self.conduit = None
         self.mock_sender = None
         self.mailer = None
 
     def setUp(self):
-        self.conduit = abdt_conduitmock.ConduitMock()
+        self.conduit_data = abdt_conduitmock.ConduitMockData()
+        self.conduit = abdt_conduitmock.ConduitMock(self.conduit_data)
         self.mock_sender = phlmail_mocksender.MailSender()
         self.mailer = abdmail_mailer.Mailer(
             self.mock_sender,
@@ -75,14 +77,14 @@ class Test(unittest.TestCase):
     def test_A_Breathing(self):
         abdi_processrepo.process_branches([], self.conduit, self.mailer)
         self.assertTrue(self.mock_sender.is_empty())
-        self.assertTrue(self.conduit.is_unchanged())
+        self.assertTrue(self.conduit_data.is_unchanged())
 
     def test_B_Uncomplicated(self):
         branch = abdt_branchmock.create_simple_new_review()
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertFalse(branch.is_status_bad())
         self.assertTrue(self.mock_sender.is_empty())
-        self.assertFalse(self.conduit.is_unchanged())
+        self.assertFalse(self.conduit_data.is_unchanged())
 
 
 # factors affecting a review:

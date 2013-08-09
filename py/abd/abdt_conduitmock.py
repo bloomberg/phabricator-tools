@@ -5,6 +5,15 @@
 # abdt_conduitmock
 #
 # Public Classes:
+#   ConduitMockData
+#    .assert_is_user
+#    .create_empty_revision_as_user
+#    .assert_is_revision
+#    .get_revision
+#    .is_unchanged
+#    .set_changed
+#    .set_unchanged
+#    .users
 #   ConduitMock
 #    .create_comment
 #    .create_empty_revision_as_user
@@ -19,8 +28,6 @@
 #    .abandon_revision
 #    .accept_revision_as_user
 #    .commandeer_revision_as_user
-#    .is_unchanged
-#    .set_unchanged
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -49,15 +56,10 @@ class _User(object):
         self.email = email
 
 
-class ConduitMock(abdt_conduitabc.ConduitAbc):
+class ConduitMockData(object):
 
     def __init__(self):
-        """Initialise a new ConduitMock.
-
-        :returns: None
-
-        """
-        super(ConduitMock, self).__init__()
+        """Initialise a new ConduitMockData."""
         self._revisions = []
         self._users = []
         self._users.append(_User(
@@ -73,16 +75,62 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         self._nextid = self._firstid
         self._no_write_attempts = True
 
-    def _assert_is_revision(self, revisionid):
-        revisionid = int(revisionid)
-        assert revisionid >= self._firstid
-        assert revisionid < self._nextid
-
-    def _assert_is_user(self, username):
+    def assert_is_user(self, username):
         for user in self._users:
             if user.username == username:
                 return
         assert False
+
+    def create_empty_revision_as_user(self, username):
+        """Return the id of a newly created empty revision as 'username'.
+
+        :username: username for the author of the revision
+        :returns: id of created revision
+
+        """
+        self.assert_is_user(username)
+        revisionid = self._nextid
+        self._nextid += 1
+        self._revisions.append(_Revision(revisionid, username))
+        self.set_changed()
+        return revisionid
+
+    def assert_is_revision(self, revisionid):
+        revisionid = int(revisionid)
+        assert revisionid >= self._firstid
+        assert revisionid < self._nextid
+
+    def get_revision(self, revisionid):
+        revisionid = int(revisionid)
+        self.assert_is_revision(revisionid)
+        index = revisionid - self._firstid
+        return self._revisions[index]
+
+    def is_unchanged(self):
+        """Return true if this conduit has not been written to."""
+        return self._no_write_attempts
+
+    def set_changed(self):
+        """Reset the unchanged status to the supplied 'value'."""
+        self._no_write_attempts = False
+
+    def set_unchanged(self):
+        """Reset the unchanged status to the supplied 'value'."""
+        self._no_write_attempts = True
+
+    @property
+    def users(self):
+        return self._users
+
+
+class ConduitMock(abdt_conduitabc.ConduitAbc):
+
+    def __init__(self, data=None):
+        """Initialise a new ConduitMock."""
+        super(ConduitMock, self).__init__()
+        self._data = data
+        if self._data is None:
+            self._data = ConduitMockData()
 
     def create_comment(self, revision, message, silent=False):
         """Make a comment on the specified 'revision'.
@@ -96,9 +144,9 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         # unused parameters
         _ = silent  # NOQA
 
-        self._assert_is_revision(revision)
+        self._data.assert_is_revision(revision)
         str(message)  # test that message can be converted to string
-        self._no_write_attempts = False
+        self._data.set_changed()
 
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
@@ -107,12 +155,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: id of created revision
 
         """
-        self._assert_is_user(username)
-        revisionid = self._nextid
-        self._nextid += 1
-        self._revisions.append(_Revision(revisionid, username))
-        self._no_write_attempts = False
-        return revisionid
+        return self._data.create_empty_revision_as_user(username)
 
     def get_commit_message(self, revisionid):
         """Return the string commit message appropriate for supplied revision.
@@ -121,7 +164,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: the string of the commit message
 
         """
-        self._assert_is_revision(revisionid)
+        self._data.assert_is_revision(revisionid)
         return 'DUMMY COMMIT MESSAGE'
 
     def create_revision_as_user(
@@ -152,7 +195,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         usernames = []
         for e in emails:
             next_username = None
-            for u in self._users:
+            for u in self._data.users:
                 if u.email == e:
                     next_username = u.username
             usernames.append(next_username)
@@ -170,12 +213,6 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         return phlcon_differential.ParseCommitMessageResponse(
             fields=fields, errors=errors)
 
-    def _get_revision(self, revisionid):
-        revisionid = int(revisionid)
-        self._assert_is_revision(revisionid)
-        index = revisionid - self._firstid
-        return self._revisions[index]
-
     def is_review_accepted(self, revisionid):
         """Return True if the supplied 'revisionid' is in 'accepted' status.
 
@@ -183,7 +220,7 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: True if accepted
 
         """
-        revision = self._get_revision(revisionid)
+        revision = self._data.get_revision(revisionid)
         return revision.status == 'accepted'
 
     def update_revision(self, revisionid, unused_raw_diff, unused_message):
@@ -195,9 +232,9 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        revision = self._get_revision(revisionid)
+        revision = self._data.get_revision(revisionid)
         revision.status = 'review'
-        self._no_write_attempts = False
+        self._data.set_changed()
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
@@ -206,10 +243,10 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        revision = self._get_revision(revisionid)
+        revision = self._data.get_revision(revisionid)
         assert revision.status != 'closed'
         revision.status = 'revision'
-        self._no_write_attempts = False
+        self._data.set_changed()
 
     def close_revision(self, revisionid):
         """Set an existing Differential revision to 'closed'.
@@ -218,10 +255,10 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        revision = self._get_revision(revisionid)
+        revision = self._data.get_revision(revisionid)
         assert revision.status == 'accepted'
         revision.status = 'revision'
-        self._no_write_attempts = False
+        self._data.set_changed()
 
     def abandon_revision(self, revisionid):
         """Set an existing Differential revision to 'abandoned'.
@@ -230,10 +267,10 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        revision = self._get_revision(revisionid)
+        revision = self._data.get_revision(revisionid)
         assert revision.status != 'closed'
         revision.status = 'abandoned'
-        self._no_write_attempts = False
+        self._data.set_changed()
 
     def accept_revision_as_user(self, revisionid, username):
         """Set an existing Differential revision to 'closed'.
@@ -243,12 +280,12 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        revision = self._get_revision(revisionid)
-        self._assert_is_user(username)
+        revision = self._data.get_revision(revisionid)
+        self._data.assert_is_user(username)
         assert revision.status != 'closed'
         assert revision.author != username
         revision.status = 'accepted'
-        self._no_write_attempts = False
+        self._data.set_changed()
 
     def commandeer_revision_as_user(self, revisionid, username):
         """Change the author of a revision to the specified 'username'.
@@ -258,21 +295,12 @@ class ConduitMock(abdt_conduitabc.ConduitAbc):
         :returns: None
 
         """
-        revision = self._get_revision(revisionid)
-        self._assert_is_user(username)
+        revision = self._data.get_revision(revisionid)
+        self._data.assert_is_user(username)
         assert revision.status != 'closed'
         assert revision.author != username
         revision.author = username
-        self._no_write_attempts = False
-
-    def is_unchanged(self):
-        """Return true if this conduit has not been written to."""
-        return self._no_write_attempts
-
-    def set_unchanged(self, value):
-        """Reset the unchanged status to the supplied 'value'."""
-        assert isinstance(value, bool)
-        return self._no_write_attempts
+        self._data.set_changed()
 
 
 #------------------------------------------------------------------------------
