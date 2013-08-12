@@ -13,7 +13,7 @@
 # [ C] can parse well-formatted commit message
 # [ C] can parse empty commit message
 # [ C] can parse commit message with invalid utf
-# [  ] can create a revision with 'create_revision_as_user'
+# [ D] can create a revision with 'create_revision_as_user'
 #------------------------------------------------------------------------------
 # XXX: make sure we cover each one of these:
 #   Conduit
@@ -35,6 +35,7 @@
 # [ A] test_A_Breathing
 # [ B] test_B_CanQueryUsersFromEmails
 # [ C] test_C_CanParseCommitMessage
+# [ D] test_D_CanCreateRevisionAsUser
 #==============================================================================
 
 import unittest
@@ -205,6 +206,14 @@ class Test(unittest.TestCase):
         self.assertNotEqual(
             title,
             result.fields[phlcon_differential.MessageFields.title])
+
+    def test_D_CanCreateRevisionAsUser(self):
+        revision = self.conduit.create_revision_as_user(
+            self.empty_diff,
+            {'title': 'test_D_CanCreateRevisionAsUser', 'testPlan': 'NONE'},
+            self.test_data.ALICE.user)
+
+        self.assertFalse(self.conduit.is_review_accepted(revision))
 
 
 #------------------------------------------------------------------------------
