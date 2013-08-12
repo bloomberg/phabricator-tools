@@ -13,9 +13,12 @@ import phlsys_conduit
 # cover those concerns.
 #
 # Concerns:
+# [ B] the 'accepted' status persists when a review is updated with a new diff
 # [  ] TODO
 #------------------------------------------------------------------------------
 # Tests:
+# [ A] test_A_Breathing
+# [ B] test_B_AcceptedPersistsWhenUpdated
 # TODO
 #==============================================================================
 
@@ -26,6 +29,7 @@ class Test(unittest.TestCase):
         super(Test, self).__init__(data)
         self.conduit = None
         self.reviewerConduit = None
+        self.phabConduit = None
         self.test_data = None
 
     def setUp(self):
@@ -40,11 +44,33 @@ class Test(unittest.TestCase):
             self.test_data.BOB.user,
             self.test_data.BOB.certificate)
 
+        self.phabConduit = phlsys_conduit.Conduit(
+            self.test_data.TEST_URI,
+            self.test_data.PHAB.user,
+            self.test_data.PHAB.certificate)
+
     def tearDown(self):
         pass
 
     def test_A_Breathing(self):
         pass
+
+    def test_B_AcceptedPersistsWhenUpdated(self):
+        conduit = self.phabConduit
+        author = phldef_conduit.ALICE.user
+        reviewer = phldef_conduit.BOB.user
+        with phlsys_conduit.act_as_user_context(conduit, author):
+            revision = phlcon_differential.create_empty_revision(conduit)
+        with phlsys_conduit.act_as_user_context(conduit, reviewer):
+            phlcon_differential.create_comment(
+                conduit,
+                revision,
+                action=phlcon_differential.Action.accept)
+        with phlsys_conduit.act_as_user_context(conduit, author):
+            phlcon_differential.update_revision_empty(conduit, revision)
+        self.assertEqual(
+            phlcon_differential.get_revision_status(conduit, revision),
+            phlcon_differential.ReviewStates.accepted)
 
     def testNullQuery(self):
         phlcon_differential.query(self.conduit)
@@ -284,7 +310,7 @@ Test Plan: I proof-read it and it looked ok
         revisionid = self._createRevision("testUpdateStrangeFields")
         phlcon_differential.get_commit_message(self.conduit, revisionid)
 
-    def testCreateEmptyRevision(self):
+    def testCreateUpdateEmptyRevision(self):
         conduit = phlsys_conduit.Conduit(
             self.test_data.TEST_URI,
             self.test_data.PHAB.user,
@@ -295,6 +321,10 @@ Test Plan: I proof-read it and it looked ok
 
         revision_list = phlcon_differential.query(conduit, [revision_id])
         self.assertEqual(len(revision_list), 1)
+
+        with phlsys_conduit.act_as_user_context(conduit, author):
+            revision_id = phlcon_differential.update_revision_empty(
+                conduit, revision_id)
 
     # XXX: re-instate when we have support for reviewers and ccs
     # def testCreateEmptyRevisionReviewersCcs(self):

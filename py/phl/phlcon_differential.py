@@ -21,6 +21,7 @@
 #   get_commit_message
 #   close
 #   create_empty_revision
+#   update_revision_empty
 #
 # Public Assignments:
 #   AUTHOR_ACTIONS
@@ -329,6 +330,20 @@ def create_empty_revision(conduit):
     revision = create_revision(conduit, diff_id, fields)
 
     return revision.revisionid
+
+
+def update_revision_empty(conduit, revision_id):
+    """Update the specified 'revision_id' with an empty diff.
+
+    :conduit: conduit to operate on
+    :revision_id: revision to update
+    :return: None
+
+    """
+
+    empty_diff = "diff --git a/ b/"
+    diff_id = create_raw_diff(conduit, empty_diff).id
+    update_revision(conduit, revision_id, diff_id, [], 'update')
 
 
 #------------------------------------------------------------------------------

@@ -121,9 +121,6 @@ class Test(unittest.TestCase):
         self.conduit_data.set_unchanged()
         branch_data.has_new_commits = True
 
-        # TODO: be sure of why we need to accept twice
-        self.conduit_data.accept_the_only_review()
-        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.conduit_data.accept_the_only_review()
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
 

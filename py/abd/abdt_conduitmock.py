@@ -263,9 +263,12 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
-        # TODO: test the behaviour of the real conduit, apparently the
-        #       'accepted' status is sticky
-        revision.status = 'review'
+
+        # match the behaviour asserted by phlcon_differential__t, 'accepted' is
+        # a sticky state as far as updating the review is concerned
+        if revision.status != 'accepted':
+            revision.status = 'review'
+
         self._data.set_changed()
 
     @_conduitmock_traced_method
