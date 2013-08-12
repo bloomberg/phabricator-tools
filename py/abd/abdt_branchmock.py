@@ -34,8 +34,10 @@
 #    .land
 #
 # Public Functions:
+#   create_ok_names_emails
 #   create_simple_new_review
 #   create_new_review_invalid_base
+#   create_review_no_initial_author
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -46,6 +48,10 @@ import phlsys_tracedecorator
 
 import abdt_exception
 import abdt_naming
+
+
+def create_ok_names_emails():
+    return [(phldef_conduit.ALICE.user, phldef_conduit.ALICE.email)]
 
 
 def create_simple_new_review():
@@ -69,6 +75,14 @@ def create_simple_new_review():
 def create_new_review_invalid_base():
     mock, data = create_simple_new_review()
     data.is_base_ok = False
+    return mock, data
+
+
+def create_review_no_initial_author():
+    mock, data = create_simple_new_review()
+    data.names_emails = [(
+        phldef_conduit.NOTAUSER.user, phldef_conduit.NOTAUSER.email)]
+    data.any_emails = [phldef_conduit.ALICE.email]
     return mock, data
 
 

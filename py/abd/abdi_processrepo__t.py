@@ -29,7 +29,9 @@ import phlcon_differential
 # [ C] processUpdateRepo can handle a review without test plan
 # [ D] processUpdateRepo can handle a review being closed unexpectedly
 # [ E] processUpdateRepo can handle a review without initial valid base
-# [  ] processUpdateRepo can handle a review without initial author
+# [ F] processUpdateRepo can handle a review without initial author
+# [  ] processUpdateRepo can handle a review without commits on branch
+# [  ] processUpdateRepo can handle a review without commits in repo
 # [  ] processUpdateRepo can abandon a review when the branch disappears
 # [  ] processUpdateRepo can handle a review with merge conflicts
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
@@ -42,6 +44,7 @@ import phlcon_differential
 # [  ] XXX: commandeeredLand
 # [  ] XXX: createHugeReview
 # [  ] XXX: hugeUpdateToReview
+# [  ] XXX: empty repository, no history
 
 # for testing 'conduit'
 # [  ] XXX: commandeeredUpdate
@@ -56,6 +59,7 @@ import phlcon_differential
 # [ C] test_C_NoTestPlan
 # [ D] test_D_UnexpectedClose
 # [ E] test_E_InvalidBaseBranch
+# [ F] test_F_NoInitialAuthor
 # XXX: fill in the others
 #==============================================================================
 
@@ -161,6 +165,16 @@ class Test(unittest.TestCase):
         branch_data.has_new_commits = True
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertTrue(branch.is_status_bad())
+
+    def test_F_NoInitialAuthor(self):
+        branch, branch_data = abdt_branchmock.create_review_no_initial_author()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertTrue(branch.is_status_bad())
+
+        branch_data.names_emails = abdt_branchmock.create_ok_names_emails()
+        branch_data.has_new_commits = True
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertFalse(branch.is_status_bad())
 
 
 # factors affecting a review:
