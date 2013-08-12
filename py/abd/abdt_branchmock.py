@@ -19,6 +19,7 @@
 #    .review_id_or_none
 #    .get_author_names_emails
 #    .get_any_author_emails
+#    .get_clone
 #    .make_message_digest
 #    .make_raw_diff
 #    .verify_review_branch_base
@@ -250,6 +251,11 @@ class BranchMock(object):
         if not emails:
             emails = self._data.any_emails
         return emails
+
+    @_branchmock_traced_method
+    def get_clone(self):
+        """Return the abdt_clone for this branch."""
+        assert False
 
     @_branchmock_traced_method
     def make_message_digest(self):

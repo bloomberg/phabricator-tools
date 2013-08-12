@@ -159,6 +159,7 @@ class ReviewTrackingBranchPair(object):
         return emails
 
     def get_clone(self):
+        """Return the abdt_clone for this branch."""
         return self._clone
 
     def _get_commit_hashes(self):
