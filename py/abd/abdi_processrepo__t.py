@@ -1,5 +1,6 @@
 """Test suite for abdi_processrepo."""
 
+import types
 import unittest
 
 import phldef_conduit
@@ -14,6 +15,7 @@ import abdt_conduitmock
 import abdt_naming
 import abdtst_devphabgit
 
+import phlcon_differential
 
 #==============================================================================
 #                                   TEST PLAN
@@ -96,6 +98,39 @@ class Test(unittest.TestCase):
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
 
+    def test_C_NoTestPlan(self):
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+
+        def error_parse_commit_message(self, unused_message):
+            return phlcon_differential.ParseCommitMessageResponse(
+                fields=None, errors=["FAKE ERROR"])
+
+        regular_parse = self.conduit.parse_commit_message
+        self.conduit.parse_commit_message = types.MethodType(
+            error_parse_commit_message, self.conduit)
+
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+
+        self.assertEqual(len(self.conduit_data.revisions), 1)
+        self.assertFalse(self.conduit_data.revisions[0].is_closed())
+        self.assertTrue(self.mock_sender.is_empty())
+        self.assertFalse(self.conduit_data.is_unchanged())
+        self.assertTrue(branch.is_status_bad())
+
+        self.conduit.parse_commit_message = regular_parse
+        self.conduit_data.set_unchanged()
+        branch_data.has_new_commits = True
+
+        # TODO: be sure of why we need to accept twice
+        self.conduit_data.accept_the_only_review()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.conduit_data.accept_the_only_review()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+
+        self.assertEqual(len(self.conduit_data.revisions), 1)
+        self.assertTrue(self.conduit_data.revisions[0].is_closed())
+        self.assertTrue(self.mock_sender.is_empty())
+        self.assertFalse(self.conduit_data.is_unchanged())
 
 # factors affecting a review:
 #  age of the revisions
