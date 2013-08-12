@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
         self.assertTrue(self.conduit_data.is_unchanged())
 
     def test_B_Uncomplicated(self):
-        branch = abdt_branchmock.create_simple_new_review()
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertFalse(branch.is_status_bad())
         self.assertTrue(self.mock_sender.is_empty())

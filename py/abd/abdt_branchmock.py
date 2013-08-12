@@ -5,7 +5,8 @@
 # abdt_branchmock
 #
 # Public Classes:
-#   ReviewBranchPairMock
+#   BranchMockData
+#   BranchMock
 #    .is_abandoned
 #    .is_null
 #    .is_new
@@ -46,7 +47,7 @@ import abdt_naming
 
 
 def create_simple_new_review():
-    return ReviewBranchPairMock(
+    data = BranchMockData(
         is_abandoned=False,
         is_null=False,
         is_base_ok=True,
@@ -59,6 +60,8 @@ def create_simple_new_review():
         message_digest="digest",
         raw_diff="raw diff",
         branch_tip_message="tip message")
+
+    return BranchMock(data), data
 
 
 # TODO: we can move this into phl and depend on standard library 'logging'
@@ -79,7 +82,7 @@ def logged_call(f):
     return logged_call_imp
 
 
-class ReviewBranchPairMock(object):
+class BranchMockData(object):
 
     def __init__(
             self,
@@ -95,7 +98,7 @@ class ReviewBranchPairMock(object):
             message_digest,
             raw_diff,
             branch_tip_message):
-        """Create a mock relationship tracker.
+        """Create data for a mock relationship tracker.
 
         :is_abandoned: bool result of self.is_abandoned()
         :is_null: bool result of self.is_null()
@@ -111,83 +114,96 @@ class ReviewBranchPairMock(object):
         :branch_tip_message: the result of self.get_commit_message_from_tip()
 
         """
-        self._is_abandoned = is_abandoned
-        self._is_null = is_null
-        self._is_base_ok = is_base_ok
-        self._base_branch = base_branch
-        self._review_branch = review_branch
-        self._has_new_commits = has_new_commits
-        self._review_branch = review_branch
-        self._review_id = review_id
-        self._names_emails = names_emails
-        self._any_emails = any_emails
-        self._message_digest = message_digest
-        self._raw_diff = raw_diff
-        self._branch_tip_message = branch_tip_message
-        self._status = None
+        super(BranchMockData, self).__init__()
+        self.is_abandoned = is_abandoned
+        self.is_null = is_null
+        self.is_base_ok = is_base_ok
+        self.base_branch = base_branch
+        self.review_branch = review_branch
+        self.has_new_commits = has_new_commits
+        self.review_branch = review_branch
+        self.review_id = review_id
+        self.names_emails = names_emails
+        self.any_emails = any_emails
+        self.message_digest = message_digest
+        self.raw_diff = raw_diff
+        self.branch_tip_message = branch_tip_message
+        self.status = None
 
-        assert isinstance(self._review_id, int) or self._review_id is None
+        assert isinstance(self.review_id, int) or self.review_id is None
+
+
+class BranchMock(object):
+
+    def __init__(self, data):
+        """Create a mock relationship tracker.
+
+        :data: BranchMockData object for this mock to use
+
+        """
+        super(BranchMock, self).__init__()
+        self._data = data
 
     def _log(self, message):
-        if self._review_branch is not None:
-            print self._review_branch + ':', message
+        if self._data.review_branch is not None:
+            print self._data.review_branch + ':', message
         else:
             print '(NULL branch):', message
 
     @logged_call
     def is_abandoned(self):
         """Return True if the author's branch no longer exists."""
-        return self._is_abandoned
+        return self._data.is_abandoned
 
     @logged_call
     def is_null(self):
         """Return True if we don't have any data."""
-        return self._is_null
+        return self._data.is_null
 
     @logged_call
     def is_new(self):
         """Return True if we haven't marked the author's branch."""
-        return self._status is None
+        return self._data.status is None
 
     @logged_call
     def is_status_bad_pre_review(self):
         """Return True if the author's branch is marked 'bad pre-review'."""
-        return self._status == abdt_naming.WB_STATUS_BAD_PREREVIEW
+        return self._data.status == abdt_naming.WB_STATUS_BAD_PREREVIEW
 
     @logged_call
     def is_status_bad_land(self):
         """Return True if the author's branch is marked 'bad land'."""
-        return self._status == abdt_naming.WB_STATUS_BAD_LAND
+        return self._data.status == abdt_naming.WB_STATUS_BAD_LAND
 
     @logged_call
     def is_status_bad(self):
         """Return True if the author's branch is marked any bad status."""
-        return self._status.startswith(abdt_naming.WB_STATUS_PREFIX_BAD)
+        return self._data.status.startswith(abdt_naming.WB_STATUS_PREFIX_BAD)
 
     @logged_call
     def has_new_commits(self):
         """Return True if the author's branch is different since marked."""
-        return self._has_new_commits
+        return self._data.has_new_commits
 
     @logged_call
     def base_branch_name(self):
         """Return the string name of the branch the review will land on."""
-        return self._base_branch
+        return self._data.base_branch
 
     @logged_call
     def review_branch_name(self):
         """Return the string name of the branch the review is based on."""
-        return self._review_branch
+        return self._data.review_branch
 
     @logged_call
     def review_id_or_none(self):
         """Return the int id of the review or 'None' if there isn't one."""
-        return self._review_id
+        return self._data.review_id
 
     @logged_call
     def get_author_names_emails(self):
         """Return a list of (name, email) tuples from the branch."""
-        return self._names_emails
+        return self._data.names_emails
 
     @logged_call
     def get_any_author_emails(self):
@@ -199,9 +215,9 @@ class ReviewBranchPairMock(object):
         Useful if 'get_author_names_emails' fails.
 
         """
-        emails = [i[1] for i in self._names_emails]
+        emails = [i[1] for i in self._data.names_emails]
         if not emails:
-            emails = self._any_emails
+            emails = self._data.any_emails
         return emails
 
     @logged_call
@@ -213,86 +229,86 @@ class ReviewBranchPairMock(object):
         unique commits on the branch.
 
         """
-        return self._message_digest
+        return self._data.message_digest
 
     @logged_call
     def make_raw_diff(self):
         """Return a string raw diff of the changes on the branch."""
-        return self._raw_diff
+        return self._data.raw_diff
 
     @logged_call
     def verify_review_branch_base(self):
         """Raise exception if review branch has invalid base."""
-        return self._is_base_ok
+        return self._data.is_base_ok
 
     @logged_call
     def get_commit_message_from_tip(self):
         """Return string commit message from latest commit on branch."""
-        return self._branch_tip_message
+        return self._data.branch_tip_message
 
     @logged_call
     def abandon(self):
         """Remove information associated with the abandoned review branch."""
-        assert self._is_abandoned
-        self._status = None
-        self._has_new_commits = False
+        assert self._data.is_abandoned
+        self._data.status = None
+        self._data.has_new_commits = False
 
     @logged_call
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
-        self._status = None
-        self._has_new_commits = True
+        self._data.status = None
+        self._data.has_new_commits = True
 
     @logged_call
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
-        self._status = abdt_naming.WB_STATUS_BAD_LAND
-        self._has_new_commits = False
+        self._data.status = abdt_naming.WB_STATUS_BAD_LAND
+        self._data.has_new_commits = False
 
     @logged_call
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
         # XXX: from the existence of 'mark_new_bad_in_review' it seems like
         #      some checking is required here
-        self._status = abdt_naming.WB_STATUS_BAD_INREVIEW
-        self._has_new_commits = False
+        self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
+        self._data.has_new_commits = False
 
     @logged_call
     def mark_new_bad_in_review(self, review_id):
         """Mark the current version of the review branch as 'bad in review'."""
         # XXX: from the existence of 'mark_bad_in_review' it seems like
         #      some checking is required here
-        self._status = abdt_naming.WB_STATUS_BAD_INREVIEW
-        self._review_id = int(review_id)
-        self._has_new_commits = False
+        self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
+        self._data.review_id = int(review_id)
+        self._data.has_new_commits = False
 
     @logged_call
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
-        self._status = abdt_naming.WB_STATUS_BAD_PREREVIEW
-        self._has_new_commits = False
+        self._data.status = abdt_naming.WB_STATUS_BAD_PREREVIEW
+        self._data.has_new_commits = False
 
     @logged_call
     def mark_ok_in_review(self):
         # XXX: from the existence of 'mark_ok_new_review' it seems like
         #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
-        self._status = abdt_naming.WB_STATUS_OK
-        self._has_new_commits = False
+        self._data.status = abdt_naming.WB_STATUS_OK
+        self._data.has_new_commits = False
 
     @logged_call
     def mark_ok_new_review(self, review_id):
         # XXX: from the existence of 'mark_ok_in_review' it seems like
         #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
-        self._status = abdt_naming.WB_STATUS_OK
-        self._review_id = int(review_id)
-        self._has_new_commits = False
+        self._data.status = abdt_naming.WB_STATUS_OK
+        self._data.review_id = int(review_id)
+        self._data.has_new_commits = False
 
     @logged_call
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
-        self._status = None
+        self._data.status = None
         return "landing message"
 
 
