@@ -6,7 +6,14 @@
 # cover those concerns.
 #
 # Concerns:
-# [  ] TODO
+# [ B] can query users from emails that are known
+# [ B] can query users from invalid emails without error
+# [ B] can query users from unknown emails without error
+# [  ] raise error if querying users with invalid utf in their email address
+# [  ] can parse well-formatted commit message
+# [  ] can parse empty commit message
+# [  ] can parse commit message with invalid utf
+# [  ] can create a revision with 'create_revision_as_user'
 #------------------------------------------------------------------------------
 # XXX: make sure we cover each one of these:
 #   Conduit
@@ -26,6 +33,7 @@
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
+# [ B] test_B_CanQueryUsersFromEmails
 #==============================================================================
 
 import unittest
@@ -129,6 +137,44 @@ class Test(unittest.TestCase):
         # create revision
         # query users
         # parse_commit_message
+
+    def test_B_CanQueryUsersFromEmails(self):
+        data = {
+            self.test_data.PHAB.email: self.test_data.PHAB.user,
+            self.test_data.ALICE.email: self.test_data.ALICE.user,
+            self.test_data.BOB.email: self.test_data.BOB.user,
+            'a@b.com': None,
+            '': None,
+            'a': None,
+            '/////////': None,
+            # '\x80': None, # TODO: we should handle this
+        }
+        valid_emails = [email for email in data if data[email] is not None]
+        valid_users = [data[email] for email in valid_emails]
+        invalid_emails = [email for email in data if data[email] is None]
+        all_emails = data.keys()
+        all_users = [data[email] for email in all_emails]
+
+        # test all valid emails
+        self.assertListEqual(
+            self.conduit.query_users_from_emails(valid_emails), valid_users)
+
+        # test all invalid emails
+        self.assertListEqual(
+            self.conduit.query_users_from_emails(invalid_emails),
+            [None] * len(invalid_emails))
+
+        # test all emails
+        self.assertListEqual(
+            self.conduit.query_users_from_emails(all_emails), all_users)
+
+        # test no emails
+        self.assertListEqual(self.conduit.query_users_from_emails([]), [])
+
+        # test individual emails
+        for (email, user) in data.iteritems():
+            self.assertListEqual(
+                self.conduit.query_users_from_emails([email]), [user])
 
 
 #------------------------------------------------------------------------------
