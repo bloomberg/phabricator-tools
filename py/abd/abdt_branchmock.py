@@ -39,6 +39,7 @@
 #   create_new_review_invalid_base
 #   create_review_no_initial_author
 #   create_review_no_commits
+#   create_review_removed
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -94,6 +95,12 @@ def create_review_no_commits():
     data.raw_diff = ""
     data.branch_tip_message = None
     data.any_emails = [phldef_conduit.ALICE.email]
+    return mock, data
+
+
+def create_review_removed():
+    mock, data = create_simple_new_review()
+    data.is_abandoned = True
     return mock, data
 
 
@@ -288,6 +295,7 @@ class BranchMock(object):
         assert self._data.is_abandoned
         self._data.status = None
         self._data.has_new_commits = False
+        self._data.is_null = True
 
     @_branchmock_traced_method
     def clear_mark(self):

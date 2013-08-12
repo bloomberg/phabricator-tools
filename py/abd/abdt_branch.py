@@ -251,6 +251,7 @@ class ReviewTrackingBranchPair(object):
         """Remove information associated with the abandoned review branch."""
         # TODO: raise if the branch is not actually abandoned
         self._push_delete_tracking_branch()
+        self._tracking_branch = None
 
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""

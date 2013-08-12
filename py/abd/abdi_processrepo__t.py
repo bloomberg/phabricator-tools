@@ -31,8 +31,8 @@ import phlcon_differential
 # [ E] processUpdateRepo can handle a review without initial valid base
 # [ F] processUpdateRepo can handle a review without initial author
 # [ G] processUpdateRepo can handle a review without commits on branch
+# [ H] processUpdateRepo can abandon a review when the branch disappears
 # [  ] processUpdateRepo can handle a review without commits in repo
-# [  ] processUpdateRepo can abandon a review when the branch disappears
 # [  ] processUpdateRepo can handle a review with merge conflicts
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
 #
@@ -61,6 +61,7 @@ import phlcon_differential
 # [ E] test_E_InvalidBaseBranch
 # [ F] test_F_NoInitialAuthor
 # [ G] test_G_NoCommitsOnBranch
+# [ H] test_H_AbandonRemovedBranch
 # XXX: fill in the others
 #==============================================================================
 
@@ -182,6 +183,14 @@ class Test(unittest.TestCase):
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertTrue(branch.is_status_bad())
 
+    def test_H_AbandonRemovedBranch(self):
+        branch, branch_data = abdt_branchmock.create_review_removed()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertTrue(branch.is_null())
+
+        # TODO: should probably abandon the review too, if the branch goes
+        # self.assertTrue(
+        #     self.conduit_data.get_the_only_revision().is_abandoned())
 
 # factors affecting a review:
 #  age of the revisions

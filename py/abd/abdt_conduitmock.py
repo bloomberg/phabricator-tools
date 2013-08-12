@@ -49,6 +49,7 @@ _conduitmock_traced_method = phlsys_tracedecorator.method_tracer(_mock_to_str)
 
 
 class _RevisionStates(object):
+    abandoned = 'abandoned'
     closed = 'closed'
 
 
@@ -68,6 +69,9 @@ class _Revision(object):
 
     def is_closed(self):
         return self.status == _RevisionStates.closed
+
+    def is_abandoned(self):
+        return self.status == _RevisionStates.abandoned
 
 
 class _User(object):
@@ -127,6 +131,10 @@ class ConduitMockData(object):
         self.assert_is_revision(revisionid)
         index = revisionid - self._firstid
         return self._revisions[index]
+
+    # def get_the_only_revision(self):
+    #     assert len(self._revisions) == 1
+    #     return self._revisions[0]
 
     def is_unchanged(self):
         """Return true if this conduit has not been written to."""
@@ -322,7 +330,7 @@ class ConduitMock(object):
         """
         revision = self._data.get_revision(revisionid)
         assert revision.status != 'closed'
-        revision.status = 'abandoned'
+        revision.status = _RevisionStates.abandoned
         self._data.set_changed()
 
     @_conduitmock_traced_method
