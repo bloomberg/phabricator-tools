@@ -28,6 +28,8 @@ import phlcon_differential
 import phlcon_user
 import phlsys_conduit
 
+import abdt_exception
+
 
 class Conduit(object):
 
@@ -145,8 +147,12 @@ class Conduit(object):
         with phlsys_conduit.act_as_user_context(self._conduit, author_user):
             diffid = phlcon_differential.create_raw_diff(
                 self._conduit, raw_diff).id
-            phlcon_differential.update_revision(
-                self._conduit, revisionid, diffid, [], message)
+            try:
+                phlcon_differential.update_revision(
+                    self._conduit, revisionid, diffid, [], message)
+            except phlcon_differential.UpdateClosedRevisionError:
+                raise abdt_exception.AbdUserException(
+                    "can't update a closed revision")
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.

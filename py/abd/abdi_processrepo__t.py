@@ -26,7 +26,8 @@ import phlcon_differential
 # Concerns:
 # [ A] processUpdateRepo can handle the case of no branches
 # [ B] processUpdateRepo can create, update and land an uncomplicated review
-# [  ] processUpdateRepo can handle a review without test plan
+# [ C] processUpdateRepo can handle a review without test plan
+# [ D] processUpdateRepo can handle a review being closed unexpectedly
 # [  ] processUpdateRepo can handle a review without initial reviewer
 # [  ] processUpdateRepo can handle a review without initial valid base
 # [  ] processUpdateRepo can handle a review without initial author
@@ -51,6 +52,8 @@ import phlcon_differential
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_Uncomplicated
+# [ C] test_C_NoTestPlan
+# [ D] test_D_UnexpectedClose
 # XXX: fill in the others
 #==============================================================================
 
@@ -128,6 +131,18 @@ class Test(unittest.TestCase):
         self.assertTrue(self.conduit_data.revisions[0].is_closed())
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
+
+    def test_D_UnexpectedClose(self):
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+
+        revision = self.conduit_data.get_revision(branch_data.review_id)
+        revision.set_closed()
+        branch_data.has_new_commits = True
+
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertTrue(branch.is_status_bad())
+
 
 # factors affecting a review:
 #  age of the revisions

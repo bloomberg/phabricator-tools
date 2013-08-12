@@ -39,11 +39,17 @@ import phlcon_differential
 import phldef_conduit
 import phlsys_tracedecorator
 
+import abdt_exception
+
 
 def _mock_to_str(mock):
     return "conduitmock"
 
 _conduitmock_traced_method = phlsys_tracedecorator.method_tracer(_mock_to_str)
+
+
+class _RevisionStates(object):
+    closed = 'closed'
 
 
 class _Revision(object):
@@ -57,8 +63,11 @@ class _Revision(object):
     def set_accepted(self):
         self.status = 'accepted'
 
+    def set_closed(self):
+        self.status = _RevisionStates.closed
+
     def is_closed(self):
-        return self.status == 'closed'
+        return self.status == _RevisionStates.closed
 
 
 class _User(object):
@@ -263,6 +272,12 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
+
+        # match the behaviour asserted by phlcon_differential__t,
+        # we can't update a closed review, that's an error
+        if revision.status == 'closed':
+            raise abdt_exception.AbdUserException(
+                "can't update a closed revision")
 
         # match the behaviour asserted by phlcon_differential__t, 'accepted' is
         # a sticky state as far as updating the review is concerned

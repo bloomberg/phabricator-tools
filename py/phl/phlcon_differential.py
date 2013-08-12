@@ -8,6 +8,8 @@
 #   ReviewStates
 #   Action
 #   MessageFields
+#   Error
+#   UpdateClosedRevisionError
 #
 # Public Functions:
 #   create_raw_diff
@@ -37,6 +39,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import phlsys_conduit
 import phlsys_dictutil
 import phlsys_namedtuple
 
@@ -154,6 +157,14 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
         'sourcePath', 'auxiliary'],
     defaults={},
     ignored=[])
+
+
+class Error(Exception):
+    pass
+
+
+class UpdateClosedRevisionError(Error):
+    pass
 
 
 def create_raw_diff(conduit, diff):
@@ -278,7 +289,14 @@ def update_revision(conduit, id, diffid, fields, message):
         "id": id, "diffid": diffid,
         "fields": fields, "message": message
     }
-    response = conduit.call('differential.updaterevision', d)
+
+    try:
+        response = conduit.call('differential.updaterevision', d)
+    except phlsys_conduit.ConduitException as e:
+        if e.error == 'ERR_CLOSED':
+            raise UpdateClosedRevisionError()
+        raise
+
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
 

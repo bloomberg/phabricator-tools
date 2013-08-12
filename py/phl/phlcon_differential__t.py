@@ -14,11 +14,13 @@ import phlsys_conduit
 #
 # Concerns:
 # [ B] the 'accepted' status persists when a review is updated with a new diff
+# [ C] the 'closed' status does not allow revisions to be updated
 # [  ] TODO
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_AcceptedPersistsWhenUpdated
+# [ C] test_C_CantUpdateClosedReviews
 # TODO
 #==============================================================================
 
@@ -71,6 +73,28 @@ class Test(unittest.TestCase):
         self.assertEqual(
             phlcon_differential.get_revision_status(conduit, revision),
             phlcon_differential.ReviewStates.accepted)
+
+    def test_C_CantUpdateClosedReviews(self):
+        conduit = self.phabConduit
+        author = phldef_conduit.ALICE.user
+        reviewer = phldef_conduit.BOB.user
+        with phlsys_conduit.act_as_user_context(conduit, author):
+            revision = phlcon_differential.create_empty_revision(conduit)
+        with phlsys_conduit.act_as_user_context(conduit, reviewer):
+            phlcon_differential.create_comment(
+                conduit,
+                revision,
+                action=phlcon_differential.Action.accept)
+        with phlsys_conduit.act_as_user_context(conduit, author):
+            phlcon_differential.create_comment(
+                conduit,
+                revision,
+                action=phlcon_differential.Action.close)
+            self.assertRaises(
+                phlcon_differential.UpdateClosedRevisionError,
+                phlcon_differential.update_revision_empty,
+                conduit,
+                revision)
 
     def testNullQuery(self):
         phlcon_differential.query(self.conduit)
