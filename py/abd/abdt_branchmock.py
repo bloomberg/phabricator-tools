@@ -38,6 +38,7 @@
 #   create_simple_new_review
 #   create_new_review_invalid_base
 #   create_review_no_initial_author
+#   create_review_no_commits
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -82,6 +83,16 @@ def create_review_no_initial_author():
     mock, data = create_simple_new_review()
     data.names_emails = [(
         phldef_conduit.NOTAUSER.user, phldef_conduit.NOTAUSER.email)]
+    data.any_emails = [phldef_conduit.ALICE.email]
+    return mock, data
+
+
+def create_review_no_commits():
+    mock, data = create_simple_new_review()
+    data.message_digest = ""
+    data.names_emails = []
+    data.raw_diff = ""
+    data.branch_tip_message = None
     data.any_emails = [phldef_conduit.ALICE.email]
     return mock, data
 
@@ -267,6 +278,8 @@ class BranchMock(object):
     @_branchmock_traced_method
     def get_commit_message_from_tip(self):
         """Return string commit message from latest commit on branch."""
+        if self._data.branch_tip_message is None:
+            raise Exception('branch tip message is None')
         return self._data.branch_tip_message
 
     @_branchmock_traced_method

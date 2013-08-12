@@ -30,7 +30,7 @@ import phlcon_differential
 # [ D] processUpdateRepo can handle a review being closed unexpectedly
 # [ E] processUpdateRepo can handle a review without initial valid base
 # [ F] processUpdateRepo can handle a review without initial author
-# [  ] processUpdateRepo can handle a review without commits on branch
+# [ G] processUpdateRepo can handle a review without commits on branch
 # [  ] processUpdateRepo can handle a review without commits in repo
 # [  ] processUpdateRepo can abandon a review when the branch disappears
 # [  ] processUpdateRepo can handle a review with merge conflicts
@@ -60,6 +60,7 @@ import phlcon_differential
 # [ D] test_D_UnexpectedClose
 # [ E] test_E_InvalidBaseBranch
 # [ F] test_F_NoInitialAuthor
+# [ G] test_G_NoCommitsOnBranch
 # XXX: fill in the others
 #==============================================================================
 
@@ -175,6 +176,11 @@ class Test(unittest.TestCase):
         branch_data.has_new_commits = True
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertFalse(branch.is_status_bad())
+
+    def test_G_NoCommitsOnBranch(self):
+        branch, branch_data = abdt_branchmock.create_review_no_commits()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertTrue(branch.is_status_bad())
 
 
 # factors affecting a review:
