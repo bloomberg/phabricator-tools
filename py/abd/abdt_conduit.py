@@ -31,6 +31,7 @@ import phlsys_conduit
 import abdt_exception
 
 
+# TODO: re-order methods as (accessor, mutator)
 class Conduit(object):
 
     def __init__(self, conduit):
@@ -143,6 +144,14 @@ class Conduit(object):
         :returns: None
 
         """
+        # do some sanity checks before committing to the expensive operation
+        # of storing a diff in Differential
+        status = phlcon_differential.get_revision_status(
+            self._conduit, revisionid)
+        if status == phlcon_differential.ReviewStates.closed:
+            raise abdt_exception.AbdUserException(
+                "can't update a closed revision")
+
         author_user = self._get_author_user(revisionid)
         with phlsys_conduit.act_as_user_context(self._conduit, author_user):
             diffid = phlcon_differential.create_raw_diff(
@@ -152,7 +161,7 @@ class Conduit(object):
                     self._conduit, revisionid, diffid, [], message)
             except phlcon_differential.UpdateClosedRevisionError:
                 raise abdt_exception.AbdUserException(
-                    "can't update a closed revision")
+                    "CONDUIT: can't update a closed revision")
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
@@ -193,10 +202,11 @@ class Conduit(object):
                 revisionid,
                 action=phlcon_differential.Action.abandon)
 
+    # XXX: test function - will disappear when moved to new processrepo tests
     def accept_revision_as_user(self, revisionid, username):
-        """Set an existing Differential revision to 'closed'.
+        """Set an existing Differential revision to 'accepted'.
 
-        :revisionid: id of the Differential revision to close
+        :revisionid: id of the Differential revision to accept
         :username: username for the reviewer of the revision
         :returns: None
 
@@ -207,6 +217,9 @@ class Conduit(object):
                 revisionid,
                 action=phlcon_differential.Action.accept)
 
+    # XXX: test function currently but needed for changing owner in the case
+    #      where no valid author is detected on a branch at creation but is
+    #      valid later, after the review has been created
     def commandeer_revision_as_user(self, revisionid, username):
         """Change the author of a revision to the specified 'username'.
 
