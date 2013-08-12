@@ -35,13 +35,13 @@
 #
 # Public Functions:
 #   create_simple_new_review
-#   logged_call
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 import phldef_conduit
+import phlsys_tracedecorator
 
 import abdt_naming
 
@@ -64,22 +64,13 @@ def create_simple_new_review():
     return BranchMock(data), data
 
 
-# TODO: we can move this into phl and depend on standard library 'logging'
-def logged_call(f):
+def _mock_to_str(mock):
+    if mock._data.review_branch is not None:
+        return mock._data.review_branch
+    else:
+        return '(NULL branch)'
 
-    def logged_call_imp(self, *args, **kwargs):
-        callstring = 'CALL ' + f.__name__ + '('
-        for (i, arg) in enumerate(args):
-            if i:
-                callstring += ', '
-            callstring += str(arg)
-        callstring += ')'
-        self._log(callstring)
-        ret = f(self, *args, **kwargs)
-        self._log('RETURN ' + str(ret))
-        return ret
-
-    return logged_call_imp
+_branchmock_traced_method = phlsys_tracedecorator.method_tracer(_mock_to_str)
 
 
 class BranchMockData(object):
@@ -150,62 +141,62 @@ class BranchMock(object):
         else:
             print '(NULL branch):', message
 
-    @logged_call
+    @_branchmock_traced_method
     def is_abandoned(self):
         """Return True if the author's branch no longer exists."""
         return self._data.is_abandoned
 
-    @logged_call
+    @_branchmock_traced_method
     def is_null(self):
         """Return True if we don't have any data."""
         return self._data.is_null
 
-    @logged_call
+    @_branchmock_traced_method
     def is_new(self):
         """Return True if we haven't marked the author's branch."""
         return self._data.status is None
 
-    @logged_call
+    @_branchmock_traced_method
     def is_status_bad_pre_review(self):
         """Return True if the author's branch is marked 'bad pre-review'."""
         return self._data.status == abdt_naming.WB_STATUS_BAD_PREREVIEW
 
-    @logged_call
+    @_branchmock_traced_method
     def is_status_bad_land(self):
         """Return True if the author's branch is marked 'bad land'."""
         return self._data.status == abdt_naming.WB_STATUS_BAD_LAND
 
-    @logged_call
+    @_branchmock_traced_method
     def is_status_bad(self):
         """Return True if the author's branch is marked any bad status."""
         return self._data.status.startswith(abdt_naming.WB_STATUS_PREFIX_BAD)
 
-    @logged_call
+    @_branchmock_traced_method
     def has_new_commits(self):
         """Return True if the author's branch is different since marked."""
         return self._data.has_new_commits
 
-    @logged_call
+    @_branchmock_traced_method
     def base_branch_name(self):
         """Return the string name of the branch the review will land on."""
         return self._data.base_branch
 
-    @logged_call
+    @_branchmock_traced_method
     def review_branch_name(self):
         """Return the string name of the branch the review is based on."""
         return self._data.review_branch
 
-    @logged_call
+    @_branchmock_traced_method
     def review_id_or_none(self):
         """Return the int id of the review or 'None' if there isn't one."""
         return self._data.review_id
 
-    @logged_call
+    @_branchmock_traced_method
     def get_author_names_emails(self):
         """Return a list of (name, email) tuples from the branch."""
         return self._data.names_emails
 
-    @logged_call
+    @_branchmock_traced_method
     def get_any_author_emails(self):
         """Return a list of email addresses tuples from the branch.
 
@@ -220,7 +211,7 @@ class BranchMock(object):
             emails = self._data.any_emails
         return emails
 
-    @logged_call
+    @_branchmock_traced_method
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.
 
@@ -231,41 +222,41 @@ class BranchMock(object):
         """
         return self._data.message_digest
 
-    @logged_call
+    @_branchmock_traced_method
     def make_raw_diff(self):
         """Return a string raw diff of the changes on the branch."""
         return self._data.raw_diff
 
-    @logged_call
+    @_branchmock_traced_method
     def verify_review_branch_base(self):
         """Raise exception if review branch has invalid base."""
         return self._data.is_base_ok
 
-    @logged_call
+    @_branchmock_traced_method
     def get_commit_message_from_tip(self):
         """Return string commit message from latest commit on branch."""
         return self._data.branch_tip_message
 
-    @logged_call
+    @_branchmock_traced_method
     def abandon(self):
         """Remove information associated with the abandoned review branch."""
         assert self._data.is_abandoned
         self._data.status = None
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
         self._data.status = None
         self._data.has_new_commits = True
 
-    @logged_call
+    @_branchmock_traced_method
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
         self._data.status = abdt_naming.WB_STATUS_BAD_LAND
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
         # XXX: from the existence of 'mark_new_bad_in_review' it seems like
@@ -273,7 +264,7 @@ class BranchMock(object):
         self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def mark_new_bad_in_review(self, review_id):
         """Mark the current version of the review branch as 'bad in review'."""
         # XXX: from the existence of 'mark_bad_in_review' it seems like
@@ -282,13 +273,13 @@ class BranchMock(object):
         self._data.review_id = int(review_id)
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
         self._data.status = abdt_naming.WB_STATUS_BAD_PREREVIEW
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def mark_ok_in_review(self):
         # XXX: from the existence of 'mark_ok_new_review' it seems like
         #      some checking is required here
@@ -296,7 +287,7 @@ class BranchMock(object):
         self._data.status = abdt_naming.WB_STATUS_OK
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def mark_ok_new_review(self, review_id):
         # XXX: from the existence of 'mark_ok_in_review' it seems like
         #      some checking is required here
@@ -305,7 +296,7 @@ class BranchMock(object):
         self._data.review_id = int(review_id)
         self._data.has_new_commits = False
 
-    @logged_call
+    @_branchmock_traced_method
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
         self._data.status = None
