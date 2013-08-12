@@ -28,10 +28,8 @@ import phlcon_differential
 import phlcon_user
 import phlsys_conduit
 
-import abdt_conduitabc
 
-
-class Conduit(abdt_conduitabc.ConduitAbc):
+class Conduit(object):
 
     def __init__(self, conduit):
         """Initialise a new Conduit.

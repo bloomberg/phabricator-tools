@@ -35,8 +35,6 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import abdt_conduitabc
-
 import phlcon_differential
 import phldef_conduit
 
@@ -140,7 +138,7 @@ class ConduitMockData(object):
         return self._revisions
 
 
-class ConduitMock(abdt_conduitabc.ConduitAbc):
+class ConduitMock(object):
 
     def __init__(self, data=None):
         """Initialise a new ConduitMock."""

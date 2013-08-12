@@ -21,8 +21,6 @@ Implement mocked operations for branch-based reviews.
 Operations on git commit message strings.
 * `abdt_conduit.py` -
 Abstraction for Arcyd's conduit operations.
-* `abdt_conduitabc.py` -
-Abstract Base Class for the 'conduit' abstraction.
 * `abdt_conduitgit.py` -
 Operations combining conduit with git.
 * `abdt_conduitmock.py` -
