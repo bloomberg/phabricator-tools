@@ -35,6 +35,7 @@
 #
 # Public Functions:
 #   create_simple_new_review
+#   create_new_review_invalid_base
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -43,6 +44,7 @@
 import phldef_conduit
 import phlsys_tracedecorator
 
+import abdt_exception
 import abdt_naming
 
 
@@ -62,6 +64,12 @@ def create_simple_new_review():
         branch_tip_message="tip message")
 
     return BranchMock(data), data
+
+
+def create_new_review_invalid_base():
+    mock, data = create_simple_new_review()
+    data.is_base_ok = False
+    return mock, data
 
 
 def _mock_to_str(mock):
@@ -230,7 +238,17 @@ class BranchMock(object):
     @_branchmock_traced_method
     def verify_review_branch_base(self):
         """Raise exception if review branch has invalid base."""
-        return self._data.is_base_ok
+        """Raise exception if review branch has invalid base."""
+        if not self._data.is_base_ok:
+            raise abdt_exception.MissingBaseException(
+                self._data.review_branch, self._data.base_branch)
+
+        # TODO: also test raising AbdUserException
+        # if not self._is_based_on(
+        #         self._review_branch.branch, self._review_branch.base):
+        #     raise abdt_exception.AbdUserException(
+        #         "'" + self._review_branch.branch +
+        #         "' is not based on '" + self._review_branch.base + "'")
 
     @_branchmock_traced_method
     def get_commit_message_from_tip(self):

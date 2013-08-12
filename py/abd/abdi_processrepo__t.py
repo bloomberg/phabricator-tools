@@ -28,11 +28,11 @@ import phlcon_differential
 # [ B] processUpdateRepo can create, update and land an uncomplicated review
 # [ C] processUpdateRepo can handle a review without test plan
 # [ D] processUpdateRepo can handle a review being closed unexpectedly
-# [  ] processUpdateRepo can handle a review without initial reviewer
-# [  ] processUpdateRepo can handle a review without initial valid base
+# [ E] processUpdateRepo can handle a review without initial valid base
 # [  ] processUpdateRepo can handle a review without initial author
 # [  ] processUpdateRepo can abandon a review when the branch disappears
 # [  ] processUpdateRepo can handle a review with merge conflicts
+# [  ] processUpdateRepo will comment on a bad branch if the error has changed
 #
 # for testing 'branch'
 # [  ] XXX: withReservedBranch
@@ -48,12 +48,14 @@ import phlcon_differential
 # [  ] XXX: commandeeredLand
 # [  ] XXX: createHugeReview
 # [  ] XXX: hugeUpdateToReview
+# [  ] XXX: processUpdateRepo can handle a review without initial reviewer
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_Uncomplicated
 # [ C] test_C_NoTestPlan
 # [ D] test_D_UnexpectedClose
+# [ E] test_E_InvalidBaseBranch
 # XXX: fill in the others
 #==============================================================================
 
@@ -140,6 +142,23 @@ class Test(unittest.TestCase):
         revision.set_closed()
         branch_data.has_new_commits = True
 
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertTrue(branch.is_status_bad())
+
+    def test_E_InvalidBaseBranch(self):
+        # set base to invalid
+        branch, branch_data = abdt_branchmock.create_new_review_invalid_base()
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertTrue(branch.is_status_bad())
+
+        # set base ok again
+        branch_data.is_base_ok = True
+        abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
+        self.assertFalse(branch.is_status_bad())
+
+        # set base bad again
+        branch_data.is_base_ok = False
+        branch_data.has_new_commits = True
         abdi_processrepo.process_branches([branch], self.conduit, self.mailer)
         self.assertTrue(branch.is_status_bad())
 
