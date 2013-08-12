@@ -10,9 +10,9 @@
 # [ B] can query users from invalid emails without error
 # [ B] can query users from unknown emails without error
 # [  ] raise error if querying users with invalid utf in their email address
-# [  ] can parse well-formatted commit message
-# [  ] can parse empty commit message
-# [  ] can parse commit message with invalid utf
+# [ C] can parse well-formatted commit message
+# [ C] can parse empty commit message
+# [ C] can parse commit message with invalid utf
 # [  ] can create a revision with 'create_revision_as_user'
 #------------------------------------------------------------------------------
 # XXX: make sure we cover each one of these:
@@ -34,6 +34,7 @@
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_CanQueryUsersFromEmails
+# [ C] test_C_CanParseCommitMessage
 #==============================================================================
 
 import unittest
@@ -175,6 +176,35 @@ class Test(unittest.TestCase):
         for (email, user) in data.iteritems():
             self.assertListEqual(
                 self.conduit.query_users_from_emails([email]), [user])
+
+    def test_C_CanParseCommitMessage(self):
+
+        # empty message
+        self.conduit.parse_commit_message('')
+
+        # well-formed message
+        title = 'Title'
+        summary = 'This is my description.'
+        test_plan = 'This is my test plan.'
+        commit_message = '\n'.join([
+            title, '\n', summary, 'Test Plan: ' + test_plan])
+        result = self.conduit.parse_commit_message(commit_message)
+        self.assertSequenceEqual(
+            result.fields[phlcon_differential.MessageFields.title], title)
+        self.assertSequenceEqual(
+            result.fields[phlcon_differential.MessageFields.summary], summary)
+        self.assertEqual(
+            result.fields[phlcon_differential.MessageFields.test_plan],
+            test_plan)
+
+        # bad-utf message
+        result = self.conduit.parse_commit_message('\x80' + title)
+        self.assertIn(
+            title,
+            result.fields[phlcon_differential.MessageFields.title])
+        self.assertNotEqual(
+            title,
+            result.fields[phlcon_differential.MessageFields.title])
 
 
 #------------------------------------------------------------------------------

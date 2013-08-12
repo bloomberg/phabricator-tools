@@ -115,6 +115,7 @@ class Conduit(object):
         :returns: a phlcon_differential.ParseCommitMessageResponse
 
         """
+        message = unicode(message, errors='replace')
         return phlcon_differential.parse_commit_message(self._conduit, message)
 
     def _get_author_user(self, revisionid):
