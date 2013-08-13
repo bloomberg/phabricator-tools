@@ -14,6 +14,7 @@ import abdmail_mailer
 # import abdt_conduit
 import abdt_branchmock
 import abdt_conduitmock
+import abdt_exception
 import abdt_naming
 import abdtst_devphabgit
 
@@ -34,8 +35,8 @@ import phlcon_differential
 # [ F] processUpdateRepo can handle a review without initial author
 # [ G] processUpdateRepo can handle a review without commits on branch
 # [ H] processUpdateRepo can abandon a review when the branch disappears
+# [ I] processUpdateRepo can handle a review with merge conflicts
 # [  ] processUpdateRepo can handle a review without commits in repo
-# [  ] processUpdateRepo can handle a review with merge conflicts
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
 #
 # for testing 'branch'
@@ -64,6 +65,7 @@ import phlcon_differential
 # [ F] test_F_NoInitialAuthor
 # [ G] test_G_NoCommitsOnBranch
 # [ H] test_H_AbandonRemovedBranch
+# [ I] test_I_MergeConflicts
 # XXX: fill in the others
 #==============================================================================
 
@@ -215,6 +217,37 @@ class Test(unittest.TestCase):
         # TODO: should probably abandon the review too, if the branch goes
         # self.assertTrue(
         #     self.conduit_data.get_the_only_revision().is_abandoned())
+
+    def test_I_MergeConflicts(self):
+
+        def error_land(self, unused_name, unused_email, unused_message):
+            raise abdt_exception.LandingException(
+                'landing exception',
+                '<review branch name>',
+                '<base branch name>')
+
+        # create review ok
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+        abdi_processrepo.process_branches(
+            [branch], self.conduit, self.mailer, self.plugin_manager)
+
+        # fail to land
+        old_land = branch.land
+        branch.land = types.MethodType(error_land, branch)
+        self.conduit_data.accept_the_only_review()
+        abdi_processrepo.process_branches(
+            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self.assertTrue(branch.is_status_bad())
+
+        # fix the landing error
+        branch.land = old_land
+        branch_data.has_new_commits = True
+
+        # land ok
+        abdi_processrepo.process_branches(
+            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self.assertFalse(branch.is_status_bad())
+
 
 # factors affecting a review:
 #  age of the revisions
