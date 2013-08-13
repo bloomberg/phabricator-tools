@@ -18,6 +18,7 @@
 #    .review_id_or_none
 #    .get_author_names_emails
 #    .get_any_author_emails
+#    .get_clone
 #    .make_message_digest
 #    .make_raw_diff
 #    .verify_review_branch_base
@@ -156,6 +157,9 @@ class ReviewTrackingBranchPair(object):
             self._clone, hashes)
         emails = [committer[1] for committer in committers]
         return emails
+
+    def get_clone(self):
+        return self._clone
 
     def _get_commit_hashes(self):
         hashes = self._clone.get_range_hashes(
