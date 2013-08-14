@@ -14,6 +14,12 @@
 # [ C] can parse empty commit message
 # [ C] can parse commit message with invalid utf
 # [ D] can create a revision with 'create_revision_as_user'
+# [  ] XXX: commandeeredUpdate
+# [  ] XXX: commandeeredLand
+# [  ] XXX: createHugeReview
+# [  ] XXX: hugeUpdateToReview
+# [  ] XXX: processUpdateRepo can handle a review without initial reviewer
+# [  ] XXX: landing when dependent review hasn't been landed
 #------------------------------------------------------------------------------
 # XXX: make sure we cover each one of these:
 #   Conduit

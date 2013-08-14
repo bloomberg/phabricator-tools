@@ -47,14 +47,6 @@ import phlcon_differential
 # [  ] XXX: hugeUpdateToReview
 # [  ] XXX: empty repository, no history
 # [  ] XXX: landing when origin has been updated underneath us
-#
-# for testing 'conduit'
-# [  ] XXX: commandeeredUpdate
-# [  ] XXX: commandeeredLand
-# [  ] XXX: createHugeReview
-# [  ] XXX: hugeUpdateToReview
-# [  ] XXX: processUpdateRepo can handle a review without initial reviewer
-# [  ] XXX: landing when dependent review hasn't been landed
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
