@@ -5,13 +5,11 @@ import unittest
 
 import phldef_conduit
 import phlmail_mocksender
-# import phlsys_conduit
 import phlsys_pluginmanager
 
 
 import abdi_processrepo
 import abdmail_mailer
-# import abdt_conduit
 import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
@@ -48,13 +46,15 @@ import phlcon_differential
 # [  ] XXX: createHugeReview
 # [  ] XXX: hugeUpdateToReview
 # [  ] XXX: empty repository, no history
-
+# [  ] XXX: landing when origin has been updated underneath us
+#
 # for testing 'conduit'
 # [  ] XXX: commandeeredUpdate
 # [  ] XXX: commandeeredLand
 # [  ] XXX: createHugeReview
 # [  ] XXX: hugeUpdateToReview
 # [  ] XXX: processUpdateRepo can handle a review without initial reviewer
+# [  ] XXX: landing when dependent review hasn't been landed
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
@@ -66,7 +66,6 @@ import phlcon_differential
 # [ G] test_G_NoCommitsOnBranch
 # [ H] test_H_AbandonRemovedBranch
 # [ I] test_I_MergeConflicts
-# XXX: fill in the others
 #==============================================================================
 
 
@@ -570,9 +569,6 @@ class OldTest(unittest.TestCase):
         lots = "h\n" * 1 * 1024 * 1024
         self._devPushNewFile("NEWFILE2", contents=lots)
         self._phabUpdateWithExpectations(total=1, bad=1)
-
-    # TODO: test landing when origin has been updated underneath us
-    # TODO: test landing when dependent review hasn't been landed
 
     def tearDown(self):
         self.dev_phab.close()
