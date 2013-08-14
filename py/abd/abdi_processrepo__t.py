@@ -36,17 +36,6 @@ import phlcon_differential
 # [ I] processUpdateRepo can handle a review with merge conflicts
 # [  ] processUpdateRepo can handle a review without commits in repo
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
-#
-# for testing 'branch'
-# [  ] XXX: withReservedBranch
-# [  ] XXX: emptyMergeWorkflow
-# [  ] XXX: mergeConflictWorkflow
-# [  ] XXX: changeAlreadyMergedOnBase
-# [  ] XXX: commandeeredLand
-# [  ] XXX: createHugeReview
-# [  ] XXX: hugeUpdateToReview
-# [  ] XXX: empty repository, no history
-# [  ] XXX: landing when origin has been updated underneath us
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
