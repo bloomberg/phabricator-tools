@@ -8,6 +8,7 @@
 #   chdir_context
 #   tmpfile
 #   tmpdir_context
+#   chtmpdir_context
 #   nostd
 #
 # -----------------------------------------------------------------------------
@@ -85,6 +86,49 @@ def tmpdir_context():
     try:
         yield tmp_dir
     finally:
+        shutil.rmtree(tmp_dir)
+
+
+@contextlib.contextmanager
+def chtmpdir_context():
+    """Change to a newly created dir, remove and change back when expired.
+
+    Usage examples:
+
+        create and remove a temporary directory:
+        >>> with chtmpdir_context() as temp_dir:
+        ...     os.getcwd() == temp_dir
+        True
+
+        >>> os.getcwd() == temp_dir
+        False
+
+        >>> os.path.isdir(temp_dir)
+        False
+
+        create and remove a temporary directory despite an exception:
+        >>> try:
+        ...     with chtmpdir_context() as temp_dir2:
+        ...         os.getcwd() == temp_dir2
+        ...         raise Exception('hi')
+        ... except Exception:
+        ...     pass
+        True
+
+        >>> os.getcwd() == temp_dir2
+        False
+
+        >>> os.path.isdir(temp_dir2)
+        False
+
+    """
+    saved_path = os.getcwd()
+    tmp_dir = tempfile.mkdtemp()
+    os.chdir(tmp_dir)
+    try:
+        yield tmp_dir
+    finally:
+        os.chdir(saved_path)
         shutil.rmtree(tmp_dir)
 
 
