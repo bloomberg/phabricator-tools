@@ -7,6 +7,7 @@
 # Public Functions:
 #   chdir_context
 #   tmpfile
+#   tmpdir_context
 #   nostd
 #
 # -----------------------------------------------------------------------------
@@ -15,19 +16,33 @@
 
 import contextlib
 import os
+import shutil
 import sys
 import tempfile
 
 
-# TODO: write a docstring with doctests when we have a tempdir helper
 @contextlib.contextmanager
-def chdir_context(newDir):
-    savedPath = os.getcwd()
-    os.chdir(newDir)
+def chdir_context(new_path):
+    """Change directory to the supplied 'new_path', change back when expired.
+
+    Usage examples:
+
+        Create a temporary directory and change to it:
+        >>> with tmpdir_context() as temp_dir:
+        ...     with chdir_context(temp_dir):
+        ...         os.getcwd() == temp_dir
+        True
+
+        >>> os.getcwd() == temp_dir
+        False
+
+    """
+    saved_path = os.getcwd()
+    os.chdir(new_path)
     try:
         yield
     finally:
-        os.chdir(savedPath)
+        os.chdir(saved_path)
 
 
 @contextlib.contextmanager
@@ -37,6 +52,40 @@ def tmpfile(tmp_dir=None, suffix=''):
     tmp_file = tempfile.NamedTemporaryFile(dir=dir, suffix=suffix)
     yield tmp_file
     tmp_file.close()
+
+
+@contextlib.contextmanager
+def tmpdir_context():
+    """Return the path to a newly created directory, remove when expired.
+
+    Usage examples:
+
+        create and remove a temporary directory:
+        >>> with tmpdir_context() as temp_dir:
+        ...     os.path.isdir(temp_dir)
+        True
+
+        >>> os.path.isdir(temp_dir)
+        False
+
+        create and remove a temporary directory despite an exception:
+        >>> try:
+        ...     with tmpdir_context() as temp_dir2:
+        ...         os.path.isdir(temp_dir2)
+        ...         raise Exception('hi')
+        ... except Exception:
+        ...     pass
+        True
+
+        >>> os.path.isdir(temp_dir2)
+        False
+
+    """
+    tmp_dir = tempfile.mkdtemp()
+    try:
+        yield tmp_dir
+    finally:
+        shutil.rmtree(tmp_dir)
 
 
 @contextlib.contextmanager
