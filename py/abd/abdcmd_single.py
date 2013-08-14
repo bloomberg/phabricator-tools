@@ -108,6 +108,16 @@ def setupParser(parser):
         type=str,
         help="file to touch when successfully updated a repo")
 
+    parser.add_argument(
+        "--plugins",
+        metavar="PLUGIN",
+        nargs="*",
+        type=str,
+        default=[],
+        required=False,
+        help="List the plugins to be loaded. The plugins must be present "
+        "in /testbed/plugins/ directory as this feature is WIP.")
+
 
 class DelayedRetrySleepOperation(object):
 

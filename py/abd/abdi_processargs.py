@@ -19,6 +19,7 @@ import abdmail_mailer
 import phlmail_sender
 import phlsys_conduit
 import phlsys_fs
+import phlsys_pluginmanager
 import phlsys_sendmail
 import phlsys_subprocess
 import phlsys_tryloop
@@ -35,6 +36,8 @@ def run_once(args, out):
         [args.admin_email],
         args.repo_desc,
         args.instance_uri)  # TODO: this should be a URI for users not conduit
+
+    pluginManager = phlsys_pluginmanager.PluginManager(args.plugins)
 
     # prepare delays in the event of trouble when fetching or connecting
     # TODO: perhaps this policy should be decided higher-up
@@ -90,7 +93,11 @@ def run_once(args, out):
     arcyd_conduit = abdt_conduit.Conduit(conduit[0])
     arcyd_clone = abdt_git.Clone(args.repo_path, "origin")
     branches = arcyd_clone.get_managed_branches()
-    abdi_processrepo.process_branches(branches, arcyd_conduit, mailer)
+    abdi_processrepo.process_branches(
+        branches,
+        arcyd_conduit,
+        mailer,
+        pluginManager)
 
     if args.ok_touch_path:
         try:

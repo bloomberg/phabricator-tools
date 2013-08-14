@@ -1,38 +1,25 @@
-#!/usr/bin/env python
-# encoding: utf-8
-
-import os
-import sys
-
-# The code base currently depends on version 2.7 of Python, any earlier
-# than that and it won't have the requisite argparse feaures.  Any later
-# than that (3.x) and there are breaking changes in the syntax.
+"""A very simple example plugin."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+# exampleplugin
 #
-# Prevent nasty runtime surprises by enforcing version 2.7 as early as
-# possible.
+# Public Functions:
+#   on_review_created
+#   get_hooks
 #
-# The version check itself will not work prior to Python version 2.0,
-# that's when sys.version_info was introduced.
-#
-if sys.version_info[:2] != (2, 7):
-    sys.stderr.write("You need python 2.7 to run this script\n")
-    exit(1)
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
 
-# append our module dirs to sys.path, which is the list of paths to search
-# for modules this is so we can import our libraries directly
-# N.B. this magic is only really passable up-front in the entrypoint module
-PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(os.path.join(PARENT_DIR, "py", "abd"))
-sys.path.append(os.path.join(PARENT_DIR, "py", "phl"))
 
-# This is a temprary fix for locationg plugins while not using "."
-# notation python packages.
-sys.path.append(os.path.join(PARENT_DIR, "testbed", "plugins"))
+def on_review_created(params):
+    print "a review was created"
 
-import abdcmd_arcyd
 
-if __name__ == "__main__":
-    sys.exit(abdcmd_arcyd.main())
+def get_hooks():
+    return [("after_create_review", on_review_created)]
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

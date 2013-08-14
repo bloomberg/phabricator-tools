@@ -40,7 +40,11 @@ def isBasedOn(name, base):
     return True
 
 
-def createReview(conduit, branch):
+def createReview(conduit, branch, pluginManager):
+    pluginManager.hook(
+        "before_create_review",
+        {"conduit": conduit, "branch": branch})
+
     branch.verify_review_branch_base()
 
     # TODO: we should also cc other users on the branch
@@ -70,10 +74,18 @@ def createReview(conduit, branch):
     revisionid = createDifferentialReview(
         conduit, user, parsed, branch, rawDiff)
 
+    commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
+
     if used_default_test_plan:
         commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
         commenter.usedDefaultTestPlan(
             branch.review_branch_name(), _DEFAULT_TEST_PLAN)
+
+    pluginManager.hook(
+        "after_create_review",
+        {"parsed": parsed, "conduit": conduit, "branch": branch,
+            "rawDiff": rawDiff, "commenter": commenter}
+    )
 
 
 def verifyReviewBranchBase(gitContext, review_branch):
@@ -171,9 +183,9 @@ def createFailedReview(conduit, branch, exception):
     branch.mark_new_bad_in_review(reviewid)
 
 
-def tryCreateReview(mailer, conduit, branch, mail_on_fail):
+def tryCreateReview(mailer, conduit, branch, pluginManager, mail_on_fail):
     try:
-        createReview(conduit, branch)
+        createReview(conduit, branch, pluginManager)
     except abdt_exception.AbdUserException as e:
         print "failed to create:"
         print e
@@ -188,7 +200,7 @@ def tryCreateReview(mailer, conduit, branch, mail_on_fail):
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def processUpdatedBranch(mailer, conduit, branch):
+def processUpdatedBranch(mailer, conduit, branch, pluginManager):
     abdte = abdt_exception
     review_branch_name = branch.review_branch_name()
     if branch.is_new():
@@ -197,6 +209,7 @@ def processUpdatedBranch(mailer, conduit, branch):
             mailer,
             conduit,
             branch,
+            pluginManager,
             mail_on_fail=True)
     else:
         review_id = branch.review_id_or_none()
@@ -209,6 +222,7 @@ def processUpdatedBranch(mailer, conduit, branch):
                 mailer,
                 conduit,
                 branch,
+                pluginManager,
                 mail_on_fail=has_new_commits)
         else:
             print "update review for " + review_branch_name
@@ -235,7 +249,7 @@ def processAbandonedBranch(conduit, branch):
     branch.abandon()
 
 
-def process_branches(branches, conduit, mailer):
+def process_branches(branches, conduit, mailer, pluginManager):
     for branch in branches:
         if branch.is_abandoned():
             processAbandonedBranch(conduit, branch)
@@ -243,7 +257,7 @@ def process_branches(branches, conduit, mailer):
             pass  # TODO: should handle these
         else:
             print "pending:", branch.review_branch_name()
-            processUpdatedBranch(mailer, conduit, branch)
+            processUpdatedBranch(mailer, conduit, branch, pluginManager)
 
 
 #------------------------------------------------------------------------------

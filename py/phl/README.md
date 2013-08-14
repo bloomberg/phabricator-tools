@@ -45,6 +45,8 @@ Wrapper to call git, with working directory.
 Create a conduit from the available information.
 * `phlsys_namedtuple.py` -
 Wrapper around collections.namedtuple with some added features.
+* `phlsys_pluginmanager.py` -
+Handles the loading, hook registration and calling of plugins.
 * `phlsys_scheduleunreliables.py` -
 Conveniently schedule unreliable tasks, retry them after a delay.
 * `phlsys_sendmail.py` -
