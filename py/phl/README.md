@@ -11,16 +11,22 @@ Conduit data for the default Phabricator install.
 Wrapper around 'git branch'.
 * `phlgit_checkout.py` -
 Wrapper around 'git checkout'.
+* `phlgit_commit.py` -
+Dependable wrapper for invocations of git commit.
 * `phlgit_config.py` -
 Wrapper around 'git config'.
 * `phlgit_diff.py` -
 Wrapper around 'git diff'.
+* `phlgit_fetch.py` -
+Dependable wrapper for invocations of git fetch.
 * `phlgit_log.py` -
 Wrapper around 'git log'.
 * `phlgit_merge.py` -
 Wrapper around 'git merge'.
 * `phlgit_push.py` -
 Wrapper around 'git push'.
+* `phlgit_rebase.py` -
+Dependable wrapper for invocations of git rebase.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
 * `phlmail_format.py` -

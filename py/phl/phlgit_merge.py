@@ -9,6 +9,7 @@
 #
 # Public Functions:
 #   squash
+#   no_ff
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -39,6 +40,20 @@ def squash(clone, source, message, author=None):
             raise MergeException(e.stdout)
 
     return result
+
+
+def no_ff(repo, branch):
+    """Merge the single 'branch' into HEAD.
+
+    Behaviour is undefined if there are merge conflicts.
+    Behaviour is undefined if the current branch is 'branch'.
+
+    :repo: supports 'call'
+    :branch: the single branch to merge
+    :returns: None
+
+    """
+    repo.call('merge', '--no-edit', branch)
 
 
 #------------------------------------------------------------------------------

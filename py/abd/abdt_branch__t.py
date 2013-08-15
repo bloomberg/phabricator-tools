@@ -9,6 +9,7 @@
 # [ B] can test is_abandoned, is_null, is_new
 # [ C] can move between all states without error
 # [  ] can detect if review branch has new commits (after ff, merge, rebase)
+# [  ] can get raw diff from branch
 # [  ] can get author names and emails from branch
 # [  ] raise if get author names and emails from branch with no history
 # [  ] raise if get author names and emails from branch with invalid base
@@ -29,7 +30,7 @@
 # [ A] test_A_Breathing
 # [ B] test_B_UntrackedBranch
 # [ C] test_C_MoveBetweenAllMarkedStates
-# [ D] test_D_BadUnicodeDiff
+# [ D] test_D_RawDiffNewCommits
 #==============================================================================
 
 import os
@@ -37,7 +38,12 @@ import shutil
 import tempfile
 import unittest
 
+import phlgit_checkout
+import phlgit_commit
+import phlgit_fetch
+import phlgit_merge
 import phlgit_push
+import phlgit_rebase
 import phlsys_git
 
 import abdt_branch
@@ -129,11 +135,74 @@ class Test(unittest.TestCase):
                     # print '', transition1.__name__
                     # print '', transition2.__name__
 
-    def test_D_BadUnicodeDiff(self):
-        base, branch_name, branch = self._setup_for_untracked_branch()
+    def test_D_RawDiffNewCommits(self):
+        base, branch_name, branch = self._setup_for_tracked_branch()
+
+        # push a new commit on branch as dev
+        phlgit_checkout.branch(self.repo_dev, branch_name)
+        filename = 'new_on_branch'
+        self._create_new_file(self.repo_dev, filename)
+        self.repo_dev.call('add', filename)
+        phlgit_commit.index(self.repo_dev, filename)
+        phlgit_push.branch(self.repo_dev, branch_name)
+
+        # check for new stuff as arcyd
+        self.assertIs(branch.has_new_commits(), False)
+        phlgit_fetch.all_prune(self.clone_arcyd)
+        self.assertIs(branch.has_new_commits(), True)
+        self.assertIn(filename, branch.make_raw_diff())
+        branch.mark_ok_in_review()
+        self.assertIs(branch.has_new_commits(), False)
+        self.assertIn(filename, branch.make_raw_diff())
+
+        # check for new stuff as arcyd again
+        phlgit_fetch.all_prune(self.clone_arcyd)
+        self.assertIs(branch.has_new_commits(), False)
+
+        # make a new commit on master as dev
+        phlgit_checkout.branch(self.repo_dev, 'master')
+        filename = 'new_on_master'
+        self._create_new_file(self.repo_dev, filename)
+        self.repo_dev.call('add', filename)
+        phlgit_commit.index(self.repo_dev, filename)
+        phlgit_push.branch(self.repo_dev, 'master')
+
+        # check for new stuff as arcyd
+        phlgit_fetch.all_prune(self.clone_arcyd)
+        self.assertIs(branch.has_new_commits(), False)
+
+        # merge master into branch, check for new stuff as arcyd
+        phlgit_checkout.branch(self.repo_dev, branch_name)
+        phlgit_merge.no_ff(self.repo_dev, 'master')
+        phlgit_push.branch(self.repo_dev, branch_name)
+
+        # check for new stuff as arcyd
+        self.assertIs(branch.has_new_commits(), False)
+        phlgit_fetch.all_prune(self.clone_arcyd)
+        self.assertNotIn(filename, branch.make_raw_diff())
+        branch.mark_ok_in_review()
+        self.assertIs(branch.has_new_commits(), False)
+
+        # rebase branch onto master
+        phlgit_checkout.branch(self.repo_dev, branch_name)
+        phlgit_rebase.onto_upstream(self.repo_dev, 'master')
+        phlgit_push.force_branch(self.repo_dev, branch_name)
+
+        # check for new stuff as arcyd
+        self.assertIs(branch.has_new_commits(), False)
+        phlgit_fetch.all_prune(self.clone_arcyd)
+        self.assertIs(branch.has_new_commits(), True)
+        branch.mark_ok_in_review()
+        self.assertIs(branch.has_new_commits(), False)
 
     def _create_new_file(self, repo, filename):
+        self.assertFalse(os.path.isfile(filename))
         open(os.path.join(repo.working_dir, filename), 'a').close()
+
+    def _setup_for_tracked_branch(self):
+        base, branch_name, branch = self._setup_for_untracked_branch()
+        branch.mark_ok_new_review(101)
+        return base, branch_name, branch
 
     def _setup_for_untracked_branch(self):
         self._create_new_file(self.repo_dev, 'README')

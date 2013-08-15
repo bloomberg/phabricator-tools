@@ -1,42 +1,25 @@
-"""Wrapper around 'git checkout'."""
+"""Dependable wrapper for invocations of git fetch."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgit_checkout
+# phlgit_fetch
 #
 # Public Functions:
-#   new_branch_force_based_on
-#   branch
+#   all_prune
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 
-def new_branch_force_based_on(clone, new_branch, base):
-    """Checkout onto a new branch copy of base, overwite existing branch.
+def all_prune(repo):
+    """Fetch from all remotes and prune dead branches.
 
-    :clone: the clone to operate on
-    :new_branch: the name for the new branch
-    :base: the name of the branch to copy
+    :repo: supports 'call'
     :returns: None
 
     """
-    clone.call('checkout', '-B', new_branch, base)
-
-
-def branch(clone, branch):
-    """Checkout onto an existing branch.
-
-    Note that the existing branch may be on a remote, in which case a tracking
-    branch will be set up.
-
-    :clone: the clone to operate on
-    :branch: the string name of the branch
-    :returns: None
-
-    """
-    clone.call('checkout', branch)
+    repo.call('fetch', '--all', '--prune')
 
 
 #------------------------------------------------------------------------------

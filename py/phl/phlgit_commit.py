@@ -1,42 +1,26 @@
-"""Wrapper around 'git checkout'."""
+"""Dependable wrapper for invocations of git commit."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgit_checkout
+# phlgit_commit
 #
 # Public Functions:
-#   new_branch_force_based_on
-#   branch
+#   index
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 
-def new_branch_force_based_on(clone, new_branch, base):
-    """Checkout onto a new branch copy of base, overwite existing branch.
+def index(repo, message):
+    """Create a new commit from the contents of the index.
 
-    :clone: the clone to operate on
-    :new_branch: the name for the new branch
-    :base: the name of the branch to copy
+    :repo: supports 'call'
+    :message: the string message for the commit
     :returns: None
 
     """
-    clone.call('checkout', '-B', new_branch, base)
-
-
-def branch(clone, branch):
-    """Checkout onto an existing branch.
-
-    Note that the existing branch may be on a remote, in which case a tracking
-    branch will be set up.
-
-    :clone: the clone to operate on
-    :branch: the string name of the branch
-    :returns: None
-
-    """
-    clone.call('checkout', branch)
+    repo.call('commit', '-m', message)
 
 
 #------------------------------------------------------------------------------
