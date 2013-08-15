@@ -34,6 +34,7 @@ import phlcon_differential
 # [ G] processUpdateRepo can handle a review without commits on branch
 # [ H] processUpdateRepo can abandon a review when the branch disappears
 # [ I] processUpdateRepo can handle a review with merge conflicts
+# [ J] processUpdateRepo can handle a diff that's too big
 # [  ] processUpdateRepo can handle a review without commits in repo
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
 #------------------------------------------------------------------------------
@@ -47,6 +48,7 @@ import phlcon_differential
 # [ G] test_G_NoCommitsOnBranch
 # [ H] test_H_AbandonRemovedBranch
 # [ I] test_I_MergeConflicts
+# [ J] test_J_DiffTooBig
 #==============================================================================
 
 
@@ -103,6 +105,7 @@ class Test(unittest.TestCase):
         self.assertTrue(self.conduit_data.revisions[0].is_closed())
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
+        self.assertTrue(branch.is_new())
 
     def test_C_NoTestPlan(self):
         branch, branch_data = abdt_branchmock.create_simple_new_review()
@@ -224,10 +227,40 @@ class Test(unittest.TestCase):
         branch_data.has_new_commits = True
 
         # land ok
+        self.conduit_data.accept_the_only_review()
+        abdi_processrepo.process_branches(
+            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self.assertTrue(branch.is_null())
+
+    def test_J_DiffTooBig(self):
+
+        def error_diff(self):
+            raise abdt_exception.LargeDiffException("diff too big", 100, 10)
+
+        # fail to create review
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+        old_diff = branch.make_raw_diff
+        branch.make_raw_diff = types.MethodType(error_diff, branch)
+        abdi_processrepo.process_branches(
+            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self.assertFalse(branch.is_status_bad_pre_review())
+        self.assertFalse(branch.is_status_bad_land())
+        self.assertTrue(branch.is_status_bad())
+
+        # fix the large diff
+        branch.make_raw_diff = old_diff
+        branch_data.has_new_commits = True
+
+        # update the review ok
         abdi_processrepo.process_branches(
             [branch], self.conduit, self.mailer, self.plugin_manager)
         self.assertFalse(branch.is_status_bad())
 
+        # land ok
+        self.conduit_data.accept_the_only_review()
+        abdi_processrepo.process_branches(
+            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self.assertTrue(branch.is_null())
 
 # factors affecting a review:
 #  age of the revisions

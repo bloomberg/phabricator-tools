@@ -359,6 +359,7 @@ class BranchMock(object):
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
         self._data.status = None
+        self._data.is_null = True
         return "landing message"
 
 

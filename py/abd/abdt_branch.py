@@ -334,6 +334,9 @@ class Branch(object):
         self._clone.push_delete(self.review_branch_name())
         # TODO: we probably want to do a better job of cleaning up locally
 
+        self._review_branch = None
+        self._tracking_branch = None
+
         return result
 
     def _make_git_context(self):

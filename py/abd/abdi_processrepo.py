@@ -163,13 +163,15 @@ def land(conduit, branch):
     # compose the commit message
     message = conduit.get_commit_message(review_id)
 
+    review_branch_name = branch.review_branch_name()
+    base_branch_name = branch.base_branch_name()
     land_message = branch.land(name, email, message)
 
     print "- commenting on revision " + str(review_id)
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.landedReview(
-        branch.review_branch_name(),
-        branch.base_branch_name(),
+        review_branch_name,
+        base_branch_name,
         land_message)
 
     conduit.close_revision(review_id)
