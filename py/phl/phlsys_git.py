@@ -8,17 +8,40 @@
 #   GitClone
 #    .call
 #
+# Public Functions:
+#   tmprepo_context
+#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import contextlib
 import os
 
+import phlsys_fs
 import phlsys_subprocess
 
+
+@contextlib.contextmanager
+def tmprepo_context():
+    """Return a newly created GitClone, remove when expired.
+
+    Usage examples:
+
+        Create a temporary repo:
+        >>> with tmprepo_context() as clone:
+        ...     status = clone.call("rev-parse", "--is-inside-work-tree")
+        ...     status.strip().lower() == 'true'
+        True
+
+    """
+    with phlsys_fs.tmpdir_context() as tmpdir:
+        clone = GitClone(tmpdir)
+        clone.call("init")
+        yield clone
+
+
 # TODO: add support for user.name and user.email to git clone
-
-
 class GitClone():
 
     def __init__(self, workingDir):
