@@ -143,7 +143,7 @@ class Test(unittest.TestCase):
         filename = 'new_on_branch'
         self._create_new_file(self.repo_dev, filename)
         self.repo_dev.call('add', filename)
-        phlgit_commit.index(self.repo_dev, filename)
+        phlgit_commit.index(self.repo_dev, message=filename)
         phlgit_push.branch(self.repo_dev, branch_name)
 
         # check for new stuff as arcyd
@@ -153,7 +153,15 @@ class Test(unittest.TestCase):
         self.assertIn(filename, branch.make_raw_diff())
         branch.mark_ok_in_review()
         self.assertIs(branch.has_new_commits(), False)
+
+        # exercise queries a bit
         self.assertIn(filename, branch.make_raw_diff())
+        self.assertIn(filename, branch.make_message_digest())
+        self.assertEqual(
+            branch.get_commit_message_from_tip().strip(),
+            filename)
+        self.assertTrue(len(branch.get_any_author_emails()) > 0)
+        self.assertTrue(len(branch.get_author_names_emails()) > 0)
 
         # check for new stuff as arcyd again
         phlgit_fetch.all_prune(self.clone_arcyd)
@@ -164,7 +172,7 @@ class Test(unittest.TestCase):
         filename = 'new_on_master'
         self._create_new_file(self.repo_dev, filename)
         self.repo_dev.call('add', filename)
-        phlgit_commit.index(self.repo_dev, filename)
+        phlgit_commit.index(self.repo_dev, message=filename)
         phlgit_push.branch(self.repo_dev, 'master')
 
         # check for new stuff as arcyd
