@@ -207,7 +207,7 @@ class Clone(object):
                 working_branch = abdt_gittypes.makeGitWorkingBranch(
                     b, self._remote)
                 abandoned_list.append(
-                    abdt_branch.ReviewTrackingBranchPair(
+                    abdt_branch.Branch(
                         self, None, working_branch, lander))
 
     def _add_paired_branches(
@@ -228,7 +228,7 @@ class Clone(object):
                         working_branch, self._remote)
 
                 paired.append(
-                    abdt_branch.ReviewTrackingBranchPair(
+                    abdt_branch.Branch(
                         self, review_branch, working_branch, lander))
 
     @property

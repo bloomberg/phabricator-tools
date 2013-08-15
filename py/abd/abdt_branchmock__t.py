@@ -12,7 +12,7 @@ import abdt_branchmock
 # cover those concerns.
 #
 # Concerns:
-# [ B] public interface of mock matches abdt_branch.ReviewTrackingBranchPair
+# [ B] public interface of mock matches abdt_branch.Branch
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
@@ -32,7 +32,7 @@ class Test(unittest.TestCase):
         abdt_branchmock.create_simple_new_review()
 
     def test_B_InterfaceMatchesRealBranch(self):
-        real_interface = abdt_branch.ReviewTrackingBranchPair.__dict__.keys()
+        real_interface = abdt_branch.Branch.__dict__.keys()
         real_interface = set([i for i in real_interface if i[0] != '_'])
         mock_interface = abdt_branchmock.BranchMock.__dict__.keys()
         mock_interface = set([i for i in mock_interface if i[0] != '_'])

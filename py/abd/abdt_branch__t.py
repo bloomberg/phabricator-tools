@@ -229,7 +229,7 @@ class Test(unittest.TestCase):
         review_branch = abdt_naming.makeReviewBranchFromName(branch_name)
         review_branch = abdt_gittypes.makeGitReviewBranch(
             review_branch, 'origin')
-        branch = abdt_branch.ReviewTrackingBranchPair(
+        branch = abdt_branch.Branch(
             self.clone_arcyd, review_branch, None, None)
 
         self._assert_branch_is_new(branch, branch_name, base)

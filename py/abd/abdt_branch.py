@@ -5,7 +5,7 @@
 # abdt_branch
 #
 # Public Classes:
-#   ReviewTrackingBranchPair
+#   Branch
 #    .is_abandoned
 #    .is_null
 #    .is_new
@@ -53,7 +53,7 @@ import phlgitu_ref
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
 
 
-class ReviewTrackingBranchPair(object):
+class Branch(object):
 
     def __init__(self, clone, review_branch, tracking_branch, lander):
         """Create a new relationship tracker for the supplied branch names.
