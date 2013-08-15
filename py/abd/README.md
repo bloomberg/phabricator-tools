@@ -25,6 +25,8 @@ Abstraction for Arcyd's conduit operations.
 Operations combining conduit with git.
 * `abdt_conduitmock.py` -
 Abstraction for Arcyd's conduit operations.
+* `abdt_differ.py` -
+Generate git diffs between branches suitable for Differential reviews.
 * `abdt_exception.py` -
 Exception hierarchy for abd user and system errors.
 * `abdt_git.py` -

@@ -38,6 +38,7 @@
 # =============================================================================
 # TODO: write test driver
 
+import abdt_differ
 import abdt_exception
 import abdt_gittypes
 import abdt_lander
@@ -48,10 +49,8 @@ import abdt_workingbranch
 import phlgit_log
 import phlgitu_ref
 
-# TODO: allow these to be passed in
+# TODO: allow this to be passed in
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
-_DIFF_CONTEXT_LINES = 1000
-_LESS_DIFF_CONTEXT_LINES = 100
 
 
 class ReviewTrackingBranchPair(object):
@@ -218,12 +217,6 @@ class ReviewTrackingBranchPair(object):
             message += r.message
         return message
 
-    def _make_raw_diff_helper(self, context=None):
-        return self._clone.raw_diff_range(
-            self._review_branch.remote_base,
-            self._review_branch.remote_branch,
-            context)
-
     def make_raw_diff(self):
         """Return a string raw diff of the changes on the branch.
 
@@ -231,30 +224,11 @@ class ReviewTrackingBranchPair(object):
         to reduce the diff size by reducing the amount of context.
 
         """
-        rawDiff = self._make_raw_diff_helper(_DIFF_CONTEXT_LINES)
-
-        if not rawDiff:
-            raise abdt_exception.AbdUserException(
-                str(
-                    "no difference from "
-                    + self._review_branch.base
-                    + " to "
-                    + self._review_branch.branch))
-
-        # if the diff is too big then regen with less context
-        if len(rawDiff) >= _MAX_DIFF_SIZE:
-            rawDiff = self._make_raw_diff_helper(_LESS_DIFF_CONTEXT_LINES)
-
-        # if the diff is still too big then regen with no context
-        if len(rawDiff) >= _MAX_DIFF_SIZE:
-            rawDiff = self._make_raw_diff_helper()
-
-        # if the diff is still too big then error
-        if len(rawDiff) >= _MAX_DIFF_SIZE:
-            raise abdt_exception.LargeDiffException(
-                "diff too big", len(rawDiff), _MAX_DIFF_SIZE)
-
-        return rawDiff
+        return abdt_differ.make_raw_diff(
+            self._clone,
+            self._review_branch.remote_base,
+            self._review_branch.remote_branch,
+            _MAX_DIFF_SIZE)
 
     def _is_based_on(self, name, base):
         # TODO: actually do this

@@ -29,7 +29,7 @@
 # [ A] test_A_Breathing
 # [ B] test_B_UntrackedBranch
 # [ C] test_C_MoveBetweenAllMarkedStates
-# [ D] test_D_HasNewCommits
+# [ D] test_D_BadUnicodeDiff
 #==============================================================================
 
 import os
@@ -128,6 +128,9 @@ class Test(unittest.TestCase):
                     # print '', initial.__name__
                     # print '', transition1.__name__
                     # print '', transition2.__name__
+
+    def test_D_BadUnicodeDiff(self):
+        base, branch_name, branch = self._setup_for_untracked_branch()
 
     def _create_new_file(self, repo, filename):
         open(os.path.join(repo.working_dir, filename), 'a').close()
