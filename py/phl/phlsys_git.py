@@ -7,6 +7,7 @@
 # Public Classes:
 #   GitClone
 #    .call
+#    .working_dir
 #
 # Public Functions:
 #   tmprepo_context
@@ -42,7 +43,7 @@ def tmprepo_context():
 
 
 # TODO: add support for user.name and user.email to git clone
-class GitClone():
+class GitClone(object):
 
     def __init__(self, workingDir):
         self._workingDir = os.path.abspath(workingDir)
@@ -55,6 +56,10 @@ class GitClone():
             'git', *args,
             stdin=stdin, workingDir=self._workingDir)
         return result.stdout
+
+    @property
+    def working_dir(self):
+        return self._workingDir
 
 
 #------------------------------------------------------------------------------

@@ -20,6 +20,7 @@
 #    .call
 #    .get_remote
 #    .get_managed_branches
+#    .working_dir
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -229,6 +230,10 @@ class Clone(object):
                 paired.append(
                     abdt_branch.ReviewTrackingBranchPair(
                         self, review_branch, working_branch, lander))
+
+    @property
+    def working_dir(self):
+        return self._clone.working_dir
 
 
 #------------------------------------------------------------------------------

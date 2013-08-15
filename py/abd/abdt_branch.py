@@ -60,8 +60,8 @@ class ReviewTrackingBranchPair(object):
         """Create a new relationship tracker for the supplied branch names.
 
         :clone: a Git clone to delegate to
-        :review_branch: the string name of the author's branch
-        :tracking_branch: the string name of Arcyd's branch
+        :review_branch: the abdt_gittypes.GitReviewBranch
+        :tracking_branch: the abdt_gittypes.GitWorkingBranch
         :lander: a lander conformant to abdt_lander
 
         """
@@ -69,39 +69,74 @@ class ReviewTrackingBranchPair(object):
         self._review_branch = review_branch
         self._tracking_branch = tracking_branch
         self._lander = lander
+        assert self._review_branch_valid_or_none()
+        assert self._tracking_branch_valid_or_none()
+
+    def _review_branch_valid_or_none(self):
+        if not self._has_review_branch():
+            return True
+        else:
+            return isinstance(
+                self._review_branch,
+                abdt_gittypes.GitReviewBranch)
+
+    def _tracking_branch_valid_or_none(self):
+        if not self._has_tracking_branch():
+            return True
+        else:
+            return isinstance(
+                self._tracking_branch,
+                abdt_gittypes.GitWorkingBranch)
+
+    def _has_review_branch(self):
+        return self._review_branch is not None
+
+    def _has_tracking_branch(self):
+        return self._tracking_branch is not None
 
     def is_abandoned(self):
         """Return True if the author's branch no longer exists."""
-        return not self._review_branch and self._tracking_branch
+        return not self._has_review_branch() and self._has_tracking_branch()
 
     def is_null(self):
         """Return True if we don't have any data."""
-        return not self._review_branch and not self._tracking_branch
+        no_review_branch = not self._has_review_branch()
+        no_tracking_branch = not self._has_tracking_branch()
+        return no_review_branch and no_tracking_branch
 
     def is_new(self):
         """Return True if we haven't marked the author's branch."""
-        return self._review_branch and not self._tracking_branch
+        return self._has_review_branch() and not self._has_tracking_branch()
 
     def is_status_bad_pre_review(self):
         """Return True if the author's branch is marked 'bad pre-review'."""
-        return self._tracking_branch and abdt_naming.isStatusBadPreReview(
-            self._tracking_branch)
+        if self._has_tracking_branch():
+            return abdt_naming.isStatusBadPreReview(self._tracking_branch)
+        else:
+            return False
 
     def is_status_bad_land(self):
         """Return True if the author's branch is marked 'bad land'."""
-        return self._tracking_branch and abdt_naming.isStatusBadLand(
-            self._tracking_branch)
+        if self._has_tracking_branch():
+            return abdt_naming.isStatusBadLand(self._tracking_branch)
+        else:
+            return False
 
     def is_status_bad(self):
         """Return True if the author's branch is marked any bad status."""
-        return self._tracking_branch and abdt_naming.isStatusBad(
-            self._tracking_branch)
+        if self._has_tracking_branch():
+            return abdt_naming.isStatusBad(self._tracking_branch)
+        else:
+            return False
 
     def has_new_commits(self):
         """Return True if the author's branch is different since marked."""
-        return not self._clone.is_identical(
-            self._review_branch.remote_branch,
-            self._tracking_branch.remote_branch)
+        if self.is_new():
+            return True
+        else:
+            return not self._clone.is_identical(
+                self._review_branch.remote_branch,
+                self._tracking_branch.remote_branch)
 
     def base_branch_name(self):
         """Return the string name of the branch the review will land on."""
@@ -250,76 +285,56 @@ class ReviewTrackingBranchPair(object):
 
     def abandon(self):
         """Remove information associated with the abandoned review branch."""
-        # TODO: raise if the branch is not actually abandoned
+        # TODO: raise if the branch is not actually abandoned by the user
         self._push_delete_tracking_branch()
         self._tracking_branch = None
 
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
         self._push_delete_tracking_branch()
+        self._tracking_branch = None
 
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        abdt_workingbranch.pushBadLand(
-            context,
+        self._tracking_branch = abdt_workingbranch.pushBadLand(
+            self._make_git_context(),
             self._review_branch,
             self._tracking_branch)
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        abdt_workingbranch.pushBadInReview(
-            context,
+        self._tracking_branch = abdt_workingbranch.pushBadInReview(
+            self._make_git_context(),
             self._review_branch,
             self._tracking_branch)
 
     def mark_new_bad_in_review(self, review_id):
         """Mark the current version of the review branch as 'bad in review'."""
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        wb = abdt_gittypes.makeGitWorkingBranchFromParts(
-            abdt_naming.WB_STATUS_BAD_INREVIEW,
-            self._review_branch.description,
-            self._review_branch.base,
-            review_id,
-            context.remote)
-        self._tracking_branch = wb
-        self.mark_bad_in_review()
+        self._tracking_branch = abdt_workingbranch.pushBadNewInReview(
+            self._make_git_context(),
+            self._review_branch,
+            review_id)
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
-        abdt_workingbranch.pushBadPreReview(context, self._review_branch)
+        self._tracking_branch = abdt_workingbranch.pushBadPreReview(
+            self._make_git_context(),
+            self._review_branch)
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
-        status = abdt_naming.WB_STATUS_OK
-        context = abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), None)
         self._tracking_branch = abdt_workingbranch.pushStatus(
-            context,
+            self._make_git_context(),
             self._review_branch,
             self._tracking_branch,
-            status)
+            abdt_naming.WB_STATUS_OK)
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""
-        self._tracking_branch = abdt_naming.makeWorkingBranchName(
-            abdt_naming.WB_STATUS_OK,
-            self._review_branch.description,
-            self._review_branch.base,
+        self._tracking_branch = abdt_workingbranch.pushOkNewReview(
+            self._make_git_context(),
+            self._review_branch,
             revision_id)
-        self._tracking_branch = abdt_naming.makeWorkingBranchFromName(
-            self._tracking_branch)
-        self._tracking_branch = abdt_gittypes.makeGitWorkingBranch(
-            self._tracking_branch, self._clone.get_remote())
-        self._clone.push_asymmetrical(
-            self._review_branch.remote_branch,
-            phlgitu_ref.make_local(self._tracking_branch.branch))
 
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
@@ -348,6 +363,9 @@ class ReviewTrackingBranchPair(object):
 
         return result
 
+    def _make_git_context(self):
+        return abdt_gittypes.GitContext(
+            self._clone, self._clone.get_remote(), branches=None)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

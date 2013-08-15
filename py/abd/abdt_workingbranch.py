@@ -5,9 +5,13 @@
 # abdt_workingbranch
 #
 # Public Functions:
+#   push_new_status_branch
 #   pushStatus
+#   pushOkNewReview
+#   pushOkReview
 #   pushBadPreReview
 #   pushBadInReview
+#   pushBadNewInReview
 #   pushBadLand
 #
 # -----------------------------------------------------------------------------
@@ -20,9 +24,40 @@ import phlgit_push
 import phlgitu_ref
 
 
+def push_new_status_branch(gitContext, review_branch, status, revision_id):
+    clone = gitContext.clone
+    remote = gitContext.remote
+
+    if revision_id is None:
+        revision_id = "none"
+    else:
+        revision_id = str(revision_id)
+
+    working_branch_name = abdt_naming.makeWorkingBranchName(
+        status,
+        review_branch.description,
+        review_branch.base,
+        revision_id)
+
+    working_branch = abdt_naming.makeWorkingBranchFromName(
+        working_branch_name)
+
+    working_branch = abdt_gittypes.makeGitWorkingBranch(
+        working_branch, gitContext.remote)
+
+    phlgit_push.push_asymmetrical(
+        clone,
+        phlgitu_ref.make_remote(review_branch.branch, remote),
+        phlgitu_ref.make_local(working_branch_name),
+        remote)
+
+    return working_branch
+
+
 def pushStatus(gitContext, review_branch, working_branch, status):
     clone = gitContext.clone
     remote = gitContext.remote
+
     old_branch = working_branch.branch
 
     working_branch = abdt_gittypes.makeWorkingBranchWithStatus(
@@ -46,32 +81,54 @@ def pushStatus(gitContext, review_branch, working_branch, status):
     return working_branch
 
 
+def pushOkNewReview(gitContext, review_branch, revision_id):
+    return push_new_status_branch(
+        gitContext,
+        review_branch,
+        abdt_naming.WB_STATUS_OK,
+        revision_id)
+
+
+def pushOkReview(gitContext, review_branch, working_branch):
+    return push_new_status_branch(
+        gitContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_OK)
+
+
 def pushBadPreReview(gitContext, review_branch):
-    working_branch_name = abdt_naming.makeWorkingBranchName(
+    return push_new_status_branch(
+        gitContext,
+        review_branch,
         abdt_naming.WB_STATUS_BAD_PREREVIEW,
-        review_branch.description, review_branch.base, "none")
-    phlgit_push.push_asymmetrical(
-        gitContext.clone,
-        phlgitu_ref.make_remote(
-            review_branch.branch, gitContext.remote),
-        phlgitu_ref.make_local(working_branch_name),
-        gitContext.remote)
+        None)
 
 
 def pushBadInReview(gitContext, review_branch, working_branch):
-    pushStatus(
+    return pushStatus(
         gitContext,
         review_branch,
         working_branch,
         abdt_naming.WB_STATUS_BAD_INREVIEW)
 
 
+def pushBadNewInReview(gitContext, review_branch, revision_id):
+    return push_new_status_branch(
+        gitContext,
+        review_branch,
+        abdt_naming.WB_STATUS_BAD_INREVIEW,
+        revision_id)
+
+
 def pushBadLand(gitContext, review_branch, working_branch):
-    pushStatus(
+    return pushStatus(
         gitContext,
         review_branch,
         working_branch,
         abdt_naming.WB_STATUS_BAD_LAND)
+
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #
