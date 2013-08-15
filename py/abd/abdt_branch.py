@@ -323,11 +323,10 @@ class ReviewTrackingBranchPair(object):
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
-        self._tracking_branch = abdt_workingbranch.pushStatus(
+        self._tracking_branch = abdt_workingbranch.pushOkReview(
             self._make_git_context(),
             self._review_branch,
-            self._tracking_branch,
-            abdt_naming.WB_STATUS_OK)
+            self._tracking_branch)
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""

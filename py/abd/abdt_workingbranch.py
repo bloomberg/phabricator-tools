@@ -5,8 +5,6 @@
 # abdt_workingbranch
 #
 # Public Functions:
-#   push_new_status_branch
-#   pushStatus
 #   pushOkNewReview
 #   pushOkReview
 #   pushBadPreReview
@@ -24,7 +22,7 @@ import phlgit_push
 import phlgitu_ref
 
 
-def push_new_status_branch(gitContext, review_branch, status, revision_id):
+def _push_new_status_branch(gitContext, review_branch, status, revision_id):
     clone = gitContext.clone
     remote = gitContext.remote
 
@@ -54,7 +52,7 @@ def push_new_status_branch(gitContext, review_branch, status, revision_id):
     return working_branch
 
 
-def pushStatus(gitContext, review_branch, working_branch, status):
+def _push_status(gitContext, review_branch, working_branch, status):
     clone = gitContext.clone
     remote = gitContext.remote
 
@@ -82,7 +80,7 @@ def pushStatus(gitContext, review_branch, working_branch, status):
 
 
 def pushOkNewReview(gitContext, review_branch, revision_id):
-    return push_new_status_branch(
+    return _push_new_status_branch(
         gitContext,
         review_branch,
         abdt_naming.WB_STATUS_OK,
@@ -90,7 +88,7 @@ def pushOkNewReview(gitContext, review_branch, revision_id):
 
 
 def pushOkReview(gitContext, review_branch, working_branch):
-    return push_new_status_branch(
+    return _push_status(
         gitContext,
         review_branch,
         working_branch,
@@ -98,7 +96,7 @@ def pushOkReview(gitContext, review_branch, working_branch):
 
 
 def pushBadPreReview(gitContext, review_branch):
-    return push_new_status_branch(
+    return _push_new_status_branch(
         gitContext,
         review_branch,
         abdt_naming.WB_STATUS_BAD_PREREVIEW,
@@ -106,7 +104,7 @@ def pushBadPreReview(gitContext, review_branch):
 
 
 def pushBadInReview(gitContext, review_branch, working_branch):
-    return pushStatus(
+    return _push_status(
         gitContext,
         review_branch,
         working_branch,
@@ -114,7 +112,7 @@ def pushBadInReview(gitContext, review_branch, working_branch):
 
 
 def pushBadNewInReview(gitContext, review_branch, revision_id):
-    return push_new_status_branch(
+    return _push_new_status_branch(
         gitContext,
         review_branch,
         abdt_naming.WB_STATUS_BAD_INREVIEW,
@@ -122,7 +120,7 @@ def pushBadNewInReview(gitContext, review_branch, revision_id):
 
 
 def pushBadLand(gitContext, review_branch, working_branch):
-    return pushStatus(
+    return _push_status(
         gitContext,
         review_branch,
         working_branch,
