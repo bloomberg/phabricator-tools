@@ -296,41 +296,41 @@ class ReviewTrackingBranchPair(object):
 
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
-        self._tracking_branch = abdt_workingbranch.pushBadLand(
+        self._tracking_branch = abdt_workingbranch.push_bad_land(
             self._make_git_context(),
             self._review_branch,
             self._tracking_branch)
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
-        self._tracking_branch = abdt_workingbranch.pushBadInReview(
+        self._tracking_branch = abdt_workingbranch.push_bad_in_review(
             self._make_git_context(),
             self._review_branch,
             self._tracking_branch)
 
     def mark_new_bad_in_review(self, review_id):
         """Mark the current version of the review branch as 'bad in review'."""
-        self._tracking_branch = abdt_workingbranch.pushBadNewInReview(
+        self._tracking_branch = abdt_workingbranch.push_bad_new_in_review(
             self._make_git_context(),
             self._review_branch,
             review_id)
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
-        self._tracking_branch = abdt_workingbranch.pushBadPreReview(
+        self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
             self._make_git_context(),
             self._review_branch)
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
-        self._tracking_branch = abdt_workingbranch.pushOkReview(
+        self._tracking_branch = abdt_workingbranch.push_ok_in_review(
             self._make_git_context(),
             self._review_branch,
             self._tracking_branch)
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""
-        self._tracking_branch = abdt_workingbranch.pushOkNewReview(
+        self._tracking_branch = abdt_workingbranch.push_ok_new_in_review(
             self._make_git_context(),
             self._review_branch,
             revision_id)

@@ -5,12 +5,12 @@
 # abdt_workingbranch
 #
 # Public Functions:
-#   pushOkNewReview
-#   pushOkReview
-#   pushBadPreReview
-#   pushBadInReview
-#   pushBadNewInReview
-#   pushBadLand
+#   push_bad_pre_review
+#   push_ok_new_in_review
+#   push_ok_in_review
+#   push_bad_in_review
+#   push_bad_new_in_review
+#   push_bad_land
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -20,6 +20,54 @@ import abdt_gittypes
 import abdt_naming
 import phlgit_push
 import phlgitu_ref
+
+
+def push_bad_pre_review(gitContext, review_branch):
+    return _push_new_status_branch(
+        gitContext,
+        review_branch,
+        abdt_naming.WB_STATUS_BAD_PREREVIEW,
+        None)
+
+
+def push_ok_new_in_review(gitContext, review_branch, revision_id):
+    return _push_new_status_branch(
+        gitContext,
+        review_branch,
+        abdt_naming.WB_STATUS_OK,
+        revision_id)
+
+
+def push_ok_in_review(gitContext, review_branch, working_branch):
+    return _push_status(
+        gitContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_OK)
+
+
+def push_bad_in_review(gitContext, review_branch, working_branch):
+    return _push_status(
+        gitContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_BAD_INREVIEW)
+
+
+def push_bad_new_in_review(gitContext, review_branch, revision_id):
+    return _push_new_status_branch(
+        gitContext,
+        review_branch,
+        abdt_naming.WB_STATUS_BAD_INREVIEW,
+        revision_id)
+
+
+def push_bad_land(gitContext, review_branch, working_branch):
+    return _push_status(
+        gitContext,
+        review_branch,
+        working_branch,
+        abdt_naming.WB_STATUS_BAD_LAND)
 
 
 def _push_new_status_branch(gitContext, review_branch, status, revision_id):
@@ -77,54 +125,6 @@ def _push_status(gitContext, review_branch, working_branch, status):
             remote)
 
     return working_branch
-
-
-def pushOkNewReview(gitContext, review_branch, revision_id):
-    return _push_new_status_branch(
-        gitContext,
-        review_branch,
-        abdt_naming.WB_STATUS_OK,
-        revision_id)
-
-
-def pushOkReview(gitContext, review_branch, working_branch):
-    return _push_status(
-        gitContext,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_OK)
-
-
-def pushBadPreReview(gitContext, review_branch):
-    return _push_new_status_branch(
-        gitContext,
-        review_branch,
-        abdt_naming.WB_STATUS_BAD_PREREVIEW,
-        None)
-
-
-def pushBadInReview(gitContext, review_branch, working_branch):
-    return _push_status(
-        gitContext,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_BAD_INREVIEW)
-
-
-def pushBadNewInReview(gitContext, review_branch, revision_id):
-    return _push_new_status_branch(
-        gitContext,
-        review_branch,
-        abdt_naming.WB_STATUS_BAD_INREVIEW,
-        revision_id)
-
-
-def pushBadLand(gitContext, review_branch, working_branch):
-    return _push_status(
-        gitContext,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_BAD_LAND)
 
 
 #------------------------------------------------------------------------------
