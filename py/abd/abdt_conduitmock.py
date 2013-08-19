@@ -45,8 +45,6 @@ import abdt_exception
 def _mock_to_str(mock):
     return "conduitmock"
 
-_conduitmock_traced_method = phlsys_tracedecorator.method_tracer(_mock_to_str)
-
 
 class _RevisionStates(object):
     abandoned = 'abandoned'
@@ -170,8 +168,8 @@ class ConduitMock(object):
         self._data = data
         if self._data is None:
             self._data = ConduitMockData()
+        phlsys_tracedecorator.decorate_object_methods(self, _mock_to_str)
 
-    @_conduitmock_traced_method
     def create_comment(self, revision, message, silent=False):
         """Make a comment on the specified 'revision'.
 
@@ -188,7 +186,6 @@ class ConduitMock(object):
         str(message)  # test that message can be converted to string
         self._data.set_changed()
 
-    @_conduitmock_traced_method
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
 
@@ -198,7 +195,6 @@ class ConduitMock(object):
         """
         return self._data.create_empty_revision_as_user(username)
 
-    @_conduitmock_traced_method
     def get_commit_message(self, revisionid):
         """Return the string commit message appropriate for supplied revision.
 
@@ -209,7 +205,6 @@ class ConduitMock(object):
         self._data.assert_is_revision(revisionid)
         return 'DUMMY COMMIT MESSAGE'
 
-    @_conduitmock_traced_method
     def create_revision_as_user(
             self, unused_raw_diff, unused_fields, username):
         """Return the id of a newly created revision based on specified args.
@@ -225,7 +220,6 @@ class ConduitMock(object):
         """
         return self.create_empty_revision_as_user(username)
 
-    @_conduitmock_traced_method
     def query_users_from_emails(self, emails):
         """Return a list of username strings based on the provided emails.
 
@@ -245,7 +239,6 @@ class ConduitMock(object):
             usernames.append(next_username)
         return usernames
 
-    @_conduitmock_traced_method
     def parse_commit_message(self, unused_message):
         """Return a ParseCommitMessageResponse based on 'message'.
 
@@ -258,7 +251,6 @@ class ConduitMock(object):
         return phlcon_differential.ParseCommitMessageResponse(
             fields=fields, errors=errors)
 
-    @_conduitmock_traced_method
     def is_review_accepted(self, revisionid):
         """Return True if the supplied 'revisionid' is in 'accepted' status.
 
@@ -269,7 +261,6 @@ class ConduitMock(object):
         revision = self._data.get_revision(revisionid)
         return revision.status == 'accepted'
 
-    @_conduitmock_traced_method
     def update_revision(self, revisionid, unused_raw_diff, unused_message):
         """Update an existing Differential revision with a new diff.
 
@@ -294,7 +285,6 @@ class ConduitMock(object):
 
         self._data.set_changed()
 
-    @_conduitmock_traced_method
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
 
@@ -307,7 +297,6 @@ class ConduitMock(object):
         revision.status = 'revision'
         self._data.set_changed()
 
-    @_conduitmock_traced_method
     def close_revision(self, revisionid):
         """Set an existing Differential revision to 'closed'.
 
@@ -320,7 +309,6 @@ class ConduitMock(object):
         revision.status = 'closed'
         self._data.set_changed()
 
-    @_conduitmock_traced_method
     def abandon_revision(self, revisionid):
         """Set an existing Differential revision to 'abandoned'.
 
@@ -333,7 +321,6 @@ class ConduitMock(object):
         revision.status = _RevisionStates.abandoned
         self._data.set_changed()
 
-    @_conduitmock_traced_method
     def accept_revision_as_user(self, revisionid, username):
         """Set an existing Differential revision to 'closed'.
 
@@ -349,7 +336,6 @@ class ConduitMock(object):
         revision.status = 'accepted'
         self._data.set_changed()
 
-    @_conduitmock_traced_method
     def commandeer_revision_as_user(self, revisionid, username):
         """Change the author of a revision to the specified 'username'.
 

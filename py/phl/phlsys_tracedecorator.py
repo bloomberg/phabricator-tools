@@ -6,13 +6,16 @@
 #
 # Public Functions:
 #   method_tracer
+#   decorate_object_methods
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 import functools
+import inspect
 import pprint
+import types
 
 
 def method_tracer(object_to_string):
@@ -23,31 +26,31 @@ def method_tracer(object_to_string):
 
     e.g.
 
-    >>> class ExampleClass(object):
-    ...     @method_tracer(lambda x: 'Example')
-    ...     def example_method(self):
-    ...         pass
-    >>> c = ExampleClass()
-    >>> c.example_method()
-    Example.example_method() -> None
+        >>> class ExampleClass(object):
+        ...     @method_tracer(lambda x: 'Example')
+        ...     def example_method(self):
+        ...         pass
+        >>> c = ExampleClass()
+        >>> c.example_method()
+        Example.example_method() -> None
 
-    >>> class ExampleClass2(object):
-    ...     @method_tracer(lambda x: 'Example2')
-    ...     def example_method2(self, int_param):
-    ...         return int_param / 2
-    >>> d = ExampleClass2()
-    >>> d.example_method2(42)
-    Example2.example_method2(42) -> 21
-    21
+        >>> class ExampleClass2(object):
+        ...     @method_tracer(lambda x: 'Example2')
+        ...     def example_method2(self, int_param):
+        ...         return int_param / 2
+        >>> d = ExampleClass2()
+        >>> d.example_method2(42)
+        Example2.example_method2(42) -> 21
+        21
 
-    >>> class ExampleClass3(object):
-    ...     @method_tracer(lambda x: 'Example3')
-    ...     def example_method3(self, str_param):
-    ...         return str_param[:5]
-    >>> e = ExampleClass3()
-    >>> e.example_method3("hovercraft")
-    Example3.example_method3('hovercraft') -> 'hover'
-    'hover'
+        >>> class ExampleClass3(object):
+        ...     @method_tracer(lambda x: 'Example3')
+        ...     def example_method3(self, str_param):
+        ...         return str_param[:5]
+        >>> e = ExampleClass3()
+        >>> e.example_method3("hovercraft")
+        Example3.example_method3('hovercraft') -> 'hover'
+        'hover'
 
     """
     def decorator(f):
@@ -61,6 +64,33 @@ def method_tracer(object_to_string):
             return ret
         return wrapper
     return decorator
+
+
+def decorate_object_methods(object_, object_to_string):
+    """Decorate all the methods of the supplied object.
+
+    Uses the supplied 'object_to_string' to generate a string summary of the
+    'self' parameter of the called method.
+
+    e.g.
+
+        >>> class ExampleClass(object):
+        ...     def example_method(self):
+        ...         pass
+        >>> c = ExampleClass()
+        >>> decorate_object_methods(c, lambda x: 'Example')
+        >>> c.example_method()
+        Example.example_method() -> None
+
+    See also: phlsys_tracedecorator.method_tracer
+
+    """
+    tracer = method_tracer(object_to_string)
+    for name, attribute in object_.__class__.__dict__.iteritems():
+        if inspect.isfunction(attribute):
+            new_method = types.MethodType(tracer(attribute), object_)
+            object_.__dict__[name] = new_method
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
