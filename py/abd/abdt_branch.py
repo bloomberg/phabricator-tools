@@ -282,12 +282,12 @@ class Branch(object):
             self._review_branch,
             self._tracking_branch)
 
-    def mark_new_bad_in_review(self, review_id):
+    def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
         self._tracking_branch = abdt_workingbranch.push_bad_new_in_review(
             self._make_git_context(),
             self._review_branch,
-            review_id)
+            revision_id)
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""

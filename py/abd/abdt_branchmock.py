@@ -65,7 +65,7 @@ def create_simple_new_review():
         has_new_commits=True,
         base_branch="base",
         review_branch="review",
-        review_id=None,
+        revision_id=None,
         names_emails=[(phldef_conduit.ALICE.user, phldef_conduit.ALICE.email)],
         any_emails=None,
         message_digest="digest",
@@ -122,7 +122,7 @@ class BranchMockData(object):
             has_new_commits,
             base_branch,
             review_branch,
-            review_id,
+            revision_id,
             names_emails,
             any_emails,
             message_digest,
@@ -136,7 +136,7 @@ class BranchMockData(object):
         :has_new_commits: bool result of self.has_new_commits()
         :base_branch: the string result of self.base_branch_name()
         :review_branch: the string result of self.review_branch_name()
-        :review_id: the int result of self.review_id_or_none()
+        :revision_id: the int result of self.review_id_or_none()
         :names_emails: the list result of self.get_author_names_emails()
         :any_emails: list result of self.get_any_emails() if no names_emails
         :message_digest: the string result of self.make_message_digest()
@@ -152,7 +152,7 @@ class BranchMockData(object):
         self.review_branch = review_branch
         self.has_new_commits = has_new_commits
         self.review_branch = review_branch
-        self.review_id = review_id
+        self.revision_id = revision_id
         self.names_emails = names_emails
         self.any_emails = any_emails
         self.message_digest = message_digest
@@ -160,7 +160,7 @@ class BranchMockData(object):
         self.branch_tip_message = branch_tip_message
         self.status = None
 
-        assert isinstance(self.review_id, int) or self.review_id is None
+        assert isinstance(self.revision_id, int) or self.revision_id is None
 
 
 class BranchMock(object):
@@ -219,7 +219,7 @@ class BranchMock(object):
 
     def review_id_or_none(self):
         """Return the int id of the review or 'None' if there isn't one."""
-        return self._data.review_id
+        return self._data.revision_id
 
     def get_author_names_emails(self):
         """Return a list of (name, email) tuples from the branch."""
@@ -301,12 +301,12 @@ class BranchMock(object):
         self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
         self._data.has_new_commits = False
 
-    def mark_new_bad_in_review(self, review_id):
+    def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
         # XXX: from the existence of 'mark_bad_in_review' it seems like
         #      some checking is required here
         self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
-        self._data.review_id = int(review_id)
+        self._data.revision_id = int(revision_id)
         self._data.has_new_commits = False
 
     def mark_bad_pre_review(self):
@@ -321,12 +321,12 @@ class BranchMock(object):
         self._data.status = abdt_naming.WB_STATUS_OK
         self._data.has_new_commits = False
 
-    def mark_ok_new_review(self, review_id):
+    def mark_ok_new_review(self, revision_id):
         # XXX: from the existence of 'mark_ok_in_review' it seems like
         #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
         self._data.status = abdt_naming.WB_STATUS_OK
-        self._data.review_id = int(review_id)
+        self._data.revision_id = int(revision_id)
         self._data.has_new_commits = False
 
     def land(self, author_name, author_email, message):

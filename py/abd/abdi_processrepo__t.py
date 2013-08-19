@@ -145,7 +145,7 @@ class Test(unittest.TestCase):
         abdi_processrepo.process_branches(
             [branch], self.conduit, self.mailer, self.plugin_manager)
 
-        revision = self.conduit_data.get_revision(branch_data.review_id)
+        revision = self.conduit_data.get_revision(branch_data.revision_id)
         revision.set_closed()
         branch_data.has_new_commits = True
 

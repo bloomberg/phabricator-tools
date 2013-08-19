@@ -1,6 +1,6 @@
 """Test suite for abdt_branchmock."""
 
-# import inspect
+import inspect
 import unittest
 
 import abdt_branch
@@ -39,13 +39,13 @@ class Test(unittest.TestCase):
         mock_interface = set([i for i in mock_interface if i[0] != '_'])
         self.assertSetEqual(mock_interface, real_interface)
 
-        # TODO: need to make decorated functions have argspec matching original
-        # for func_name in real_interface:
-        #     real_func = abdt_branch.Branch.__dict__[func_name]
-        #     mock_func = abdt_branchmock.BranchMock.__dict__[func_name]
-        #     self.assertEqual(
-        #         inspect.getargspec(real_func),
-        #         inspect.getargspec(mock_func))
+        for func_name in real_interface:
+            print func_name
+            real_func = abdt_branch.Branch.__dict__[func_name]
+            mock_func = abdt_branchmock.BranchMock.__dict__[func_name]
+            self.assertEqual(
+                inspect.getargspec(real_func),
+                inspect.getargspec(mock_func))
 
 
 #------------------------------------------------------------------------------
