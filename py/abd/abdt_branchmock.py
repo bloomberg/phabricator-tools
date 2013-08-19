@@ -226,10 +226,10 @@ class BranchMock(object):
         return self._data.names_emails
 
     def get_any_author_emails(self):
-        """Return a list of email addresses tuples from the branch.
+        """Return a list of emails from the branch.
 
         If the branch has an invalid base or has no history against the base
-        then return information from the commit pointed to by the branch.
+        then resort to using the whole history.
 
         Useful if 'get_author_names_emails' fails.
 
@@ -254,7 +254,12 @@ class BranchMock(object):
         return self._data.message_digest
 
     def make_raw_diff(self):
-        """Return a string raw diff of the changes on the branch."""
+        """Return a string raw diff of the changes on the branch.
+
+        If the diff would exceed the pre-specified max diff size then take
+        measures to reduce the diff.
+
+        """
         return self._data.raw_diff
 
     def verify_review_branch_base(self):

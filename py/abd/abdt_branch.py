@@ -170,10 +170,10 @@ class Branch(object):
             self._clone, hashes)
 
     def get_any_author_emails(self):
-        """Return a list of (name, email) tuples from the branch.
+        """Return a list of emails from the branch.
 
         If the branch has an invalid base or has no history against the base
-        then return information from the commit pointed to by the branch.
+        then resort to using the whole history.
 
         Useful if 'get_author_names_emails' fails.
 
@@ -220,8 +220,8 @@ class Branch(object):
     def make_raw_diff(self):
         """Return a string raw diff of the changes on the branch.
 
-        If the diff would exceed the _MAX_DIFF_SIZE then take measures
-        to reduce the diff size by reducing the amount of context.
+        If the diff would exceed the pre-specified max diff size then take
+        measures to reduce the diff.
 
         """
         return abdt_differ.make_raw_diff(

@@ -43,9 +43,16 @@ class Test(unittest.TestCase):
             print func_name
             real_func = abdt_branch.Branch.__dict__[func_name]
             mock_func = abdt_branchmock.BranchMock.__dict__[func_name]
+
+            # check that the argument lists match
             self.assertEqual(
                 inspect.getargspec(real_func),
                 inspect.getargspec(mock_func))
+
+            # check that the doc strings match
+            self.assertSequenceEqual(
+                inspect.getdoc(real_func),
+                inspect.getdoc(mock_func))
 
 
 #------------------------------------------------------------------------------
