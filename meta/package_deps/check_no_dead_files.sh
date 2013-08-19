@@ -21,6 +21,13 @@ test_drivers=`cat $needed_file | sed 's/\.py/__t.py/g' | python -c 'import os, s
 # append the dependencies of the test drivers to the list of needed files
 sfood --follow --internal $test_drivers $from_phl | sfood-flatten >> $needed_file
 
+# determine which files are test-drivers for the needed files by guessing a
+# suffix of '__t' and testing if that file exists
+test_drivers=`cat $needed_file | sed 's/\.py/__t.py/g' | python -c 'import os, sys; sys.stdout.writelines([f for f in sys.stdin if os.path.isfile(f.strip())])'`
+
+# append the dependencies of the test drivers to the list of needed files
+sfood --follow --internal $test_drivers $from_phl | sfood-flatten >> $needed_file
+
 # list all of the python source files
 find `pwd` -iname *.py | grep -v '__t' > $all_file
 

@@ -1,7 +1,8 @@
 """Test suite for abdt_branchmock."""
 
-import inspect
 import unittest
+
+import phlsys_compiface
 
 import abdt_branch
 import abdt_branchmock
@@ -33,26 +34,10 @@ class Test(unittest.TestCase):
         abdt_branchmock.create_simple_new_review()
 
     def test_B_InterfaceMatchesRealBranch(self):
-        real_interface = abdt_branch.Branch.__dict__.keys()
-        real_interface = set([i for i in real_interface if i[0] != '_'])
-        mock_interface = abdt_branchmock.BranchMock.__dict__.keys()
-        mock_interface = set([i for i in mock_interface if i[0] != '_'])
-        self.assertSetEqual(mock_interface, real_interface)
-
-        for func_name in real_interface:
-            print func_name
-            real_func = abdt_branch.Branch.__dict__[func_name]
-            mock_func = abdt_branchmock.BranchMock.__dict__[func_name]
-
-            # check that the argument lists match
-            self.assertEqual(
-                inspect.getargspec(real_func),
-                inspect.getargspec(mock_func))
-
-            # check that the doc strings match
-            self.assertSequenceEqual(
-                inspect.getdoc(real_func),
-                inspect.getdoc(mock_func))
+        self.assertTrue(
+            phlsys_compiface.check_public_ifaces_match(
+                abdt_branch.Branch,
+                abdt_branchmock.BranchMock))
 
 
 #------------------------------------------------------------------------------
