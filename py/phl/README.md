@@ -1,6 +1,8 @@
 # phl
 * `phlcon_differential.py` -
 Wrapper to call Phabricator's Differential Conduit API.
+* `phlcon_paste.py` -
+Wrapper to call Phabricator's Paste Conduit API.
 * `phlcon_remarkup.py` -
 Helpers to easily generate properly formatted remarkup.
 * `phlcon_user.py` -
