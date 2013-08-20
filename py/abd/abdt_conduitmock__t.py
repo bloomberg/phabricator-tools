@@ -15,6 +15,8 @@
 
 import unittest
 
+import phlsys_compiface
+
 import abdt_conduit
 import abdt_conduitmock
 
@@ -31,11 +33,10 @@ class Test(unittest.TestCase):
         pass
 
     def test_B_InterfaceMatchesRealConduit(self):
-        real_interface = abdt_conduit.Conduit.__dict__.keys()
-        real_interface = set([i for i in real_interface if i[0] != '_'])
-        mock_interface = abdt_conduitmock.ConduitMock.__dict__.keys()
-        mock_interface = set([i for i in mock_interface if i[0] != '_'])
-        self.assertSetEqual(mock_interface, real_interface)
+        self.assertTrue(
+            phlsys_compiface.check_public_ifaces_match(
+                abdt_conduit.Conduit,
+                abdt_conduitmock.ConduitMock))
 
 
 #------------------------------------------------------------------------------

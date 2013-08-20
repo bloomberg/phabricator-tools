@@ -206,7 +206,7 @@ class ConduitMock(object):
         return 'DUMMY COMMIT MESSAGE'
 
     def create_revision_as_user(
-            self, unused_raw_diff, unused_fields, username):
+            self, raw_diff, fields, username):
         """Return the id of a newly created revision based on specified args.
 
         See phlcon_differential.MessageFields for some examples of valid input
@@ -218,6 +218,8 @@ class ConduitMock(object):
         :returns: id of created revision
 
         """
+        assert raw_diff
+        assert fields
         return self.create_empty_revision_as_user(username)
 
     def query_users_from_emails(self, emails):
@@ -239,15 +241,16 @@ class ConduitMock(object):
             usernames.append(next_username)
         return usernames
 
-    def parse_commit_message(self, unused_message):
+    def parse_commit_message(self, message):
         """Return a ParseCommitMessageResponse based on 'message'.
 
         :message: a string message to parse
         :returns: a phlcon_differential.ParseCommitMessageResponse
 
         """
-        fields = None
+        fields = {'title': 'title', 'testPlan': 'test plan'}
         errors = None
+        assert message
         return phlcon_differential.ParseCommitMessageResponse(
             fields=fields, errors=errors)
 
@@ -261,7 +264,7 @@ class ConduitMock(object):
         revision = self._data.get_revision(revisionid)
         return revision.status == 'accepted'
 
-    def update_revision(self, revisionid, unused_raw_diff, unused_message):
+    def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.
 
         :revisionid: id of the Differential revision to update
@@ -271,6 +274,9 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
+
+        assert raw_diff
+        assert message
 
         # match the behaviour asserted by phlcon_differential__t,
         # we can't update a closed review, that's an error
@@ -322,9 +328,9 @@ class ConduitMock(object):
         self._data.set_changed()
 
     def accept_revision_as_user(self, revisionid, username):
-        """Set an existing Differential revision to 'closed'.
+        """Set an existing Differential revision to 'accepted'.
 
-        :revisionid: id of the Differential revision to close
+        :revisionid: id of the Differential revision to accept
         :username: username for the reviewer of the revision
         :returns: None
 
