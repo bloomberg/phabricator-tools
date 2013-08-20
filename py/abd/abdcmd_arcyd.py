@@ -107,6 +107,7 @@ import sys
 import traceback
 
 import abdcmd_multi
+import abdcmd_multionce
 import abdcmd_single
 import phlmail_sender
 import phlsys_sendmail
@@ -149,6 +150,7 @@ def main():
 
     phlsys_subcommand.setup_parser("single", abdcmd_single, subparsers)
     phlsys_subcommand.setup_parser("multi", abdcmd_multi, subparsers)
+    phlsys_subcommand.setup_parser("multi-once", abdcmd_multionce, subparsers)
 
     args = parser.parse_args()
 

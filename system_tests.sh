@@ -36,4 +36,5 @@ function run_test_script() {
     set -e # exit immediately on error
 }
 
+run_test_script "testbed/arcyd" "exercise_arcyd.sh"
 run_test_script "testbed/arcyon" "exercise_arcyon.sh"
