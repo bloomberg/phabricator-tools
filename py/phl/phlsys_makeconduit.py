@@ -44,7 +44,9 @@ def make_conduit(uri=None, user=None, cert=None):
 
 def get_uri_user_cert_explanation(uri, user, cert):
     if uri and user and cert:
-        return uri, user, cert, "all parameters were supplied"
+        explanations = ["all parameters were supplied"]
+        uri = _fix_uri(explanations, uri)
+        return uri, user, cert, '\n\n'.join(explanations)
 
     arcrc, arcrc_path = _load_arcrc()
     arcconfig_path, arcconfig = _load_arcconfig()
