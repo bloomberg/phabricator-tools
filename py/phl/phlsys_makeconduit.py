@@ -46,27 +46,8 @@ def get_uri_user_cert_explanation(uri, user, cert):
     if uri and user and cert:
         return uri, user, cert, "all parameters were supplied"
 
-    # try to load arcrc, if we can find it
-    arcrc_path = phlsys_arcrc.find_arcrc()
-    arcrc = None
-    try:
-        if arcrc_path is not None:
-            arcrc = phlsys_arcrc.load(arcrc_path)
-    except ValueError:
-        pass
-    except EnvironmentError:
-        pass
-
-    # try to load arcconfig, if we can find it
-    arcconfig_path = phlsys_arcconfig.find_arcconfig()
-    arcconfig = None
-    try:
-        if arcconfig_path is not None:
-            arcconfig = phlsys_arcconfig.load(arcconfig_path)
-    except ValueError:
-        pass
-    except EnvironmentError:
-        pass
+    arcrc, arcrc_path = _load_arcrc()
+    arcconfig_path, arcconfig = _load_arcconfig()
 
     install_arc_url = str(
         "http://www.phabricator.com/docs/phabricator/article/"
@@ -192,6 +173,34 @@ def get_uri_user_cert_explanation(uri, user, cert):
         raise Exception("unexpected error determinining uri, user or cert")
 
     return uri, user, cert, '\n\n'.join(explanations)
+
+
+def _load_arcconfig():
+    # try to load arcconfig, if we can find it
+    arcconfig_path = phlsys_arcconfig.find_arcconfig()
+    arcconfig = None
+    try:
+        if arcconfig_path is not None:
+            arcconfig = phlsys_arcconfig.load(arcconfig_path)
+    except ValueError:
+        pass
+    except EnvironmentError:
+        pass
+    return arcconfig_path, arcconfig
+
+
+def _load_arcrc():
+    # try to load arcrc, if we can find it
+    arcrc_path = phlsys_arcrc.find_arcrc()
+    arcrc = None
+    try:
+        if arcrc_path is not None:
+            arcrc = phlsys_arcrc.load(arcrc_path)
+    except ValueError:
+        pass
+    except EnvironmentError:
+        pass
+    return arcrc, arcrc_path
 
 
 def _fix_uri(explanations, uri):
