@@ -1,4 +1,4 @@
-trap "echo FAILED!; exit" ERR
+trap "echo FAILED!; exit 1" ERR
 set -x
 
 arcyon='../../bin/arcyon'

@@ -1,13 +1,11 @@
 ###############################################################################
-## runtime tests ##############################################################
+## unit tests #################################################################
 #                                                                             #
 # The following tests are performed:                                          #
 # :o unit-tests and doc-tests, discovered and run using nose                  #
 #                                                                             #
 # N.B. you can pass parameters to nose, e.g. to re-run failed tests only:     #
 # $ ./runtime_tests.sh --failed                                               #
-#                                                                             #
-# TODO: include smoke tests under testbed/                                    #
 #                                                                             #
 ###############################################################################
 
@@ -27,7 +25,9 @@ libscripts="$(find py -iname '*.py')"
 # 'sudo apt-get install python-coverage' to use the '--with-coverage' option
 # the '--with-profile' option should just work
 # the '--failed' option will run only the tests that failed on the last run
+
 PYTHONPATH=py/phl:testbed/plugins nosetests $libscripts --with-doctest --doctest-tests "$@"
+
 #python -m unittest discover -p "*.py"
 # N.B. can easily run individual tests with nose like so:
 # nosetests abdcmd_default:TestAbd.test_abandonedWorkflow
