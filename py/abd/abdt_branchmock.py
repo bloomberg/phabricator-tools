@@ -203,7 +203,10 @@ class BranchMock(object):
 
     def is_status_bad(self):
         """Return True if the author's branch is marked any bad status."""
-        return self._data.status.startswith(abdt_naming.WB_STATUS_PREFIX_BAD)
+        if self._data.status:
+            return self._data.status.startswith(
+                abdt_naming.WB_STATUS_PREFIX_BAD)
+        return False
 
     def has_new_commits(self):
         """Return True if the author's branch is different since marked."""
@@ -288,11 +291,13 @@ class BranchMock(object):
         self._data.status = None
         self._data.has_new_commits = False
         self._data.is_null = True
+        self._data.revision_id = None
 
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
         self._data.status = None
         self._data.has_new_commits = True
+        self._data.revision_id = None
 
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
@@ -318,6 +323,7 @@ class BranchMock(object):
         """Mark this version of the review branch as 'bad pre review'."""
         self._data.status = abdt_naming.WB_STATUS_BAD_PREREVIEW
         self._data.has_new_commits = False
+        self._data.revision_id = None
 
     def mark_ok_in_review(self):
         # XXX: from the existence of 'mark_ok_new_review' it seems like

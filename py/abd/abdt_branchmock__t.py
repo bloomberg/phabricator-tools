@@ -6,6 +6,7 @@ import phlsys_compiface
 
 import abdt_branch
 import abdt_branchmock
+import abdt_branchtester
 
 #==============================================================================
 #                                   TEST PLAN
@@ -15,10 +16,14 @@ import abdt_branchmock
 #
 # Concerns:
 # [ B] public interface of mock matches abdt_branch.Branch
+# [XB] can test is_abandoned, is_null, is_new
+# [XC] can move between all states without error
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_InterfaceMatchesRealConduit
+# [XB] test_XB_UntrackedBranch
+# [XC] test_XC_MoveBetweenAllMarkedStates
 #==============================================================================
 
 
@@ -38,6 +43,16 @@ class Test(unittest.TestCase):
             phlsys_compiface.check_public_ifaces_match(
                 abdt_branch.Branch,
                 abdt_branchmock.BranchMock))
+
+    def test_XB_UntrackedBranch(self):
+        abdt_branchtester.check_XB_UntrackedBranch(self)
+
+    def test_XC_MoveBetweenAllMarkedStates(self):
+        abdt_branchtester.check_XC_MoveBetweenAllMarkedStates(self)
+
+    def _setup_for_untracked_branch(self):
+        branch, data = abdt_branchmock.create_simple_new_review()
+        return data.base_branch, data.review_branch, branch
 
 
 #------------------------------------------------------------------------------
