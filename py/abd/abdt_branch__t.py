@@ -39,15 +39,11 @@ import shutil
 import tempfile
 import unittest
 
-import phlgit_checkout
-import phlgit_commit
-import phlgit_fetch
-import phlgit_merge
 import phlgit_push
-import phlgit_rebase
 import phlsys_git
 
 import abdt_branch
+import abdt_branchtester
 import abdt_git
 import abdt_gittypes
 import abdt_naming
@@ -80,129 +76,13 @@ class Test(unittest.TestCase):
         pass
 
     def test_B_UntrackedBranch(self):
-        base, branch_name, branch = self._setup_for_untracked_branch()
+        abdt_branchtester.check_B_UntrackedBranch(self)
 
     def test_C_MoveBetweenAllMarkedStates(self):
-        base, branch_name, branch = self._setup_for_untracked_branch()
-
-        next_rev_id = [0]
-        rev_id = [None]
-
-        def ok_new_review():
-            rev_id[0] = next_rev_id[0]
-            next_rev_id[0] += 1
-            branch.mark_ok_new_review(rev_id[0])
-            self._assert_branch_ok_in_review(
-                branch, branch_name, base, rev_id[0])
-
-        def bad_new_in_review():
-            rev_id[0] = next_rev_id[0]
-            next_rev_id[0] += 1
-            branch.mark_new_bad_in_review(rev_id[0])
-            self._assert_branch_bad_in_review(
-                branch, branch_name, base, rev_id[0])
-
-        def bad_pre_review():
-            rev_id[0] = None
-            branch.mark_bad_pre_review()
-            self._assert_branch_bad_pre_review(
-                branch, branch_name, base, rev_id[0])
-
-        def bad_in_review():
-            branch.mark_bad_in_review()
-            self._assert_branch_bad_in_review(
-                branch, branch_name, base, rev_id[0])
-
-        def ok_in_review():
-            branch.mark_ok_in_review()
-            self._assert_branch_ok_in_review(
-                branch, branch_name, base, rev_id[0])
-
-        def bad_land():
-            branch.mark_bad_land()
-            self._assert_branch_bad_land(branch, branch_name, base, rev_id[0])
-
-        initial_states = [ok_new_review, bad_new_in_review, bad_pre_review]
-        transitions = [bad_in_review, ok_in_review, bad_land]
-
-        for initial in initial_states:
-            for transition1 in transitions:
-                for transition2 in transitions:
-                    initial()
-                    print rev_id[0]
-                    transition1()
-                    transition2()
-                    # print '', initial.__name__
-                    # print '', transition1.__name__
-                    # print '', transition2.__name__
+        abdt_branchtester.check_C_MoveBetweenAllMarkedStates(self)
 
     def test_D_RawDiffNewCommits(self):
-        base, branch_name, branch = self._setup_for_tracked_branch()
-
-        # push a new commit on branch as dev
-        phlgit_checkout.branch(self.repo_dev, branch_name)
-        filename = 'new_on_branch'
-        self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
-        phlgit_commit.index(self.repo_dev, message=filename)
-        phlgit_push.branch(self.repo_dev, branch_name)
-
-        # check for new stuff as arcyd
-        self.assertIs(branch.has_new_commits(), False)
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), True)
-        self.assertIn(filename, branch.make_raw_diff())
-        branch.mark_ok_in_review()
-        self.assertIs(branch.has_new_commits(), False)
-
-        # exercise queries a bit
-        self.assertIn(filename, branch.make_raw_diff())
-        self.assertIn(filename, branch.make_message_digest())
-        self.assertEqual(
-            branch.get_commit_message_from_tip().strip(),
-            filename)
-        self.assertTrue(len(branch.get_any_author_emails()) > 0)
-        self.assertTrue(len(branch.get_author_names_emails()) > 0)
-
-        # check for new stuff as arcyd again
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), False)
-
-        # make a new commit on master as dev
-        phlgit_checkout.branch(self.repo_dev, 'master')
-        filename = 'new_on_master'
-        self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
-        phlgit_commit.index(self.repo_dev, message=filename)
-        phlgit_push.branch(self.repo_dev, 'master')
-
-        # check for new stuff as arcyd
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), False)
-
-        # merge master into branch, check for new stuff as arcyd
-        phlgit_checkout.branch(self.repo_dev, branch_name)
-        phlgit_merge.no_ff(self.repo_dev, 'master')
-        phlgit_push.branch(self.repo_dev, branch_name)
-
-        # check for new stuff as arcyd
-        self.assertIs(branch.has_new_commits(), False)
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertNotIn(filename, branch.make_raw_diff())
-        branch.mark_ok_in_review()
-        self.assertIs(branch.has_new_commits(), False)
-
-        # rebase branch onto master
-        phlgit_checkout.branch(self.repo_dev, branch_name)
-        phlgit_rebase.onto_upstream(self.repo_dev, 'master')
-        phlgit_push.force_branch(self.repo_dev, branch_name)
-
-        # check for new stuff as arcyd
-        self.assertIs(branch.has_new_commits(), False)
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), True)
-        branch.mark_ok_in_review()
-        self.assertIs(branch.has_new_commits(), False)
+        abdt_branchtester.check_D_RawDiffNewCommits(self)
 
     def _create_new_file(self, repo, filename):
         self.assertFalse(os.path.isfile(filename))

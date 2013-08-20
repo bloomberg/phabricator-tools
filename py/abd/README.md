@@ -17,6 +17,8 @@ Send mails to interested parties about pre-specified conditions.
 Implement operations for branch-based reviews.
 * `abdt_branchmock.py` -
 Implement mocked operations for branch-based reviews.
+* `abdt_branchtester.py` -
+Test suite for abdt_branch-like things.
 * `abdt_commitmessage.py` -
 Operations on git commit message strings.
 * `abdt_conduit.py` -
