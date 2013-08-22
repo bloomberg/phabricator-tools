@@ -5,17 +5,17 @@
 # abdi_processrepo
 #
 # Public Functions:
-#   isBasedOn
-#   createReview
-#   verifyReviewBranchBase
-#   createDifferentialReview
-#   updateReview
-#   updateInReview
+#   is_based_on
+#   create_review
+#   verify_review_branch_base
+#   create_differential_review
+#   update_review
+#   update_in_review
 #   land
-#   createFailedReview
-#   tryCreateReview
-#   processUpdatedBranch
-#   processAbandonedBranch
+#   create_failed_review
+#   try_create_review
+#   process_updated_branch
+#   process_abandoned_branch
 #   process_branches
 #
 # Public Assignments:
@@ -35,13 +35,13 @@ _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 MAX_DIFF_SIZE = 1.5 * 1024 * 1024
 
 
-def isBasedOn(name, base):
+def is_based_on(name, base):
     # TODO: actually do this
     return True
 
 
-def createReview(conduit, branch, pluginManager):
-    pluginManager.hook(
+def create_review(conduit, branch, plugin_manager):
+    plugin_manager.hook(
         "before_create_review",
         {"conduit": conduit, "branch": branch})
 
@@ -71,7 +71,7 @@ def createReview(conduit, branch, pluginManager):
 
     rawDiff = branch.make_raw_diff()
 
-    revisionid = createDifferentialReview(
+    revisionid = create_differential_review(
         conduit, user, parsed, branch, rawDiff)
 
     commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
@@ -81,26 +81,27 @@ def createReview(conduit, branch, pluginManager):
         commenter.usedDefaultTestPlan(
             branch.review_branch_name(), _DEFAULT_TEST_PLAN)
 
-    pluginManager.hook(
+    plugin_manager.hook(
         "after_create_review",
         {"parsed": parsed, "conduit": conduit, "branch": branch,
             "rawDiff": rawDiff, "commenter": commenter}
     )
 
 
-def verifyReviewBranchBase(gitContext, review_branch):
-    if review_branch.base not in gitContext.branches:
+def verify_review_branch_base(git_context, review_branch):
+    if review_branch.base not in git_context.branches:
         raise abdt_exception.MissingBaseException(
             review_branch.branch, review_branch.base)
-    if not isBasedOn(review_branch.branch, review_branch.base):
+    if not is_based_on(review_branch.branch, review_branch.base):
         raise abdt_exception.AbdUserException(
             "'" + review_branch.branch +
             "' is not based on '" + review_branch.base + "'")
 
 
-def createDifferentialReview(conduit, user, parsed, branch, rawDiff):
+def create_differential_review(conduit, user, parsed, branch, raw_diff):
     print "- creating revision"
-    revision_id = conduit.create_revision_as_user(rawDiff, parsed.fields, user)
+    revision_id = conduit.create_revision_as_user(
+        raw_diff, parsed.fields, user)
     print "- created " + str(revision_id)
     branch.mark_ok_new_review(revision_id)
 
@@ -113,16 +114,16 @@ def createDifferentialReview(conduit, user, parsed, branch, rawDiff):
     return revision_id
 
 
-def updateReview(conduit, branch):
+def update_review(conduit, branch):
     if branch.has_new_commits():
         print "changes on branch"
         branch.verify_review_branch_base()
-        updateInReview(conduit, branch)
+        update_in_review(conduit, branch)
     elif branch.is_status_bad() and not branch.is_status_bad_land():
         try:
             print "try updating bad branch"
             branch.verify_review_branch_base()
-            updateInReview(conduit, branch)
+            update_in_review(conduit, branch)
         except abdt_exception.AbdUserException:
             print "still bad"
 
@@ -135,8 +136,8 @@ def updateReview(conduit, branch):
             print "do nothing"
 
 
-def updateInReview(conduit, branch):
-    print "updateInReview"
+def update_in_review(conduit, branch):
+    print "update_in_review"
 
     print "- creating diff"
     rawDiff = branch.make_raw_diff()
@@ -177,7 +178,7 @@ def land(conduit, branch):
     conduit.close_revision(review_id)
 
 
-def createFailedReview(conduit, branch, exception):
+def create_failed_review(conduit, branch, exception):
     user = abdt_conduitgit.getAnyUserFromBranch(conduit, branch)
     reviewid = conduit.create_empty_revision_as_user(user)
     commenter = abdcmnt_commenter.Commenter(conduit, reviewid)
@@ -185,14 +186,14 @@ def createFailedReview(conduit, branch, exception):
     branch.mark_new_bad_in_review(reviewid)
 
 
-def tryCreateReview(mailer, conduit, branch, pluginManager, mail_on_fail):
+def try_create_review(mailer, conduit, branch, plugin_manager, mail_on_fail):
     try:
-        createReview(conduit, branch, pluginManager)
+        create_review(conduit, branch, plugin_manager)
     except abdt_exception.AbdUserException as e:
         print "failed to create:"
         print e
         try:
-            createFailedReview(conduit, branch, e)
+            create_failed_review(conduit, branch, e)
         except abdt_exception.NoUsersOnBranchException as e:
             print "failed to create failed review:"
             print e
@@ -202,16 +203,16 @@ def tryCreateReview(mailer, conduit, branch, pluginManager, mail_on_fail):
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def processUpdatedBranch(mailer, conduit, branch, pluginManager):
+def process_updated_branch(mailer, conduit, branch, plugin_manager):
     abdte = abdt_exception
     review_branch_name = branch.review_branch_name()
     if branch.is_new():
         print "create review for " + review_branch_name
-        tryCreateReview(
+        try_create_review(
             mailer,
             conduit,
             branch,
-            pluginManager,
+            plugin_manager,
             mail_on_fail=True)
     else:
         review_id = branch.review_id_or_none()
@@ -220,16 +221,16 @@ def processUpdatedBranch(mailer, conduit, branch, pluginManager):
             print "try again to create review for " + review_branch_name
             has_new_commits = branch.has_new_commits()
             branch.clear_mark()
-            tryCreateReview(
+            try_create_review(
                 mailer,
                 conduit,
                 branch,
-                pluginManager,
+                plugin_manager,
                 mail_on_fail=has_new_commits)
         else:
             print "update review for " + review_branch_name
             try:
-                updateReview(conduit, branch)
+                update_review(conduit, branch)
             except abdte.LandingException as e:
                 print "landing exception"
                 branch.mark_bad_land()
@@ -241,7 +242,7 @@ def processUpdatedBranch(mailer, conduit, branch, pluginManager):
                 commenter.exception(e)
 
 
-def processAbandonedBranch(conduit, branch):
+def process_abandoned_branch(conduit, branch):
     print "untracking abandoned branch: " + branch.review_branch_name()
     review_id = branch.review_id_or_none()
     if review_id is not None:
@@ -251,15 +252,15 @@ def processAbandonedBranch(conduit, branch):
     branch.abandon()
 
 
-def process_branches(branches, conduit, mailer, pluginManager):
+def process_branches(branches, conduit, mailer, plugin_manager):
     for branch in branches:
         if branch.is_abandoned():
-            processAbandonedBranch(conduit, branch)
+            process_abandoned_branch(conduit, branch)
         elif branch.is_null():
             pass  # TODO: should handle these
         else:
             print "pending:", branch.review_branch_name()
-            processUpdatedBranch(mailer, conduit, branch, pluginManager)
+            process_updated_branch(mailer, conduit, branch, plugin_manager)
 
 
 #------------------------------------------------------------------------------
