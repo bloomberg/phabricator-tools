@@ -3,6 +3,15 @@ set -x
 
 arcyon='../../bin/arcyon'
 
+$arcyon -h
+$arcyon comment -h
+$arcyon get-diff -h
+$arcyon paste -h
+$arcyon query -h
+$arcyon raw-diff -h
+$arcyon show-config -h
+$arcyon update-revision -h
+
 id="$($arcyon create-revision -t title -p plan --summary ssss -f diff1)"
 $arcyon get-diff -r $id --ls
 $arcyon update-revision $id update -f diff2
@@ -23,3 +32,5 @@ $arcyon update-revision $id2 update --diff-id $diffid2
 $arcyon query --format-type ids | grep $id2
 
 $arcyon comment $id2 -m 'hello there!'
+
+$arcyon paste "test paste" -f diff1

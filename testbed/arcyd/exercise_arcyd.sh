@@ -19,6 +19,11 @@ tempdir=$(mktemp -d)
 olddir=$(pwd)
 cd ${tempdir}
 
+$arcyd -h
+$arcyd multi -h
+$arcyd multi-once -h
+$arcyd single -h
+
 function setup_repos() {
     mkdir origin
     cd origin
