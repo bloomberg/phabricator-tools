@@ -5,9 +5,7 @@
 # abdi_processrepo
 #
 # Public Functions:
-#   is_based_on
 #   create_review
-#   verify_review_branch_base
 #   create_differential_review
 #   update_review
 #   update_in_review
@@ -33,11 +31,6 @@ import abdt_exception
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 MAX_DIFF_SIZE = 1.5 * 1024 * 1024
-
-
-def is_based_on(name, base):
-    # TODO: actually do this
-    return True
 
 
 def create_review(conduit, branch, plugin_manager):
@@ -86,16 +79,6 @@ def create_review(conduit, branch, plugin_manager):
         {"parsed": parsed, "conduit": conduit, "branch": branch,
             "rawDiff": rawDiff, "commenter": commenter}
     )
-
-
-def verify_review_branch_base(git_context, review_branch):
-    if review_branch.base not in git_context.branches:
-        raise abdt_exception.MissingBaseException(
-            review_branch.branch, review_branch.base)
-    if not is_based_on(review_branch.branch, review_branch.base):
-        raise abdt_exception.AbdUserException(
-            "'" + review_branch.branch +
-            "' is not based on '" + review_branch.base + "'")
 
 
 def create_differential_review(conduit, user, parsed, branch, raw_diff):
