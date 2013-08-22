@@ -21,7 +21,7 @@ import abdt_branchtester
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
-# [ B] test_B_InterfaceMatchesRealConduit
+# [ B] test_B_InterfaceMatchesRealBranch
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
 #==============================================================================
