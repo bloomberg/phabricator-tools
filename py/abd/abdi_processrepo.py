@@ -16,9 +16,6 @@
 #   process_abandoned_branch
 #   process_branches
 #
-# Public Assignments:
-#   MAX_DIFF_SIZE
-#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
@@ -27,10 +24,7 @@ import abdcmnt_commenter
 import abdt_conduitgit
 import abdt_exception
 
-# TODO: split into appropriate modules
-
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
-MAX_DIFF_SIZE = 1.5 * 1024 * 1024
 
 
 def create_review(conduit, branch, plugin_manager):
