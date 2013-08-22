@@ -5,6 +5,8 @@
 # phlsys_fs
 #
 # Public Functions:
+#   read_file_lock_context
+#   write_file_lock_context
 #   chdir_context
 #   tmpfile
 #   tmpdir_context
@@ -16,10 +18,70 @@
 # =============================================================================
 
 import contextlib
+import fcntl
 import os
 import shutil
 import sys
 import tempfile
+
+
+@contextlib.contextmanager
+def read_file_lock_context(filename):
+    """Open 'filename' for reading and acquire a shared lock, unlock and close.
+
+    Note that the lock is 'advisory', which means that the lock doesn't prevent
+    access to the file.  The lock is merely associated with the file and will
+    not be respected by other processes unless they explicitly check it.
+
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     with open('testfile', 'w') as f:
+        ...         f.write('hello')
+        ...     with read_file_lock_context('testfile') as f:
+        ...         print f.read()
+        hello
+
+    """
+    with open(filename, 'r') as file_object:
+        fcntl.flock(file_object, fcntl.LOCK_SH)
+        try:
+            yield file_object
+        finally:
+            fcntl.flock(file_object, fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
+def write_file_lock_context(filename):
+    """Open 'filename' for write and acquire exclusive lock, unlock and close.
+
+    Note that the lock is 'advisory', which means that the lock doesn't prevent
+    access to the file.  The lock is merely associated with the file and will
+    not be respected by other processes unless they explicitly check it.
+
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     with write_file_lock_context('testfile') as f:
+        ...         f.write('hello')
+        ...     with read_file_lock_context('testfile') as f:
+        ...         print f.read()
+        hello
+
+    """
+    # 'touch' the file to make sure we can open it for 'r+'
+    with open(filename, 'a'):
+        pass
+
+    with open(filename, 'r+') as file_object:
+        fcntl.flock(file_object, fcntl.LOCK_EX)
+        file_object.truncate()
+        try:
+            yield file_object
+        finally:
+            file_object.flush()
+            os.fsync(file_object.fileno())
+            fcntl.flock(file_object, fcntl.LOCK_UN)
 
 
 @contextlib.contextmanager
