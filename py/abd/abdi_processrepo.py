@@ -229,15 +229,18 @@ def process_abandoned_branch(conduit, branch):
     branch.abandon()
 
 
-def process_branches(branches, conduit, mailer, plugin_manager):
+def process_branches(branches, conduit, mailer, plugin_manager, reporter):
     for branch in branches:
+        reporter.start_branch(branch)
         if branch.is_abandoned():
             process_abandoned_branch(conduit, branch)
         elif branch.is_null():
             pass  # TODO: should handle these
         else:
             print "pending:", branch.review_branch_name()
-            process_updated_branch(mailer, conduit, branch, plugin_manager)
+            process_updated_branch(
+                mailer, conduit, branch, plugin_manager)
+        reporter.finish_branch(branch)
 
 
 #------------------------------------------------------------------------------

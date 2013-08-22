@@ -11,6 +11,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import contextlib
 import datetime
 import logging
 
@@ -26,11 +27,23 @@ import phlsys_tryloop
 
 import abdt_conduit
 import abdt_git
+import abdt_reporeporter
 
 
 def run_once(args, out):
+
+    reporter = abdt_reporeporter.RepoReporter(
+        args.try_touch_path, args.ok_touch_path)
+
+    with contextlib.closing(reporter):
+        _run_once(args, out, reporter)
+
+
+def _run_once(args, out, reporter):
+
     sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
+
     mailer = abdmail_mailer.Mailer(
         sender,
         [args.admin_email],
@@ -52,22 +65,16 @@ def run_once(args, out):
     ]
 
     # log.error if we get an exception when fetching
-    def on_exception(e, delay):
+    def on_tryloop_exception(e, delay):
+        reporter.on_tryloop_exception(e, delay)
         logging.error(str(e) + "\nwill wait " + str(delay))
-
-    if args.try_touch_path:
-        try:
-            # TODO: don't rely on the touch command
-            phlsys_subprocess.run("touch", args.try_touch_path)
-        except Exception:
-            pass  # XXX: we don't care atm, later log this
 
     with phlsys_fs.chdir_context(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
         phlsys_tryloop.try_loop_delay(
             lambda: phlsys_subprocess.run_commands("git fetch -p"),
             delays,
-            onException=on_exception)
+            onException=on_tryloop_exception)
 
     # XXX: until conduit refreshes the connection, we'll suffer from
     #      timeouts; reduce the probability of this by using a new
@@ -76,7 +83,7 @@ def run_once(args, out):
     # create an array so that the 'connect' closure binds to the 'conduit'
     # variable as we'd expect, otherwise it'll just modify a local variable
     # and this 'conduit' will remain 'None'
-    # XXX: we can do better in python 3.x
+    # XXX: we can do better in python 3.x (nonlocal?)
     conduit = [None]
 
     def connect():
@@ -87,24 +94,26 @@ def run_once(args, out):
             args.arcyd_cert,
             https_proxy=args.https_proxy)
 
-    phlsys_tryloop.try_loop_delay(connect, delays, onException=on_exception)
+    phlsys_tryloop.try_loop_delay(
+        connect, delays, onException=on_tryloop_exception)
 
     out.display("process (" + args.repo_desc + "): ")
     arcyd_conduit = abdt_conduit.Conduit(conduit[0])
     arcyd_clone = abdt_git.Clone(args.repo_path, "origin")
     branches = arcyd_clone.get_managed_branches()
-    abdi_processrepo.process_branches(
-        branches,
-        arcyd_conduit,
-        mailer,
-        pluginManager)
 
-    if args.ok_touch_path:
-        try:
-            # TODO: don't rely on the touch command
-            phlsys_subprocess.run("touch", args.ok_touch_path)
-        except Exception:
-            pass  # XXX: we don't care atm, later log this
+    try:
+        abdi_processrepo.process_branches(
+            branches,
+            arcyd_conduit,
+            mailer,
+            pluginManager,
+            reporter)
+    except Exception as e:
+        reporter.on_exception(e)
+        raise
+
+    reporter.on_completed()
 
 
 #------------------------------------------------------------------------------

@@ -14,6 +14,7 @@ import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
 import abdt_naming
+import abdt_reporeportermock
 import abdtst_devphabgit
 
 import phlcon_differential
@@ -61,6 +62,7 @@ class Test(unittest.TestCase):
         self.mock_sender = None
         self.mailer = None
         self.plugin_manager = None
+        self.reporter = None
 
     def setUp(self):
         self.conduit_data = abdt_conduitmock.ConduitMockData()
@@ -72,23 +74,27 @@ class Test(unittest.TestCase):
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
         self.plugin_manager = phlsys_pluginmanager.PluginManager([])
+        self.reporter = abdt_reporeportermock.RepoReporterMock()
 
     def tearDown(self):
         pass
 
+    def _process_branches(self, branches):
+        abdi_processrepo.process_branches(
+            branches,
+            self.conduit,
+            self.mailer,
+            self.plugin_manager,
+            self.reporter)
+
     def test_A_Breathing(self):
-        abdi_processrepo.process_branches([], self.conduit, self.mailer,
-                                          self.plugin_manager)
+        self._process_branches([])
         self.assertTrue(self.mock_sender.is_empty())
         self.assertTrue(self.conduit_data.is_unchanged())
 
     def test_B_Uncomplicated(self):
         branch, branch_data = abdt_branchmock.create_simple_new_review()
-        abdi_processrepo.process_branches(
-            [branch],
-            self.conduit,
-            self.mailer,
-            self.plugin_manager)
+        self._process_branches([branch])
         self.assertFalse(branch.is_status_bad())
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
@@ -96,11 +102,7 @@ class Test(unittest.TestCase):
 
         self.conduit_data.accept_the_only_review()
         self.conduit_data.set_unchanged()
-        abdi_processrepo.process_branches(
-            [branch],
-            self.conduit,
-            self.mailer,
-            self.plugin_manager)
+        self._process_branches([branch])
         self.assertEqual(len(self.conduit_data.revisions), 1)
         self.assertTrue(self.conduit_data.revisions[0].is_closed())
         self.assertTrue(self.mock_sender.is_empty())
@@ -118,8 +120,7 @@ class Test(unittest.TestCase):
         self.conduit.parse_commit_message = types.MethodType(
             error_parse_commit_message, self.conduit)
 
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
 
         self.assertEqual(len(self.conduit_data.revisions), 1)
         self.assertFalse(self.conduit_data.revisions[0].is_closed())
@@ -132,8 +133,7 @@ class Test(unittest.TestCase):
         branch_data.has_new_commits = True
 
         self.conduit_data.accept_the_only_review()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
 
         self.assertEqual(len(self.conduit_data.revisions), 1)
         self.assertTrue(self.conduit_data.revisions[0].is_closed())
@@ -142,59 +142,50 @@ class Test(unittest.TestCase):
 
     def test_D_UnexpectedClose(self):
         branch, branch_data = abdt_branchmock.create_simple_new_review()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
 
         revision = self.conduit_data.get_revision(branch_data.revision_id)
         revision.set_closed()
         branch_data.has_new_commits = True
 
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_status_bad())
 
     def test_E_InvalidBaseBranch(self):
         # set base to invalid
         branch, branch_data = abdt_branchmock.create_new_review_invalid_base()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_status_bad())
 
         # set base ok again
         branch_data.is_base_ok = True
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertFalse(branch.is_status_bad())
 
         # set base bad again
         branch_data.is_base_ok = False
         branch_data.has_new_commits = True
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_status_bad())
 
     def test_F_NoInitialAuthor(self):
         branch, branch_data = abdt_branchmock.create_review_no_initial_author()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_status_bad())
 
         branch_data.names_emails = abdt_branchmock.create_ok_names_emails()
         branch_data.has_new_commits = True
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertFalse(branch.is_status_bad())
 
     def test_G_NoCommitsOnBranch(self):
         branch, branch_data = abdt_branchmock.create_review_no_commits()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_status_bad())
 
     def test_H_AbandonRemovedBranch(self):
         branch, branch_data = abdt_branchmock.create_review_removed()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_null())
 
         # TODO: should probably abandon the review too, if the branch goes
@@ -211,15 +202,13 @@ class Test(unittest.TestCase):
 
         # create review ok
         branch, branch_data = abdt_branchmock.create_simple_new_review()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
 
         # fail to land
         old_land = branch.land
         branch.land = types.MethodType(error_land, branch)
         self.conduit_data.accept_the_only_review()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_status_bad())
 
         # fix the landing error
@@ -228,8 +217,7 @@ class Test(unittest.TestCase):
 
         # land ok
         self.conduit_data.accept_the_only_review()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_null())
 
     def test_J_DiffTooBig(self):
@@ -241,8 +229,7 @@ class Test(unittest.TestCase):
         branch, branch_data = abdt_branchmock.create_simple_new_review()
         old_diff = branch.make_raw_diff
         branch.make_raw_diff = types.MethodType(error_diff, branch)
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertFalse(branch.is_status_bad_pre_review())
         self.assertFalse(branch.is_status_bad_land())
         self.assertTrue(branch.is_status_bad())
@@ -252,14 +239,12 @@ class Test(unittest.TestCase):
         branch_data.has_new_commits = True
 
         # update the review ok
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertFalse(branch.is_status_bad())
 
         # land ok
         self.conduit_data.accept_the_only_review()
-        abdi_processrepo.process_branches(
-            [branch], self.conduit, self.mailer, self.plugin_manager)
+        self._process_branches([branch])
         self.assertTrue(branch.is_null())
 
 # factors affecting a review:
@@ -286,6 +271,7 @@ class OldTest(unittest.TestCase):
         self.mailer = None
         self.mock_sender = None
         self.plugin_manager = None
+        self.reporter = None
 
     def setUp(self):
         self.dev_phab = abdtst_devphabgit.Collaboration(
@@ -296,6 +282,8 @@ class OldTest(unittest.TestCase):
         self.dev_phab.dev_commit_new_file("README")
         self.dev_phab.dev_push_branch("master")
         self.dev_phab.phab_fetch()
+
+        self.reporter = abdt_reporeportermock.RepoReporterMock()
 
         # sys_conduit = phlsys_conduit.Conduit(
         #     phldef_conduit.TEST_URI,
@@ -318,13 +306,13 @@ class OldTest(unittest.TestCase):
         self.dev_phab.phab_fetch()
         abdi_processrepo.process_branches(
             self.clone.get_managed_branches(), self.conduit,
-            self.mailer, self.plugin_manager)
+            self.mailer, self.plugin_manager, self.reporter)
 
     def _phabUpdateWithExpectationsHelper(
             self, total=None, bad=None, emails=None):
         abdi_processrepo.process_branches(
             self.clone.get_managed_branches(), self.conduit,
-            self.mailer, self.plugin_manager)
+            self.mailer, self.plugin_manager, self.reporter)
         if total is not None:
             self.assertEqual(
                 self.dev_phab.count_phab_working_branches(), total)
@@ -376,7 +364,7 @@ class OldTest(unittest.TestCase):
         # nothing to process
         abdi_processrepo.process_branches(
             self.clone.get_managed_branches(), self.conduit,
-            self.mailer, self.plugin_manager)
+            self.mailer, self.plugin_manager, self.reporter)
 
     def test_simpleWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(
