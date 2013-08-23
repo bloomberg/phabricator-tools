@@ -38,24 +38,10 @@ usage example:
     Using the example accounts baked into the 'phabricator-tools'
     vagrant/puppet installation. (see ./README)
 
-    $ arcyd
-    --system-admin-email systemadmin@server.test \\
-    --sendmail-binary sendmail \\
-    --sendmail-type sendmail \\
-    single \\
-    --instance-uri https://127.0.0.1/api/ \\
-    --arcyd-user phab \\
-    --arcyd-cert xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7\
-ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo\
-2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5\
-rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
-    --arcyd-email phab-role-account@server.example \\
-    --admin-email admin@server.example \\
-    --repo-desc http://server.example/repo.git \\
-    --sleep-duration 60
-
     You can also split the configuration across multiple files and combine them
     on the command-line or have them inherit from eachother.
+
+    ** TODO: test this config **
 
     in localinstance.cfg:
         --instance-uri
@@ -63,7 +49,10 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
         --arcyd-user
         phab
         --arcyd-cert
-        <<paste-certificate-here>>
+        xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7\
+ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo\
+2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5\
+rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
 
     in email.cfg:
         --arcyd-email
@@ -72,32 +61,20 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
         admin@server.example
 
     in repo1.cfg:
+        @localinstance.cfg
+        @email.cfg
         --repo-desc
         http://server.example/repo.git
         --repo-path
         /path/to/repo
 
     to run arcyd:
-    $ arcyd
+    $ arcyd process-repos\\
+    --repo-configs @repo1.cfg \\
     --system-admin-email systemadmin@server.test \\
     --sendmail-binary sendmail \\
     --sendmail-type sendmail \\
-    single @localinstance.cfg @email.cfg @repo1.cfg
 
-    or you can use inheritance, e.g. in repo2.cfg:
-        @localinstance.cfg
-        @email.cfg
-        --repo-desc
-        http://server.example/repo2.git
-        --repo-path
-        /path/to/repo
-
-    to run arcyd:
-    $ arcyd
-    --system-admin-email systemadmin@server.test \\
-    --sendmail-binary sendmail \\
-    --sendmail-type sendmail \\
-    single @localinstance.cfg @email.cfg @repo1.cfg
     """
 
 import argparse
