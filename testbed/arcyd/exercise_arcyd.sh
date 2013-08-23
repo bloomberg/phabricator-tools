@@ -20,7 +20,7 @@ olddir=$(pwd)
 cd ${tempdir}
 
 $arcyd -h
-$arcyd multi -h
+$arcyd process-repos -h
 
 function setup_repos() {
     mkdir origin
@@ -79,7 +79,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
 
 function run_arcyd() {
 $arcyd \
-    multi \
+    process-repos \
     --sys-admin-emails admin@server.test \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \

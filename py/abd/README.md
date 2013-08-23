@@ -1,7 +1,7 @@
 # abd
 * `abdcmd_arcyd.py` -
 Arcyd - daemon to watch git repos, create and land reviews automatically.
-* `abdcmd_multi.py` -
+* `abdcmd_processrepos.py` -
 Command to process multiple repos.
 * `abdcmnt_commenter.py` -
 Make pre-defined comments on Differential revisions.

@@ -102,7 +102,7 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
 
 import argparse
 
-import abdcmd_multi
+import abdcmd_processrepos
 import phlsys_subcommand
 
 
@@ -114,7 +114,8 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setup_parser("multi", abdcmd_multi, subparsers)
+    phlsys_subcommand.setup_parser(
+        "process-repos", abdcmd_processrepos, subparsers)
 
     args = parser.parse_args()
 
