@@ -26,7 +26,6 @@ import functools
 import os
 import time
 
-import abdcmd_single
 import abdi_processargs
 import phlsys_scheduleunreliables
 import phlsys_statusline
@@ -37,6 +36,7 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
+    abdi_processargs.setup_parser(parser)
     parser.add_argument(
         '--repo-configs',
         metavar="N",
@@ -68,6 +68,10 @@ def setupParser(parser):
         type=int,
         default=60,
         help="time to wait between runs through the list")
+    parser.add_argument(
+        '--no-loop',
+        action='store_true',
+        help="supply this argument to only process each repo once then exit")
 
 
 class DelayedRetrySleepOperation(object):
@@ -125,13 +129,41 @@ def tryHandleSpecialFiles(f, on_exception_delay):
             on_exception_delay(None)
 
 
-def process(args, retry_delays, on_exception_delay):
+def process(args):
+
+    # XXX: catch all exceptions at this level
+    # XXX: catch all exceptions at this level
+    # XXX: catch all exceptions at this level
+
+    abdi_processargs.setup_sigterm_handler()
+    abdi_processargs.configure_sendmail(args)
+
+    on_exception = abdi_processargs.make_exception_message_handler(
+        args, "arcyd stopped with exception", "")
+
+    try:
+        _process(args)
+    except BaseException:
+        on_exception("Arcyd will now stop")
+        print "stopping"
+        raise
+
+    # we should never get here, raise and handle an exception if we do
+    try:
+        raise Exception("Arcyd stopped unexpectedly")
+    except Exception:
+        on_exception("Arcyd will now stop")
+
+
+def _process(args):
+
+    retry_delays = abdi_processargs.get_retry_delays()
+    on_exception_delay = abdi_processargs.make_exception_delay_handler(args)
+
     repos = []
     for repo in args.repo_configs:
-        # TODO: we should not depend on another command like this
-        parser = argparse.ArgumentParser(
-            fromfile_prefix_chars=abdcmd_single.getFromfilePrefixChars())
-        abdcmd_single.setupParser(parser)
+        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+        abdi_processargs.setup_repo_arg_parser(parser)
         repo_args = parser.parse_args(repo)
         repos.append(repo_args)
 
@@ -161,11 +193,17 @@ def process(args, retry_delays, on_exception_delay):
         DelayedRetrySleepOperation(
             out, args.sleep_secs))
 
-    def loopForever():
-        phlsys_scheduleunreliables.loop_forever(list(operations))
+    if args.no_loop:
+        def process_once():
+            phlsys_scheduleunreliables.process_once(list(operations))
 
-    while True:
-        tryHandleSpecialFiles(loopForever, on_exception_delay)
+        tryHandleSpecialFiles(process_once, on_exception_delay)
+    else:
+        def loopForever():
+            phlsys_scheduleunreliables.process_loop_forever(list(operations))
+
+        while True:
+            tryHandleSpecialFiles(loopForever, on_exception_delay)
 
 
 #------------------------------------------------------------------------------

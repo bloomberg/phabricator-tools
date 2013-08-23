@@ -10,9 +10,9 @@
 #    .getDelay
 #
 # Public Functions:
-#   loop_forever
+#   process_loop_forever
+#   process_once
 #   make_timed_queue
-#   loop_once
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -21,7 +21,7 @@
 import phlsys_timedqueue
 
 
-def loop_forever(operations):
+def process_loop_forever(operations):
     # use a copy of the original, as we may modify it
     # we need to do set operations so 'set' is most appropriate
     operations = set(operations)
@@ -29,14 +29,24 @@ def loop_forever(operations):
     paused_operations = phlsys_timedqueue.TimedQueue()
 
     while True:
-        loop_once(operations, paused_operations)
+        _process_operations(operations, paused_operations)
+
+
+def process_once(operations):
+    # use a copy of the original, as we may modify it
+    # we need to do set operations so 'set' is most appropriate
+    operations = set(operations)
+
+    paused_operations = phlsys_timedqueue.TimedQueue()
+
+    _process_operations(operations, paused_operations)
 
 
 def make_timed_queue():
     return phlsys_timedqueue.TimedQueue()
 
 
-def loop_once(operations, paused_operations):
+def _process_operations(operations, paused_operations):
     assert isinstance(operations, set)
     operations |= set(paused_operations.pop_expired())
 

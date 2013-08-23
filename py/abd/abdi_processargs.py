@@ -5,6 +5,13 @@
 # abdi_processargs
 #
 # Public Functions:
+#   setup_parser
+#   setup_repo_arg_parser
+#   configure_sendmail
+#   setup_sigterm_handler
+#   make_exception_message_handler
+#   make_exception_delay_handler
+#   get_retry_delays
 #   run_once
 #
 # -----------------------------------------------------------------------------
@@ -14,20 +21,192 @@
 import contextlib
 import datetime
 import logging
+import platform
+import signal
+import sys
+import traceback
 
-import abdi_processrepo
-import abdmail_mailer
 import phlmail_sender
 import phlsys_conduit
 import phlsys_fs
 import phlsys_pluginmanager
 import phlsys_sendmail
+import phlsys_strtotime
 import phlsys_subprocess
 import phlsys_tryloop
 
+import abdi_processrepo
+import abdmail_mailer
 import abdt_conduit
 import abdt_git
 import abdt_reporeporter
+
+
+def setup_parser(parser):
+    parser.add_argument(
+        '--sys-admin-emails',
+        metavar="EMAIL",
+        nargs="+",
+        type=str,
+        required=True,
+        help="email addresses to send important system events to")
+    parser.add_argument(
+        '--sendmail-binary',
+        metavar="PROGRAM",
+        type=str,
+        default="sendmail",
+        help="program to send the mail with (e.g. sendmail, catchmail)")
+    parser.add_argument(
+        '--sendmail-type',
+        metavar="TYPE",
+        type=str,
+        default="sendmail",
+        help="type of program to send the mail with (sendmail, catchmail), "
+        "this will affect the parameters that Arycd will use.")
+
+
+def setup_repo_arg_parser(parser):
+
+    parser.add_argument(
+        '--instance-uri',
+        metavar="URI",
+        type=str,
+        required=True,
+        help="instance to connect to, e.g. http://127.0.0.1")
+
+    parser.add_argument(
+        '--arcyd-user',
+        metavar="USER",
+        type=str,
+        required=True,
+        help="username for Arcyd to use")
+
+    parser.add_argument(
+        '--arcyd-cert',
+        metavar="CERT",
+        type=str,
+        required=True,
+        help="Phabricator Conduit API certificate to use, this is the "
+        "value that you will find in your user account in Phabricator "
+        "at: http://your.server.example/settings/panel/conduit/. "
+        "It can also be found in ~/.arcrc.")
+
+    parser.add_argument(
+        '--arcyd-email',
+        metavar="FROM",
+        type=str,
+        required=True,
+        help="email address for Arcyd to send mails from")
+
+    parser.add_argument(
+        '--admin-email',
+        metavar="TO",
+        type=str,
+        required=True,
+        help="email address to send important system events to")
+
+    parser.add_argument(
+        '--repo-desc',
+        metavar="DESC",
+        type=str,
+        required=True,
+        help="description to use in emails")
+
+    parser.add_argument(
+        '--repo-path',
+        metavar="PATH",
+        type=str,
+        required=True,
+        help="path to the repository on disk")
+
+    parser.add_argument(
+        '--https-proxy',
+        metavar="PROXY",
+        type=str,
+        help="proxy to use, if necessary")
+
+    parser.add_argument(
+        '--sleep-secs',
+        metavar="TIME",
+        type=int,
+        default=60,
+        help="time to wait between fetches")
+
+    parser.add_argument(
+        '--try-touch-path',
+        metavar="PATH",
+        type=str,
+        required=True,
+        help="file to touch when trying to update a repo")
+
+    parser.add_argument(
+        '--ok-touch-path',
+        metavar="PATH",
+        type=str,
+        required=True,
+        help="file to touch when successfully updated a repo")
+
+    parser.add_argument(
+        "--plugins",
+        metavar="PLUGIN",
+        nargs="*",
+        type=str,
+        default=[],
+        required=False,
+        help="List the plugins to be loaded. The plugins must be present "
+        "in /testbed/plugins/ directory as this feature is WIP.")
+
+
+def configure_sendmail(args):
+    if args.sendmail_binary:
+        phlsys_sendmail.Sendmail.set_default_binary(
+            args.sendmail_binary)
+
+    if args.sendmail_type:
+        phlsys_sendmail.Sendmail.set_default_params_from_type(
+            args.sendmail_type)
+
+
+# XXX: belongs in phlsys somewhere
+def setup_sigterm_handler():
+    def HandleSigterm(unused1, unused2):
+        # raises 'SystemExit' exception, which will allow us to clean up
+        sys.exit(1)
+    signal.signal(signal.SIGTERM, HandleSigterm)
+
+
+def make_exception_message_handler(args, subject, body_prefix):
+    uname = str(platform.uname())
+    emails = args.sys_admin_emails
+
+    mailsender = phlmail_sender.MailSender(
+        phlsys_sendmail.Sendmail(),
+        "arcyd@" + platform.node())
+
+    def msg_exception(message):
+        body = uname + "\n" + traceback.format_exc()
+        body += str(body_prefix)
+        body += str(message)
+        print body
+        mailsender.send(
+            subject=str(subject),
+            message=body,
+            to_addresses=emails)
+
+    return msg_exception
+
+
+def make_exception_delay_handler(args):
+    return make_exception_message_handler(
+        args,
+        "arcyd paused with exception",
+        "will wait: ")
+
+
+def get_retry_delays():
+    strToTime = phlsys_strtotime.duration_string_to_time_delta
+    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
+    return retry_delays
 
 
 def run_once(args, out):

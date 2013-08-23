@@ -21,8 +21,6 @@ cd ${tempdir}
 
 $arcyd -h
 $arcyd multi -h
-$arcyd multi-once -h
-$arcyd single -h
 
 function setup_repos() {
     mkdir origin
@@ -81,11 +79,13 @@ vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
 
 function run_arcyd() {
 $arcyd \
+    multi \
     --sys-admin-emails admin@server.test \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
-    multi-once \
     --repo-configs @repo_arcyd.cfg \
+    --sleep-secs 0 \
+    --no-loop
 
 }
 

@@ -101,17 +101,8 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     """
 
 import argparse
-import platform
-import signal
-import sys
-import traceback
 
 import abdcmd_multi
-import abdcmd_multionce
-import abdcmd_single
-import phlmail_sender
-import phlsys_sendmail
-import phlsys_strtotime
 import phlsys_subcommand
 
 
@@ -121,88 +112,13 @@ def main():
         description=__doc__,
         epilog=_USAGE_EXAMPLES)
 
-    parser.add_argument(
-        '--sys-admin-emails',
-        metavar="EMAIL",
-        nargs="+",
-        type=str,
-        required=True,
-        help="email addresses to send important system events to")
-
-    parser.add_argument(
-        '--sendmail-binary',
-        metavar="PROGRAM",
-        type=str,
-        default="sendmail",
-        required=True,
-        help="program to send the mail with (e.g. sendmail, catchmail)")
-
-    parser.add_argument(
-        '--sendmail-type',
-        metavar="TYPE",
-        type=str,
-        default="sendmail",
-        required=True,
-        help="type of program to send the mail with (sendmail, catchmail), "
-        "this will affect the parameters that Arycd will use.")
-
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setup_parser("single", abdcmd_single, subparsers)
     phlsys_subcommand.setup_parser("multi", abdcmd_multi, subparsers)
-    phlsys_subcommand.setup_parser("multi-once", abdcmd_multionce, subparsers)
 
     args = parser.parse_args()
 
-    uname = str(platform.uname())
-
-    if args.sendmail_binary:
-        phlsys_sendmail.Sendmail.set_default_binary(
-            args.sendmail_binary)
-
-    if args.sendmail_type:
-        phlsys_sendmail.Sendmail.set_default_params_from_type(
-            args.sendmail_type)
-
-    mailsender = phlmail_sender.MailSender(
-        phlsys_sendmail.Sendmail(),
-        "arcyd@" + platform.node())
-
-    # exit if we're stopped by SIGTERM
-    def HandleSigterm(unused1, unused2):
-        # raises 'SystemExit' exception, which will allow us to clean up
-        sys.exit(1)
-    signal.signal(signal.SIGTERM, HandleSigterm)
-
-    strToTime = phlsys_strtotime.duration_string_to_time_delta
-    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
-
-    emails = args.sys_admin_emails
-
-    def msgException(delay):
-        message = uname + "\n" + traceback.format_exc()
-        message += "\nwill wait:" + str(delay)
-        print message
-        mailsender.send(
-            subject="arcyd paused with exception",
-            message=message,
-            to_addresses=emails)
-
-    try:
-        args.func(args, retry_delays, msgException)
-    except:
-        message = uname + "\n" + traceback.format_exc()
-        print message
-        mailsender.send(
-            subject="arcyd stopped with exception",
-            message=message,
-            to_addresses=emails)
-        sys.exit(1)
-
-    mailsender.send(
-        subject="arcyd stopped",
-        message="",
-        to_addresses=args.sys_admin_emails)
+    args.func(args)
 
 
 #------------------------------------------------------------------------------

@@ -3,10 +3,6 @@
 Arcyd - daemon to watch git repos, create and land reviews automatically.
 * `abdcmd_multi.py` -
 Command to process multiple repos.
-* `abdcmd_multionce.py` -
-Command to process multiple repos without looping.
-* `abdcmd_single.py` -
-Command to process a single repository.
 * `abdcmnt_commenter.py` -
 Make pre-defined comments on Differential revisions.
 * `abdi_processargs.py` -
