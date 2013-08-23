@@ -87,11 +87,16 @@ $arcyd \
     --sleep-secs 0 \
     --no-loop
 
+${arcyd} \
+    status-html \
+    touches/repo_origin.try \
+    touches/repo_origin.ok
 }
 
 setup_repos
 configure_arcyd
 run_arcyd
+
 
 # create a review branch
 cd dev
