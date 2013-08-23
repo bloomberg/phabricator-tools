@@ -5,6 +5,8 @@
 # abdt_reporeporter
 #
 # Public Classes:
+#   RepoAttribs
+#   RepoStatuses
 #   RepoReporter
 #    .on_tryloop_exception
 #    .on_exception
@@ -17,7 +19,22 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import json
+
+import phlsys_fs
 import phlsys_subprocess
+
+
+class RepoAttribs:
+    status = 'status'
+
+
+class RepoStatuses:
+    updating = 'updating'
+    failed_tryloop = 'failed tryloop'
+    failed_exception = 'failed exception'
+    failed = 'failed'
+    ok = 'ok'
 
 
 class RepoReporter(object):
@@ -32,16 +49,24 @@ class RepoReporter(object):
         super(RepoReporter, self).__init__()
         self._try_filename = try_filename
         self._ok_filename = ok_filename
+        self._is_updating = True
+
         phlsys_subprocess.run("touch", self._try_filename)
+        self._repo_attribs = {}
+        self._update_write_repo_status(RepoStatuses.updating)
 
     def on_tryloop_exception(self, e, delay):
         self._repo_report(str(e) + "\nwill wait " + str(delay))
+        self._update_write_repo_status(RepoStatuses.failed_tryloop)
 
     def on_exception(self, e):
         self._repo_report(str(e))
+        self._update_write_repo_status(RepoStatuses.failed_exception)
 
     def on_completed(self):
         phlsys_subprocess.run("touch", self._ok_filename)
+        self._is_updating = False
+        self._update_write_repo_status(RepoStatuses.ok)
 
     def start_branch(self, branch):
         _ = branch  # NOQA
@@ -51,12 +76,18 @@ class RepoReporter(object):
         _ = branch  # NOQA
         self._repo_report('finish branch')
 
+    def _update_write_repo_status(self, status):
+        self._repo_attribs[RepoAttribs.status] = status
+        with phlsys_fs.write_file_lock_context(self._try_filename) as f:
+            f.write(json.dumps(self._repo_attribs))
+
     def _repo_report(self, s):
         pass
 
     def close(self):
         """Close any resources associated with the report."""
-        pass
+        if self._is_updating:
+            self._update_write_repo_status(RepoStatuses.failed)
 
 
 #------------------------------------------------------------------------------

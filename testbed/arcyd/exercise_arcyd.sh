@@ -125,5 +125,8 @@ cd -
 
 cat savemail.txt
 
+cat touches/repo_origin.try
+cat touches/repo_origin.ok
+
 cd ${olddir}
 rm -rf ${tempdir}
