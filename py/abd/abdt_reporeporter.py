@@ -51,7 +51,9 @@ class RepoReporter(object):
         self._ok_filename = ok_filename
         self._is_updating = True
 
-        phlsys_subprocess.run("touch", self._try_filename)
+        assert self._try_filename
+        assert self._ok_filename
+
         self._repo_attribs = {}
         self._update_write_repo_status(RepoStatuses.updating)
 

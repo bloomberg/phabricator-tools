@@ -100,12 +100,14 @@ def setupParser(parser):
         '--try-touch-path',
         metavar="PATH",
         type=str,
+        required=True,
         help="file to touch when trying to update a repo")
 
     parser.add_argument(
         '--ok-touch-path',
         metavar="PATH",
         type=str,
+        required=True,
         help="file to touch when successfully updated a repo")
 
     parser.add_argument(
