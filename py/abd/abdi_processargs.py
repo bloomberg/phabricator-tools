@@ -56,10 +56,14 @@ def run_once(args, out):
         except Exception:
             pass  # XXX: we don't care atm, later log this
 
+    def prune_and_fetch():
+        phlsys_subprocess.run_commands("git remote prune origin")
+        phlsys_subprocess.run_commands("git fetch")
+
     with phlsys_fs.chdir_context(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
         phlsys_tryloop.try_loop_delay(
-            lambda: phlsys_subprocess.run_commands("git fetch -p"),
+            prune_and_fetch,
             delays,
             onException=on_exception)
 
