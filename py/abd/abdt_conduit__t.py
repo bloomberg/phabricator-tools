@@ -98,6 +98,7 @@ class Test(unittest.TestCase):
         self.assertTrue(self.conduit.is_review_accepted(revision))
 
         self.conduit.abandon_revision(revision)
+        self.conduit.get_commit_message(revision)
 
         # un-abandon
         with phlsys_conduit.act_as_user_context(self.sys_conduit, bob):
@@ -119,6 +120,7 @@ class Test(unittest.TestCase):
         self.conduit.accept_revision_as_user(revision, alice)
         self.assertTrue(self.conduit.is_review_accepted(revision))
         self.conduit.close_revision(revision)
+        self.conduit.get_commit_message(revision)
 
         # commandeer closed revision
         # self.conduit.commandeer_revision_as_user(revision, alice)
