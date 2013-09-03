@@ -15,6 +15,7 @@
 # [  ] raise if get author names and emails from branch with invalid base
 # [  ] can 'get_any_author_emails', raise if no emails ever
 # [  ] bad unicode chars in diffs
+# [  ] bad unicode chars in commit messages
 # [  ] can land an uncomplicated review
 # [  ] XXX: withReservedBranch
 # [  ] XXX: emptyMergeWorkflow
