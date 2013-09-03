@@ -35,13 +35,13 @@ def make_raw_diff(clone, base, branch, max_bytes):
     :returns: the string diff of the changes on the branch
 
     """
-    rawDiff = phlgit_diff.raw_diff_range(
+    raw_diff = phlgit_diff.raw_diff_range(
         clone, base, branch, _LOTS_OF_DIFF_CONTEXT_LINES)
 
     # TODO: report that we replaced errors, if any
-    rawDiff = unicode(rawDiff, errors='replace')
+    raw_diff = unicode(raw_diff, errors='replace')
 
-    if not rawDiff:
+    if not raw_diff:
         raise abdt_exception.AbdUserException(
             str("no difference from " + base + " to " + branch))
 
@@ -50,22 +50,22 @@ def make_raw_diff(clone, base, branch, max_bytes):
     # TODO: detect generated files and try excluding those first
 
     # if the diff is too big then regen with less context
-    if len(rawDiff) >= max_bytes:
-        rawDiff = phlgit_diff.raw_diff_range(
+    if len(raw_diff) >= max_bytes:
+        raw_diff = phlgit_diff.raw_diff_range(
             clone, base, branch, _LESS_DIFF_CONTEXT_LINES)
 
     # if the diff is still too big then regen with no context
-    if len(rawDiff) >= max_bytes:
-        rawDiff = phlgit_diff.raw_diff_range(clone, base, branch, None)
+    if len(raw_diff) >= max_bytes:
+        raw_diff = phlgit_diff.raw_diff_range(clone, base, branch, None)
 
     # if the diff is still too big then error
-    if len(rawDiff) >= max_bytes:
+    if len(raw_diff) >= max_bytes:
         raise abdt_exception.LargeDiffException(
-            "diff too big", len(rawDiff), max_bytes)
+            "diff too big", len(raw_diff), max_bytes)
 
     # TODO: somehow report if we had to reduce the diff at all
 
-    return rawDiff
+    return raw_diff
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
