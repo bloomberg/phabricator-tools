@@ -38,6 +38,9 @@ def make_raw_diff(clone, base, branch, max_bytes):
     rawDiff = phlgit_diff.raw_diff_range(
         clone, base, branch, _LOTS_OF_DIFF_CONTEXT_LINES)
 
+    # TODO: report that we replaced errors, if any
+    rawDiff = unicode(rawDiff, errors='replace')
+
     if not rawDiff:
         raise abdt_exception.AbdUserException(
             str("no difference from " + base + " to " + branch))
@@ -60,7 +63,6 @@ def make_raw_diff(clone, base, branch, max_bytes):
         raise abdt_exception.LargeDiffException(
             "diff too big", len(rawDiff), max_bytes)
 
-    # TODO: normalise any bad unicode chars and report that somehow
     # TODO: somehow report if we had to reduce the diff at all
 
     return rawDiff
