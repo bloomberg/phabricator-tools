@@ -148,13 +148,24 @@ def setup_repo_arg_parser(parser):
 
     parser.add_argument(
         "--plugins",
-        metavar="PLUGIN",
-        nargs="*",
+        metavar="MODULE_NAME",
+        nargs="+",
         type=str,
         default=[],
         required=False,
-        help="List the plugins to be loaded. The plugins must be present "
+        help="List the plugins to be loaded. MODULE_NAME must be present "
         "in /testbed/plugins/ directory as this feature is WIP.")
+
+    parser.add_argument(
+        "--trusted-plugins",
+        metavar="MODULE_NAME",
+        nargs="+",
+        type=str,
+        default=[],
+        required=False,
+        help="List the trusted plugins to be loaded. MODULE_NAME must be "
+        "present in /testbed/plugins/ directory as this feature is WIP."
+        "See /testbed/plugins/README.md for detail about trusted-plugins")
 
 
 def configure_sendmail(args):
@@ -229,7 +240,8 @@ def _run_once(args, out, reporter):
         args.repo_desc,
         args.instance_uri)  # TODO: this should be a URI for users not conduit
 
-    pluginManager = phlsys_pluginmanager.PluginManager(args.plugins)
+    pluginManager = phlsys_pluginmanager.PluginManager(
+        args.plugins, args.trusted_plugins)
 
     # prepare delays in the event of trouble when fetching or connecting
     # TODO: perhaps this policy should be decided higher-up

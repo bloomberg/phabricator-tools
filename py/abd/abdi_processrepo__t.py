@@ -73,7 +73,7 @@ class Test(unittest.TestCase):
             ["admin@server.test"],
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
-        self.plugin_manager = phlsys_pluginmanager.PluginManager([])
+        self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
         self.reporter = abdt_reporeportermock.RepoReporterMock()
 
     def tearDown(self):
@@ -300,7 +300,7 @@ class OldTest(unittest.TestCase):
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
         # Default behavior is to not test with plugins
-        self.plugin_manager = phlsys_pluginmanager.PluginManager([])
+        self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
 
     def _phabUpdate(self):
         self.dev_phab.phab_fetch()

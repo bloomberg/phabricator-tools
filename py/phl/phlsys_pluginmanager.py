@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import copy
 import importlib
 import traceback
 
@@ -25,21 +26,26 @@ class PluginManager(object):
 
     hooks = {
         'hook_name':[
-            ('plugin_name', plugin_callback), ('2nd_plugin', other_callback)
+            ('plugin_name', plugin_callback, False),
+            ('2nd_plugin_name', other_callback, True)
         ],
         'another_hook':[
-            ('plugin_name', another_hook_callback)
+            ('plugin_name', another_hook_callback, False)
         ]
     }
 
     """
 
-    def __init__(self, plugin_names):
+    def __init__(self, plugin_names, trusted_plugin_names):
         """Load the requested plugin submodules and register their hooks."""
         self._hooks = {}
+        self._load_plugins(plugin_names, False)
+        self._load_plugins(trusted_plugin_names, True)
+
+    def _load_plugins(self, plugin_names, trusted):
         for plugin_name in plugin_names:
             plugin = self._get_plugin(plugin_name)
-            self._register_hooks(plugin_name, plugin)
+            self._register_hooks(plugin_name, plugin, trusted)
 
     def _get_plugin(self, plugin_name):
         """Gets the plugin submodule.
@@ -52,14 +58,14 @@ class PluginManager(object):
         docs.python.org/2.7/library/importlib.html#importlib.import_module
 
         """
-
         return importlib.import_module(plugin_name)
 
-    def _register_hooks(self, plugin_name, plugin):
+    def _register_hooks(self, plugin_name, plugin, trusted):
         """Populates the hooks dictionary with the callbacks provided by the
         plugin_names getHooks method."""
         for hook in plugin.get_hooks():
-            self._hooks.setdefault(hook[0], []).append((plugin_name, hook[1]))
+            self._hooks.setdefault(hook[0], []).append(
+                (plugin_name, hook[1], trusted))
 
     def hook(self, hook_name, params):
         """Call's all the plugin_names registered against this hook.
@@ -73,8 +79,10 @@ class PluginManager(object):
 
         """
         if hook_name in self._hooks.keys():
-            for plugin_name, callback in self._hooks[hook_name]:
+            for plugin_name, callback, trusted in self._hooks[hook_name]:
                 try:
+                    if not trusted:
+                        params = copy.deepcopy(params)
                     callback(params)
                 except Exception as e:
                     raise PluginError(e, traceback.format_exc(), plugin_name)

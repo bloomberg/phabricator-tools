@@ -18,3 +18,6 @@ The plugin must then be added to the repo configuration file as `--plugins PLUGI
         return [("beforeCreateReview", printSomeStuffBeforeReviewCreation)]
 ##Testing
 The regular tests do not load plugins but can be made to by passing a PluginManager with the required plugins loaded
+
+##Trusted Plugins
+If the plugins are specified using `--trusted-plugins` then the references passed in will not be copied so the plugin will be able to modify the objects arcyd is using.
