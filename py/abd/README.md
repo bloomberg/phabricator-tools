@@ -1,6 +1,8 @@
 # abd
 * `abdcmd_arcyd.py` -
 Arcyd - daemon to watch git repos, create and land reviews automatically.
+* `abdcmd_devstatushtml.py` -
+Help develop status-html by providing flags to simulate various statuses.
 * `abdcmd_processrepos.py` -
 Command to process multiple repos.
 * `abdcmd_statushtml.py` -
@@ -47,6 +49,12 @@ Mock version of abdt_reporeporter for testing.
 Git operations on working branches.
 * `abdtst_devphabgit.py` -
 Support for testing developer / phab interactions.
+* `abdweb_htmlformatter.py` -
+Provide useful utilities for formatting html.
+* `abdweb_page.py` -
+Render the outline of an Arcyd report page, with inline CSS, JS etc.
+* `abdweb_repocontent.py` -
+Render html to report the state of a repository watched by Arcyd.
 
 -----
 *please note: this file is generated, edits will be lost*

@@ -1,63 +1,20 @@
-"""Render status files as meaningful html to present to users."""
+"""Render the outline of an Arcyd report page, with inline CSS, JS etc."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdcmd_statushtml
+# abdweb_page
 #
 # Public Functions:
-#   getFromfilePrefixChars
-#   setupParser
-#   process
+#   render
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import json
 
-import phlsys_fs
-
-import abdweb_htmlformatter
-import abdweb_page
-import abdweb_repocontent
-
-
-def getFromfilePrefixChars():
-    return None
-
-
-def setupParser(parser):
-    parser.add_argument(
-        'repo_report_file',
-        metavar="REPOREPORTFILE",
-        type=str,
-        help="path to the try file to render")
-    parser.add_argument(
-        'branches_report_file',
-        metavar="BRANCHESREPORTFILE",
-        type=str,
-        help="path to the try file to render")
-
-
-def _read_json_file(filename):
-    result = None
-    with phlsys_fs.read_file_lock_context(filename) as f:
-        text = f.read()
-        if text:
-            result = json.loads(text)
-    return result
-
-
-def process(args):
-    formatter = abdweb_htmlformatter.HtmlFormatter()
-    repo_report = _read_json_file(args.repo_report_file)
-    branch_report = _read_json_file(args.branches_report_file)
-    abdweb_repocontent.render(formatter, repo_report, branch_report)
-    content = formatter.get_content()
-
-    formatter = abdweb_htmlformatter.HtmlFormatter()
-    abdweb_page.render(formatter, content)
-    print formatter.get_content()
+def render(formatter, content_string):
+    with formatter.tags_context('html', 'body'):
+        formatter.raw(content_string)
 
 
 #------------------------------------------------------------------------------

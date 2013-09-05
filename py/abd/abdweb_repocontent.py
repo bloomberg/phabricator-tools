@@ -1,63 +1,28 @@
-"""Render status files as meaningful html to present to users."""
+"""Render html to report the state of a repository watched by Arcyd."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdcmd_statushtml
+# abdweb_repocontent
 #
 # Public Functions:
-#   getFromfilePrefixChars
-#   setupParser
-#   process
+#   render
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import json
-
-import phlsys_fs
-
-import abdweb_htmlformatter
-import abdweb_page
-import abdweb_repocontent
+import abdt_reporeporter
 
 
-def getFromfilePrefixChars():
-    return None
+def render(formatter, repo_report, branch_report):
 
+    if not repo_report and not branch_report:
+        formatter.text('repo has never been tried')
+        return
 
-def setupParser(parser):
-    parser.add_argument(
-        'repo_report_file',
-        metavar="REPOREPORTFILE",
-        type=str,
-        help="path to the try file to render")
-    parser.add_argument(
-        'branches_report_file',
-        metavar="BRANCHESREPORTFILE",
-        type=str,
-        help="path to the try file to render")
-
-
-def _read_json_file(filename):
-    result = None
-    with phlsys_fs.read_file_lock_context(filename) as f:
-        text = f.read()
-        if text:
-            result = json.loads(text)
-    return result
-
-
-def process(args):
-    formatter = abdweb_htmlformatter.HtmlFormatter()
-    repo_report = _read_json_file(args.repo_report_file)
-    branch_report = _read_json_file(args.branches_report_file)
-    abdweb_repocontent.render(formatter, repo_report, branch_report)
-    content = formatter.get_content()
-
-    formatter = abdweb_htmlformatter.HtmlFormatter()
-    abdweb_page.render(formatter, content)
-    print formatter.get_content()
+    if repo_report:
+        status = repo_report[abdt_reporeporter.RepoAttribs.status]
+        formatter.text('status: ' + status)
 
 
 #------------------------------------------------------------------------------

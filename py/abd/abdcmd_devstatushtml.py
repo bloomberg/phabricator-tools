@@ -1,8 +1,8 @@
-"""Render status files as meaningful html to present to users."""
+"""Help develop status-html by providing flags to simulate various statuses."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdcmd_statushtml
+# abdcmd_devstatushtml
 #
 # Public Functions:
 #   getFromfilePrefixChars
@@ -13,10 +13,9 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import json
+import textwrap
 
-import phlsys_fs
-
+import abdt_reporeporter
 import abdweb_htmlformatter
 import abdweb_page
 import abdweb_repocontent
@@ -27,31 +26,24 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    parser.add_argument(
-        'repo_report_file',
-        metavar="REPOREPORTFILE",
-        type=str,
-        help="path to the try file to render")
-    parser.add_argument(
-        'branches_report_file',
-        metavar="BRANCHESREPORTFILE",
-        type=str,
-        help="path to the try file to render")
+    statuses = abdt_reporeporter.REPO_STATUSES
+    status_group = parser.add_argument_group(
+        'status arguments',
+        'use one of ' + textwrap.fill(str(statuses)))
 
-
-def _read_json_file(filename):
-    result = None
-    with phlsys_fs.read_file_lock_context(filename) as f:
-        text = f.read()
-        if text:
-            result = json.loads(text)
-    return result
+    status_group.add_argument(
+        '--status',
+        metavar="STATUS",
+        required=True,
+        choices=statuses)
 
 
 def process(args):
+
+    repo_report = {abdt_reporeporter.RepoAttribs.status: args.status}
+    branch_report = {}
+
     formatter = abdweb_htmlformatter.HtmlFormatter()
-    repo_report = _read_json_file(args.repo_report_file)
-    branch_report = _read_json_file(args.branches_report_file)
     abdweb_repocontent.render(formatter, repo_report, branch_report)
     content = formatter.get_content()
 

@@ -81,6 +81,7 @@ import argparse
 
 import phlsys_subcommand
 
+import abdcmd_devstatushtml
 import abdcmd_processrepos
 import abdcmd_statushtml
 
@@ -97,6 +98,8 @@ def main():
         "process-repos", abdcmd_processrepos, subparsers)
     phlsys_subcommand.setup_parser(
         "status-html", abdcmd_statushtml, subparsers)
+    phlsys_subcommand.setup_parser(
+        "dev-status-html", abdcmd_devstatushtml, subparsers)
 
     args = parser.parse_args()
 

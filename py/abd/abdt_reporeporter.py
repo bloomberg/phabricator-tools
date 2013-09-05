@@ -15,6 +15,9 @@
 #    .finish_branch
 #    .close
 #
+# Public Assignments:
+#   REPO_STATUSES
+#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
@@ -35,6 +38,14 @@ class RepoStatuses:
     failed_exception = 'failed exception'
     failed = 'failed'
     ok = 'ok'
+
+REPO_STATUSES = [
+    RepoStatuses.updating,
+    RepoStatuses.failed_tryloop,
+    RepoStatuses.failed_exception,
+    RepoStatuses.failed,
+    RepoStatuses.ok,
+]
 
 
 class RepoReporter(object):

@@ -1,63 +1,54 @@
-"""Render status files as meaningful html to present to users."""
+"""Provide useful utilities for formatting html."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdcmd_statushtml
+# abdweb_htmlformatter
 #
-# Public Functions:
-#   getFromfilePrefixChars
-#   setupParser
-#   process
+# Public Classes:
+#   HtmlFormatter
+#    .raw
+#    .text
+#    .get_content
+#    .tags_context
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import json
-
-import phlsys_fs
-
-import abdweb_htmlformatter
-import abdweb_page
-import abdweb_repocontent
+import contextlib
 
 
-def getFromfilePrefixChars():
-    return None
+class HtmlFormatter(object):
 
+    def __init__(self):
+        super(HtmlFormatter, self).__init__()
+        self._string = ''
 
-def setupParser(parser):
-    parser.add_argument(
-        'repo_report_file',
-        metavar="REPOREPORTFILE",
-        type=str,
-        help="path to the try file to render")
-    parser.add_argument(
-        'branches_report_file',
-        metavar="BRANCHESREPORTFILE",
-        type=str,
-        help="path to the try file to render")
+    def _add_open_tag(self, tag):
+        self.raw('<{}>'.format(tag))
 
+    def _add_close_tag(self, tag):
+        self.raw('</{}>'.format(tag))
 
-def _read_json_file(filename):
-    result = None
-    with phlsys_fs.read_file_lock_context(filename) as f:
-        text = f.read()
-        if text:
-            result = json.loads(text)
-    return result
+    def raw(self, text):
+        self._string += text
 
+    def text(self, text):
+        self.raw(text)
 
-def process(args):
-    formatter = abdweb_htmlformatter.HtmlFormatter()
-    repo_report = _read_json_file(args.repo_report_file)
-    branch_report = _read_json_file(args.branches_report_file)
-    abdweb_repocontent.render(formatter, repo_report, branch_report)
-    content = formatter.get_content()
+    def get_content(self):
+        return self._string
 
-    formatter = abdweb_htmlformatter.HtmlFormatter()
-    abdweb_page.render(formatter, content)
-    print formatter.get_content()
+    @contextlib.contextmanager
+    def tags_context(self, *tags):
+        for tag in tags:
+            self._add_open_tag(tag)
+
+        try:
+            yield
+        finally:
+            for tag in reversed(tags):
+                self._add_close_tag(tag)
 
 
 #------------------------------------------------------------------------------
