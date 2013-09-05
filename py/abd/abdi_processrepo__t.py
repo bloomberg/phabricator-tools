@@ -367,7 +367,7 @@ class OldTest(unittest.TestCase):
 
     def test_simpleWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/simpleWorkflow/master")
+            "arcyd-review/simpleWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
@@ -377,7 +377,7 @@ class OldTest(unittest.TestCase):
 
     def test_badMsgWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/badMsgWorkflow/master")
+            "arcyd-review/badMsgWorkflow/master")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -385,7 +385,7 @@ class OldTest(unittest.TestCase):
 
     def test_noReviewerWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/noReviewerWorkflow/master")
+            "arcyd-review/noReviewerWorkflow/master")
         self._devPushNewFile("NEWFILE", has_reviewer=False)
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -393,33 +393,35 @@ class OldTest(unittest.TestCase):
 
     def test_badBaseWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/badBaseWorkflow/blaster")
+            "arcyd-review/badBaseWorkflow/blaster")
         self._devPushNewFile("NEWFILE", has_plan=False)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
         self.dev_phab.dev_push_delete_branch(
-            "ph-review/badBaseWorkflow/blaster")
+            "arcyd-review/badBaseWorkflow/blaster")
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_withReservedBranch(self):
-        self.dev_phab.dev_checkout_push_new_branch("dev/phab/reserve")
-        self.dev_phab.dev_checkout_push_new_branch("ph-review/reserve/master")
+        self.dev_phab.dev_checkout_push_new_branch("dev/arcyd/reserve")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "arcyd-review/reserve/master")
         self._devPushNewFile("reserve")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_noBaseWorkflow(self):
-        self.dev_phab.dev_checkout_push_new_branch("ph-review/noBaseWorkflow")
+        self.dev_phab.dev_checkout_push_new_branch(
+            "arcyd-review/noBaseWorkflow")
         self._devPushNewFile("NEWFILE", has_plan=False)
 
         # TODO: handle no base properly
         # self._phabUpdateWithExpectations(total=1, bad=1)
 
         # delete the bad branch
-        self.dev_phab.dev_push_delete_branch("ph-review/noBaseWorkflow")
+        self.dev_phab.dev_push_delete_branch("arcyd-review/noBaseWorkflow")
 
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
@@ -429,13 +431,13 @@ class OldTest(unittest.TestCase):
     def test_badAuthorWorkflow(self):
         self._devSetAuthorAccount(phldef_conduit.NOTAUSER)
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/badAuthorWorkflow/master")
+            "arcyd-review/badAuthorWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=1, emails=1)
         self._devPushNewFile("NEWFILE2")
         self._phabUpdateWithExpectations(total=1, bad=1, emails=2)
         self.dev_phab.dev_reset_branch_to_master(
-            "ph-review/badAuthorWorkflow/master")
+            "arcyd-review/badAuthorWorkflow/master")
         self._devSetAuthorAccount(self.author_account)
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0, emails=2)
@@ -444,7 +446,7 @@ class OldTest(unittest.TestCase):
 
     def test_abandonedWorkflow(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/abandonedWorkflow/master")
+            "arcyd-review/abandonedWorkflow/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._abandonTheOnlyReview()
@@ -462,7 +464,7 @@ class OldTest(unittest.TestCase):
         # move back to master and land a conflicting change
         self.dev_phab.dev_checkout("master")
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/emptyMerge/master")
+            "arcyd-review/emptyMerge/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -471,13 +473,13 @@ class OldTest(unittest.TestCase):
         # move back to original and try to push and land
         self.dev_phab.dev_checkout("temp/emptyMerge/master")
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/emptyMerge2/master")
+            "arcyd-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # 'resolve' by abandoning our change
-        self.dev_phab.dev_push_delete_branch("ph-review/emptyMerge2/master")
+        self.dev_phab.dev_push_delete_branch("arcyd-review/emptyMerge2/master")
         self._phabUpdateWithExpectations(total=0, bad=0, emails=0)
 
     def test_mergeConflictWorkflow(self):
@@ -488,7 +490,7 @@ class OldTest(unittest.TestCase):
         # move back to master and land a conflicting change
         self.dev_phab.dev_checkout("master")
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/mergeConflict/master")
+            "arcyd-review/mergeConflict/master")
         self._devPushNewFile("NEWFILE", contents="goodbye")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -496,7 +498,7 @@ class OldTest(unittest.TestCase):
 
         # move back to original and try to push and land
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/mergeConflict2/master",
+            "arcyd-review/mergeConflict2/master",
             base="temp/mergeConflict/master")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._acceptTheOnlyReview()
@@ -506,7 +508,7 @@ class OldTest(unittest.TestCase):
         print "force our change"
         self.dev_phab.dev_fetch()
         self.dev_phab.dev_merge_keep_ours("origin/master")
-        self.dev_phab.dev_push_branch("ph-review/mergeConflict2/master")
+        self.dev_phab.dev_push_branch("arcyd-review/mergeConflict2/master")
 
         print "update again"
         self._phabUpdateWithExpectations(total=1, bad=0)
@@ -517,7 +519,7 @@ class OldTest(unittest.TestCase):
         self.dev_phab.dev_checkout_push_new_branch("landing_branch")
         self._devPushNewFile("NEWFILE")
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/alreadyMerged/landing_branch")
+            "arcyd-review/alreadyMerged/landing_branch")
         self._phabUpdateWithExpectations(total=1, bad=1)
 
         # reset the landing branch back to master to resolve
@@ -529,7 +531,7 @@ class OldTest(unittest.TestCase):
 
     def test_commandeeredUpdate(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/commandeeredUpdate/master")
+            "arcyd-review/commandeeredUpdate/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
 
@@ -542,7 +544,7 @@ class OldTest(unittest.TestCase):
 
     def test_commandeeredLand(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/commandeeredLand/master")
+            "arcyd-review/commandeeredLand/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         self._devPushNewFile("NEWFILE2")
@@ -557,14 +559,14 @@ class OldTest(unittest.TestCase):
 
     def test_createHugeReview(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/createHugeReview/master")
+            "arcyd-review/createHugeReview/master")
         lots = "h\n" * 1 * 1024 * 1024
         self._devPushNewFile("NEWFILE", contents=lots)
         self._phabUpdateWithExpectations(total=1, bad=1)
 
     def test_hugeUpdateToReview(self):
         self.dev_phab.dev_checkout_push_new_branch(
-            "ph-review/hugeUpdateReview/master")
+            "arcyd-review/hugeUpdateReview/master")
         self._devPushNewFile("NEWFILE")
         self._phabUpdateWithExpectations(total=1, bad=0)
         lots = "h\n" * 1 * 1024 * 1024

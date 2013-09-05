@@ -114,11 +114,11 @@ trap "echo FAILED!; exit 1" ERR
 
 # create a review branch
 cd dev
-    git checkout -b 'ph-review/myfile/master'
+    git checkout -b 'arcyd-review/myfile/master'
     echo hello > MYFILE
     git add MYFILE
     git commit -m 'add MYFILE'
-    git push origin 'ph-review/myfile/master'
+    git push origin 'arcyd-review/myfile/master'
 cd -
 run_arcyd
 
@@ -127,8 +127,8 @@ cd dev
     echo goodbye > MYFILE
     git add MYFILE
     git commit -m 'update MYFILE'
-    git push origin 'ph-review/myfile/master'
-    git branch -r | grep 'origin/ph-review/myfile/master'
+    git push origin 'arcyd-review/myfile/master'
+    git branch -r | grep 'origin/arcyd-review/myfile/master'
 cd -
 run_arcyd
 

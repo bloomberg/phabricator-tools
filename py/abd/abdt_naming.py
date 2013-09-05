@@ -60,7 +60,7 @@ WB_DICT_STATUS_DESC = {
 
 def getReviewBranchPrefix():
     # don't see a reason to change this atm
-    return "ph-review/"
+    return "arcyd-review/"
 
 
 def getWorkingBranchPrefix():
@@ -68,7 +68,7 @@ def getWorkingBranchPrefix():
     # want to wrap the functions in this module in a class and store the
     # convention variables per-instance; will get the whole thing working
     # first and worry about that later.
-    return "dev/phab/"
+    return "dev/arcyd/"
 
 
 def getReservedBranchPrefix():
@@ -76,7 +76,7 @@ def getReservedBranchPrefix():
     # want to wrap the functions in this module in a class and store the
     # convention variables per-instance; will get the whole thing working
     # first and worry about that later.
-    return "dev/phab/reserve"
+    return "dev/arcyd/reserve"
 
 
 def isStatusBad(working_branch):
@@ -172,7 +172,7 @@ def makeReviewBranchName(description, base):
 
     Usage Example:
         >>> makeReviewBranchName('mywork', 'master')
-        'ph-review/mywork/master'
+        'arcyd-review/mywork/master'
 
     :description: string descriptive name of the branch
     :base: string name of the branch to diff against and land on
@@ -193,7 +193,7 @@ def makeWorkingBranchName(status, description, base, review_id):
 
     Usage example:
         >>> makeWorkingBranchName('ok', 'mywork', 'master',  99)
-        'dev/phab/ok/mywork/master/99'
+        'dev/arcyd/ok/mywork/master/99'
 
     :description: string descriptive name of the branch
     :base: string name of the branch to diff against and land on
@@ -214,9 +214,9 @@ def makeReviewBranchFromName(branch_name):
     """Return the ReviewBranch for 'branch_name' or None if invalid.
 
     Usage example:
-        >>> makeReviewBranchFromName('ph-review/mywork/master')
+        >>> makeReviewBranchFromName('arcyd-review/mywork/master')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__ReviewBranch(branch='ph-review/mywork/master',
+        abdt_naming__ReviewBranch(branch='arcyd-review/mywork/master',
                                   description='mywork',
                                   base='master')
 
@@ -244,9 +244,9 @@ def makeWorkingBranchFromName(branch_name):
     """Return the WorkingBranch for 'branch_name' or None if invalid.
 
     Usage example:
-        >>> makeWorkingBranchFromName('dev/phab/ok/mywork/master/99')
+        >>> makeWorkingBranchFromName('dev/arcyd/ok/mywork/master/99')
         ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__WorkingBranch(branch='dev/phab/ok/mywork/master/99',
+        abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
                                    status='ok',
                                    description='mywork',
                                    base='master',
@@ -280,9 +280,9 @@ def getWorkingBranches(branch_list):
     Strings that aren't valid working branch names are ignored.
 
     Usage example:
-        >>> getWorkingBranches(['dev/phab/ok/mywork/master/99'])
+        >>> getWorkingBranches(['dev/arcyd/ok/mywork/master/99'])
         ... # doctest: +NORMALIZE_WHITESPACE
-        [abdt_naming__WorkingBranch(branch='dev/phab/ok/mywork/master/99',
+        [abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
                                    status='ok',
                                    description='mywork',
                                    base='master',

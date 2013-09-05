@@ -14,11 +14,11 @@ Arcyd does the following:
 minimal user workflow:
     $ git checkout feature/mywork
     ~ commit some work on the branch ~
-    $ git push origin feature/mywork:ph-review/mywork/master
+    $ git push origin feature/mywork:arcyd-review/mywork/master
 
-    .. Arcyd see's the 'ph-review' branch and creates a review ..
+    .. Arcyd see's the 'arcyd-review' branch and creates a review ..
     .. Reviewer accepts the change ..
-    .. Arcyd squashes the 'ph-review' branch onto master and deletes it ..
+    .. Arcyd squashes the 'arcyd-review' branch onto master and deletes it ..
 
 """
 # =============================================================================
