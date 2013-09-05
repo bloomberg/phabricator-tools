@@ -1,6 +1,29 @@
 """Update an existing revision in differential.
 
-usage examples:
+Note:
+
+    When updating an existing revision, you should submit a diff versus
+    the original file. Otherwise the display in Differential may not be as you
+    expect.
+
+    e.g.
+
+    You have 3 versions of your README file:
+        README_original.txt
+        README_update_1.txt
+        README_update_2.txt
+
+    You would like to create a review of these two updates in sequence,
+    the correct way to do it is this:
+
+    1. create the review with this diff:
+       $ diff -u README_original.txt README_update_1.txt
+
+    2. update the review with this diff:
+       $ diff -u README_original.txt README_update_2.txt
+
+Usage examples:
+
     update revision 99 by piping in a diff:
     $ diff -u file1 file2 | arcyon update-revision 99 fixes -f -
     99
