@@ -20,18 +20,42 @@ def render(formatter, repo_report, branch_report):
         formatter.text('repo has never been tried')
         return
 
-    if repo_report:
-        repo_name = repo_report[abdt_reporeporter.REPO_ATTRIB_NAME]
-        status = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS]
-        branch = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH]
-        status_text = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_TEXT]
+    _render_repo_report(formatter, repo_report)
+    _render_branch_report(formatter, branch_report)
 
-        formatter.heading(repo_name)
-        formatter.text('status: ' + status)
-        if branch:
-            formatter.text('branch: ' + branch)
-        if status_text:
-            formatter.text('status text:\n' + status_text)
+
+def _render_repo_report(formatter, repo_report):
+    if not repo_report:
+        return
+
+    repo_name = repo_report[abdt_reporeporter.REPO_ATTRIB_NAME]
+    status = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS]
+    branch = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH]
+    status_text = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_TEXT]
+
+    formatter.heading(repo_name)
+    formatter.text('status: ' + status)
+    if branch:
+        formatter.text('branch: ' + branch)
+    if status_text:
+        formatter.text('status text:\n' + status_text)
+
+
+def _render_branch_report(formatter, branch_report):
+    if not branch_report:
+        return
+
+    branches = branch_report[abdt_reporeporter.RESULT_ATTRIB_BRANCHES]
+    if branches:
+        text = ''
+        text += 'branches\n'
+        text += '--------\n'
+        for branch in branches:
+            text += '{name}: [{status}]\n'.format(
+                name=branch[abdt_reporeporter.RESULT_BRANCH_NAME],
+                status=branch[abdt_reporeporter.RESULT_BRANCH_STATUS],
+            )
+        formatter.text(text)
 
 
 #------------------------------------------------------------------------------

@@ -33,6 +33,9 @@
 #    .mark_ok_new_review
 #    .land
 #
+# Public Functions:
+#   calc_is_ok
+#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
@@ -50,6 +53,22 @@ import abdt_workingbranch
 
 # TODO: allow this to be passed in
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
+
+
+def calc_is_ok(branch):
+    """Return True if the supplied 'branch' is ok, False if bad, else None.
+
+    Note that a branch can be 'null' in which case we return None.
+
+    :branch: the Branch to examine
+    :returns: bool status of the branch
+
+    """
+    assert branch is not None
+    if branch.is_null() or branch.is_new() or branch.is_abandoned():
+        return None
+
+    return not branch.is_status_bad()
 
 
 class Branch(object):

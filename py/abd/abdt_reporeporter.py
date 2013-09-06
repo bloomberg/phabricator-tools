@@ -17,6 +17,9 @@
 #    .finish_branch
 #    .close
 #
+# Public Functions:
+#   branch_status_to_string
+#
 # Public Assignments:
 #   REPO_ATTRIB_NAME
 #   REPO_ATTRIB_STATUS
@@ -27,6 +30,14 @@
 #   REPO_STATUS_FAILED
 #   REPO_STATUS_OK
 #   REPO_STATUSES
+#   RESULT_ATTRIB_BRANCHES
+#   RESULT_BRANCH_NAME
+#   RESULT_BRANCH_STATUS
+#   RESULT_BRANCH_STATUS_OK
+#   RESULT_BRANCH_STATUS_BAD
+#   RESULT_BRANCH_STATUS_UNKNOWN
+#   RESULT_BRANCH_LIST_STATUS
+#   RESULT_LIST_BRANCH
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -57,6 +68,34 @@ REPO_STATUSES = [
     REPO_STATUS_FAILED,
     REPO_STATUS_OK,
 ]
+
+RESULT_ATTRIB_BRANCHES = 'branches'
+
+RESULT_BRANCH_NAME = 'name'
+RESULT_BRANCH_STATUS = 'status'
+
+RESULT_BRANCH_STATUS_OK = 'ok'
+RESULT_BRANCH_STATUS_BAD = 'bad'
+RESULT_BRANCH_STATUS_UNKNOWN = 'unknown'
+
+RESULT_BRANCH_LIST_STATUS = [
+    RESULT_BRANCH_STATUS_OK,
+    RESULT_BRANCH_STATUS_BAD,
+    RESULT_BRANCH_STATUS_UNKNOWN,
+]
+
+RESULT_LIST_BRANCH = [
+    RESULT_BRANCH_NAME,
+    RESULT_BRANCH_STATUS,
+]
+
+
+def branch_status_to_string(status):
+    if status is None:
+        return RESULT_BRANCH_STATUS_UNKNOWN
+    elif status:
+        return RESULT_BRANCH_STATUS_OK
+    return RESULT_BRANCH_STATUS_BAD
 
 
 class SharedFileDictOutput(object):
@@ -99,6 +138,7 @@ class RepoReporter(object):
         self._try_output = try_output
         self._ok_output = ok_output
         self._is_updating = True
+        self._branches = []
 
         assert self._try_output
         assert self._ok_output
@@ -128,15 +168,23 @@ class RepoReporter(object):
             traceback)
 
     def on_completed(self):
-        self._ok_output.write({})
         self._is_updating = False
         self._update_write_repo_status(REPO_STATUS_OK)
+        self._ok_output.write({
+            RESULT_ATTRIB_BRANCHES: self._branches,
+        })
 
-    def start_branch(self, branch):
-        _ = branch  # NOQA
-        self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = branch
+    def start_branch(self, name):
+        self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = name
 
-    def finish_branch(self):
+    def finish_branch(self, status):
+        status = branch_status_to_string(status)
+        d = {
+            RESULT_BRANCH_NAME: self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH],
+            RESULT_BRANCH_STATUS: status,
+        }
+        assert set(d.keys()) == set(RESULT_LIST_BRANCH)
+        self._branches.append(d)
         self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = ''
 
     def _update_write_repo_status(self, status, text=''):

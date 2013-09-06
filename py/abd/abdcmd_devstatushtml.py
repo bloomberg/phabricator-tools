@@ -52,19 +52,41 @@ def process(args):
     repo_report = {}
     branch_report = {}
 
+    def _write(filename):
+        _write_status_page(filename, repo_report, branch_report)
+
+    # simulate unhandled exception during processing
+
+    reporter = abdt_reporeporter.RepoReporter(
+        "exception repo",
+        abdt_reporeporter.SharedDictOutput(repo_report),
+        abdt_reporeporter.SharedDictOutput(branch_report))
+
+    with contextlib.closing(reporter):
+        _write('exception_start')
+        reporter.start_branch('mybranch')
+        reporter.on_traceback('traceback\ntraceback\n')
+    _write('exception_closed')
+
+    # simulate repo with no problems
+
+    repo_report = {}
+    branch_report = {}
+
     reporter = abdt_reporeporter.RepoReporter(
         "myrepo",
         abdt_reporeporter.SharedDictOutput(repo_report),
         abdt_reporeporter.SharedDictOutput(branch_report))
 
-    def _write(filename):
-        _write_status_page(filename, repo_report, branch_report)
-
     with contextlib.closing(reporter):
-        _write('start')
         reporter.start_branch('mybranch')
-        reporter.on_traceback('traceback\ntraceback\n')
-    _write('closed')
+        reporter.finish_branch(True)
+        reporter.start_branch('mybranch2')
+        reporter.finish_branch(False)
+        reporter.start_branch('mybranch3')
+        reporter.finish_branch(None)
+        reporter.on_completed()
+    _write('aok_closed')
 
 
 #------------------------------------------------------------------------------
