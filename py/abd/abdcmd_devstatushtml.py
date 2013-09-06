@@ -13,7 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import textwrap
+import contextlib
 
 import abdt_reporeporter
 import abdweb_htmlformatter
@@ -26,22 +26,12 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    statuses = abdt_reporeporter.REPO_STATUSES
-    status_group = parser.add_argument_group(
-        'status arguments',
-        'use one of ' + textwrap.fill(str(statuses)))
-
-    status_group.add_argument(
-        '--status',
-        metavar="STATUS",
-        required=True,
-        choices=statuses)
+    pass
 
 
-def process(args):
+def _write_status_page(filename, repo_report, branch_report):
 
-    repo_report = {abdt_reporeporter.RepoAttribs.status: args.status}
-    branch_report = {}
+    filename += '.html'
 
     formatter = abdweb_htmlformatter.HtmlFormatter()
     abdweb_repocontent.render(formatter, repo_report, branch_report)
@@ -49,7 +39,29 @@ def process(args):
 
     formatter = abdweb_htmlformatter.HtmlFormatter()
     abdweb_page.render(formatter, content)
-    print formatter.get_content()
+
+    with open(filename, 'w') as f:
+        f.write(formatter.get_content())
+    print "wrote:", filename
+
+
+def process(args):
+
+    _ = args  # NOQA
+
+    repo_report = {}
+    branch_report = {}
+
+    reporter = abdt_reporeporter.RepoReporter(
+        abdt_reporeporter.SharedDictOutput(repo_report),
+        abdt_reporeporter.SharedDictOutput(branch_report))
+
+    def _write(filename):
+        _write_status_page(filename, repo_report, branch_report)
+
+    with contextlib.closing(reporter):
+        _write('start')
+    _write('closed')
 
 
 #------------------------------------------------------------------------------
