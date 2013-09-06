@@ -39,7 +39,8 @@ class HtmlFormatter(object):
             self.raw(text)
 
     def text(self, text):
-        self.raw(text)
+        with self.tags_context('pre'):
+            self.raw(text)
 
     def get_content(self):
         return self._string
