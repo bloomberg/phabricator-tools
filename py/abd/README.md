@@ -43,8 +43,6 @@ Callables for re-integrating branches upstream.
 Naming conventions for abd.
 * `abdt_reporeporter.py` -
 Report the state of a repository.
-* `abdt_reporeportermock.py` -
-Mock version of abdt_reporeporter for testing.
 * `abdt_workingbranch.py` -
 Git operations on working branches.
 * `abdtst_devphabgit.py` -

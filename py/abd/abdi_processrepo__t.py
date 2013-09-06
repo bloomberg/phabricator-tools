@@ -13,7 +13,7 @@ import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
 import abdt_naming
-import abdt_reporeportermock
+import abdt_reporeporter
 import abdtst_devphabgit
 
 import abdi_processrepo
@@ -62,6 +62,8 @@ class Test(unittest.TestCase):
         self.mailer = None
         self.plugin_manager = None
         self.reporter = None
+        self.reporter_try = None
+        self.reporter_ok = None
 
     def setUp(self):
         self.conduit_data = abdt_conduitmock.ConduitMockData()
@@ -73,7 +75,11 @@ class Test(unittest.TestCase):
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
         self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
-        self.reporter = abdt_reporeportermock.RepoReporterMock()
+        self.reporter_try = {}
+        self.reporter_ok = {}
+        self.reporter = abdt_reporeporter.RepoReporter(
+            abdt_reporeporter.SharedDictOutput(self.reporter_try),
+            abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 
     def tearDown(self):
         pass
@@ -271,6 +277,8 @@ class OldTest(unittest.TestCase):
         self.mock_sender = None
         self.plugin_manager = None
         self.reporter = None
+        self.reporter_try = None
+        self.reporter_ok = None
 
     def setUp(self):
         self.dev_phab = abdtst_devphabgit.Collaboration(
@@ -282,7 +290,11 @@ class OldTest(unittest.TestCase):
         self.dev_phab.dev_push_branch("master")
         self.dev_phab.phab_fetch()
 
-        self.reporter = abdt_reporeportermock.RepoReporterMock()
+        self.reporter_try = {}
+        self.reporter_ok = {}
+        self.reporter = abdt_reporeporter.RepoReporter(
+            abdt_reporeporter.SharedDictOutput(self.reporter_try),
+            abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 
         # sys_conduit = phlsys_conduit.Conduit(
         #     phldef_conduit.TEST_URI,

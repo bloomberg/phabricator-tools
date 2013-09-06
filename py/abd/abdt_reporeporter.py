@@ -7,6 +7,10 @@
 # Public Classes:
 #   RepoAttribs
 #   RepoStatuses
+#   SharedFileDictOutput
+#    .write
+#   SharedDictOutput
+#    .write
 #   RepoReporter
 #    .on_tryloop_exception
 #    .on_exception
@@ -25,7 +29,6 @@
 import json
 
 import phlsys_fs
-import phlsys_subprocess
 
 
 class RepoAttribs:
@@ -48,22 +51,48 @@ REPO_STATUSES = [
 ]
 
 
+class SharedFileDictOutput(object):
+
+    def __init__(self, filename):
+        super(SharedFileDictOutput, self).__init__()
+        self._filename = filename
+
+    def write(self, d):
+        assert isinstance(d, dict)
+        with phlsys_fs.write_file_lock_context(self._filename) as f:
+            f.write(json.dumps(d))
+
+
+class SharedDictOutput(object):
+
+    def __init__(self, shared_d):
+        super(SharedDictOutput, self).__init__()
+        self._shared_d = shared_d
+        assert isinstance(self._shared_d, dict)
+
+    def write(self, d):
+        assert isinstance(d, dict)
+        # copy contents to other dict
+        self._shared_d.clear()
+        self._shared_d.update(d)
+
+
 class RepoReporter(object):
 
-    def __init__(self, try_filename, ok_filename):
-        """Initialise a new reporter to report to the specified files.
+    def __init__(self, try_output, ok_output):
+        """Initialise a new reporter to report to the specified outputs.
 
-        :try_filename: string path to the file to touch when trying the repo
-        :ok_filename: string path to the file to touch when processed the repo
+        :try_output: output to use when trying the repo
+        :ok_output: output to use when processed the repo
 
         """
         super(RepoReporter, self).__init__()
-        self._try_filename = try_filename
-        self._ok_filename = ok_filename
+        self._try_output = try_output
+        self._ok_output = ok_output
         self._is_updating = True
 
-        assert self._try_filename
-        assert self._ok_filename
+        assert self._try_output
+        assert self._ok_output
 
         self._repo_attribs = {}
         self._update_write_repo_status(RepoStatuses.updating)
@@ -77,7 +106,7 @@ class RepoReporter(object):
         self._update_write_repo_status(RepoStatuses.failed_exception)
 
     def on_completed(self):
-        phlsys_subprocess.run("touch", self._ok_filename)
+        self._ok_output.write({})
         self._is_updating = False
         self._update_write_repo_status(RepoStatuses.ok)
 
@@ -91,8 +120,7 @@ class RepoReporter(object):
 
     def _update_write_repo_status(self, status):
         self._repo_attribs[RepoAttribs.status] = status
-        with phlsys_fs.write_file_lock_context(self._try_filename) as f:
-            f.write(json.dumps(self._repo_attribs))
+        self._try_output.write(self._repo_attribs)
 
     def _repo_report(self, s):
         pass
