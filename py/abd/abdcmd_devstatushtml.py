@@ -53,6 +53,7 @@ def process(args):
     branch_report = {}
 
     reporter = abdt_reporeporter.RepoReporter(
+        "myrepo",
         abdt_reporeporter.SharedDictOutput(repo_report),
         abdt_reporeporter.SharedDictOutput(branch_report))
 

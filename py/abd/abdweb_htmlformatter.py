@@ -7,6 +7,7 @@
 # Public Classes:
 #   HtmlFormatter
 #    .raw
+#    .heading
 #    .text
 #    .get_content
 #    .tags_context
@@ -32,6 +33,10 @@ class HtmlFormatter(object):
 
     def raw(self, text):
         self._string += text
+
+    def heading(self, text):
+        with self.tags_context('h1'):
+            self.raw(text)
 
     def text(self, text):
         self.raw(text)

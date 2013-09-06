@@ -237,6 +237,7 @@ def get_retry_delays():
 def run_once(args, out):
 
     reporter = abdt_reporeporter.RepoReporter(
+        args.repo_desc,
         abdt_reporeporter.SharedFileDictOutput(args.try_touch_path),
         abdt_reporeporter.SharedFileDictOutput(args.ok_touch_path))
 

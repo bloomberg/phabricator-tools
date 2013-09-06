@@ -13,8 +13,12 @@
 
 
 def render(formatter, content_string):
-    with formatter.tags_context('html', 'body'):
-        formatter.raw(content_string)
+    with formatter.tags_context('html'):
+        with formatter.tags_context('head'):
+            # CSS / js
+            pass
+        with formatter.tags_context('body'):
+            formatter.raw(content_string)
 
 
 #------------------------------------------------------------------------------

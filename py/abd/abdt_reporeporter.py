@@ -32,6 +32,7 @@ import phlsys_fs
 
 
 class RepoAttribs:
+    name = 'name'
     status = 'status'
 
 
@@ -79,9 +80,10 @@ class SharedDictOutput(object):
 
 class RepoReporter(object):
 
-    def __init__(self, try_output, ok_output):
+    def __init__(self, repo_name, try_output, ok_output):
         """Initialise a new reporter to report to the specified outputs.
 
+        :repo_name: human-readable name to identify the repo
         :try_output: output to use when trying the repo
         :ok_output: output to use when processed the repo
 
@@ -94,7 +96,10 @@ class RepoReporter(object):
         assert self._try_output
         assert self._ok_output
 
-        self._repo_attribs = {}
+        self._repo_attribs = {
+            RepoAttribs.name: repo_name,
+        }
+
         self._update_write_repo_status(RepoStatuses.updating)
 
     def on_tryloop_exception(self, e, delay):

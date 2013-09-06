@@ -78,6 +78,7 @@ class Test(unittest.TestCase):
         self.reporter_try = {}
         self.reporter_ok = {}
         self.reporter = abdt_reporeporter.RepoReporter(
+            'abdi_processrepo__t:Test repo',
             abdt_reporeporter.SharedDictOutput(self.reporter_try),
             abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 
@@ -293,6 +294,7 @@ class OldTest(unittest.TestCase):
         self.reporter_try = {}
         self.reporter_ok = {}
         self.reporter = abdt_reporeporter.RepoReporter(
+            'abdi_processrepo__t:OldTest repo',
             abdt_reporeporter.SharedDictOutput(self.reporter_try),
             abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 
