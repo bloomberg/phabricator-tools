@@ -23,8 +23,15 @@ def render(formatter, repo_report, branch_report):
     if repo_report:
         repo_name = repo_report[abdt_reporeporter.REPO_ATTRIB_NAME]
         status = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS]
+        branch = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH]
+        status_text = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_TEXT]
+
         formatter.heading(repo_name)
         formatter.text('status: ' + status)
+        if branch:
+            formatter.text('branch: ' + branch)
+        if status_text:
+            formatter.text('status text:\n' + status_text)
 
 
 #------------------------------------------------------------------------------

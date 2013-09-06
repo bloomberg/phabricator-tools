@@ -11,7 +11,7 @@
 #    .write
 #   RepoReporter
 #    .on_tryloop_exception
-#    .on_exception
+#    .on_traceback
 #    .on_completed
 #    .start_branch
 #    .finish_branch
@@ -20,10 +20,10 @@
 # Public Assignments:
 #   REPO_ATTRIB_NAME
 #   REPO_ATTRIB_STATUS
+#   REPO_ATTRIB_STATUS_BRANCH
+#   REPO_ATTRIB_STATUS_TEXT
 #   REPO_LIST_ATTRIB
 #   REPO_STATUS_UPDATING
-#   REPO_STATUS_FAILED_TRYLOOP
-#   REPO_STATUS_FAILED_EXCEPTION
 #   REPO_STATUS_FAILED
 #   REPO_STATUS_OK
 #   REPO_STATUSES
@@ -38,22 +38,22 @@ import phlsys_fs
 
 REPO_ATTRIB_NAME = 'name'
 REPO_ATTRIB_STATUS = 'status'
+REPO_ATTRIB_STATUS_BRANCH = 'status-current-branch'
+REPO_ATTRIB_STATUS_TEXT = 'status-text'
 
 REPO_LIST_ATTRIB = [
     REPO_ATTRIB_NAME,
     REPO_ATTRIB_STATUS,
+    REPO_ATTRIB_STATUS_BRANCH,
+    REPO_ATTRIB_STATUS_TEXT,
 ]
 
 REPO_STATUS_UPDATING = 'updating'
-REPO_STATUS_FAILED_TRYLOOP = 'failed tryloop'
-REPO_STATUS_FAILED_EXCEPTION = 'failed exception'
 REPO_STATUS_FAILED = 'failed'
 REPO_STATUS_OK = 'ok'
 
 REPO_STATUSES = [
     REPO_STATUS_UPDATING,
-    REPO_STATUS_FAILED_TRYLOOP,
-    REPO_STATUS_FAILED_EXCEPTION,
     REPO_STATUS_FAILED,
     REPO_STATUS_OK,
 ]
@@ -105,19 +105,27 @@ class RepoReporter(object):
 
         self._repo_attribs = {
             REPO_ATTRIB_NAME: repo_name,
+            REPO_ATTRIB_STATUS: '',
+            REPO_ATTRIB_STATUS_BRANCH: '',
+            REPO_ATTRIB_STATUS_TEXT: '',
         }
+
+        # make sure we've initialised all the expected attributes
+        assert set(self._repo_attribs.keys()) == set(REPO_LIST_ATTRIB)
 
         self._update_write_repo_status(REPO_STATUS_UPDATING)
 
     def on_tryloop_exception(self, e, delay):
-        self._repo_report(str(e) + "\nwill wait " + str(delay))
         self._is_updating = False
-        self._update_write_repo_status(REPO_STATUS_FAILED_TRYLOOP)
+        self._update_write_repo_status(
+            REPO_STATUS_FAILED,
+            str(e) + "\nwill wait " + str(delay))
 
-    def on_exception(self, e):
-        self._repo_report(str(e))
+    def on_traceback(self, traceback):
         self._is_updating = False
-        self._update_write_repo_status(REPO_STATUS_FAILED_EXCEPTION)
+        self._update_write_repo_status(
+            REPO_STATUS_FAILED,
+            traceback)
 
     def on_completed(self):
         self._ok_output.write({})
@@ -126,22 +134,18 @@ class RepoReporter(object):
 
     def start_branch(self, branch):
         _ = branch  # NOQA
-        self._repo_report('start branch')
+        self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = branch
 
-    def finish_branch(self, branch):
-        _ = branch  # NOQA
-        self._repo_report('finish branch')
+    def finish_branch(self):
+        self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = ''
 
-    def _update_write_repo_status(self, status):
+    def _update_write_repo_status(self, status, text=''):
         self._repo_attribs[REPO_ATTRIB_STATUS] = status
+        self._repo_attribs[REPO_ATTRIB_STATUS_TEXT] = text
         self._try_output.write(self._repo_attribs)
-
-    def _repo_report(self, s):
-        pass
 
     def close(self):
         """Close any resources associated with the report."""
-        self._is_updating = False
         if self._is_updating:
             self._update_write_repo_status(REPO_STATUS_FAILED)
 

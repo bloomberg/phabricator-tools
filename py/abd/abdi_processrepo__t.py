@@ -1,5 +1,6 @@
 """Test suite for abdi_processrepo."""
 
+import contextlib
 import types
 import unittest
 
@@ -35,6 +36,8 @@ import abdi_processrepo
 # [ H] processUpdateRepo can abandon a review when the branch disappears
 # [ I] processUpdateRepo can handle a review with merge conflicts
 # [ J] processUpdateRepo can handle a diff that's too big
+# [ K] processUpdateRepo can report an exception during branch processing
+# [ B] processUpdateRepo doesn't leave the current branch set after processing
 # [  ] processUpdateRepo can handle a review without commits in repo
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
 #------------------------------------------------------------------------------
@@ -49,6 +52,7 @@ import abdi_processrepo
 # [ H] test_H_AbandonRemovedBranch
 # [ I] test_I_MergeConflicts
 # [ J] test_J_DiffTooBig
+# [ K] test_K_ExceptionDuringProcessing
 #==============================================================================
 
 
@@ -86,12 +90,13 @@ class Test(unittest.TestCase):
         pass
 
     def _process_branches(self, branches):
-        abdi_processrepo.process_branches(
-            branches,
-            self.conduit,
-            self.mailer,
-            self.plugin_manager,
-            self.reporter)
+        with contextlib.closing(self.reporter):
+            abdi_processrepo.process_branches(
+                branches,
+                self.conduit,
+                self.mailer,
+                self.plugin_manager,
+                self.reporter)
 
     def test_A_Breathing(self):
         self._process_branches([])
@@ -105,6 +110,8 @@ class Test(unittest.TestCase):
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
         self.assertEqual(len(self.conduit_data.revisions), 1)
+        self.assertFalse(
+            self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH])
 
         self.conduit_data.accept_the_only_review()
         self.conduit_data.set_unchanged()
@@ -114,6 +121,8 @@ class Test(unittest.TestCase):
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
         self.assertTrue(branch.is_new())
+        self.assertFalse(
+            self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH])
 
     def test_C_NoTestPlan(self):
         branch, branch_data = abdt_branchmock.create_simple_new_review()
@@ -252,6 +261,30 @@ class Test(unittest.TestCase):
         self.conduit_data.accept_the_only_review()
         self._process_branches([branch])
         self.assertTrue(branch.is_null())
+
+    def test_K_ExceptionDuringProcessing(self):
+
+        class test_K_ExceptionDuringProcessing_Exception(Exception):
+            pass
+
+        def error_diff(self):
+            raise test_K_ExceptionDuringProcessing_Exception()
+
+        # fail to create review
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+        branch.make_raw_diff = types.MethodType(error_diff, branch)
+
+        # make sure it raises our exception
+        self.assertRaises(
+            test_K_ExceptionDuringProcessing_Exception,
+            self._process_branches,
+            [branch])
+
+        # make sure the current branch is set in the report
+        self.assertEqual(
+            self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH],
+            branch.review_branch_name())
+
 
 # factors affecting a review:
 #  age of the revisions

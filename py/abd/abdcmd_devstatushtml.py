@@ -62,6 +62,8 @@ def process(args):
 
     with contextlib.closing(reporter):
         _write('start')
+        reporter.start_branch('mybranch')
+        reporter.on_traceback('traceback\ntraceback\n')
     _write('closed')
 
 

@@ -316,8 +316,8 @@ def _run_once(args, out, reporter):
             mailer,
             pluginManager,
             reporter)
-    except Exception as e:
-        reporter.on_exception(e)
+    except Exception:
+        reporter.on_traceback(traceback.format_exc())
         raise
 
     reporter.on_completed()
