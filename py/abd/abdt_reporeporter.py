@@ -5,8 +5,6 @@
 # abdt_reporeporter
 #
 # Public Classes:
-#   RepoAttribs
-#   RepoStatuses
 #   SharedFileDictOutput
 #    .write
 #   SharedDictOutput
@@ -20,6 +18,14 @@
 #    .close
 #
 # Public Assignments:
+#   REPO_ATTRIB_NAME
+#   REPO_ATTRIB_STATUS
+#   REPO_LIST_ATTRIB
+#   REPO_STATUS_UPDATING
+#   REPO_STATUS_FAILED_TRYLOOP
+#   REPO_STATUS_FAILED_EXCEPTION
+#   REPO_STATUS_FAILED
+#   REPO_STATUS_OK
 #   REPO_STATUSES
 #
 # -----------------------------------------------------------------------------
@@ -30,25 +36,26 @@ import json
 
 import phlsys_fs
 
+REPO_ATTRIB_NAME = 'name'
+REPO_ATTRIB_STATUS = 'status'
 
-class RepoAttribs:
-    name = 'name'
-    status = 'status'
+REPO_LIST_ATTRIB = [
+    REPO_ATTRIB_NAME,
+    REPO_ATTRIB_STATUS,
+]
 
-
-class RepoStatuses:
-    updating = 'updating'
-    failed_tryloop = 'failed tryloop'
-    failed_exception = 'failed exception'
-    failed = 'failed'
-    ok = 'ok'
+REPO_STATUS_UPDATING = 'updating'
+REPO_STATUS_FAILED_TRYLOOP = 'failed tryloop'
+REPO_STATUS_FAILED_EXCEPTION = 'failed exception'
+REPO_STATUS_FAILED = 'failed'
+REPO_STATUS_OK = 'ok'
 
 REPO_STATUSES = [
-    RepoStatuses.updating,
-    RepoStatuses.failed_tryloop,
-    RepoStatuses.failed_exception,
-    RepoStatuses.failed,
-    RepoStatuses.ok,
+    REPO_STATUS_UPDATING,
+    REPO_STATUS_FAILED_TRYLOOP,
+    REPO_STATUS_FAILED_EXCEPTION,
+    REPO_STATUS_FAILED,
+    REPO_STATUS_OK,
 ]
 
 
@@ -97,23 +104,25 @@ class RepoReporter(object):
         assert self._ok_output
 
         self._repo_attribs = {
-            RepoAttribs.name: repo_name,
+            REPO_ATTRIB_NAME: repo_name,
         }
 
-        self._update_write_repo_status(RepoStatuses.updating)
+        self._update_write_repo_status(REPO_STATUS_UPDATING)
 
     def on_tryloop_exception(self, e, delay):
         self._repo_report(str(e) + "\nwill wait " + str(delay))
-        self._update_write_repo_status(RepoStatuses.failed_tryloop)
+        self._is_updating = False
+        self._update_write_repo_status(REPO_STATUS_FAILED_TRYLOOP)
 
     def on_exception(self, e):
         self._repo_report(str(e))
-        self._update_write_repo_status(RepoStatuses.failed_exception)
+        self._is_updating = False
+        self._update_write_repo_status(REPO_STATUS_FAILED_EXCEPTION)
 
     def on_completed(self):
         self._ok_output.write({})
         self._is_updating = False
-        self._update_write_repo_status(RepoStatuses.ok)
+        self._update_write_repo_status(REPO_STATUS_OK)
 
     def start_branch(self, branch):
         _ = branch  # NOQA
@@ -124,7 +133,7 @@ class RepoReporter(object):
         self._repo_report('finish branch')
 
     def _update_write_repo_status(self, status):
-        self._repo_attribs[RepoAttribs.status] = status
+        self._repo_attribs[REPO_ATTRIB_STATUS] = status
         self._try_output.write(self._repo_attribs)
 
     def _repo_report(self, s):
@@ -132,8 +141,9 @@ class RepoReporter(object):
 
     def close(self):
         """Close any resources associated with the report."""
+        self._is_updating = False
         if self._is_updating:
-            self._update_write_repo_status(RepoStatuses.failed)
+            self._update_write_repo_status(REPO_STATUS_FAILED)
 
 
 #------------------------------------------------------------------------------
