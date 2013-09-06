@@ -28,6 +28,7 @@ class MergeException(Exception):
 
 
 def squash(clone, source, message, author=None):
+    # TODO: test merging with no effective changes
     with phlsys_fs.nostd():
         try:
             clone.call("merge", "--squash", source)
