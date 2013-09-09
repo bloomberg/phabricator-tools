@@ -33,6 +33,17 @@ PYTHONPATH=py/phl pychecker \
     py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
 
 ###############################################################################
+# pylint
+###############################################################################
+# disabled for now, doesn't seem to add significant value; recent work looks
+# interesting though
+#
+# pylint \
+#     --errors-only \
+#     py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
+#
+
+###############################################################################
 # flake8
 ###############################################################################
 flake8 $allscripts

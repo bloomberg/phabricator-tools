@@ -348,8 +348,7 @@ Test Plan: I proof-read it and it looked ok
         self.assertEqual(len(revision_list), 1)
 
         with phlsys_conduit.act_as_user_context(conduit, author):
-            revision_id = phlcon_differential.update_revision_empty(
-                conduit, revision_id)
+            phlcon_differential.update_revision_empty(conduit, revision_id)
 
     # XXX: re-instate when we have support for reviewers and ccs
     # def testCreateEmptyRevisionReviewersCcs(self):
