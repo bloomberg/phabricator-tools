@@ -241,7 +241,9 @@ def process_branches(branches, conduit, mailer, plugin_manager, reporter):
             print "pending:", branch.review_branch_name()
             process_updated_branch(
                 mailer, conduit, branch, plugin_manager)
-            reporter.finish_branch(abdt_branch.calc_is_ok(branch))
+            reporter.finish_branch(
+                abdt_branch.calc_is_ok(branch),
+                branch.review_id_or_none)
 
 
 #------------------------------------------------------------------------------

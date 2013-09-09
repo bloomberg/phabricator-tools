@@ -59,6 +59,8 @@ def process(args):
 
     reporter = abdt_reporeporter.RepoReporter(
         "exception repo",
+        'http://my.phabricator/{review}',
+        'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
         abdt_reporeporter.SharedDictOutput(repo_report),
         abdt_reporeporter.SharedDictOutput(branch_report))
 
@@ -75,16 +77,24 @@ def process(args):
 
     reporter = abdt_reporeporter.RepoReporter(
         "myrepo",
+        'http://my.phabricator/{review}',
+        'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
         abdt_reporeporter.SharedDictOutput(repo_report),
         abdt_reporeporter.SharedDictOutput(branch_report))
 
     with contextlib.closing(reporter):
         reporter.start_branch('mybranch')
-        reporter.finish_branch(True)
+        reporter.finish_branch(True, None)
         reporter.start_branch('mybranch2')
-        reporter.finish_branch(False)
+        reporter.finish_branch(False, None)
         reporter.start_branch('mybranch3')
-        reporter.finish_branch(None)
+        reporter.finish_branch(None, None)
+        reporter.start_branch('mybranch4')
+        reporter.finish_branch(True, 1)
+        reporter.start_branch('mybranch5')
+        reporter.finish_branch(False, 2)
+        reporter.start_branch('mybranch6')
+        reporter.finish_branch(None, 3)
         reporter.on_completed()
     _write('aok_closed')
 

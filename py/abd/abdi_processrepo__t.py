@@ -83,6 +83,8 @@ class Test(unittest.TestCase):
         self.reporter_ok = {}
         self.reporter = abdt_reporeporter.RepoReporter(
             'abdi_processrepo__t:Test repo',
+            'http://my.phabricator/{review}',
+            'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
             abdt_reporeporter.SharedDictOutput(self.reporter_try),
             abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 
@@ -328,6 +330,8 @@ class OldTest(unittest.TestCase):
         self.reporter_ok = {}
         self.reporter = abdt_reporeporter.RepoReporter(
             'abdi_processrepo__t:OldTest repo',
+            'http://my.phabricator/{review}',
+            'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
             abdt_reporeporter.SharedDictOutput(self.reporter_try),
             abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 

@@ -135,6 +135,18 @@ def setup_repo_arg_parser(parser):
         help="time to wait between fetches")
 
     parser.add_argument(
+        '--review-url-format',
+        metavar="STRING",
+        type=str,
+        help="e.g. 'http://my.phabricator/{review}'")
+
+    parser.add_argument(
+        '--branch-url-format',
+        metavar="STRING",
+        type=str,
+        help="e.g. 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}'")
+
+    parser.add_argument(
         '--try-touch-path',
         metavar="PATH",
         type=str,
@@ -238,6 +250,8 @@ def run_once(args, out):
 
     reporter = abdt_reporeporter.RepoReporter(
         args.repo_desc,
+        args.review_url_format,
+        args.branch_url_format,
         abdt_reporeporter.SharedFileDictOutput(args.try_touch_path),
         abdt_reporeporter.SharedFileDictOutput(args.ok_touch_path))
 

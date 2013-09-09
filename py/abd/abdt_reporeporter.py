@@ -33,11 +33,13 @@
 #   RESULT_ATTRIB_BRANCHES
 #   RESULT_BRANCH_NAME
 #   RESULT_BRANCH_STATUS
+#   RESULT_BRANCH_REVIEW_URL
+#   RESULT_BRANCH_BRANCH_URL
+#   RESULT_LIST_BRANCH
 #   RESULT_BRANCH_STATUS_OK
 #   RESULT_BRANCH_STATUS_BAD
 #   RESULT_BRANCH_STATUS_UNKNOWN
 #   RESULT_BRANCH_LIST_STATUS
-#   RESULT_LIST_BRANCH
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -73,6 +75,15 @@ RESULT_ATTRIB_BRANCHES = 'branches'
 
 RESULT_BRANCH_NAME = 'name'
 RESULT_BRANCH_STATUS = 'status'
+RESULT_BRANCH_REVIEW_URL = 'review-url'
+RESULT_BRANCH_BRANCH_URL = 'branch-url'
+
+RESULT_LIST_BRANCH = [
+    RESULT_BRANCH_NAME,
+    RESULT_BRANCH_STATUS,
+    RESULT_BRANCH_REVIEW_URL,
+    RESULT_BRANCH_BRANCH_URL,
+]
 
 RESULT_BRANCH_STATUS_OK = 'ok'
 RESULT_BRANCH_STATUS_BAD = 'bad'
@@ -82,11 +93,6 @@ RESULT_BRANCH_LIST_STATUS = [
     RESULT_BRANCH_STATUS_OK,
     RESULT_BRANCH_STATUS_BAD,
     RESULT_BRANCH_STATUS_UNKNOWN,
-]
-
-RESULT_LIST_BRANCH = [
-    RESULT_BRANCH_NAME,
-    RESULT_BRANCH_STATUS,
 ]
 
 
@@ -124,17 +130,39 @@ class SharedDictOutput(object):
         self._shared_d.update(d)
 
 
+def _exercise_branch_url_format_string(branch_format_string):
+    """Exercise the supplied string so as to reveal defects early."""
+    branch = 'blahbranch'
+    branch_format_string.format(branch=branch)
+
+
+def _exercise_review_url_format_string(review_format_string):
+    """Exercise the supplied string so as to reveal defects early."""
+    review = 123
+    review_format_string.format(review=review)
+
+
 class RepoReporter(object):
 
-    def __init__(self, repo_name, try_output, ok_output):
+    def __init__(
+            self,
+            repo_name,
+            review_url_format,
+            branch_url_format,
+            try_output,
+            ok_output):
         """Initialise a new reporter to report to the specified outputs.
 
         :repo_name: human-readable name to identify the repo
+        :review_url_format: format string for generating review urls
+        :branch_url_format: format string for generating branch urls
         :try_output: output to use when trying the repo
         :ok_output: output to use when processed the repo
 
         """
         super(RepoReporter, self).__init__()
+        self._review_url_format = review_url_format
+        self._branch_url_format = branch_url_format
         self._try_output = try_output
         self._ok_output = ok_output
         self._is_updating = True
@@ -152,6 +180,11 @@ class RepoReporter(object):
 
         # make sure we've initialised all the expected attributes
         assert set(self._repo_attribs.keys()) == set(REPO_LIST_ATTRIB)
+
+        if self._review_url_format:
+            _exercise_review_url_format_string(self._review_url_format)
+        if self._branch_url_format:
+            _exercise_branch_url_format_string(self._branch_url_format)
 
         self._update_write_repo_status(REPO_STATUS_UPDATING)
 
@@ -177,13 +210,25 @@ class RepoReporter(object):
     def start_branch(self, name):
         self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = name
 
-    def finish_branch(self, status):
-        status = branch_status_to_string(status)
+    def finish_branch(self, status, review_id):
+        branch_name = self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH]
+
+        branch_url = ''
+        review_url = ''
+        if review_id is not None and self._review_url_format:
+            review_url = self._review_url_format.format(review=review_id)
+        if self._branch_url_format:
+            branch_url = self._branch_url_format.format(branch=branch_name)
+
+        status_str = branch_status_to_string(status)
         d = {
-            RESULT_BRANCH_NAME: self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH],
-            RESULT_BRANCH_STATUS: status,
+            RESULT_BRANCH_NAME: branch_name,
+            RESULT_BRANCH_STATUS: status_str,
+            RESULT_BRANCH_REVIEW_URL: review_url,
+            RESULT_BRANCH_BRANCH_URL: branch_url,
         }
         assert set(d.keys()) == set(RESULT_LIST_BRANCH)
+
         self._branches.append(d)
         self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = ''
 
