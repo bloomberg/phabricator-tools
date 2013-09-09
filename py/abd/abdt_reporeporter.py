@@ -17,9 +17,6 @@
 #    .finish_branch
 #    .close
 #
-# Public Functions:
-#   branch_status_to_string
-#
 # Public Assignments:
 #   REPO_ATTRIB_NAME
 #   REPO_ATTRIB_STATUS
@@ -96,7 +93,7 @@ RESULT_BRANCH_LIST_STATUS = [
 ]
 
 
-def branch_status_to_string(status):
+def _branch_status_to_string(status):
     if status is None:
         return RESULT_BRANCH_STATUS_UNKNOWN
     elif status:
@@ -220,7 +217,7 @@ class RepoReporter(object):
         if self._branch_url_format:
             branch_url = self._branch_url_format.format(branch=branch_name)
 
-        status_str = branch_status_to_string(status)
+        status_str = _branch_status_to_string(status)
         d = {
             RESULT_BRANCH_NAME: branch_name,
             RESULT_BRANCH_STATUS: status_str,
