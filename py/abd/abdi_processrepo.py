@@ -65,7 +65,6 @@ def create_review(conduit, branch, plugin_manager):
     commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
 
     if used_default_test_plan:
-        commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
         commenter.usedDefaultTestPlan(
             branch.review_branch_name(), _DEFAULT_TEST_PLAN)
 
