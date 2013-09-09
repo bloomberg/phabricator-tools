@@ -55,12 +55,21 @@ def _render_branch_report(formatter, branch_report):
                 name=branch[abdt_reporeporter.RESULT_BRANCH_NAME],
                 status=branch[abdt_reporeporter.RESULT_BRANCH_STATUS],
             )
+
             branch_url = branch[abdt_reporeporter.RESULT_BRANCH_BRANCH_URL]
             if branch_url:
                 text += '  ' + branch_url + '\n'
+
             review_url = branch[abdt_reporeporter.RESULT_BRANCH_REVIEW_URL]
             if review_url:
                 text += '  ' + review_url + '\n'
+
+            notes = branch[abdt_reporeporter.RESULT_BRANCH_NOTES]
+            if notes:
+                text += notes + '\n'
+
+            text += '\n'
+
         formatter.text(text)
 
 

@@ -95,6 +95,13 @@ def process(args):
         reporter.finish_branch(False, 2)
         reporter.start_branch('mybranch6')
         reporter.finish_branch(None, 3)
+
+        reporter.start_branch('mybranch7')
+        reporter.no_users_on_branch([])
+        reporter.finish_branch(False, 4)
+        reporter.start_branch('mybranch8')
+        reporter.no_users_on_branch(set(['a@b.com', 'c@d.com']))
+        reporter.finish_branch(False, 5)
         reporter.on_completed()
     _write('aok_closed')
 

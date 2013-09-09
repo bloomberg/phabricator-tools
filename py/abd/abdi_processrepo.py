@@ -164,7 +164,8 @@ def create_failed_review(conduit, branch, exception):
     branch.mark_new_bad_in_review(reviewid)
 
 
-def try_create_review(mailer, conduit, branch, plugin_manager, mail_on_fail):
+def try_create_review(
+        mailer, conduit, branch, plugin_manager, reporter, mail_on_fail):
     try:
         create_review(conduit, branch, plugin_manager)
     except abdt_exception.AbdUserException as e:
@@ -177,11 +178,12 @@ def try_create_review(mailer, conduit, branch, plugin_manager, mail_on_fail):
             print e
             branch.mark_bad_pre_review()
             if mail_on_fail:
+                reporter.no_users_on_branch(e.emails)
                 mailer.noUsersOnBranch(
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def process_updated_branch(mailer, conduit, branch, plugin_manager):
+def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
     abdte = abdt_exception
     review_branch_name = branch.review_branch_name()
     if branch.is_new():
@@ -191,6 +193,7 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager):
             conduit,
             branch,
             plugin_manager,
+            reporter,
             mail_on_fail=True)
     else:
         review_id = branch.review_id_or_none()
@@ -204,6 +207,7 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager):
                 conduit,
                 branch,
                 plugin_manager,
+                reporter,
                 mail_on_fail=has_new_commits)
         else:
             print "update review for " + review_branch_name
@@ -240,7 +244,7 @@ def process_branches(branches, conduit, mailer, plugin_manager, reporter):
             reporter.start_branch(branch.review_branch_name())
             print "pending:", branch.review_branch_name()
             process_updated_branch(
-                mailer, conduit, branch, plugin_manager)
+                mailer, conduit, branch, plugin_manager, reporter)
             reporter.finish_branch(
                 abdt_branch.calc_is_ok(branch),
                 branch.review_id_or_none)

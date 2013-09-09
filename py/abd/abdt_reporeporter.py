@@ -14,6 +14,7 @@
 #    .on_traceback
 #    .on_completed
 #    .start_branch
+#    .no_users_on_branch
 #    .finish_branch
 #    .close
 #
@@ -32,6 +33,7 @@
 #   RESULT_BRANCH_STATUS
 #   RESULT_BRANCH_REVIEW_URL
 #   RESULT_BRANCH_BRANCH_URL
+#   RESULT_BRANCH_NOTES
 #   RESULT_LIST_BRANCH
 #   RESULT_BRANCH_STATUS_OK
 #   RESULT_BRANCH_STATUS_BAD
@@ -74,12 +76,14 @@ RESULT_BRANCH_NAME = 'name'
 RESULT_BRANCH_STATUS = 'status'
 RESULT_BRANCH_REVIEW_URL = 'review-url'
 RESULT_BRANCH_BRANCH_URL = 'branch-url'
+RESULT_BRANCH_NOTES = 'notes'
 
 RESULT_LIST_BRANCH = [
     RESULT_BRANCH_NAME,
     RESULT_BRANCH_STATUS,
     RESULT_BRANCH_REVIEW_URL,
     RESULT_BRANCH_BRANCH_URL,
+    RESULT_BRANCH_NOTES,
 ]
 
 RESULT_BRANCH_STATUS_OK = 'ok'
@@ -175,6 +179,8 @@ class RepoReporter(object):
             REPO_ATTRIB_STATUS_TEXT: '',
         }
 
+        self._branch_notes = None
+
         # make sure we've initialised all the expected attributes
         assert set(self._repo_attribs.keys()) == set(REPO_LIST_ATTRIB)
 
@@ -206,6 +212,14 @@ class RepoReporter(object):
 
     def start_branch(self, name):
         self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = name
+        self._branch_notes = ''
+
+    def no_users_on_branch(self, emails):
+        self._branch_notes += """Unable to assign any users to branch.
+
+        These email addresses were considered:
+        {emails}
+        """.format(emails=emails)
 
     def finish_branch(self, status, review_id):
         branch_name = self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH]
@@ -223,11 +237,13 @@ class RepoReporter(object):
             RESULT_BRANCH_STATUS: status_str,
             RESULT_BRANCH_REVIEW_URL: review_url,
             RESULT_BRANCH_BRANCH_URL: branch_url,
+            RESULT_BRANCH_NOTES: self._branch_notes.strip(),
         }
         assert set(d.keys()) == set(RESULT_LIST_BRANCH)
 
         self._branches.append(d)
         self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH] = ''
+        self._branch_notes = ''
 
     def _update_write_repo_status(self, status, text=''):
         self._repo_attribs[REPO_ATTRIB_STATUS] = status
