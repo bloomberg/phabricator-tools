@@ -1,5 +1,7 @@
 """Test suite for phlsys_timedqueue."""
 
+from __future__ import absolute_import
+
 import datetime
 import sys
 import unittest

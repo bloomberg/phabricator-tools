@@ -13,6 +13,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 def set_username_email(clone, username, email):
     """Set the user.name and user.email on the supplied git clone.

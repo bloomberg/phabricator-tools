@@ -11,6 +11,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 def onto_upstream(repo, upstream):
     """Rebase HEAD onto the supplied 'upstream'.

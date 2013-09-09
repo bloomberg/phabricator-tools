@@ -20,6 +20,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 import abdcmnt_commenter
 import abdt_branch
 import abdt_conduitgit

@@ -33,6 +33,17 @@ minimal user workflow:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
+import argparse
+
+import phlsys_subcommand
+
+import abdcmd_devstatushtml
+import abdcmd_processrepos
+import abdcmd_statushtml
+
+
 _USAGE_EXAMPLES = """
 usage example:
     Using the example accounts baked into the 'phabricator-tools'
@@ -76,14 +87,6 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     --sendmail-type sendmail \\
 
     """
-
-import argparse
-
-import phlsys_subcommand
-
-import abdcmd_devstatushtml
-import abdcmd_processrepos
-import abdcmd_statushtml
 
 
 def main():

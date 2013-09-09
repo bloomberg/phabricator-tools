@@ -1,5 +1,7 @@
 """Test suite for abdi_processrepo."""
 
+from __future__ import absolute_import
+
 import contextlib
 import types
 import unittest

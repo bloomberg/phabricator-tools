@@ -1,5 +1,7 @@
 """Test suite for phlsys_dictutil."""
 
+from __future__ import absolute_import
+
 import copy
 import unittest
 

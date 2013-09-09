@@ -17,6 +17,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 def push_asymmetrical_force(clone, localBranch, remoteBranch, remoteName):
     clone.call('push', remoteName, localBranch + ":" + remoteBranch, "--force")

@@ -18,6 +18,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 def code_block(message, lang=None, name=None, lines=None, isBad=False):
     """Return a string code block.

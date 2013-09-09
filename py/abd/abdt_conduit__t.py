@@ -44,6 +44,8 @@
 # [ D] test_D_CanCreateRevisionAsUser
 #==============================================================================
 
+from __future__ import absolute_import
+
 import unittest
 
 import phlcon_differential

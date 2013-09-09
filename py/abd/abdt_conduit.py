@@ -24,6 +24,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 import phlcon_differential
 import phlcon_user
 import phlsys_conduit

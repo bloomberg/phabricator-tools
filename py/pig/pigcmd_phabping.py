@@ -20,14 +20,7 @@ For benchmarking Phabricator you might want to take a look at 'Apache Bench'.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-_USAGE_EXAMPLES = """
-usage examples:
-    ping the official Phabricator install once:
-    $ phab-ping https://secure.phabricator.com -c 1
-
-    ping the local Phabricator install indefinitely:
-    $ phab-ping http://127.0.0.1
-"""
+from __future__ import absolute_import
 
 import argparse
 import collections
@@ -36,6 +29,15 @@ import sys
 import time
 
 import phlsys_conduit
+
+_USAGE_EXAMPLES = """
+usage examples:
+    ping the official Phabricator install once:
+    $ phab-ping https://secure.phabricator.com -c 1
+
+    ping the local Phabricator install indefinitely:
+    $ phab-ping http://127.0.0.1
+"""
 
 
 def main():

@@ -27,6 +27,8 @@ Usage examples:
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
+from __future__ import absolute_import
+
 import argparse
 import sys
 

@@ -23,6 +23,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 class UnitToSeconds(object):  # XXX: will derive from Enum in Python 3.4+
     year = 60 * 60 * 24 * 365  # XXX: based on average days per year

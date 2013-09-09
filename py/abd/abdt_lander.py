@@ -30,6 +30,8 @@ of the failure.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 import phlgit_merge
 
 

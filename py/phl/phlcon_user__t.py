@@ -1,5 +1,7 @@
 """Test suite for phlcon_user."""
 
+from __future__ import absolute_import
+
 import unittest
 
 import phldef_conduit

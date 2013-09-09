@@ -43,6 +43,8 @@
 # =============================================================================
 # TODO: write test driver
 
+from __future__ import absolute_import
+
 import phlgit_log
 import phlgitu_ref
 

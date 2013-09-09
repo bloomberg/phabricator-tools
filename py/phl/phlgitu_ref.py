@@ -13,6 +13,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 def make_remote(ref, remote):
     """Return a Git reference based on a local name and a remote name.

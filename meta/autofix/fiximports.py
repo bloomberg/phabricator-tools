@@ -34,7 +34,7 @@ import sys
 ParsedImport = collections.namedtuple(
     'ParsedImport', ['line', 'module', 'is_future'])
 
-_REQUIRED_FUTURE_IMPORTS = set([])
+_REQUIRED_FUTURE_IMPORTS = set(['absolute_import'])
 
 
 class ProcessingException(Exception):
@@ -79,17 +79,20 @@ def rewrite_module(s, module_name):
     groups = group_imports(imports, module_name)
     lines = s.splitlines()
 
-    if imports:
-        new_import_lines = []
-        for g in groups:
-            for i in g:
-                new_import_lines.append(i)
+    new_import_lines = None
+    if groups:
+        new_import_lines = groups[0]
+        for g in groups[1:]:
             new_import_lines.append('')
-        new_import_lines.pop(-1)
+            new_import_lines += g
 
-        first_line = imports[0].line - 1
-        last_line = imports[-1].line - 1
-        lines[first_line:last_line + 1] = new_import_lines
+    if new_import_lines:
+        if imports:
+            first_line = imports[0].line - 1
+            last_line = imports[-1].line - 1
+            lines[first_line:last_line + 1] = new_import_lines
+        else:
+            lines[0:1] = lines[0:1] + new_import_lines
 
     return '\n'.join(lines) + '\n'
 

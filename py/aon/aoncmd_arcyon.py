@@ -17,6 +17,22 @@ which extend Phabricator.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
+import argparse
+
+import phlsys_makeconduit
+import phlsys_subcommand
+
+import aoncmd_comment
+import aoncmd_createrevision
+import aoncmd_getdiff
+import aoncmd_paste
+import aoncmd_query
+import aoncmd_rawdiff
+import aoncmd_showconfig
+import aoncmd_updaterevision
+
 _USAGE_EXAMPLES = """
 usage examples:
 
@@ -38,20 +54,6 @@ usage examples:
     to comment on every revision:
     $ arcyon query --format-type ids | arcyon comment --ids-file - -m hello
     """
-
-import argparse
-
-import phlsys_makeconduit
-import phlsys_subcommand
-
-import aoncmd_comment
-import aoncmd_createrevision
-import aoncmd_getdiff
-import aoncmd_paste
-import aoncmd_query
-import aoncmd_rawdiff
-import aoncmd_showconfig
-import aoncmd_updaterevision
 
 
 def main():

@@ -11,6 +11,8 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 
 def all_prune(repo):
     """Fetch from all remotes and prune dead branches.
