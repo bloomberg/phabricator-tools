@@ -7,6 +7,7 @@
 # Public Functions:
 #   check_XB_UntrackedBranch
 #   check_XC_MoveBetweenAllMarkedStates
+#   check_XD_SetRetrieveRepoNameBranchLink
 #   assert_branch_is_new
 #   assert_branch_bad_pre_review
 #   assert_branch_bad_in_review
@@ -27,6 +28,7 @@
 # Concerns:
 # [XB] can test is_abandoned, is_null, is_new
 # [XC] can move between all states without error
+# [XD] can set and retrieve repo name, branch link
 # [  ] can detect if review branch has new commits (after ff, merge, rebase)
 # [  ] can get raw diff from branch
 # [  ] can get author names and emails from branch
@@ -48,8 +50,9 @@
 #------------------------------------------------------------------------------
 # Tests:
 # [XA] XXX: check_A_Breathing
-# [XB] check_B_UntrackedBranch
-# [XC] check_C_MoveBetweenAllMarkedStates
+# [XB] check_XB_UntrackedBranch
+# [XC] check_XC_MoveBetweenAllMarkedStates
+# [XD] check_XD_SetRetrieveRepoNameBranchLink
 #
 # N.B. the functions begin with 'check' not 'test' so that the 'nose' test
 #      runner won't try to run them for itself and fail
@@ -114,6 +117,41 @@ def check_XC_MoveBetweenAllMarkedStates(fixture):
                 # print '', initial.__name__
                 # print '', transition1.__name__
                 # print '', transition2.__name__
+
+
+def check_XD_SetRetrieveRepoNameBranchLink(fixture):
+
+    # regular case, repo name and url supplied
+    repo_name = 'repo'
+    browse_url = 'http://server.test/mybranch'
+    base, branch_name, branch = fixture._setup_for_untracked_branch(
+        repo_name, browse_url)
+    fixture.assertEqual(branch.get_repo_name(), repo_name)
+    fixture.assertEqual(branch.get_browse_url(), browse_url)
+
+    # regular case, repo name and url not supplied
+    repo_name = 'repo'
+    browse_url = None
+    base, branch_name, branch = fixture._setup_for_untracked_branch(
+        repo_name, browse_url)
+    fixture.assertEqual(branch.get_repo_name(), repo_name)
+    fixture.assertIsNone(branch.get_browse_url())
+
+    # error case, repo name and url not supplied
+    repo_name = None
+    browse_url = None
+    fixture.assertRaises(
+        AssertionError,
+        fixture._setup_for_untracked_branch,
+        repo_name, browse_url)
+
+    # error case, repo name and url not supplied
+    repo_name = None
+    browse_url = None
+    fixture.assertRaises(
+        AssertionError,
+        fixture._setup_for_untracked_branch,
+        repo_name, browse_url)
 
 
 def assert_branch_is_new(fixture, branch, branch_name, base):

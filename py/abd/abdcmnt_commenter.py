@@ -57,20 +57,32 @@ class Commenter(object):
         self._createComment(message)
         self.exception(exception)
 
-    def createdReview(self, branch_name, base_name):
-        message = "created revision from branch "
-        message += phlcon_remarkup.monospaced(branch_name) + "\n"
-        message += "\n"
-        message += "if the revision is accepted then i will automatically try "
-        message += "to land the revision on "
-        message += phlcon_remarkup.monospaced(base_name) + "."
-        message += " the commit message will "
-        message += "be created from the title, summary, test plan and other "
-        message += "properties of this review page.\n"
-        message += "\n"
-        message += "the author may change the properties of the review at any "
-        message += "time by following the 'edit revision' link at the "
-        message += "top-right of the page."
+    def createdReview(
+            self, repo_name, branch_name, base_name, branch_url=None):
+
+        message = """
+created revision from:
+
+**repository**: {repo_name}
+**branch**: {branch_name}
+
+if the revision is accepted then i will automatically try to land the
+revision on {base_name}.
+
+the commit message will be created from the title, summary, test plan and
+other properties of this review page.
+
+the author may change the properties of the review at any time by following
+the 'edit revision' link at the top-right of the page.
+        """.format(
+            repo_name=phlcon_remarkup.monospaced(repo_name),
+            branch_name=phlcon_remarkup.monospaced(branch_name),
+            base_name=phlcon_remarkup.monospaced(base_name)).strip()
+
+        if branch_url is not None:
+            message += "\nyou can browse the branch here: {branch_url}".format(
+                branch_url=phlcon_remarkup.link(branch_url))
+
         self._createComment(message, silent=True)
 
     def updatedReview(self, branch_name):

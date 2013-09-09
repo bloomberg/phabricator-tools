@@ -19,6 +19,8 @@
 #    .review_id_or_none
 #    .get_author_names_emails
 #    .get_any_author_emails
+#    .get_repo_name
+#    .get_browse_url
 #    .get_clone
 #    .make_message_digest
 #    .make_raw_diff
@@ -57,7 +59,7 @@ def create_ok_names_emails():
     return [(phldef_conduit.ALICE.user, phldef_conduit.ALICE.email)]
 
 
-def create_simple_new_review():
+def create_simple_new_review(repo_name='name', branch_url=None):
     data = BranchMockData(
         is_abandoned=False,
         is_null=False,
@@ -70,7 +72,9 @@ def create_simple_new_review():
         any_emails=None,
         message_digest="digest",
         raw_diff="raw diff",
-        branch_tip_message="tip message")
+        branch_tip_message="tip message",
+        repo_name=repo_name,
+        branch_url=branch_url)
 
     return BranchMock(data), data
 
@@ -127,7 +131,9 @@ class BranchMockData(object):
             any_emails,
             message_digest,
             raw_diff,
-            branch_tip_message):
+            branch_tip_message,
+            repo_name,
+            branch_url):
         """Create data for a mock relationship tracker.
 
         :is_abandoned: bool result of self.is_abandoned()
@@ -142,6 +148,8 @@ class BranchMockData(object):
         :message_digest: the string result of self.make_message_digest()
         :raw_diff: the string result of self.make_raw_diff()
         :branch_tip_message: the result of self.get_commit_message_from_tip()
+        :repo_name: the name of the repository, returned by get_repo_name()
+        :branch_url: the url to browse the url, returned by get_browse_url()
 
         """
         super(BranchMockData, self).__init__()
@@ -159,6 +167,8 @@ class BranchMockData(object):
         self.raw_diff = raw_diff
         self.branch_tip_message = branch_tip_message
         self.status = None
+        self.repo_name = repo_name
+        self.branch_url = branch_url
 
         assert isinstance(self.revision_id, int) or self.revision_id is None
 
@@ -241,6 +251,14 @@ class BranchMock(object):
         if not emails:
             emails = self._data.any_emails
         return emails
+
+    def get_repo_name(self):
+        """Return the human name for the repo the branch came from."""
+        return self._data.repo_name
+
+    def get_browse_url(self):
+        """Return the url to browse this branch, may be None."""
+        return self._data.branch_url
 
     def get_clone(self):
         """Return the abdt_clone for this branch."""

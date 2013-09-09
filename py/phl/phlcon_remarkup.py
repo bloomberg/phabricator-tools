@@ -12,6 +12,7 @@
 #   italic
 #   monospaced
 #   deleted
+#   link
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -163,6 +164,19 @@ def deleted(message):
 
     """
     return encased(message, "~~")
+
+
+def link(url):
+    """Return 'url' explicitly remarked up as a link.
+
+    >>> link("http://server.test/")
+    '[[http://server.test/]]'
+
+    :url: the string to be remarked up
+    :returns: 'url' encased in appropriate remarkup
+
+    """
+    return "[[{url}]]".format(url=url)
 
 
 #------------------------------------------------------------------------------

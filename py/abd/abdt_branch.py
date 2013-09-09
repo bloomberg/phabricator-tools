@@ -18,6 +18,8 @@
 #    .review_id_or_none
 #    .get_author_names_emails
 #    .get_any_author_emails
+#    .get_repo_name
+#    .get_browse_url
 #    .get_clone
 #    .make_message_digest
 #    .make_raw_diff
@@ -73,13 +75,22 @@ def calc_is_ok(branch):
 
 class Branch(object):
 
-    def __init__(self, clone, review_branch, tracking_branch, lander):
+    def __init__(
+            self,
+            clone,
+            review_branch,
+            tracking_branch,
+            lander,
+            repo_name,
+            browse_url=None):
         """Create a new relationship tracker for the supplied branch names.
 
         :clone: a Git clone to delegate to
         :review_branch: the abdt_gittypes.GitReviewBranch
         :tracking_branch: the abdt_gittypes.GitWorkingBranch
         :lander: a lander conformant to abdt_lander
+        :repo_name: a short string to identify the repo to humans
+        :browse_url: a URL to browse the branch or repo (may be None)
 
         """
         self._clone = clone
@@ -88,6 +99,9 @@ class Branch(object):
         self._lander = lander
         assert self._review_branch_valid_or_none()
         assert self._tracking_branch_valid_or_none()
+        self._repo_name = repo_name
+        self._browse_url = browse_url
+        assert self._repo_name is not None
 
     def _review_branch_valid_or_none(self):
         if not self._has_review_branch():
@@ -209,6 +223,14 @@ class Branch(object):
             self._clone, hashes)
         emails = [committer[1] for committer in committers]
         return emails
+
+    def get_repo_name(self):
+        """Return the human name for the repo the branch came from."""
+        return self._repo_name
+
+    def get_browse_url(self):
+        """Return the url to browse this branch, may be None."""
+        return self._browse_url
 
     def get_clone(self):
         """Return the abdt_clone for this branch."""

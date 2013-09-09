@@ -50,10 +50,10 @@ class Collaboration(object):
         )
 
         self._phab_wdir = os.path.abspath("phab")
-        self.clone = abdt_git.Clone("phab", "origin")
+        self.clone = abdt_git.Clone("phab", "origin", "./phab")
 
         self._dev_wdir = os.path.abspath("developer")
-        self.dev_clone = abdt_git.Clone("developer", "origin")
+        self.dev_clone = abdt_git.Clone("developer", "origin", "./developer")
 
         self.clone.set_name_email(phab.user, phab.email)
         self.dev_clone.set_name_email(author.user, author.email)

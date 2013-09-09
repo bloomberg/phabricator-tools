@@ -18,12 +18,14 @@ import abdt_branchtester
 # [ B] public interface of mock matches abdt_branch.Branch
 # [XB] can test is_abandoned, is_null, is_new
 # [XC] can move between all states without error
+# [XD] can set and retrieve repo name, branch link
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_InterfaceMatchesRealBranch
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
+# [XD] check_XD_SetRetrieveRepoNameBranchLink
 #==============================================================================
 
 
@@ -50,8 +52,12 @@ class Test(unittest.TestCase):
     def test_XC_MoveBetweenAllMarkedStates(self):
         abdt_branchtester.check_XC_MoveBetweenAllMarkedStates(self)
 
-    def _setup_for_untracked_branch(self):
-        branch, data = abdt_branchmock.create_simple_new_review()
+    def check_XD_SetRetrieveRepoNameBranchLink(self):
+        abdt_branchtester.check_XD_SetRetrieveRepoNameBranchLink(self)
+
+    def _setup_for_untracked_branch(self, repo_name='name', branch_url=None):
+        branch, data = abdt_branchmock.create_simple_new_review(
+            repo_name, branch_url)
         return data.base_branch, data.review_branch, branch
 
 

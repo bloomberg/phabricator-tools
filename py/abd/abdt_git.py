@@ -42,16 +42,22 @@ import abdt_naming
 
 class Clone(object):
 
-    def __init__(self, working_dir, remote):
+    def __init__(
+            self, working_dir, remote, description, branch_link_callable=None):
         """Initialise a new Clone.
 
-        :clone: a phlsys_git.Clone to delegate to
+        :working_dir: the directory to attach to
+        :remote: name of the remote to use
+        :description: short identification of the repo for humans
+        :branch_link_callable: we call this with a branch to get a link
         :returns: None
 
         """
         super(Clone, self).__init__()
         self._clone = phlsys_git.GitClone(working_dir)
         self._remote = remote
+        self._description = description
+        self._branch_link_callable = branch_link_callable
 
     def is_identical(self, branch1, branch2):
         """Return True if the branches point to the same commit.
@@ -208,7 +214,7 @@ class Clone(object):
                     b, self._remote)
                 abandoned_list.append(
                     abdt_branch.Branch(
-                        self, None, working_branch, lander))
+                        self, None, working_branch, lander, self._description))
 
     def _add_paired_branches(
             self, paired, branches, rb_to_wb, lander):
@@ -227,9 +233,18 @@ class Clone(object):
                     working_branch = abdt_gittypes.makeGitWorkingBranch(
                         working_branch, self._remote)
 
+                branch_url = None
+                if self._branch_link_callable:
+                    branch_url = self._branch_link_callable(review_branch)
+
                 paired.append(
                     abdt_branch.Branch(
-                        self, review_branch, working_branch, lander))
+                        self,
+                        review_branch,
+                        working_branch,
+                        lander,
+                        self._description,
+                        branch_url))
 
     @property
     def working_dir(self):

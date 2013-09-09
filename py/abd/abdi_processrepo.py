@@ -85,8 +85,10 @@ def create_differential_review(conduit, user, parsed, branch, raw_diff):
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
     commenter.createdReview(
+        branch.get_repo_name(),
         branch.review_branch_name(),
-        branch.base_branch_name())
+        branch.base_branch_name(),
+        branch.get_browse_url())
 
     return revision_id
 

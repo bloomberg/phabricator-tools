@@ -320,7 +320,15 @@ def _run_once(args, out, reporter):
 
     out.display("process (" + args.repo_desc + "): ")
     arcyd_conduit = abdt_conduit.Conduit(conduit[0])
-    arcyd_clone = abdt_git.Clone(args.repo_path, "origin")
+
+    branch_url_callable = None
+    if args.branch_url_format:
+        def make_branch_url(branch_name):
+            return args.branch_url_format.format(branch=branch_name)
+        branch_url_callable = make_branch_url
+
+    arcyd_clone = abdt_git.Clone(
+        args.repo_path, "origin", args.repo_desc, branch_url_callable)
     branches = arcyd_clone.get_managed_branches()
 
     try:

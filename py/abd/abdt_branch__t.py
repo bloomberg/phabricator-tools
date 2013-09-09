@@ -8,6 +8,7 @@
 # Concerns:
 # [XB] can test is_abandoned, is_null, is_new
 # [XC] can move between all states without error
+# [XD] can set and retrieve repo name, branch link
 # [  ] can detect if review branch has new commits (after ff, merge, rebase)
 # [  ] can get raw diff from branch
 # [  ] can get author names and emails from branch
@@ -33,6 +34,7 @@
 # [ B] test_B_RawDiffNewCommits
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
+# [XD] check_XD_SetRetrieveRepoNameBranchLink
 #==============================================================================
 
 import os
@@ -66,7 +68,8 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.repo_central = phlsys_git.GitClone(tempfile.mkdtemp())
         self.repo_dev = phlsys_git.GitClone(tempfile.mkdtemp())
-        self.clone_arcyd = abdt_git.Clone(tempfile.mkdtemp(), 'origin')
+        self.clone_arcyd = abdt_git.Clone(
+            tempfile.mkdtemp(), 'origin', "myrepo", "http://git/{branch}")
 
         self.repo_central.call("init", "--bare")
 
@@ -155,6 +158,9 @@ class Test(unittest.TestCase):
     def test_XC_MoveBetweenAllMarkedStates(self):
         abdt_branchtester.check_XC_MoveBetweenAllMarkedStates(self)
 
+    def check_D_SetRetrieveRepoNameBranchLink(self):
+        abdt_branchtester.check_XD_SetRetrieveRepoNameBranchLink(self)
+
     def _create_new_file(self, repo, filename):
         self.assertFalse(os.path.isfile(filename))
         open(os.path.join(repo.working_dir, filename), 'a').close()
@@ -164,7 +170,7 @@ class Test(unittest.TestCase):
         branch.mark_ok_new_review(101)
         return base, branch_name, branch
 
-    def _setup_for_untracked_branch(self):
+    def _setup_for_untracked_branch(self, repo_name='name', branch_url=None):
         self._create_new_file(self.repo_dev, 'README')
         self.repo_dev.call('add', 'README')
         self.repo_dev.call('commit', '-m', 'initial commit')
@@ -182,7 +188,12 @@ class Test(unittest.TestCase):
         review_branch = abdt_gittypes.makeGitReviewBranch(
             review_branch, 'origin')
         branch = abdt_branch.Branch(
-            self.clone_arcyd, review_branch, None, None)
+            self.clone_arcyd,
+            review_branch,
+            None,
+            None,
+            repo_name,
+            branch_url)
 
         # should not raise
         branch.verify_review_branch_base()
