@@ -226,7 +226,7 @@ class Test(unittest.TestCase):
         branch.land = types.MethodType(error_land, branch)
         self.conduit_data.accept_the_only_review()
         self._process_branches([branch])
-        self.assertTrue(branch.is_status_bad())
+        self.assertTrue(branch.is_status_bad_land())
 
         # fix the landing error
         branch.land = old_land
