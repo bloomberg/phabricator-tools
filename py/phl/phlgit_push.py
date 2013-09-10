@@ -1,4 +1,4 @@
-"""Wrapper around 'git push'"""
+"""Wrapper around 'git push'."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -8,6 +8,8 @@
 #   push_asymmetrical_force
 #   push_asymmetrical
 #   push
+#   force_branch
+#   branch
 #   move_asymmetrical
 #   delete
 #
@@ -26,6 +28,22 @@ def push_asymmetrical(clone, localBranch, remoteBranch, remoteName):
 
 def push(clone, branch, remoteName):
     clone.call('push', remoteName, branch)
+
+
+def force_branch(repo, branch, remote='origin'):
+    """Force push 'branch' to the supplied 'origin'.
+
+    :repo: supports 'call'
+    :branch: the string name of the branch to push
+    :remote: the string name of the remote to push to
+    :returns: None
+
+    """
+    repo.call('push', '--force', remote, branch)
+
+
+def branch(clone, branch, remote='origin'):
+    clone.call('push', remote, branch)
 
 
 def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):

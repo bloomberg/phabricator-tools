@@ -1,4 +1,4 @@
-"""Test suite for phlsys_scheduleunreliables"""
+"""Test suite for phlsys_scheduleunreliables."""
 
 import datetime
 import functools
@@ -54,7 +54,7 @@ class Test(unittest.TestCase):
         data = set([1, 2, 3, 4, 5, 6, 7, 8, 9])
         operations = set([makeOperation(i) for i in data])
 
-        phlsys_scheduleunreliables.loop_once(
+        phlsys_scheduleunreliables._process_operations(
             operations, phlsys_scheduleunreliables.make_timed_queue())
 
         self.assertSetEqual(data, results)
@@ -79,7 +79,7 @@ class Test(unittest.TestCase):
         self.assertEqual(num_operations, len(operations))
 
         bad_operations = phlsys_scheduleunreliables.make_timed_queue()
-        phlsys_scheduleunreliables.loop_once(
+        phlsys_scheduleunreliables._process_operations(
             operations, bad_operations)
 
         # loopOnce() should have moved all our operations into bad_operations
@@ -112,13 +112,13 @@ class Test(unittest.TestCase):
 
         bad_operations = phlsys_scheduleunreliables.make_timed_queue()
 
-        phlsys_scheduleunreliables.loop_once(
+        phlsys_scheduleunreliables._process_operations(
             operations, bad_operations)
         self.assertSetEqual(data, results)
 
         # we should fill the results with the same data again
         results = set()
-        phlsys_scheduleunreliables.loop_once(
+        phlsys_scheduleunreliables._process_operations(
             operations, bad_operations)
         self.assertSetEqual(data, results)
 
@@ -146,7 +146,7 @@ class Test(unittest.TestCase):
 
         bad_operations = phlsys_scheduleunreliables.make_timed_queue()
 
-        phlsys_scheduleunreliables.loop_once(
+        phlsys_scheduleunreliables._process_operations(
             operations, bad_operations)
         self.assertEqual(0, len(operations))
         self.assertEqual(0, len(bad_operations.pop_expired()))

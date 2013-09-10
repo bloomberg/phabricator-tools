@@ -15,6 +15,7 @@ usage examples:
     create a new revision from diff 1, add a reviewer and a cc:
     $ arcyon create-revision -d 1 -t title -p test -r reviewer -c cc
     99
+
 """
 # =============================================================================
 # CONTENTS

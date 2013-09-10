@@ -35,6 +35,7 @@ appear in the help pages.
 #   print_contents
 #   find_likely_insertion_point
 #   print_items_indented
+#   print_nested_items_indented
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -150,8 +151,15 @@ def parse_module(s, classes, functions, assignments):
                 functions.append(name)
         elif isinstance(c, ast.ClassDef):
             name = fields["name"]
+            members = []
+            for member in fields["body"]:
+                if isinstance(member, ast.FunctionDef):
+                    member_fields = dict(ast.iter_fields(member))
+                    member_name = member_fields['name']
+                    if member_name[0] != '_':
+                        members.append(member_name)
             if name[0] != '_':
-                classes.append(name)
+                classes.append((name, members))
         elif isinstance(c, ast.Assign):
             for t in fields["targets"]:
                 name = dict(ast.iter_fields(t))["id"]
@@ -163,7 +171,7 @@ def print_contents(f, name, classes, functions, assignments):
     print("#", name, file=f)
     print("#", file=f)
     if classes:
-        print_items_indented(f, "Public Classes", classes)
+        print_nested_items_indented(f, "Public Classes", classes)
     if functions:
         print_items_indented(f, "Public Functions", functions)
     if assignments:
@@ -188,6 +196,15 @@ def print_items_indented(f, description, items):
     print("# " + description + ":", file=f)
     for i in items:
         print("#  ", i, file=f)
+    print("#", file=f)
+
+
+def print_nested_items_indented(f, description, nested_items):
+    print("# " + description + ":", file=f)
+    for i in nested_items:
+        print("#  ", i[0], file=f)
+        for j in i[1]:
+            print("#    ." + j, file=f)
     print("#", file=f)
 
 

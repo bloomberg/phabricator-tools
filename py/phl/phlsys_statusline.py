@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   StatusLine
+#    .display
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

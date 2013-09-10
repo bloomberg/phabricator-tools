@@ -1,4 +1,4 @@
-"""Test suite for phlsys_conduit"""
+"""Test suite for phlsys_conduit."""
 #==============================================================================
 #                                   TEST PLAN
 #------------------------------------------------------------------------------
@@ -15,6 +15,7 @@
 import unittest
 
 import phldef_conduit
+
 import phlsys_conduit
 
 

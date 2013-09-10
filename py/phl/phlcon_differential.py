@@ -1,4 +1,4 @@
-"""Wrapper to call Phabricator's Differential Conduit API"""
+"""Wrapper to call Phabricator's Differential Conduit API."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -8,6 +8,8 @@
 #   ReviewStates
 #   Action
 #   MessageFields
+#   Error
+#   UpdateClosedRevisionError
 #
 # Public Functions:
 #   create_raw_diff
@@ -20,6 +22,8 @@
 #   create_comment
 #   get_commit_message
 #   close
+#   create_empty_revision
+#   update_revision_empty
 #
 # Public Assignments:
 #   AUTHOR_ACTIONS
@@ -35,12 +39,13 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+import phlsys_conduit
 import phlsys_dictutil
 import phlsys_namedtuple
 
 
 # Enumerate the states that a Differential review can be in
-## from ArcanistRevisionDifferentialStatus.php:
+# from ArcanistRevisionDifferentialStatus.php:
 class ReviewStates(object):  # XXX: will derive from Enum in Python 3.4+
     needs_review = 0
     needs_revision = 1
@@ -50,7 +55,7 @@ class ReviewStates(object):  # XXX: will derive from Enum in Python 3.4+
 
 
 # Enumerate the actions that can be performed on a Differential review
-## from .../differential/constants/DifferentialAction.php:
+# from .../differential/constants/DifferentialAction.php:
 class Action(object):  # XXX: will derive from Enum in Python 3.4+
     close = 'commit'
     comment = 'none'
@@ -154,6 +159,14 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
     ignored=[])
 
 
+class Error(Exception):
+    pass
+
+
+class UpdateClosedRevisionError(Error):
+    pass
+
+
 def create_raw_diff(conduit, diff):
     response = conduit.call("differential.createrawdiff", {"diff": diff})
     return CreateRawDiffResponse(**response)
@@ -176,7 +189,7 @@ def create_diff(
         author_phid=None,
         arcanist_project=None,
         repository_uuid=None):
-    """@todo: Docstring for create_diff
+    """@todo: Docstring for create_diff.
 
     :conduit: conduit to operate on
     :changes_dict: changes response, 'changes' field of GetDiffResponse
@@ -276,7 +289,14 @@ def update_revision(conduit, id, diffid, fields, message):
         "id": id, "diffid": diffid,
         "fields": fields, "message": message
     }
-    response = conduit.call('differential.updaterevision', d)
+
+    try:
+        response = conduit.call('differential.updaterevision', d)
+    except phlsys_conduit.ConduitException as e:
+        if e.error == 'ERR_CLOSED':
+            raise UpdateClosedRevisionError()
+        raise
+
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
 
@@ -300,6 +320,48 @@ def get_commit_message(conduit, revision_id):
 
 def close(conduit, revisionId):
     conduit.call('differential.close', {"revisionID": revisionId})
+
+
+def create_empty_revision(conduit):
+    """Return the revision id of a newly created empty revision.
+
+    :conduit: conduit to operate on
+    :return: revision id
+
+    """
+
+    empty_diff = "diff --git a/ b/"
+    diff_id = create_raw_diff(conduit, empty_diff).id
+    fields = {
+        "title": "empty revision",
+        "testPlan": "UNTESTED",
+    }
+
+    # TODO: add support for reviewers and ccs
+    # if reviewers:
+    #     assert not isinstance(reviewers, types.StringTypes)
+    #     fields["reviewers"] = reviewers
+    # if ccs:
+    #     assert not isinstance(ccs, types.StringTypes)
+    #     fields["ccs"] = ccs
+
+    revision = create_revision(conduit, diff_id, fields)
+
+    return revision.revisionid
+
+
+def update_revision_empty(conduit, revision_id):
+    """Update the specified 'revision_id' with an empty diff.
+
+    :conduit: conduit to operate on
+    :revision_id: revision to update
+    :return: None
+
+    """
+
+    empty_diff = "diff --git a/ b/"
+    diff_id = create_raw_diff(conduit, empty_diff).id
+    update_revision(conduit, revision_id, diff_id, [], 'update')
 
 
 #------------------------------------------------------------------------------

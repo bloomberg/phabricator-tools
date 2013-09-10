@@ -41,6 +41,7 @@ output formats:
             ],
             "commits": [],
             ...
+
 """
 # =============================================================================
 # CONTENTS
@@ -65,9 +66,9 @@ import textwrap
 
 import phlcon_user
 import phlsys_dictutil
+import phlsys_makeconduit
 import phlsys_strtotime
 import phlsys_timedeltatostr
-import phlsys_makeconduit
 
 import aont_conduitargs
 

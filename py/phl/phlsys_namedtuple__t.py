@@ -1,4 +1,4 @@
-"""Test suite for phlsys_namedtuple"""
+"""Test suite for phlsys_namedtuple."""
 
 import unittest
 import warnings
@@ -38,6 +38,7 @@ import phlsys_namedtuple
 
 
 class Test(unittest.TestCase):
+
     def __init__(self, data):
         self.factory = None
         super(Test, self).__init__(data)

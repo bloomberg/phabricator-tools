@@ -7,6 +7,8 @@ create a comment on differential reviews.
 Create a new revision in differential.
 * `aoncmd_getdiff.py` -
 Get a diff from differential, along with metadata.
+* `aoncmd_paste.py` -
+Create a new paste.
 * `aoncmd_query.py` -
 display and filter the list of differential revisions.
 * `aoncmd_rawdiff.py` -

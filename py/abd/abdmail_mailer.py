@@ -6,6 +6,10 @@
 #
 # Public Classes:
 #   Mailer
+#    .noUsersOnBranch
+#    .userException
+#    .initialCommitMessageParseException
+#    .badBranchName
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)

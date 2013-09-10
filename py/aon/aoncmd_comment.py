@@ -9,6 +9,7 @@ usage examples:
 
     comment on revisions 1 and 2, reading the message from 'mymessage':
     $ arcyon comment 1 2 --message-file mymessage
+
 """
 # =============================================================================
 # CONTENTS

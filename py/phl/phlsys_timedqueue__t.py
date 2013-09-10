@@ -1,8 +1,8 @@
-"""Test suite for phlsys_timedqueue"""
+"""Test suite for phlsys_timedqueue."""
 
-import unittest
 import datetime
 import sys
+import unittest
 
 import phlsys_timedqueue
 

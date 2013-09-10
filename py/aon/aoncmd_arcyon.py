@@ -47,10 +47,11 @@ import phlsys_subcommand
 import aoncmd_comment
 import aoncmd_createrevision
 import aoncmd_getdiff
+import aoncmd_paste
+import aoncmd_query
 import aoncmd_rawdiff
 import aoncmd_showconfig
 import aoncmd_updaterevision
-import aoncmd_query
 
 
 def main():
@@ -71,6 +72,7 @@ def main():
     phlsys_subcommand.setup_parser(
         "update-revision", aoncmd_updaterevision, subparsers)
     phlsys_subcommand.setup_parser("get-diff", aoncmd_getdiff, subparsers)
+    phlsys_subcommand.setup_parser("paste", aoncmd_paste, subparsers)
 
     args = parser.parse_args()
 

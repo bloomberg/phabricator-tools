@@ -1,4 +1,4 @@
-"""Wrapper to call Phabricator's Conduit API"""
+"""Wrapper to call Phabricator's Conduit API."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -7,6 +7,12 @@
 # Public Classes:
 #   ConduitException
 #   Conduit
+#    .set_act_as_user
+#    .clear_act_as_user
+#    .get_act_as_user
+#    .get_user
+#    .call
+#    .ping
 #
 # Public Functions:
 #   act_as_user_context
@@ -20,7 +26,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-from contextlib import contextmanager
+import contextlib
 import hashlib
 import json
 import logging
@@ -35,7 +41,7 @@ import phldef_conduit
 # TODO: allow connections without specifying user details where possible
 
 
-@contextmanager
+@contextlib.contextmanager
 def act_as_user_context(conduit, user):
     """Manage the context of impersonating another user.
 
@@ -75,7 +81,7 @@ def act_as_user_context(conduit, user):
 
 
 def make_conduit_uri(uri):
-    """Return the expected conduit uri based on the supplied 'uri'
+    """Return the expected conduit uri based on the supplied 'uri'.
 
     Usage examples:
         >>> make_conduit_uri('http://127.0.0.1')
@@ -112,7 +118,7 @@ def make_phab_test_conduit():
 class ConduitException(Exception):
 
     def __init__(self, method, error, errormsg, result, obj, uri, actAsUser):
-        """Construct from an error returned by conduit
+        """Construct from an error returned by conduit.
 
         :method: the conduit method that was being called
         :error: the type of error

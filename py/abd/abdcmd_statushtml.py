@@ -1,36 +1,63 @@
-"""A mail sender that just prints the mails to the console."""
+"""Render status files as meaningful html to present to users."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlmail_printsender
+# abdcmd_statushtml
 #
-# Public Classes:
-#   MailSender
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-import phlmail_format
+import json
+
+import phlsys_fs
+
+import abdweb_htmlformatter
+import abdweb_page
+import abdweb_repocontent
 
 
-class MailSender(object):
+def getFromfilePrefixChars():
+    return None
 
-    """A mail sender that just prints the mails to the console."""
 
-    def __init__(self, from_email):
-        """Setup to print email to the console from 'from_email'.
+def setupParser(parser):
+    parser.add_argument(
+        'repo_report_file',
+        metavar="REPOREPORTFILE",
+        type=str,
+        help="path to the try file to render")
+    parser.add_argument(
+        'branches_report_file',
+        metavar="BRANCHESREPORTFILE",
+        type=str,
+        help="path to the try file to render")
 
-        :from_email: the address to send from
 
-        """
-        self._from_email = from_email
+def _read_json_file(filename):
+    result = None
+    with phlsys_fs.read_file_lock_context(filename) as f:
+        text = f.read()
+        if text:
+            result = json.loads(text)
+    return result
 
-    def send(self, subject, message, to_addresses, cc_addresses=None):
-        print "-----"
-        print phlmail_format.text(
-            subject, message, self._from_email, to_addresses, cc_addresses)
-        print "-----"
+
+def process(args):
+    formatter = abdweb_htmlformatter.HtmlFormatter()
+    repo_report = _read_json_file(args.repo_report_file)
+    branch_report = _read_json_file(args.branches_report_file)
+    abdweb_repocontent.render(formatter, repo_report, branch_report)
+    content = formatter.get_content()
+
+    formatter = abdweb_htmlformatter.HtmlFormatter()
+    abdweb_page.render(formatter, content)
+    print formatter.get_content()
 
 
 #------------------------------------------------------------------------------

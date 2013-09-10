@@ -1,8 +1,27 @@
-# do tests in order of time to execute
+###############################################################################
+## static analysis tests ######################################################
+#                                                                             #
+# The following tests are performed:                                          #
+# :o pychecker (linter)                                                       #
+# :o flake8 (linter)                                                          #
+# :o check dependencies between packages, using snakefood                     #
+# :o check for components which are unused by end products, using snakefood   #
+# :o check for copyright notices at the end of files                          #
+#                                                                             #
+###############################################################################
+
 set -e # exit immediately on error
 
+# cd to the dir of this script, so we can run scripts in the same dir
+cd "$(dirname "$0")"
+
+# distinguish between 'library' scripts and all scripts
 libscripts=$(find py/ -iname '*.py' |  tr '\n' ' ')
-allscripts="$(ls bin/* meta/docgen/*.py) $libscripts"
+allscripts="$(ls bin/* proto/* meta/docgen/*.py meta/autofix/*.py) $libscripts"
+
+###############################################################################
+# pychecker
+###############################################################################
 
 ## please install pychecker with sudo apt-get install pychecker
 # TODO: find workaround for borked import detection
@@ -13,16 +32,40 @@ PYTHONPATH=py/phl pychecker \
     --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
     py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
 
+###############################################################################
+# pylint
+###############################################################################
+# disabled for now, doesn't seem to add significant value; recent work looks
+# interesting though
+#
+# pylint \
+#     --errors-only \
+#     py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
+#
+
+###############################################################################
+# flake8
+###############################################################################
 flake8 $allscripts
+
+###############################################################################
+# check dependencies between packages
+###############################################################################
 
 # please install snakefood with ./meta/package_deps/install_snakefood.sh
 sfood $libscripts --internal > meta/package_deps/deps
 ./meta/package_deps/process.py meta/package_deps/deps meta/package_deps/file-deps meta/package_deps/package-deps
 diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 
-# copyright
-set +e
+###############################################################################
+# check for unused components
+###############################################################################
+(cd meta/package_deps; ./check_no_dead_files.sh)
 
+###############################################################################
+# check for copyright notices
+###############################################################################
+set +e
 GIT_PAGER='' git grep -L "Copyright (C) 2012 Bloomberg L.P." $allscripts
 if [ $? -ne 1 ]
 then

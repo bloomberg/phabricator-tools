@@ -23,6 +23,7 @@ def make_remote(ref, remote):
 
         >>> make_remote("mywork", "github")
         'refs/remotes/github/mywork'
+
     """
     return "refs/remotes/" + remote + "/" + ref
 
@@ -33,6 +34,7 @@ def make_local(ref):
     Usage example:
         >>> make_local("mywork")
         'refs/heads/mywork'
+
     """
     # TODO: check that it isn't already fully qualified
     return "refs/heads/" + ref

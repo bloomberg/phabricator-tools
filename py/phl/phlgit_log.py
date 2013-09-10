@@ -1,4 +1,4 @@
-"""Wrapper around 'git log'"""
+"""Wrapper around 'git log'."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -174,7 +174,7 @@ def make_revision_from_full_message(message):
 def make_revision_from_hash(clone, commitHash):
     """Return a 'phlgit_log__Revision' based on 'commitHash' from the clone.
     Raise an exception if the clone does not return a valid FullMessage from
-    the commitHash
+    the commitHash.
 
     :clone: something that supports "call()" with git commands
     :commitHash: a string containing the hash to get the message of
@@ -189,8 +189,9 @@ def make_revision_from_hash(clone, commitHash):
 
 def make_revisions_from_hashes(clone, hashes):
     """Return a list of 'phlgit_log__Revision' from 'hashes'.
-    Raise an exception if the clone does not return a valid FullMessage from
-    any of 'hashes'.
+
+    Raise an exception if the clone does not return a valid FullMessage
+    from any of 'hashes'.
 
     :clone: something that supports "call()" with git commands
     :returns: a list of 'phlgit_log__Revision'

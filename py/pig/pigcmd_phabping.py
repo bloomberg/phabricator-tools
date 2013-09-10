@@ -1,4 +1,4 @@
-"""phab-ping  - a Phabricator conduit.ping wrapper
+"""phab-ping  - a Phabricator conduit.ping wrapper.
 
 This tool is for checking that Phabricator instances are running as expected.
 
@@ -6,6 +6,7 @@ In the event of an error when communicating with Phabricator, we return -1.
 In the event bad arguments we return -2.
 
 For benchmarking Phabricator you might want to take a look at 'Apache Bench'.
+
 """
 # =============================================================================
 # CONTENTS

@@ -1,4 +1,4 @@
-"""Test suite for phlgit_diff"""
+"""Test suite for phlgit_diff."""
 #==============================================================================
 #                                   TEST PLAN
 #------------------------------------------------------------------------------
@@ -15,9 +15,10 @@
 import os
 import unittest
 
-import phlgit_diff
 import phlsys_git
 import phlsys_subprocess
+
+import phlgit_diff
 
 
 class Test(unittest.TestCase):

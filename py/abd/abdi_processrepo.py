@@ -1,450 +1,261 @@
-"""abd automates the creation and landing of reviews from branches"""
+"""abd automates the creation and landing of reviews from branches."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
 # abdi_processrepo
 #
 # Public Functions:
-#   isBasedOn
-#   createReview
-#   verifyReviewBranchBase
-#   createDifferentialReview
-#   makeMessageDigest
-#   updateReview
-#   updateInReview
+#   create_review
+#   create_differential_review
+#   update_review
+#   update_in_review
 #   land
-#   createFailedReview
-#   tryCreateReview
-#   processUpdatedBranch
-#   processAbandonedBranches
-#   processUpdatedRepo
-#
-# Public Assignments:
-#   MAX_DIFF_SIZE
+#   create_failed_review
+#   try_create_review
+#   process_updated_branch
+#   process_abandoned_branch
+#   process_branches
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-# XXX: probably too many imports
 import abdcmnt_commenter
-import abdt_exception
-import abdt_naming
-import phlcon_differential
-import phlcon_user
-import phlgit_branch
-import phlgit_checkout
-import phlgit_diff
-import phlgit_log
-import phlgit_merge
-import phlgit_push
-import phlsys_conduit
-import phlsys_fs
-import phlsys_git
-import phlsys_subprocess
-import abdt_gittypes
-import abdt_conduit
+import abdt_branch
 import abdt_conduitgit
-import abdt_workingbranch
-
-# TODO: split into appropriate modules
+import abdt_exception
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
-MAX_DIFF_SIZE = 1.5 * 1024 * 1024
-_DIFF_CONTEXT_LINES = 1000
-_LESS_DIFF_CONTEXT_LINES = 100
 
 
-def isBasedOn(name, base):
-    # TODO: actually do this
-    return True
+def create_review(conduit, branch, plugin_manager):
+    plugin_manager.hook(
+        "before_create_review",
+        {"conduit": conduit, "branch": branch})
 
-
-def createReview(conduit, gitContext, review_branch):
-    clone = gitContext.clone
-    verifyReviewBranchBase(gitContext, review_branch)
+    branch.verify_review_branch_base()
 
     # TODO: we should also cc other users on the branch
     # TODO: if there are emails that don't match up to users then we should
     #       note that on the review and perhaps use the mailer to notify them
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
-        clone, conduit, review_branch.remote_base,
-        review_branch.remote_branch)
+        conduit, branch)
 
     print "- author: " + user
 
     used_default_test_plan = False
 
-    hashes = phlgit_log.get_range_hashes(
-        clone, review_branch.remote_base, review_branch.remote_branch)
-    commit = hashes[-1]
-    parsed = abdt_conduitgit.getFieldsFromCommitHash(
-        conduit, clone, commit)
+    parsed = abdt_conduitgit.getFieldsFromBranch(conduit, branch)
     if parsed.errors:
         used_default_test_plan = True
-        parsed = abdt_conduitgit.getFieldsFromCommitHash(
-            conduit, clone, commit, _DEFAULT_TEST_PLAN)
+        parsed = abdt_conduitgit.getFieldsFromBranch(
+            conduit, branch, _DEFAULT_TEST_PLAN)
         if parsed.errors:
             print parsed
             raise abdt_exception.CommitMessageParseException(
                 errors=parsed.errors,
                 fields=parsed.fields,
-                digest=makeMessageDigest(
-                    clone,
-                    review_branch.remote_base,
-                    review_branch.remote_branch))
+                digest=branch.make_message_digest())
 
-    rawDiff = phlgit_diff.raw_diff_range(
-        clone,
-        review_branch.remote_base,
-        review_branch.remote_branch,
-        _DIFF_CONTEXT_LINES)
-
-    # if the diff is too big then regen with less context
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone,
-            review_branch.remote_base,
-            review_branch.remote_branch,
-            _LESS_DIFF_CONTEXT_LINES)
-
-    # if the diff is still too big then regen with no context
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone, review_branch.remote_base, review_branch.remote_branch)
-
-    # if the diff is still too big then error
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        raise abdt_exception.LargeDiffException(
-            "diff too big", len(rawDiff), MAX_DIFF_SIZE)
+    rawDiff = branch.make_raw_diff()
 
     if not rawDiff:
         raise abdt_exception.AbdUserException("no difference to review")
 
-    revisionid = createDifferentialReview(
-        conduit, user, parsed, gitContext, review_branch, rawDiff)
+    revisionid = create_differential_review(
+        conduit, user, parsed, branch, rawDiff)
+
+    commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
 
     if used_default_test_plan:
-        commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
-        commenter.usedDefaultTestPlan(review_branch.branch, _DEFAULT_TEST_PLAN)
+        commenter.usedDefaultTestPlan(
+            branch.review_branch_name(), _DEFAULT_TEST_PLAN)
+
+    plugin_manager.hook(
+        "after_create_review",
+        {"parsed": parsed, "conduit": conduit, "branch": branch,
+            "rawDiff": rawDiff, "commenter": commenter}
+    )
 
 
-def verifyReviewBranchBase(gitContext, review_branch):
-    if review_branch.base not in gitContext.branches:
-        raise abdt_exception.MissingBaseException(
-            review_branch.branch, review_branch.base)
-    if not isBasedOn(review_branch.branch, review_branch.base):
-        raise abdt_exception.AbdUserException(
-            "'" + review_branch.branch +
-            "' is not based on '" + review_branch.base + "'")
+def create_differential_review(conduit, user, parsed, branch, raw_diff):
+    print "- creating revision"
+    revision_id = conduit.create_revision_as_user(
+        raw_diff, parsed.fields, user)
+    print "- created " + str(revision_id)
+    branch.mark_ok_new_review(revision_id)
+
+    print "- commenting on " + str(revision_id)
+    commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
+    commenter.createdReview(
+        branch.get_repo_name(),
+        branch.review_branch_name(),
+        branch.base_branch_name(),
+        branch.get_browse_url())
+
+    return revision_id
 
 
-def createDifferentialReview(
-        conduit, user, parsed, gitContext, review_branch, rawDiff):
-    clone = gitContext.clone
-    phlgit_checkout.new_branch_force_based_on(
-        clone, review_branch.branch, review_branch.remote_branch)
-
-    with phlsys_conduit.act_as_user_context(conduit, user):
-        print "- creating diff"
-        diffid = phlcon_differential.create_raw_diff(conduit, rawDiff).id
-
-        print "- creating revision"
-        review = phlcon_differential.create_revision(
-            conduit, diffid, parsed.fields)
-        print "- created " + str(review.revisionid)
-
-        workingBranch = abdt_naming.makeWorkingBranchName(
-            abdt_naming.WB_STATUS_OK,
-            review_branch.description,
-            review_branch.base,
-            review.revisionid)
-
-        print "- pushing working branch: " + workingBranch
-        phlgit_push.push_asymmetrical(
-            clone, review_branch.branch, workingBranch, gitContext.remote)
-
-    print "- commenting on " + str(review.revisionid)
-    commenter = abdcmnt_commenter.Commenter(conduit, review.revisionid)
-    commenter.createdReview(review_branch.branch, review_branch.base)
-
-    return review.revisionid
-
-
-def makeMessageDigest(clone, base, branch):
-    hashes = phlgit_log.get_range_hashes(clone, base, branch)
-    revisions = phlgit_log.make_revisions_from_hashes(clone, hashes)
-    message = revisions[0].subject + "\n\n"
-    for r in revisions:
-        message += r.message
-    return message
-
-
-def updateReview(conduit, gitContext, reviewBranch, workingBranch, author):
-    rb = reviewBranch
-    wb = workingBranch
-
-    clone = gitContext.clone
-    isBranchIdentical = phlgit_branch.is_identical
-    if not isBranchIdentical(clone, rb.remote_branch, wb.remote_branch):
+def update_review(conduit, branch):
+    if branch.has_new_commits():
         print "changes on branch"
-        verifyReviewBranchBase(gitContext, reviewBranch)
-        wb = updateInReview(conduit, wb, gitContext, rb, author)
-    elif abdt_naming.isStatusBad(wb) and not abdt_naming.isStatusBadLand(wb):
-        d = phlcon_differential
-        status = d.get_revision_status(conduit, wb.id)
+        branch.verify_review_branch_base()
+        update_in_review(conduit, branch)
+    elif branch.is_status_bad() and not branch.is_status_bad_land():
         try:
             print "try updating bad branch"
-            verifyReviewBranchBase(gitContext, reviewBranch)
-            updateInReview(conduit, wb, gitContext, rb, author)
+            branch.verify_review_branch_base()
+            update_in_review(conduit, branch)
         except abdt_exception.AbdUserException:
             print "still bad"
 
-    if not abdt_naming.isStatusBad(wb):
-        d = phlcon_differential
-        status = d.get_revision_status(conduit, wb.id)
-        if int(status) == d.ReviewStates.accepted:
-            verifyReviewBranchBase(gitContext, reviewBranch)
-            land(conduit, wb, gitContext, reviewBranch.branch)
+    if not branch.is_status_bad():
+        if conduit.is_review_accepted(branch.review_id_or_none()):
+            branch.verify_review_branch_base()
+            land(conduit, branch)
             # TODO: we probably want to do a better job of cleaning up locally
         else:
             print "do nothing"
 
 
-def updateInReview(conduit, wb, gitContext, review_branch, author):
-    remoteBranch = review_branch.remote_branch
-    clone = gitContext.clone
-
-    print "updateInReview"
+def update_in_review(conduit, branch):
+    print "update_in_review"
 
     print "- creating diff"
-    rawDiff = phlgit_diff.raw_diff_range(
-        clone, wb.remote_base, remoteBranch, _DIFF_CONTEXT_LINES)
-    if not rawDiff:
-        raise abdt_exception.AbdUserException(
-            "no difference from " + wb.base + " to " + wb.branch)
-
-    # if the diff is too big then regen with less context
-    # used_less_context = False
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        # used_less_context = True
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone, wb.remote_base, remoteBranch, _LESS_DIFF_CONTEXT_LINES)
-
-    # if the diff is still too big then regen with no context
-    # used_no_context = False
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        # used_no_context = True
-        rawDiff = phlgit_diff.raw_diff_range(
-            clone, wb.remote_base, remoteBranch)
-
-    # if the diff is still too big then error
-    if len(rawDiff) >= MAX_DIFF_SIZE:
-        raise abdt_exception.LargeDiffException(
-            "diff too big", len(rawDiff), MAX_DIFF_SIZE)
+    rawDiff = branch.make_raw_diff()
 
     if not rawDiff:
         raise abdt_exception.AbdUserException("no difference to review")
 
-    d = phlcon_differential
-    used_default_test_plan = False
-    with phlsys_conduit.act_as_user_context(conduit, author):
-        print "- updating revision " + str(wb.id)
-        diffid = d.create_raw_diff(conduit, rawDiff).id
-        d.update_revision(
-            conduit, wb.id, diffid, [], "update")
+    review_id = branch.review_id_or_none()
+    review_id_str = str(review_id)
 
-    wb = abdt_workingbranch.pushStatus(
-        gitContext,
-        review_branch,
-        wb,
-        abdt_naming.WB_STATUS_OK)
+    print "- updating revision " + review_id_str
+    conduit.update_revision(review_id, rawDiff, "update")
 
-    print "- commenting on revision " + str(wb.id)
-    commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
-    commenter.updatedReview(review_branch.branch)
-    if used_default_test_plan:
-        commenter.usedDefaultTestPlan(wb.branch, _DEFAULT_TEST_PLAN)
+    branch.mark_ok_in_review()
 
-    return wb
+    print "- commenting on revision " + review_id_str
+    commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+    commenter.updatedReview(branch.review_branch_name())
 
 
-def land(conduit, wb, gitContext, branch):
-    clone = gitContext.clone
-    print "landing " + wb.remote_branch + " onto " + wb.remote_base
+def land(conduit, branch):
+    print "landing " + branch.review_branch_name()
     name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
-        clone, conduit, wb.remote_base, wb.remote_branch)
-    d = phlcon_differential
-    with phlsys_conduit.act_as_user_context(conduit, user):
-        phlgit_checkout.new_branch_force_based_on(
-            clone, wb.base, wb.remote_base)
+        conduit, branch)
 
-        # compose the commit message
-        message = d.get_commit_message(conduit, wb.id)
+    review_id = branch.review_id_or_none()
 
-        try:
-            with phlsys_fs.nostd():
-                squashMessage = phlgit_merge.squash(
-                    clone,
-                    wb.remote_branch,
-                    message,
-                    name + " <" + email + ">")
-        except phlsys_subprocess.CalledProcessError as e:
-            clone.call("reset", "--hard")  # fix the working copy
-            raise abdt_exception.LandingException(
-                '\n' + e.stdout, branch, wb.base)
+    # compose the commit message
+    message = conduit.get_commit_message(review_id)
 
-        print "- pushing " + wb.remote_base
-        phlgit_push.push(clone, wb.base, gitContext.remote)
-        print "- deleting " + wb.branch
-        phlgit_push.delete(clone, wb.branch, gitContext.remote)
-        print "- deleting " + branch
-        phlgit_push.delete(clone, branch, gitContext.remote)
+    review_branch_name = branch.review_branch_name()
+    base_branch_name = branch.base_branch_name()
+    land_message = branch.land(name, email, message)
 
-    print "- commenting on revision " + str(wb.id)
-    commenter = abdcmnt_commenter.Commenter(conduit, wb.id)
-    commenter.landedReview(branch, wb.base, squashMessage)
+    print "- commenting on revision " + str(review_id)
+    commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+    commenter.landedReview(
+        review_branch_name,
+        base_branch_name,
+        land_message)
 
-    authorPHID = d.query(conduit, [wb.id])[0].authorPHID
-    authorUser = phlcon_user.query_usernames_from_phids(
-        conduit, [authorPHID])[0]
-    # TODO: there's a potential race condition on the author here
-    with phlsys_conduit.act_as_user_context(conduit, authorUser):
-        d.close(conduit, wb.id)
-    # TODO: we probably want to do a better job of cleaning up locally
+    conduit.close_revision(review_id)
 
 
-def createFailedReview(conduit, gitContext, review_branch, exception):
-    user = abdt_conduitgit.getAnyUserFromBranch(
-        gitContext.clone,
-        conduit,
-        review_branch.remote_base,
-        review_branch.remote_branch)
-    reviewid = abdt_conduit.createEmptyRevision(conduit, user)
-    wb = abdt_gittypes.makeGitWorkingBranchFromParts(
-        abdt_naming.WB_STATUS_BAD_INREVIEW,
-        review_branch.description,
-        review_branch.base,
-        reviewid,
-        gitContext.remote)
-    commenter = abdcmnt_commenter.Commenter(
-        conduit, reviewid)
-    commenter.failedCreateReview(review_branch.branch, exception)
-    abdt_workingbranch.pushBadInReview(
-        gitContext, review_branch, wb)
+def create_failed_review(conduit, branch, exception):
+    user = abdt_conduitgit.getAnyUserFromBranch(conduit, branch)
+    reviewid = conduit.create_empty_revision_as_user(user)
+    commenter = abdcmnt_commenter.Commenter(conduit, reviewid)
+    commenter.failedCreateReview(branch.review_branch_name(), exception)
+    branch.mark_new_bad_in_review(reviewid)
 
 
-def tryCreateReview(mailer, conduit, gitContext, review_branch, mail_on_fail):
+def try_create_review(
+        mailer, conduit, branch, plugin_manager, reporter, mail_on_fail):
     try:
-        createReview(conduit, gitContext, review_branch)
+        create_review(conduit, branch, plugin_manager)
     except abdt_exception.AbdUserException as e:
+        print "failed to create:"
+        print e
         try:
-            createFailedReview(conduit, gitContext, review_branch, e)
+            create_failed_review(conduit, branch, e)
         except abdt_exception.NoUsersOnBranchException as e:
-            abdt_workingbranch.pushBadPreReview(
-                gitContext, review_branch)
+            print "failed to create failed review:"
+            print e
+            branch.mark_bad_pre_review()
             if mail_on_fail:
+                reporter.no_users_on_branch(e.emails)
                 mailer.noUsersOnBranch(
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def processUpdatedBranch(
-        mailer, conduit, gitContext, review_branch, working_branch):
+def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
     abdte = abdt_exception
-    if working_branch is None:
-        print "create review for " + review_branch.branch
-        tryCreateReview(
-            mailer, conduit, gitContext, review_branch, mail_on_fail=True)
+    review_branch_name = branch.review_branch_name()
+    if branch.is_new():
+        print "create review for " + review_branch_name
+        try_create_review(
+            mailer,
+            conduit,
+            branch,
+            plugin_manager,
+            reporter,
+            mail_on_fail=True)
     else:
-        commenter = abdcmnt_commenter.Commenter(conduit, working_branch.id)
-        if abdt_naming.isStatusBadPreReview(working_branch):
-            hasChanged = not phlgit_branch.is_identical(
-                gitContext.clone,
-                review_branch.remote_branch,
-                working_branch.remote_branch)
-            print "try again to create review for " + review_branch.branch
-            phlgit_push.delete(
-                gitContext.clone,
-                working_branch.branch,
-                gitContext.remote)
-            tryCreateReview(
+        review_id = branch.review_id_or_none()
+        commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+        if branch.is_status_bad_pre_review():
+            print "try again to create review for " + review_branch_name
+            has_new_commits = branch.has_new_commits()
+            branch.clear_mark()
+            try_create_review(
                 mailer,
                 conduit,
-                gitContext,
-                review_branch,
-                mail_on_fail=hasChanged)
+                branch,
+                plugin_manager,
+                reporter,
+                mail_on_fail=has_new_commits)
         else:
-            print "update review for " + review_branch.branch
-            revision = phlcon_differential.query(
-                conduit, [working_branch.id])[0]
-            author_user = phlcon_user.query_usernames_from_phids(
-                conduit, [revision.authorPHID])[0]
+            print "update review for " + review_branch_name
             try:
-                updateReview(
-                    conduit,
-                    gitContext,
-                    review_branch,
-                    working_branch,
-                    author_user)
+                update_review(conduit, branch)
             except abdte.LandingException as e:
                 print "landing exception"
-                abdt_workingbranch.pushBadLand(
-                    gitContext, review_branch, working_branch)
+                branch.mark_bad_land()
                 commenter.exception(e)
-                with phlsys_conduit.act_as_user_context(conduit, author_user):
-                    phlcon_differential.create_comment(
-                        conduit,
-                        working_branch.id,
-                        action=phlcon_differential.Action.rethink)
+                conduit.set_requires_revision(review_id)
             except abdte.AbdUserException as e:
                 print "user exception"
-                abdt_workingbranch.pushBadInReview(
-                    gitContext, review_branch, working_branch)
+                branch.mark_bad_in_review()
                 commenter.exception(e)
 
 
-def processAbandonedBranches(conduit, clone, remote, wbList, remote_branches):
-    for wb in wbList:
-        rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(wb)
-        if rb not in remote_branches:
-            print "delete abandoned branch: " + wb.branch
-            try:
-                revisionid = int(wb.id)
-            except ValueError:
-                pass
-            else:
-                commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
-                commenter.abandonedBranch(rb)
-                # TODO: abandon the associated revision if not already
-            phlgit_push.delete(clone, wb.branch, remote)
+def process_abandoned_branch(conduit, branch):
+    print "untracking abandoned branch: " + branch.review_branch_name()
+    review_id = branch.review_id_or_none()
+    if review_id is not None:
+        commenter = abdcmnt_commenter.Commenter(conduit, review_id)
+        commenter.abandonedBranch(branch.review_branch_name())
+        # TODO: abandon the associated revision if not already
+    branch.abandon()
 
 
-def processUpdatedRepo(conduit, path, remote, mailer):
-    clone = phlsys_git.GitClone(path)
-    remote_branches = phlgit_branch.get_remote(clone, remote)
-    gitContext = abdt_gittypes.GitContext(clone, remote, remote_branches)
-    wbList = abdt_naming.getWorkingBranches(remote_branches)
-    makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
-    rbDict = dict((makeRb(wb), wb) for wb in wbList)
-
-    processAbandonedBranches(conduit, clone, remote, wbList, remote_branches)
-
-    for b in remote_branches:
-        if abdt_naming.isReviewBranchPrefixed(b):
-            review_branch = abdt_naming.makeReviewBranchFromName(b)
-            if review_branch is None:
-                # TODO: handle this case properly
-                continue
-
-            review_branch = abdt_gittypes.makeGitReviewBranch(
-                review_branch, remote)
-            working_branch = None
-            if b in rbDict.keys():
-                working_branch = rbDict[b]
-                working_branch = abdt_gittypes.makeGitWorkingBranch(
-                    working_branch, remote)
-            processUpdatedBranch(
-                mailer, conduit, gitContext, review_branch, working_branch)
+def process_branches(branches, conduit, mailer, plugin_manager, reporter):
+    for branch in branches:
+        if branch.is_abandoned():
+            process_abandoned_branch(conduit, branch)
+        elif branch.is_null():
+            pass  # TODO: should handle these
+        else:
+            reporter.start_branch(branch.review_branch_name())
+            print "pending:", branch.review_branch_name()
+            process_updated_branch(
+                mailer, conduit, branch, plugin_manager, reporter)
+            reporter.finish_branch(
+                abdt_branch.calc_is_ok(branch),
+                branch.review_id_or_none)
 
 
 #------------------------------------------------------------------------------

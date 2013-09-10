@@ -6,6 +6,18 @@
 #
 # Public Classes:
 #   TestCommitMessage
+#    .testJustTitle
+#    .testSummary
+#    .testTitleMultilineSummary
+#    .testTitleMultilineSummaryTestPlan
+#    .testLongTestPlanLine
+#    .testMultilineTestPlan
+#    .testMultilineTestPlanReviewers
+#    .testMultilineTestPlanReviewersRevision
+#    .testMultilineTestPlanMultilineReviewersRevision
+#    .testTestPlanMultilineReviewersRevision
+#    .testCompactReviewers
+#    .testAllTogether
 #
 # Public Functions:
 #   make

@@ -6,6 +6,10 @@
 #
 # Public Classes:
 #   MailSender
+#    .send
+#    .mailboxes
+#    .mails
+#    .is_empty
 #
 # Public Assignments:
 #   Mail
@@ -50,6 +54,8 @@ class MailSender(object):
     def mails(self):
         return self._mails
 
+    def is_empty(self):
+        return not self._mails
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

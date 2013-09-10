@@ -1,25 +1,61 @@
-"""Wrapper around 'git merge'"""
+"""Wrapper around 'git merge'."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
 # phlgit_merge
 #
+# Public Classes:
+#   MergeException
+#
 # Public Functions:
 #   squash
+#   no_ff
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
+# TODO: write test driver
+# TODO: distinguish between different error conditions
+
+import phlsys_fs
+import phlsys_subprocess
+
+
+class MergeException(Exception):
+
+    def __init__(self, description):
+        super(MergeException, self).__init__(description)
 
 
 def squash(clone, source, message, author=None):
-    clone.call("merge", "--squash", source)
-    result = ""
-    if author:
-        result = clone.call("commit", "-m", message, "--author", author)
-    else:
-        result = clone.call("commit", "-m", message)
+    # TODO: test merging with no effective changes
+    with phlsys_fs.nostd():
+        try:
+            clone.call("merge", "--squash", source)
+            if author:
+                result = clone.call(
+                    "commit", "-m", message, "--author", author)
+            else:
+                result = clone.call("commit", "-m", message)
+        except phlsys_subprocess.CalledProcessError as e:
+            raise MergeException(e.stdout)
+
     return result
+
+
+def no_ff(repo, branch):
+    """Merge the single 'branch' into HEAD.
+
+    Behaviour is undefined if there are merge conflicts.
+    Behaviour is undefined if the current branch is 'branch'.
+
+    :repo: supports 'call'
+    :branch: the single branch to merge
+    :returns: None
+
+    """
+    repo.call('merge', '--no-edit', branch)
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
