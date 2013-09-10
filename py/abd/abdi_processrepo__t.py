@@ -188,12 +188,23 @@ class Test(unittest.TestCase):
     def test_F_NoInitialAuthor(self):
         branch, branch_data = abdt_branchmock.create_review_no_initial_author()
         self._process_branches([branch])
-        self.assertTrue(branch.is_status_bad())
+        self.assertTrue(branch.is_status_bad_pre_review())
 
+        # we must have sent a message to warn about the user
+        self.assertFalse(self.mock_sender.is_empty())
+
+        # no review will have been created
+        self.assertTrue(self.conduit_data.is_unchanged())
+
+        # fix the user details and process
         branch_data.names_emails = abdt_branchmock.create_ok_names_emails()
         branch_data.has_new_commits = True
         self._process_branches([branch])
         self.assertFalse(branch.is_status_bad())
+
+        # check that a review was created
+        self.assertFalse(self.conduit_data.is_unchanged())
+        self.assertEqual(len(self.conduit_data.revisions), 1)
 
     def test_G_NoCommitsOnBranch(self):
         branch, branch_data = abdt_branchmock.create_review_no_commits()
