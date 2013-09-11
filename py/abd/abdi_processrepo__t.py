@@ -37,6 +37,8 @@ import abdi_processrepo
 # [ J] processUpdateRepo can handle a diff that's too big
 # [ K] processUpdateRepo can report an exception during branch processing
 # [ B] processUpdateRepo doesn't leave the current branch set after processing
+# [ L] processUpdateRepo can handle a branch with only empty commits
+# [ M] processUpdateRepo won't emit errors in a cycle when landing w/o author
 # [  ] processUpdateRepo can handle a review without commits in repo
 # [  ] processUpdateRepo will comment on a bad branch if the error has changed
 #------------------------------------------------------------------------------
@@ -53,6 +55,7 @@ import abdi_processrepo
 # [ J] test_J_DiffTooBig
 # [ K] test_K_ExceptionDuringProcessing
 # [ L] test_L_EmptyDiff
+# [ M] test_M_NoLandingAuthor
 #==============================================================================
 
 
@@ -331,6 +334,20 @@ class Test(unittest.TestCase):
         # land ok
         self.conduit_data.accept_the_only_review()
         self._process_branches([branch])
+        self.assertTrue(branch.is_null())
+
+    def test_M_NoLandingAuthor(self):
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+        self._process_branches([branch])
+        self.assertFalse(branch.is_status_bad())
+
+        # set bad email addresses and accept the review
+        branch_data.names_emails = abdt_branchmock.create_bad_names_emails()
+        branch_data.has_new_commits = True
+        self.conduit_data.accept_the_only_review()
+        self._process_branches([branch])
+
+        # ensure that the review is landed
         self.assertTrue(branch.is_null())
 
 

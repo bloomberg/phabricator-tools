@@ -144,16 +144,23 @@ def update_in_review(conduit, branch):
 
 def land(conduit, branch):
     print "landing " + branch.review_branch_name()
-    name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
-        conduit, branch)
+
+    review_branch_name = branch.review_branch_name()
+    base_branch_name = branch.base_branch_name()
+
+    names_emails = branch.get_author_names_emails()
+    if not names_emails:
+        raise abdt_exception.LandingException(
+            "no commits on branch", review_branch_name, base_branch_name)
+
+    # pick the last author as the author for landing
+    name, email = names_emails[-1]
 
     review_id = branch.review_id_or_none()
 
     # compose the commit message
     message = conduit.get_commit_message(review_id)
 
-    review_branch_name = branch.review_branch_name()
-    base_branch_name = branch.base_branch_name()
     land_message = branch.land(name, email, message)
 
     print "- commenting on revision " + str(review_id)

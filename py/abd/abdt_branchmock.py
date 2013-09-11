@@ -38,6 +38,7 @@
 #
 # Public Functions:
 #   create_ok_names_emails
+#   create_bad_names_emails
 #   create_simple_new_review
 #   create_new_review_invalid_base
 #   create_review_no_initial_author
@@ -59,6 +60,10 @@ import abdt_naming
 
 def create_ok_names_emails():
     return [(phldef_conduit.ALICE.user, phldef_conduit.ALICE.email)]
+
+
+def create_bad_names_emails():
+    return [(phldef_conduit.NOTAUSER.user, phldef_conduit.NOTAUSER.email)]
 
 
 def create_simple_new_review(repo_name='name', branch_url=None):
@@ -89,8 +94,7 @@ def create_new_review_invalid_base():
 
 def create_review_no_initial_author():
     mock, data = create_simple_new_review()
-    data.names_emails = [(
-        phldef_conduit.NOTAUSER.user, phldef_conduit.NOTAUSER.email)]
+    data.names_emails = create_bad_names_emails()
     data.any_emails = [phldef_conduit.ALICE.email]
     return mock, data
 
