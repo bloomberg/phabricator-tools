@@ -21,8 +21,6 @@ Implement operations for branch-based reviews.
 Implement mocked operations for branch-based reviews.
 * `abdt_branchtester.py` -
 Test suite for abdt_branch-like things.
-* `abdt_commitmessage.py` -
-Operations on git commit message strings.
 * `abdt_conduit.py` -
 Abstraction for Arcyd's conduit operations.
 * `abdt_conduitgit.py` -
@@ -45,8 +43,6 @@ Naming conventions for abd.
 Report the state of a repository.
 * `abdt_workingbranch.py` -
 Git operations on working branches.
-* `abdtst_devphabgit.py` -
-Support for testing developer / phab interactions.
 * `abdweb_htmlformatter.py` -
 Provide useful utilities for formatting html.
 * `abdweb_page.py` -
