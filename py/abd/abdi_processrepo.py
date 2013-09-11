@@ -264,7 +264,7 @@ def process_branches(branches, conduit, mailer, plugin_manager, reporter):
                 mailer, conduit, branch, plugin_manager, reporter)
             reporter.finish_branch(
                 abdt_branch.calc_is_ok(branch),
-                branch.review_id_or_none)
+                branch.review_id_or_none())
 
 
 #------------------------------------------------------------------------------

@@ -229,7 +229,7 @@ class RepoReporter(object):
         branch_url = ''
         review_url = ''
         if review_id is not None and self._review_url_format:
-            review_url = self._review_url_format.format(review=review_id)
+            review_url = self._review_url_format.format(review=int(review_id))
         if self._branch_url_format:
             branch_url = self._branch_url_format.format(branch=branch_name)
 
