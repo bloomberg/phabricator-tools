@@ -18,6 +18,7 @@ import phlcon_differential
 # Concerns:
 # [ B] the 'accepted' status persists when a review is updated with a new diff
 # [ C] the 'closed' status does not allow revisions to be updated
+# [ C] the 'closed' status does allow revisions to be closed again
 # [  ] TODO
 #------------------------------------------------------------------------------
 # Tests:
@@ -98,6 +99,9 @@ class Test(unittest.TestCase):
                 phlcon_differential.update_revision_empty,
                 conduit,
                 revision)
+
+            # expect that we can close a closed revision without errors
+            phlcon_differential.close(conduit, revision)
 
     def testNullQuery(self):
         phlcon_differential.query(self.conduit)
