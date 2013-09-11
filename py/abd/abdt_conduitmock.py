@@ -50,7 +50,10 @@ def _mock_to_str(mock):
 
 class _RevisionStates(object):
     abandoned = 'abandoned'
+    accepted = 'accepted'
     closed = 'closed'
+    in_review = 'in-review'
+    needs_revision = 'needs-revision'
 
 
 class _Revision(object):
@@ -59,19 +62,32 @@ class _Revision(object):
         super(_Revision, self).__init__()
         self.revisionid = revisionid
         self.author = author
-        self.status = 'review'
+        self._status = None
+        self.set_in_review()
+
+    def set_abandoned(self):
+        self._status = _RevisionStates.abandoned
 
     def set_accepted(self):
-        self.status = 'accepted'
+        self._status = _RevisionStates.accepted
 
     def set_closed(self):
-        self.status = _RevisionStates.closed
+        self._status = _RevisionStates.closed
 
-    def is_closed(self):
-        return self.status == _RevisionStates.closed
+    def set_in_review(self):
+        self._status = _RevisionStates.in_review
+
+    def set_needs_revision(self):
+        self._status = _RevisionStates.needs_revision
 
     def is_abandoned(self):
-        return self.status == _RevisionStates.abandoned
+        return self._status == _RevisionStates.abandoned
+
+    def is_accepted(self):
+        return self._status == _RevisionStates.accepted
+
+    def is_closed(self):
+        return self._status == _RevisionStates.closed
 
 
 class _User(object):
@@ -264,7 +280,7 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
-        return revision.status == 'accepted'
+        return revision.is_accepted()
 
     def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.
@@ -282,14 +298,14 @@ class ConduitMock(object):
 
         # match the behaviour asserted by phlcon_differential__t,
         # we can't update a closed review, that's an error
-        if revision.status == 'closed':
+        if revision.is_closed():
             raise abdt_exception.AbdUserException(
                 "can't update a closed revision")
 
         # match the behaviour asserted by phlcon_differential__t, 'accepted' is
         # a sticky state as far as updating the review is concerned
-        if revision.status != 'accepted':
-            revision.status = 'review'
+        if not revision.is_accepted():
+            revision.set_in_review()
 
         self._data.set_changed()
 
@@ -301,8 +317,8 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
-        assert revision.status != 'closed'
-        revision.status = 'revision'
+        assert not revision.is_closed()
+        revision.set_needs_revision()
         self._data.set_changed()
 
     def close_revision(self, revisionid):
@@ -313,8 +329,8 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
-        assert revision.status == 'accepted'
-        revision.status = 'closed'
+        assert revision.is_accepted()
+        revision.set_closed()
         self._data.set_changed()
 
     def abandon_revision(self, revisionid):
@@ -325,8 +341,8 @@ class ConduitMock(object):
 
         """
         revision = self._data.get_revision(revisionid)
-        assert revision.status != 'closed'
-        revision.status = _RevisionStates.abandoned
+        assert not revision.is_closed()
+        revision.set_abandoned()
         self._data.set_changed()
 
     def accept_revision_as_user(self, revisionid, username):
@@ -339,9 +355,9 @@ class ConduitMock(object):
         """
         revision = self._data.get_revision(revisionid)
         self._data.assert_is_user(username)
-        assert revision.status != 'closed'
+        assert not revision.is_closed()
         assert revision.author != username
-        revision.status = 'accepted'
+        revision.set_accepted()
         self._data.set_changed()
 
     def commandeer_revision_as_user(self, revisionid, username):
@@ -354,7 +370,7 @@ class ConduitMock(object):
         """
         revision = self._data.get_revision(revisionid)
         self._data.assert_is_user(username)
-        assert revision.status != 'closed'
+        assert not revision.is_closed()
         assert revision.author != username
         revision.author = username
         self._data.set_changed()
