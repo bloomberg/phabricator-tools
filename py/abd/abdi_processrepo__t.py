@@ -55,6 +55,7 @@ import abdi_processrepo
 # [ I] test_I_MergeConflicts
 # [ J] test_J_DiffTooBig
 # [ K] test_K_ExceptionDuringProcessing
+# [ L] test_L_EmptyDiff
 #==============================================================================
 
 
@@ -299,6 +300,41 @@ class Test(unittest.TestCase):
         self.assertEqual(
             self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH],
             branch.review_branch_name())
+
+    def test_L_EmptyDiff(self):
+
+        # fail to create review with empty diff
+        branch, branch_data = abdt_branchmock.create_simple_new_review()
+        branch_data.raw_diff = ""
+        self._process_branches([branch])
+        self.assertFalse(branch.is_status_bad_pre_review())
+        self.assertFalse(branch.is_status_bad_land())
+        self.assertTrue(branch.is_status_bad())
+
+        # fix the empty diff
+        branch_data.raw_diff = "raw diff"
+        branch_data.has_new_commits = True
+        self._process_branches([branch])
+        self.assertFalse(branch.is_status_bad())
+
+        # empty diff again
+        branch_data.raw_diff = ""
+        branch_data.has_new_commits = True
+        self._process_branches([branch])
+        self.assertFalse(branch.is_status_bad_pre_review())
+        self.assertFalse(branch.is_status_bad_land())
+        self.assertTrue(branch.is_status_bad())
+
+        # fix the empty diff
+        branch_data.raw_diff = "raw diff2"
+        branch_data.has_new_commits = True
+        self._process_branches([branch])
+        self.assertFalse(branch.is_status_bad())
+
+        # land ok
+        self.conduit_data.accept_the_only_review()
+        self._process_branches([branch])
+        self.assertTrue(branch.is_null())
 
 
 # factors affecting a review:
