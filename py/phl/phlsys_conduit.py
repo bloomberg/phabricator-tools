@@ -139,7 +139,7 @@ class ConduitException(Exception):
             "result: '" + str(result) + "'\n" +
             "object: '" + str(obj) + "'\n" +
             "uri: '" + str(uri) + "'\n" +
-            "actAsUser: '" + str(uri) + "'\n")
+            "actAsUser: '" + str(actAsUser) + "'\n")
         super(ConduitException, self).__init__(message)
         self.method = method
         self.error = error
