@@ -140,7 +140,7 @@ def setup_repo_arg_parser(parser):
         '--review-url-format',
         metavar="STRING",
         type=str,
-        help="e.g. 'http://my.phabricator/{review}'")
+        help="e.g. 'http://my.phabricator/D{review}'")
 
     parser.add_argument(
         '--branch-url-format',
