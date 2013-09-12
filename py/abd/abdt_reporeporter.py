@@ -219,9 +219,24 @@ class RepoReporter(object):
     def no_users_on_branch(self, emails):
         self._branch_notes += """Unable to assign any users to branch.
 
-        These email addresses were considered:
+        These email addresses from authors of commits were considered:
         {emails}
-        """.format(emails=emails)
+
+        Note that the email address of the author in git must match one of the
+        email addresses that the user has in Phabricator.
+
+        You may use this to check your email address in Git, note that you
+        should run this from your working copy or the ouput may not be correct.
+        $ git config user.email
+
+        See the "Pro Git" book for details on changing this config:
+        http://git-scm.com/book/en/Getting-Started-First-Time-Git-Setup
+
+        Each user may see their configured email addresses in Phabricator
+        by visiting a link like this (substitute your own base url)
+        https://my.phabricator.domain/settings/panel/email/
+
+        """.format(emails=emails).strip() + '\n\n'
 
     def finish_branch(self, status, review_id):
         branch_name = self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH]
