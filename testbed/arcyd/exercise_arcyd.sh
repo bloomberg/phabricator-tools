@@ -59,6 +59,10 @@ function configure_arcyd() {
     echo touches/repo_origin.try >> repo_arcyd.cfg
     echo --ok-touch-path >> repo_arcyd.cfg
     echo touches/repo_origin.ok >> repo_arcyd.cfg
+    echo --review-url-format >> repo_arcyd.cfg
+    echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
+    echo --branch-url-format >> repo_arcyd.cfg
+    echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
 
     touch instance_local.cfg
     echo --instance-uri >> instance_local.cfg

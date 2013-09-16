@@ -82,8 +82,10 @@ the 'edit revision' link at the top-right of the page.
             base_name=phlcon_remarkup.monospaced(base_name)).strip()
 
         if branch_url is not None:
-            message += "\nyou can browse the branch here: {branch_url}".format(
-                branch_url=phlcon_remarkup.link(branch_url))
+            message += "\n\n"
+            message += "you can browse {name} here:\n{url}".format(
+                name=phlcon_remarkup.monospaced(branch_name),
+                url=phlcon_remarkup.link(branch_url))
 
         self._createComment(message, silent=True)
 

@@ -237,7 +237,7 @@ class Clone(object):
 
                 branch_url = None
                 if self._branch_link_callable:
-                    branch_url = self._branch_link_callable(review_branch)
+                    branch_url = self._branch_link_callable(b)
 
                 paired.append(
                     abdt_branch.Branch(
