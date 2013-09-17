@@ -39,6 +39,8 @@ import urlparse
 
 import phldef_conduit
 
+_URLLIB_TIMEOUT = 600
+
 # TODO: handle re-authentication when the token expires
 # TODO: allow connections without specifying user details where possible
 
@@ -254,9 +256,9 @@ class Conduit():
                 proxy['http'] = self._http_proxy
             proxy_handler = urllib2.ProxyHandler(proxy)
             opener = urllib2.build_opener(proxy_handler)
-            data = opener.open(path, body).read()
+            data = opener.open(path, body, _URLLIB_TIMEOUT).read()
         else:
-            data = urllib2.urlopen(path, body).read()
+            data = urllib2.urlopen(path, body, _URLLIB_TIMEOUT).read()
 
         return json.loads(data)
 
