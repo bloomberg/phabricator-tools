@@ -10,7 +10,10 @@
 #    .heading
 #    .text
 #    .get_content
+#    .section_break
+#    .horizontal_rule
 #    .tags_context
+#    .singletag_context
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -47,6 +50,12 @@ class HtmlFormatter(object):
     def get_content(self):
         return self._string
 
+    def section_break(self):
+        self.raw('<br/>')
+
+    def horizontal_rule(self):
+        self.raw('<hr/>')
+
     @contextlib.contextmanager
     def tags_context(self, *tags):
         for tag in tags:
@@ -57,6 +66,19 @@ class HtmlFormatter(object):
         finally:
             for tag in reversed(tags):
                 self._add_close_tag(tag)
+
+    @contextlib.contextmanager
+    def singletag_context(self, tag, class_=None):
+        if class_:
+            self._add_open_tag("{tag} class='{class_}'".format(
+                tag=tag, class_=class_))
+        else:
+            self._add_open_tag(tag)
+
+        try:
+            yield
+        finally:
+            self._add_close_tag(tag)
 
 
 #------------------------------------------------------------------------------

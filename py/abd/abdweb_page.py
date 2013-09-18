@@ -13,12 +13,76 @@
 
 from __future__ import absolute_import
 
+_CSS_STRING = """
+body {
+    background-color: #555;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family:"Arial Black", Gadget, sans-serif;
+    color: #fff;
+}
+
+pre {
+    font-family:"Lucida Console", Monaco, monospace;
+}
+
+.greeninset {
+    background-color: #5C5;
+    padding: 6px;
+    box-shadow: 0px 0px 30px #111;
+}
+
+.redinset {
+    background-color: #E55;
+    padding: 6px;
+    box-shadow: 0px 0px 30px #111;
+}
+
+.activeinset {
+    background-color: #EE3;
+    padding: 6px;
+    box-shadow: 0px 0px 30px #111;
+      -webkit-animation: pulsate 1s ease-out;
+    -webkit-animation-iteration-count: infinite;
+}
+
+.greencard {
+    background-color: #5C5;
+    padding: 6px;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0px 0px 30px #111;
+}
+
+.redcard {
+    background-color: #E55;
+    padding: 6px;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0px 0px 30px #111;
+}
+
+@-webkit-keyframes pulsate {
+    0% {-webkit-transform: scale(1.0, 1.0); opacity: 0.75;}
+    50% {-webkit-transform: scale(1.01, 1.01); opacity: 1.0;}
+    100% {-webkit-transform: scale(1.0, 1.0); opacity: 0.75;}
+}
+
+.activecard {
+    background-color: #EE3;
+    border: 6px solid #EE3;
+    box-shadow: 0px 0px 30px #111;
+      -webkit-animation: pulsate 1s ease-out;
+    -webkit-animation-iteration-count: infinite;
+}
+"""
+
 
 def render(formatter, content_string):
     with formatter.tags_context('html'):
         with formatter.tags_context('head'):
-            # CSS / js
-            pass
+            with formatter.tags_context('style'):
+                formatter.raw(_CSS_STRING)
         with formatter.tags_context('body'):
             formatter.raw(content_string)
 

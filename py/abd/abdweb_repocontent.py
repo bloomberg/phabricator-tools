@@ -23,6 +23,8 @@ def render(formatter, repo_report, branch_report):
         return
 
     _render_repo_report(formatter, repo_report)
+    formatter.section_break()
+    formatter.horizontal_rule()
     _render_branch_report(formatter, branch_report)
 
 
@@ -36,11 +38,20 @@ def _render_repo_report(formatter, repo_report):
     status_text = repo_report[abdt_reporeporter.REPO_ATTRIB_STATUS_TEXT]
 
     formatter.heading(repo_name)
-    formatter.text('status: ' + status)
-    if branch:
-        formatter.text('branch: ' + branch)
-    if status_text:
-        formatter.text('status text:\n' + status_text)
+
+    if status == abdt_reporeporter.REPO_STATUS_OK:
+        divclass = 'greeninset'
+    elif status == abdt_reporeporter.REPO_STATUS_UPDATING:
+        divclass = 'activeinset'
+    else:
+        divclass = 'redinset'
+
+    with formatter.singletag_context('div', class_=divclass):
+        formatter.text('status: ' + status)
+        if branch:
+            formatter.text('branch: ' + branch)
+        if status_text:
+            formatter.text('status text:\n' + status_text)
 
 
 def _render_branch_report(formatter, branch_report):
@@ -48,31 +59,27 @@ def _render_branch_report(formatter, branch_report):
         return
 
     branches = branch_report[abdt_reporeporter.RESULT_ATTRIB_BRANCHES]
-    if branches:
-        text = ''
-        text += 'branches\n'
-        text += '--------\n'
-        for branch in branches:
-            text += '{name}: [{status}]\n'.format(
-                name=branch[abdt_reporeporter.RESULT_BRANCH_NAME],
-                status=branch[abdt_reporeporter.RESULT_BRANCH_STATUS],
-            )
+    for branch in branches:
+        name = branch[abdt_reporeporter.RESULT_BRANCH_NAME]
+        status = branch[abdt_reporeporter.RESULT_BRANCH_STATUS]
+        branch_url = branch[abdt_reporeporter.RESULT_BRANCH_BRANCH_URL]
+        review_url = branch[abdt_reporeporter.RESULT_BRANCH_REVIEW_URL]
+        notes = branch[abdt_reporeporter.RESULT_BRANCH_NOTES]
 
-            branch_url = branch[abdt_reporeporter.RESULT_BRANCH_BRANCH_URL]
+        if status == abdt_reporeporter.RESULT_BRANCH_STATUS_OK:
+            divclass = 'greencard'
+        else:
+            divclass = 'redcard'
+
+        formatter.section_break()
+        with formatter.singletag_context('div', class_=divclass):
+            formatter.heading(name)
             if branch_url:
-                text += '  ' + branch_url + '\n'
-
-            review_url = branch[abdt_reporeporter.RESULT_BRANCH_REVIEW_URL]
+                formatter.text(branch_url)
             if review_url:
-                text += '  ' + review_url + '\n'
-
-            notes = branch[abdt_reporeporter.RESULT_BRANCH_NOTES]
+                formatter.text(review_url)
             if notes:
-                text += notes + '\n'
-
-            text += '\n'
-
-        formatter.text(text)
+                formatter.text(notes)
 
 
 #------------------------------------------------------------------------------
