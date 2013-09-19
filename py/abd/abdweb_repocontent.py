@@ -47,7 +47,7 @@ def _render_repo_report(formatter, repo_report):
         divclass = 'redinset'
 
     with formatter.singletag_context('div', class_=divclass):
-        formatter.text('status: ' + status)
+        formatter.text('repo status: ' + status)
         if branch:
             formatter.text('branch: ' + branch)
         if status_text:
@@ -75,9 +75,11 @@ def _render_branch_report(formatter, branch_report):
         with formatter.singletag_context('div', class_=divclass):
             formatter.heading(name)
             if branch_url:
-                formatter.text(branch_url)
+                formatter.link(branch_url, 'view branch')
+                formatter.section_break()
             if review_url:
-                formatter.text(review_url)
+                formatter.link(review_url, 'view review')
+                formatter.section_break()
             if notes:
                 formatter.text(notes)
 

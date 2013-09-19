@@ -28,6 +28,16 @@ pre {
     font-family:"Lucida Console", Monaco, monospace;
 }
 
+a {
+    font-family:"Arial Black", Gadget, sans-serif;
+    color: #000;
+}
+
+a:hover {
+    background-color: #000;
+    color: #fff;
+}
+
 .greeninset {
     background-color: #5C5;
     padding: 6px;

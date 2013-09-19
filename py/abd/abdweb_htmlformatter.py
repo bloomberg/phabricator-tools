@@ -12,6 +12,7 @@
 #    .get_content
 #    .section_break
 #    .horizontal_rule
+#    .link
 #    .tags_context
 #    .singletag_context
 #
@@ -55,6 +56,14 @@ class HtmlFormatter(object):
 
     def horizontal_rule(self):
         self.raw('<hr/>')
+
+    def link(self, target, text=None):
+        self._add_open_tag('a href={}'.format(target))
+        if text:
+            self.raw(text)
+        else:
+            self.raw(target)
+        self._add_close_tag('a')
 
     @contextlib.contextmanager
     def tags_context(self, *tags):
