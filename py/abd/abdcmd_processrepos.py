@@ -152,10 +152,11 @@ def process(args):
         raise
 
     # we should never get here, raise and handle an exception if we do
-    try:
-        raise Exception("Arcyd stopped unexpectedly")
-    except Exception:
-        on_exception("Arcyd will now stop")
+    if not args.no_loop:
+        try:
+            raise Exception("Arcyd stopped unexpectedly")
+        except Exception:
+            on_exception("Arcyd will now stop")
 
 
 def _process(args):
