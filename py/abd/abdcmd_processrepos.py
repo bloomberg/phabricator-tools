@@ -151,8 +151,8 @@ def process(args):
         print "stopping"
         raise
 
-    # we should never get here, raise and handle an exception if we do
     if not args.no_loop:
+        # we should never get here, raise and handle an exception if we do
         try:
             raise Exception("Arcyd stopped unexpectedly")
         except Exception:
