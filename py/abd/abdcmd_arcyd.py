@@ -39,9 +39,10 @@ import argparse
 
 import phlsys_subcommand
 
+import abdcmd_arcydstatushtml
 import abdcmd_devstatushtml
 import abdcmd_processrepos
-import abdcmd_statushtml
+import abdcmd_repostatushtml
 
 
 _USAGE_EXAMPLES = """
@@ -100,7 +101,9 @@ def main():
     phlsys_subcommand.setup_parser(
         "process-repos", abdcmd_processrepos, subparsers)
     phlsys_subcommand.setup_parser(
-        "status-html", abdcmd_statushtml, subparsers)
+        "arcyd-status-html", abdcmd_arcydstatushtml, subparsers)
+    phlsys_subcommand.setup_parser(
+        "repo-status-html", abdcmd_repostatushtml, subparsers)
     phlsys_subcommand.setup_parser(
         "dev-status-html", abdcmd_devstatushtml, subparsers)
 

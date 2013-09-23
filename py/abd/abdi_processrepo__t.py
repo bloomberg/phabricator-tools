@@ -11,6 +11,7 @@ import phlmail_mocksender
 import phlsys_pluginmanager
 
 import abdmail_mailer
+import abdt_arcydreporter
 import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
@@ -68,6 +69,8 @@ class Test(unittest.TestCase):
         self.mock_sender = None
         self.mailer = None
         self.plugin_manager = None
+        self.arcyd_reporter_data = None
+        self.arcyd_reporter = None
         self.reporter = None
         self.reporter_try = None
         self.reporter_ok = None
@@ -82,19 +85,25 @@ class Test(unittest.TestCase):
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
         self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
+        self.arcyd_reporter_data = {}
+        self.arcyd_reporter = abdt_arcydreporter.ArcydReporter(
+            abdt_arcydreporter.SharedDictOutput(self.arcyd_reporter_data))
+
+    def tearDown(self):
+        pass
+
+    def _process_branches(self, branches):
         self.reporter_try = {}
         self.reporter_ok = {}
         self.reporter = abdt_reporeporter.RepoReporter(
+            self.arcyd_reporter,
+            'abdi_processrepo__t:Test repo:machine name',
             'abdi_processrepo__t:Test repo',
             'http://my.phabricator/{review}',
             'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
             abdt_reporeporter.SharedDictOutput(self.reporter_try),
             abdt_reporeporter.SharedDictOutput(self.reporter_ok))
 
-    def tearDown(self):
-        pass
-
-    def _process_branches(self, branches):
         with contextlib.closing(self.reporter):
             abdi_processrepo.process_branches(
                 branches,

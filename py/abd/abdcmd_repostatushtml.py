@@ -2,7 +2,7 @@
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdcmd_statushtml
+# abdcmd_repostatushtml
 #
 # Public Functions:
 #   getFromfilePrefixChars

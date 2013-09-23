@@ -1,4 +1,4 @@
-"""Help develop status-html by providing flags to simulate various statuses."""
+"""Help develop status pages by providing simulating various statuses."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
@@ -17,7 +17,9 @@ from __future__ import absolute_import
 
 import contextlib
 
+import abdt_arcydreporter
 import abdt_reporeporter
+import abdweb_arcydcontent
 import abdweb_htmlformatter
 import abdweb_page
 import abdweb_repocontent
@@ -31,7 +33,7 @@ def setupParser(parser):
     pass
 
 
-def _write_status_page(filename, repo_report, branch_report):
+def _write_repo_status_page(filename, repo_report, branch_report):
 
     filename += '.html'
 
@@ -47,19 +49,41 @@ def _write_status_page(filename, repo_report, branch_report):
     print "wrote:", filename
 
 
-def process(args):
+def _write_arcyd_status_page(filename, report):
 
-    _ = args  # NOQA
+    filename += '.html'
+
+    formatter = abdweb_htmlformatter.HtmlFormatter()
+    abdweb_arcydcontent.render(
+        formatter, 'https://server.test/', report)
+
+    content = formatter.get_content()
+
+    formatter = abdweb_htmlformatter.HtmlFormatter()
+    abdweb_page.render(formatter, content)
+
+    with open(filename, 'w') as f:
+        f.write(formatter.get_content())
+    print "wrote:", filename
+
+
+def _exercise_reporeporter():
 
     repo_report = {}
     branch_report = {}
 
     def _write(filename):
-        _write_status_page(filename, repo_report, branch_report)
+        _write_repo_status_page(filename, repo_report, branch_report)
 
-    # simulate unhandled exception during processing
+    report = {}
+    arcyd_reporter = abdt_arcydreporter.ArcydReporter(
+        abdt_arcydreporter.SharedDictOutput(report))
+
+    # simulate unhandled exception during processing repo
 
     reporter = abdt_reporeporter.RepoReporter(
+        arcyd_reporter,
+        "exception repo-machine-name",
         "exception repo",
         'http://my.phabricator/{review}',
         'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
@@ -67,7 +91,7 @@ def process(args):
         abdt_reporeporter.SharedDictOutput(branch_report))
 
     with contextlib.closing(reporter):
-        _write('exception_start')
+        _write('updating')
         reporter.start_branch('mybranch')
         reporter.on_traceback('traceback\ntraceback\n')
     _write('exception_closed')
@@ -78,6 +102,8 @@ def process(args):
     branch_report = {}
 
     reporter = abdt_reporeporter.RepoReporter(
+        arcyd_reporter,
+        "myrepo-machine-name",
         "myrepo",
         'http://my.phabricator/{review}',
         'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
@@ -107,6 +133,47 @@ def process(args):
         reporter.on_completed()
     _write('aok_closed')
 
+
+def _exercise_arcydreporter():
+
+    report = {}
+
+    def _write(filename):
+        _write_arcyd_status_page(filename, report)
+
+    # simulate unhandled exception during processing repo
+
+    reporter = abdt_arcydreporter.ArcydReporter(
+        abdt_arcydreporter.SharedDictOutput(report))
+
+    with contextlib.closing(reporter):
+        _write('arcyd_exception_start')
+        reporter.start_repo('myrepo-machine', 'myrepo')
+        _write('arcyd_exception_startrepo')
+        reporter.finish_repo()
+        reporter.start_repo('myrepo2-machine', 'myrepo2')
+        reporter.finish_repo()
+        reporter.start_repo('myrepo3-machine', 'myrepo3')
+        reporter.finish_repo()
+        reporter.start_repo('failrepo-machine', 'failrepo')
+        reporter.fail_repo()
+        reporter.start_repo('myrepo4-machine', 'myrepo4')
+        reporter.finish_repo()
+        reporter.start_repo('updating_repo-machine', 'updating_repo')
+        _write('arcyd_many_repos')
+        reporter.finish_repo()
+        reporter.start_sleep(3)
+        _write('arcyd_sleeping')
+        reporter.finish_sleep()
+        _write('arcyd_idle')
+    _write('arcyd_stopped')
+
+
+def process(args):
+
+    _ = args  # NOQA
+    _exercise_arcydreporter()
+    _exercise_reporeporter()
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

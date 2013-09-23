@@ -24,6 +24,7 @@
 from __future__ import absolute_import
 
 import argparse
+import contextlib
 import functools
 import os
 import time
@@ -32,6 +33,7 @@ import phlsys_scheduleunreliables
 import phlsys_statusline
 
 import abdi_processargs
+import abdt_arcydreporter
 
 
 def getFromfilePrefixChars():
@@ -47,6 +49,12 @@ def setupParser(parser):
         nargs='+',
         type=str,
         help="files to load configuration from, prefix with @")
+    parser.add_argument(
+        '--status-path',
+        metavar="PATH",
+        type=str,
+        required=True,
+        help="file to write status to")
     parser.add_argument(
         '--kill-file',
         metavar="NAME",
@@ -79,16 +87,20 @@ def setupParser(parser):
 
 class DelayedRetrySleepOperation(object):
 
-    def __init__(self, out, secs):
+    def __init__(self, out, secs, reporter):
         self._out = out
         self._secs = secs
+        self._reporter = reporter
 
     def do(self):
         sleep_remaining = self._secs
+        self._reporter.start_sleep(sleep_remaining)
         while sleep_remaining > 0:
             self._out.display("sleep (" + str(sleep_remaining) + " seconds) ")
+            self._reporter.update_sleep(sleep_remaining)
             time.sleep(1)
             sleep_remaining -= 1
+        self._reporter.finish_sleep()
         return True
 
 
@@ -144,22 +156,26 @@ def process(args):
     on_exception = abdi_processargs.make_exception_message_handler(
         args, "arcyd stopped with exception", "")
 
-    try:
-        _process(args)
-    except BaseException:
-        on_exception("Arcyd will now stop")
-        print "stopping"
-        raise
+    reporter_data = abdt_arcydreporter.SharedFileDictOutput(args.status_path)
+    with contextlib.closing(
+            abdt_arcydreporter.ArcydReporter(reporter_data)) as reporter:
 
-    if not args.no_loop:
-        # we should never get here, raise and handle an exception if we do
         try:
-            raise Exception("Arcyd stopped unexpectedly")
-        except Exception:
+            _process(args, reporter)
+        except BaseException:
             on_exception("Arcyd will now stop")
+            print "stopping"
+            raise
+
+        if not args.no_loop:
+            # we should never get here, raise and handle an exception if we do
+            try:
+                raise Exception("Arcyd stopped unexpectedly")
+            except Exception:
+                on_exception("Arcyd will now stop")
 
 
-def _process(args):
+def _process(args, reporter):
 
     retry_delays = abdi_processargs.get_retry_delays()
     on_exception_delay = abdi_processargs.make_exception_delay_handler(args)
@@ -168,7 +184,9 @@ def _process(args):
     for repo in args.repo_configs:
         parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
         abdi_processargs.setup_repo_arg_parser(parser)
-        repo_args = parser.parse_args(repo)
+        repo_name = repo[0]  # oddly this comes to us as a list
+        repo_name = repo_name[1:]  # strip off the '@' prefix
+        repo_args = (repo_name, parser.parse_args(repo))
         repos.append(repo_args)
 
     out = phlsys_statusline.StatusLine()
@@ -176,11 +194,16 @@ def _process(args):
     # TODO: test write access to repos here
 
     operations = []
-    for repo in repos:
+    for repo, repo_args in repos:
+
+        process_func = functools.partial(
+            abdi_processargs.run_once, repo, repo_args, out, reporter)
+
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
-            functools.partial(abdi_processargs.run_once, repo, out),
+            process_func,
             list(retry_delays),  # make a copy to be sure
             on_exception_delay)
+
         operations.append(operation)
 
     def on_pause():
@@ -195,7 +218,7 @@ def _process(args):
 
     operations.append(
         DelayedRetrySleepOperation(
-            out, args.sleep_secs))
+            out, args.sleep_secs, reporter))
 
     if args.no_loop:
         def process_once():

@@ -149,6 +149,8 @@ class RepoReporter(object):
 
     def __init__(
             self,
+            arcyd_reporter,
+            repo,
             repo_name,
             review_url_format,
             branch_url_format,
@@ -156,6 +158,8 @@ class RepoReporter(object):
             ok_output):
         """Initialise a new reporter to report to the specified outputs.
 
+        :arcyd_reporter: reporter to escalate to
+        :repo: machine-readable name to identify the repo
         :repo_name: human-readable name to identify the repo
         :review_url_format: format string for generating review urls
         :branch_url_format: format string for generating branch urls
@@ -164,12 +168,15 @@ class RepoReporter(object):
 
         """
         super(RepoReporter, self).__init__()
+        self._arcyd_reporter = arcyd_reporter
         self._review_url_format = review_url_format
         self._branch_url_format = branch_url_format
         self._try_output = try_output
         self._ok_output = ok_output
         self._is_updating = True
         self._branches = []
+
+        self._arcyd_reporter.start_repo(repo, repo_name)
 
         assert self._try_output
         assert self._ok_output
@@ -271,6 +278,9 @@ class RepoReporter(object):
         """Close any resources associated with the report."""
         if self._is_updating:
             self._update_write_repo_status(REPO_STATUS_FAILED)
+            self._arcyd_reporter.fail_repo()
+        else:
+            self._arcyd_reporter.finish_repo()
 
 
 #------------------------------------------------------------------------------

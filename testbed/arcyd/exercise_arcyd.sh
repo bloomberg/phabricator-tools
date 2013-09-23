@@ -25,6 +25,9 @@ cd ${tempdir}
 
 $arcyd -h
 $arcyd process-repos -h
+$arcyd arcyd-status-html -h
+$arcyd repo-status-html -h
+$arcyd dev-status-html -h
 
 function setup_repos() {
     mkdir origin
@@ -92,11 +95,17 @@ $arcyd \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
     --repo-configs @repo_arcyd.cfg \
+    --status-path arcyd_status.json \
     --sleep-secs 0 \
     --no-loop
 
 ${arcyd} \
-    status-html \
+    arcyd-status-html \
+    arcyd_status.json \
+    https://server.test/arcyd
+
+${arcyd} \
+    repo-status-html \
     touches/repo_origin.try \
     touches/repo_origin.ok
 }
@@ -114,6 +123,7 @@ $arcyd \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
     --repo-configs @repo_arcyd.cfg \
+    --status-path arcyd_status.json \
     --sleep-secs 0 \
     --kill-file killfile \
     --no-loop

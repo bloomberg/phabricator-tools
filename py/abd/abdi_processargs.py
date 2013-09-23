@@ -248,9 +248,11 @@ def get_retry_delays():
     return retry_delays
 
 
-def run_once(args, out):
+def run_once(repo, args, out, arcyd_reporter):
 
     reporter = abdt_reporeporter.RepoReporter(
+        arcyd_reporter,
+        repo,
         args.repo_desc,
         args.review_url_format,
         args.branch_url_format,
