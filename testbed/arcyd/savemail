@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
-read stdin
 echo ========================================================== >> savemail.txt
 echo -------------------------- SAVE MAIL --------------------- >> savemail.txt
-echo $stdin >> savemail.txt
+cat - >> savemail.txt
 echo ========================================================== >> savemail.txt
-echo > savemail.txt
+echo >> savemail.txt
