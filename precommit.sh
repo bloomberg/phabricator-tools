@@ -98,8 +98,8 @@ printf "unit tests: "
 # echo "OK" <-- nose will print status for itself
 
 ###############################################################################
-# perform system tests (stuff in testbed/ etc.)
+# perform smoke tests (stuff in testbed/ etc.)
 ###############################################################################
-printf "system tests: "
-./system_tests.sh
+printf "smoke tests: "
+./smoke_tests.sh
 echo "OK"
