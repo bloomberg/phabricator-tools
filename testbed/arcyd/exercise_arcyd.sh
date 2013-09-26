@@ -1,5 +1,6 @@
-trap "echo FAILED!; exit 1" ERR
 set -x
+set -e
+trap "echo FAILED!; exit 1" EXIT
 
 # cd to the dir of this script, so paths are relative
 cd "$(dirname "$0")"
@@ -106,7 +107,7 @@ run_arcyd
 
 # exercise the killfile route
 touch killfile
-trap ERR
+set +e
 $arcyd \
     process-repos \
     --sys-admin-emails admin@server.test \
@@ -116,8 +117,7 @@ $arcyd \
     --sleep-secs 0 \
     --kill-file killfile \
     --no-loop
-trap "echo FAILED!; exit 1" ERR
-
+set -e
 
 # create a review branch
 cd dev
@@ -192,3 +192,4 @@ cat touches/repo_origin.ok
 
 cd ${olddir}
 rm -rf ${tempdir}
+trap - EXIT
