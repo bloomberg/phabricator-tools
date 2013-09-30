@@ -154,6 +154,10 @@ def _exercise_arcydreporter():
         _write('arcyd_exception_start')
         reporter.start_repo('myrepo-machine', 'myrepo')
         _write('arcyd_exception_startrepo')
+        with reporter.tag_timer_context('git'):
+            pass
+        with reporter.tag_timer_context('phabricator'):
+            pass
         reporter.finish_repo()
         reporter.start_repo('myrepo2-machine', 'myrepo2')
         reporter.finish_repo()

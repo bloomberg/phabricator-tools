@@ -9,14 +9,23 @@
 #    .write
 #   SharedDictOutput
 #    .write
+#   Timer
+#    .start
+#    .stop
+#    .duration
 #   ArcydReporter
 #    .start_sleep
 #    .update_sleep
 #    .finish_sleep
 #    .start_repo
+#    .tag_timer_context
+#    .tag_timer_decorate_object_methods
 #    .fail_repo
 #    .finish_repo
 #    .close
+#
+# Public Functions:
+#   timer_context
 #
 # Public Assignments:
 #   ARCYD_STATUS
@@ -40,6 +49,7 @@
 #   REPO_STATUSES
 #   ARCYD_STAT_CURRENT_CYCLE_TIME
 #   ARCYD_STAT_LAST_CYCLE_TIME
+#   ARCYD_STAT_TAG_TIMES
 #   ARCYD_LIST_STATISTICS
 #
 # -----------------------------------------------------------------------------
@@ -48,8 +58,13 @@
 
 from __future__ import absolute_import
 
+import collections
+import contextlib
 import datetime
+import functools
+import inspect
 import json
+import types
 
 import phlsys_fs
 
@@ -101,10 +116,12 @@ REPO_STATUSES = [
 
 ARCYD_STAT_CURRENT_CYCLE_TIME = 'current-cycle-time'
 ARCYD_STAT_LAST_CYCLE_TIME = 'last-cycle-time'
+ARCYD_STAT_TAG_TIMES = 'tag-times'
 
 ARCYD_LIST_STATISTICS = [
     ARCYD_STAT_CURRENT_CYCLE_TIME,
     ARCYD_STAT_LAST_CYCLE_TIME,
+    ARCYD_STAT_TAG_TIMES,
 ]
 
 
@@ -132,6 +149,45 @@ class SharedDictOutput(object):
         # copy contents to other dict
         self._shared_d.clear()
         self._shared_d.update(d)
+
+
+@contextlib.contextmanager
+def timer_context():
+    timer = Timer()
+    timer.start()
+    try:
+        yield timer
+    finally:
+        timer.stop()
+
+
+class Timer(object):
+
+    def __init__(self):
+        self._start = None
+        self._stop = None
+        self._duration = None
+
+    def start(self):
+        self._start = datetime.datetime.utcnow()
+        self._stop = None
+        self._duration = None
+
+    def stop(self):
+        assert self._start is not None
+        self._stop = datetime.datetime.utcnow()
+
+    @property
+    def duration(self):
+        if self._duration is None:
+            assert self._start is not None
+            if self._stop is None:
+                duration = datetime.datetime.utcnow() - self._start
+                duration = duration.total_seconds()
+                return duration
+            self._duration = self._stop - self._start
+            self._duration = self._duration.total_seconds()
+        return self._duration
 
 
 class _CycleTimer(object):
@@ -175,6 +231,7 @@ class ArcydReporter(object):
         self._repo = None
 
         self._cycle_timer = _CycleTimer()
+        self._tag_times = collections.defaultdict(float)
 
         self._write_status(ARCYD_STATUS_STARTING)
 
@@ -199,6 +256,26 @@ class ArcydReporter(object):
         }
         self._write_status(ARCYD_STATUS_UPDATING)
 
+    @contextlib.contextmanager
+    def tag_timer_context(self, tag_name):
+        with timer_context() as timer:
+            yield
+        self._tag_times[tag_name] += timer.duration
+
+    def _tag_timer_decorate(self, tag, f):
+        @functools.wraps(f)
+        def wrapper(other_self, *args, **kwargs):
+            with self.tag_timer_context(tag):
+                return f(other_self, *args, **kwargs)
+        return wrapper
+
+    def tag_timer_decorate_object_methods(self, object_, tag):
+        for name, attribute in object_.__class__.__dict__.iteritems():
+            if inspect.isfunction(attribute):
+                new_method = types.MethodType(
+                    self._tag_timer_decorate(tag, attribute), object_)
+                object_.__dict__[name] = new_method
+
     def fail_repo(self):
         self._repo[REPO_ATTRIB_STATUS] = REPO_STATUS_FAILED
         self._repos.append(self._repo)
@@ -216,7 +293,9 @@ class ArcydReporter(object):
         statistics = {
             ARCYD_STAT_CURRENT_CYCLE_TIME: timer.current_duration(),
             ARCYD_STAT_LAST_CYCLE_TIME: timer.last_duration,
+            ARCYD_STAT_TAG_TIMES: self._tag_times,
         }
+        assert set(statistics.keys()) == set(ARCYD_LIST_STATISTICS)
         d = {
             ARCYD_STATUS: status,
             ARCYD_CURRENT_REPO: self._repo,

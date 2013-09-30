@@ -260,10 +260,10 @@ def run_once(repo, args, out, arcyd_reporter):
         abdt_reporeporter.SharedFileDictOutput(args.ok_touch_path))
 
     with contextlib.closing(reporter):
-        _run_once(args, out, reporter)
+        _run_once(args, out, reporter, arcyd_reporter)
 
 
-def _run_once(args, out, reporter):
+def _run_once(args, out, reporter, arcyd_reporter):
 
     sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
@@ -326,8 +326,11 @@ def _run_once(args, out, reporter):
     phlsys_tryloop.try_loop_delay(
         connect, delays, onException=on_tryloop_exception)
 
+    conduit = conduit[0]
+    arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')
+
     out.display("process (" + args.repo_desc + "): ")
-    arcyd_conduit = abdt_conduit.Conduit(conduit[0])
+    arcyd_conduit = abdt_conduit.Conduit(conduit)
 
     branch_url_callable = None
     if args.branch_url_format:
@@ -337,6 +340,8 @@ def _run_once(args, out, reporter):
 
     arcyd_clone = abdt_git.Clone(
         args.repo_path, "origin", args.repo_desc, branch_url_callable)
+    arcyd_reporter.tag_timer_decorate_object_methods(
+        arcyd_clone, 'arcyd_clone')
     branches = arcyd_clone.get_managed_branches()
 
     try:

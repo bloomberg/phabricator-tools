@@ -94,12 +94,17 @@ def render(
 def render_stats(stats, formatter):
     current_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
     last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
+    tag_times = stats[abdt_arcydreporter.ARCYD_STAT_TAG_TIMES]
     if current_duration:
         formatter.text(
             'current cycle time: {:.2f} secs'.format(current_duration))
     if last_duration:
         formatter.text(
             'last cycle time: {:.2f} secs'.format(last_duration))
+    if tag_times:
+        for tag, time in tag_times.iteritems():
+            formatter.text(
+                '{tag} time: {time:.2f} secs'.format(tag=tag, time=time))
 
 
 def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):
