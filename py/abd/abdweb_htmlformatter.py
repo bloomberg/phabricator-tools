@@ -13,6 +13,7 @@
 #    .section_break
 #    .horizontal_rule
 #    .link
+#    .action_button
 #    .tags_context
 #    .singletag_context
 #
@@ -64,6 +65,21 @@ class HtmlFormatter(object):
         else:
             self.raw(target)
         self._add_close_tag('a')
+
+    def action_button(self, text, action, is_active):
+        self.raw("<form method='post'>")
+        self.raw(
+            "<input type='hidden' name='action' value={action}>".format(
+                action=action))
+        if is_active:
+            self.raw(
+                "<input type='submit' value='{text}'>".format(
+                    text=text))
+        else:
+            self.raw(
+                "<input type='submit' value='{text}' disabled>".format(
+                    text=text))
+        self.raw("</form>")
 
     @contextlib.contextmanager
     def tags_context(self, *tags):

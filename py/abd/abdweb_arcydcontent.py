@@ -7,6 +7,7 @@
 # Public Functions:
 #   render
 #   render_stats
+#   render_controls
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -36,8 +37,18 @@ def _join_url(base_url, leaf):
     return '/'.join([base_url.rstrip('/'), leaf])
 
 
-def render(formatter, base_url, report):
+def render(
+        formatter,
+        base_url,
+        report,
+        is_reset_scheduled,
+        is_pause_scheduled):
+
     formatter.heading('arcyd')
+
+    formatter.horizontal_rule()
+    render_controls(is_reset_scheduled, is_pause_scheduled, formatter)
+    formatter.horizontal_rule()
 
     status = report[abdt_arcydreporter.ARCYD_STATUS]
     formatter.text('status: {status}'.format(status=status))
@@ -89,6 +100,24 @@ def render_stats(stats, formatter):
     if last_duration:
         formatter.text(
             'last cycle time: {:.2f} secs'.format(last_duration))
+
+
+def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):
+    with formatter.tags_context('table'):
+        with formatter.tags_context('tr'):
+            with formatter.tags_context('td'):
+                formatter.action_button(
+                    'reset Arcyd', 'reset', not is_reset_scheduled)
+            with formatter.tags_context('td'):
+                formatter.action_button(
+                    'cancel reset', 'cancel-reset', is_reset_scheduled)
+        with formatter.tags_context('tr'):
+            with formatter.tags_context('td'):
+                formatter.action_button(
+                    'pause Arcyd', 'pause', not is_pause_scheduled)
+            with formatter.tags_context('td'):
+                formatter.action_button(
+                    'unpause Arcyd', 'unpause', is_pause_scheduled)
 
 
 #------------------------------------------------------------------------------

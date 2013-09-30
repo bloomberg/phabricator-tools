@@ -16,6 +16,7 @@
 from __future__ import absolute_import
 
 import json
+import os
 
 import phlsys_fs
 
@@ -39,6 +40,18 @@ def setupParser(parser):
         metavar="URL",
         type=str,
         help="base url to construct links from")
+    parser.add_argument(
+        '--reset-file',
+        metavar="NAME",
+        type=str,
+        help="filename to watch for, will reset operations if the file is "
+             "detected and remove the file.")
+    parser.add_argument(
+        '--pause-file',
+        metavar="NAME",
+        type=str,
+        help="filename to watch for, will pause operations while the file is "
+             "detected.")
 
 
 def _read_json_file(filename):
@@ -51,9 +64,21 @@ def _read_json_file(filename):
 
 
 def process(args):
+    is_reset_scheduled = False
+    is_pause_scheduled = False
+    if args.reset_file:
+        is_reset_scheduled = os.path.isfile(args.reset_file)
+    if args.pause_file:
+        is_pause_scheduled = os.path.isfile(args.pause_file)
+
     formatter = abdweb_htmlformatter.HtmlFormatter()
     report = _read_json_file(args.report_file)
-    abdweb_arcydcontent.render(formatter, args.base_url, report)
+    abdweb_arcydcontent.render(
+        formatter,
+        args.base_url,
+        report,
+        is_reset_scheduled=is_reset_scheduled,
+        is_pause_scheduled=is_pause_scheduled)
     content = formatter.get_content()
 
     formatter = abdweb_htmlformatter.HtmlFormatter()
