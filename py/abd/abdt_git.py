@@ -34,7 +34,6 @@ import phlgit_diff
 import phlgit_log
 import phlgit_merge
 import phlgit_push
-import phlsys_git
 
 import abdt_branch
 import abdt_gittypes
@@ -45,10 +44,10 @@ import abdt_naming
 class Clone(object):
 
     def __init__(
-            self, working_dir, remote, description, branch_link_callable=None):
+            self, clone, remote, description, branch_link_callable=None):
         """Initialise a new Clone.
 
-        :working_dir: the directory to attach to
+        :clone: the clone to attach to and delegate calls to
         :remote: name of the remote to use
         :description: short identification of the repo for humans
         :branch_link_callable: we call this with a branch to get a link
@@ -56,7 +55,7 @@ class Clone(object):
 
         """
         super(Clone, self).__init__()
-        self._clone = phlsys_git.GitClone(working_dir)
+        self._clone = clone
         self._remote = remote
         self._description = description
         self._branch_link_callable = branch_link_callable

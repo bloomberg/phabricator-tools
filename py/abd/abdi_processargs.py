@@ -31,6 +31,7 @@ import traceback
 import phlmail_sender
 import phlsys_conduit
 import phlsys_fs
+import phlsys_git
 import phlsys_pluginmanager
 import phlsys_sendmail
 import phlsys_strtotime
@@ -338,10 +339,10 @@ def _run_once(args, out, reporter, arcyd_reporter):
             return args.branch_url_format.format(branch=branch_name)
         branch_url_callable = make_branch_url
 
+    sys_clone = phlsys_git.GitClone(args.repo_path)
+    arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
     arcyd_clone = abdt_git.Clone(
-        args.repo_path, "origin", args.repo_desc, branch_url_callable)
-    arcyd_reporter.tag_timer_decorate_object_methods(
-        arcyd_clone, 'arcyd_clone')
+        sys_clone, "origin", args.repo_desc, branch_url_callable)
     branches = arcyd_clone.get_managed_branches()
 
     try:
