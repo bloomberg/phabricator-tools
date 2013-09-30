@@ -83,8 +83,12 @@ def render(formatter, base_url, report):
 def render_stats(stats, formatter):
     current_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
     last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
-    formatter.text('current: {}'.format(current_duration))
-    formatter.text('last: {}'.format(last_duration))
+    if current_duration:
+        formatter.text(
+            'current cycle time: {:.2f} secs'.format(current_duration))
+    if last_duration:
+        formatter.text(
+            'last cycle time: {:.2f} secs'.format(last_duration))
 
 
 #------------------------------------------------------------------------------
