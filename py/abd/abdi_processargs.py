@@ -260,8 +260,9 @@ def run_once(repo, args, out, arcyd_reporter):
         abdt_reporeporter.SharedFileDictOutput(args.try_touch_path),
         abdt_reporeporter.SharedFileDictOutput(args.ok_touch_path))
 
-    with contextlib.closing(reporter):
-        _run_once(args, out, reporter, arcyd_reporter)
+    with arcyd_reporter.tag_timer_context('process args'):
+        with contextlib.closing(reporter):
+            _run_once(args, out, reporter, arcyd_reporter)
 
 
 def _run_once(args, out, reporter, arcyd_reporter):
@@ -301,10 +302,11 @@ def _run_once(args, out, reporter, arcyd_reporter):
 
     with phlsys_fs.chdir_context(args.repo_path):
         out.display("fetch (" + args.repo_desc + "): ")
-        phlsys_tryloop.try_loop_delay(
-            prune_and_fetch,
-            delays,
-            onException=on_tryloop_exception)
+        with arcyd_reporter.tag_timer_context('git fetch'):
+            phlsys_tryloop.try_loop_delay(
+                prune_and_fetch,
+                delays,
+                onException=on_tryloop_exception)
 
     # XXX: until conduit refreshes the connection, we'll suffer from
     #      timeouts; reduce the probability of this by using a new
@@ -324,8 +326,9 @@ def _run_once(args, out, reporter, arcyd_reporter):
             args.arcyd_cert,
             https_proxy=args.https_proxy)
 
-    phlsys_tryloop.try_loop_delay(
-        connect, delays, onException=on_tryloop_exception)
+    with arcyd_reporter.tag_timer_context('conduit connect'):
+        phlsys_tryloop.try_loop_delay(
+            connect, delays, onException=on_tryloop_exception)
 
     conduit = conduit[0]
     arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')
