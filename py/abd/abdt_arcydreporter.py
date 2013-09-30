@@ -155,10 +155,7 @@ class _CycleTimer(object):
 
     @property
     def last_duration(self):
-        if self._last_duration is not None:
-            return self._last_duration.total_seconds()
-        else:
-            return None
+        return self._last_duration
 
 
 class ArcydReporter(object):
