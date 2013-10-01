@@ -227,7 +227,7 @@ class ArcydReporter(object):
 
         assert self._output
 
-        self._repos = []
+        self._repos = {}
         self._repo = None
 
         self._cycle_timer = _CycleTimer()
@@ -278,13 +278,13 @@ class ArcydReporter(object):
 
     def fail_repo(self):
         self._repo[REPO_ATTRIB_STATUS] = REPO_STATUS_FAILED
-        self._repos.append(self._repo)
+        self._repos[self._repo[REPO_ATTRIB_NAME]] = self._repo
         self._repo = None
         self._write_status(ARCYD_STATUS_UPDATING)
 
     def finish_repo(self):
         self._repo[REPO_ATTRIB_STATUS] = REPO_STATUS_OK
-        self._repos.append(self._repo)
+        self._repos[self._repo[REPO_ATTRIB_NAME]] = self._repo
         self._repo = None
         self._write_status(ARCYD_STATUS_IDLE)
 
@@ -299,7 +299,7 @@ class ArcydReporter(object):
         d = {
             ARCYD_STATUS: status,
             ARCYD_CURRENT_REPO: self._repo,
-            ARCYD_REPOS: self._repos,
+            ARCYD_REPOS: [self._repos[k] for k in self._repos],
             ARCYD_STATISTICS: statistics,
         }
         assert set(d.keys()) == set(ARCYD_LIST_ATTRIB)

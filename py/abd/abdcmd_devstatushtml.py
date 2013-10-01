@@ -159,6 +159,8 @@ def _exercise_arcydreporter():
         with reporter.tag_timer_context('phabricator'):
             pass
         reporter.finish_repo()
+        reporter.start_repo('repeatrepo-machine', 'repeatrepo')
+        reporter.finish_repo()
         reporter.start_repo('myrepo2-machine', 'myrepo2')
         reporter.finish_repo()
         reporter.start_repo('myrepo3-machine', 'myrepo3')
@@ -166,6 +168,8 @@ def _exercise_arcydreporter():
         reporter.start_repo('failrepo-machine', 'failrepo')
         reporter.fail_repo()
         reporter.start_repo('myrepo4-machine', 'myrepo4')
+        reporter.finish_repo()
+        reporter.start_repo('repeatrepo-machine', 'repeatrepo')
         reporter.finish_repo()
         reporter.start_repo('updating_repo-machine', 'updating_repo')
         _write('arcyd_many_repos')
