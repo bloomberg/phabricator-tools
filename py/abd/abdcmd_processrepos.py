@@ -7,6 +7,8 @@
 # Public Classes:
 #   DelayedRetrySleepOperation
 #    .do
+#   RefreshCachesOperation
+#    .do
 #   ResetFileException
 #   FileCheckOperation
 #    .do
@@ -25,12 +27,16 @@ from __future__ import absolute_import
 
 import argparse
 import contextlib
+import datetime
 import functools
+import itertools
+import logging
 import os
 import time
 
 import phlsys_scheduleunreliables
 import phlsys_statusline
+import phlsys_tryloop
 
 import abdi_processargs
 import abdt_arcydreporter
@@ -101,6 +107,62 @@ class DelayedRetrySleepOperation(object):
             time.sleep(1)
             sleep_remaining -= 1
         self._reporter.finish_sleep()
+        return True
+
+
+class RefreshCachesOperation(object):
+
+    def __init__(self, conduits, reporter):
+        super(RefreshCachesOperation, self).__init__()
+        self._conduits = conduits
+        self._reporter = reporter
+
+    def do(self):
+        self._reporter.start_cache_refresh()
+
+        # prepare delays in the event of trouble when refreshing
+        # TODO: perhaps this policy should be decided higher-up
+        delays = [
+            datetime.timedelta(seconds=1),
+            datetime.timedelta(seconds=1),
+            datetime.timedelta(seconds=1),
+            datetime.timedelta(seconds=1),
+            datetime.timedelta(seconds=1),
+            datetime.timedelta(seconds=10),
+            datetime.timedelta(seconds=10),
+            datetime.timedelta(seconds=10),
+            datetime.timedelta(seconds=10),
+            datetime.timedelta(seconds=10),
+            datetime.timedelta(seconds=10),
+            datetime.timedelta(minutes=1),
+            datetime.timedelta(minutes=1),
+            datetime.timedelta(minutes=1),
+            datetime.timedelta(minutes=1),
+            datetime.timedelta(minutes=1),
+            datetime.timedelta(minutes=10),
+            datetime.timedelta(minutes=10),
+            datetime.timedelta(minutes=10),
+            datetime.timedelta(minutes=10),
+            datetime.timedelta(minutes=10),
+            datetime.timedelta(minutes=10),
+        ]
+
+        forever = itertools.repeat(datetime.timedelta(minutes=10))
+        delays = itertools.chain(delays, forever)
+
+        # log.error if we get an exception when fetching
+        def on_tryloop_exception(e, delay):
+            self._reporter.on_tryloop_exception(e, delay)
+            logging.error(str(e) + "\nwill wait " + str(delay))
+
+        for key in self._conduits:
+            conduit = self._conduits[key]
+            phlsys_tryloop.try_loop_delay(
+                conduit.refresh_cache_on_cycle,
+                delays,
+                onException=on_tryloop_exception)
+
+        self._reporter.finish_cache_refresh()
         return True
 
 
@@ -225,6 +287,10 @@ def _process(args, reporter):
     operations.append(
         DelayedRetrySleepOperation(
             out, args.sleep_secs, reporter))
+
+    operations.append(
+        RefreshCachesOperation(
+            conduits, reporter))
 
     if args.no_loop:
         def process_once():

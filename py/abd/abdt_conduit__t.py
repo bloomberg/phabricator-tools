@@ -49,6 +49,7 @@ from __future__ import absolute_import
 import unittest
 
 import phlcon_differential
+import phlcon_reviewstatecache
 import phldef_conduit
 import phlsys_conduit
 
@@ -62,6 +63,7 @@ class Test(unittest.TestCase):
         super(Test, self).__init__(data)
         self.test_data = None
         self.sys_conduit = None
+        self.reviewstate_cache = None
         self.conduit = None
         self.empty_diff = "diff --git a/ b/"
 
@@ -71,7 +73,13 @@ class Test(unittest.TestCase):
             self.test_data.TEST_URI,
             self.test_data.PHAB.user,
             self.test_data.PHAB.certificate)
-        self.conduit = abdt_conduit.Conduit(self.sys_conduit)
+        self.reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
+        self.reviewstate_cache.set_conduit(self.sys_conduit)
+        self.conduit = abdt_conduit.Conduit(
+            self.sys_conduit, self.reviewstate_cache)
+
+    def _invalidate_cache(self):
+        self.reviewstate_cache.refresh_active_reviews()
 
     def tearDown(self):
         pass
@@ -89,14 +97,18 @@ class Test(unittest.TestCase):
         self.conduit.set_requires_revision(revision)
         self.assertFalse(self.conduit.is_review_accepted(revision))
         self.conduit.accept_revision_as_user(revision, alice)
+        self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
         self.conduit.set_requires_revision(revision)
+        self._invalidate_cache()
         self.assertFalse(self.conduit.is_review_accepted(revision))
         self.conduit.accept_revision_as_user(revision, alice)
 
         # check that the review is still accepted after an update
+        self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
         self.conduit.update_revision(revision, self.empty_diff, 'update')
+        self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
 
         self.conduit.abandon_revision(revision)
@@ -120,6 +132,7 @@ class Test(unittest.TestCase):
 
         # close revision
         self.conduit.accept_revision_as_user(revision, alice)
+        self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
         self.conduit.close_revision(revision)
         self.conduit.get_commit_message(revision)
@@ -128,6 +141,7 @@ class Test(unittest.TestCase):
         # self.conduit.commandeer_revision_as_user(revision, alice)
 
         # update closed revision
+        self._invalidate_cache()
         self.assertRaises(
             abdt_exception.AbdUserException,
             self.conduit.update_revision,

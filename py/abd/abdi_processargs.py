@@ -28,6 +28,7 @@ import signal
 import sys
 import traceback
 
+import phlcon_reviewstatecache
 import phlmail_sender
 import phlsys_conduit
 import phlsys_fs
@@ -331,12 +332,14 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits):
 
         conduit = conduit[0]
         arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')
-        conduits[key] = conduit
+        reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
+        reviewstate_cache.set_conduit(conduit)
+        arcyd_conduit = abdt_conduit.Conduit(conduit, reviewstate_cache)
+        conduits[key] = arcyd_conduit
     else:
-        conduit = conduits[key]
+        arcyd_conduit = conduits[key]
 
     out.display("process (" + args.repo_desc + "): ")
-    arcyd_conduit = abdt_conduit.Conduit(conduit)
 
     branch_url_callable = None
     if args.branch_url_format:

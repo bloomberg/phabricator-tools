@@ -17,6 +17,8 @@
 #    .start_sleep
 #    .update_sleep
 #    .finish_sleep
+#    .start_cache_refresh
+#    .finish_cache_refresh
 #    .start_repo
 #    .tag_timer_context
 #    .tag_timer_decorate_object_methods
@@ -36,6 +38,7 @@
 #   ARCYD_STATUS_STARTING
 #   ARCYD_STATUS_UPDATING
 #   ARCYD_STATUS_SLEEPING
+#   ARCYD_STATUS_REFRESHING_CACHE
 #   ARCYD_STATUS_STOPPED
 #   ARCYD_STATUS_IDLE
 #   ARCYD_LIST_STATUS
@@ -83,12 +86,14 @@ ARCYD_LIST_ATTRIB = [
 ARCYD_STATUS_STARTING = 'starting'
 ARCYD_STATUS_UPDATING = 'updating'
 ARCYD_STATUS_SLEEPING = 'sleeping'
+ARCYD_STATUS_REFRESHING_CACHE = 'refreshing-cache'
 ARCYD_STATUS_STOPPED = 'stopped'
 ARCYD_STATUS_IDLE = 'idle'
 
 ARCYD_LIST_STATUS = [
     ARCYD_STATUS_UPDATING,
     ARCYD_STATUS_SLEEPING,
+    ARCYD_STATUS_REFRESHING_CACHE,
     ARCYD_STATUS_STARTING,
     ARCYD_STATUS_STOPPED,
     ARCYD_STATUS_IDLE,
@@ -247,6 +252,12 @@ class ArcydReporter(object):
     def finish_sleep(self):
         self._write_status(ARCYD_STATUS_IDLE)
         self._cycle_timer.start_cycle()
+
+    def start_cache_refresh(self):
+        self._write_status(ARCYD_STATUS_REFRESHING_CACHE)
+
+    def finish_cache_refresh(self):
+        self._write_status(ARCYD_STATUS_IDLE)
 
     def start_repo(self, name, human_name):
         self._repo = {

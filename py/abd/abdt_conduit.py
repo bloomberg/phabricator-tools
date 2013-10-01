@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   Conduit
+#    .refresh_cache_on_cycle
 #    .create_comment
 #    .create_empty_revision_as_user
 #    .get_commit_message
@@ -36,7 +37,7 @@ import abdt_exception
 # TODO: re-order methods as (accessor, mutator)
 class Conduit(object):
 
-    def __init__(self, conduit):
+    def __init__(self, conduit, reviewstate_cache):
         """Initialise a new Conduit.
 
         :conduit: a phlsys_conduit to delegate to
@@ -45,6 +46,19 @@ class Conduit(object):
         """
         super(Conduit, self).__init__()
         self._conduit = conduit
+        self._reviewstate_cache = reviewstate_cache
+
+    def refresh_cache_on_cycle(self):
+        """Refresh the stored state of revisions and users.
+
+        Note that this should be called once per 'cycle' of git
+        repositories to avoid degredation of performance.  This is
+        necessary because revisions that were not accessed since the
+        last refresh are evicted and will not benefit from the batching
+        of revision queries.
+
+        """
+        self._reviewstate_cache.refresh_active_reviews()
 
     def create_comment(self, revision, message, silent=False):
         """Make a comment on the specified 'revision'.
@@ -134,8 +148,7 @@ class Conduit(object):
         :returns: True if accepted
 
         """
-        status = phlcon_differential.get_revision_status(
-            self._conduit, revisionid)
+        status = self._reviewstate_cache.get_status(revisionid)
         return int(status) == phlcon_differential.ReviewStates.accepted
 
     def update_revision(self, revisionid, raw_diff, message):
@@ -149,8 +162,7 @@ class Conduit(object):
         """
         # do some sanity checks before committing to the expensive operation
         # of storing a diff in Differential
-        status = phlcon_differential.get_revision_status(
-            self._conduit, revisionid)
+        status = self._reviewstate_cache.get_status(revisionid)
         if status == phlcon_differential.ReviewStates.closed:
             raise abdt_exception.AbdUserException(
                 "can't update a closed revision")
