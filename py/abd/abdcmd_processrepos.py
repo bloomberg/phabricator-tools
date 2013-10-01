@@ -194,10 +194,16 @@ def _process(args, reporter):
     # TODO: test write access to repos here
 
     operations = []
+    conduits = {}
     for repo, repo_args in repos:
 
         process_func = functools.partial(
-            abdi_processargs.run_once, repo, repo_args, out, reporter)
+            abdi_processargs.run_once,
+            repo,
+            repo_args,
+            out,
+            reporter,
+            conduits)
 
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,

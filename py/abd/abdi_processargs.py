@@ -249,7 +249,7 @@ def get_retry_delays():
     return retry_delays
 
 
-def run_once(repo, args, out, arcyd_reporter):
+def run_once(repo, args, out, arcyd_reporter, conduits):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
@@ -262,10 +262,10 @@ def run_once(repo, args, out, arcyd_reporter):
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
-            _run_once(args, out, reporter, arcyd_reporter)
+            _run_once(args, out, reporter, arcyd_reporter, conduits)
 
 
-def _run_once(args, out, reporter, arcyd_reporter):
+def _run_once(args, out, reporter, arcyd_reporter, conduits):
 
     sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
@@ -308,30 +308,32 @@ def _run_once(args, out, reporter, arcyd_reporter):
                 delays,
                 onException=on_tryloop_exception)
 
-    # XXX: until conduit refreshes the connection, we'll suffer from
-    #      timeouts; reduce the probability of this by using a new
-    #      conduit each time.
+    key = (
+        args.instance_uri, args.arcyd_user, args.arcyd_cert, args.https_proxy)
+    if key not in conduits:
+        # create an array so that the 'connect' closure binds to the 'conduit'
+        # variable as we'd expect, otherwise it'll just modify a local variable
+        # and this 'conduit' will remain 'None'
+        # XXX: we can do better in python 3.x (nonlocal?)
+        conduit = [None]
 
-    # create an array so that the 'connect' closure binds to the 'conduit'
-    # variable as we'd expect, otherwise it'll just modify a local variable
-    # and this 'conduit' will remain 'None'
-    # XXX: we can do better in python 3.x (nonlocal?)
-    conduit = [None]
+        def connect():
+            # nonlocal conduit # XXX: we'll rebind in python 3.x, instead
+            conduit[0] = phlsys_conduit.Conduit(
+                args.instance_uri,
+                args.arcyd_user,
+                args.arcyd_cert,
+                https_proxy=args.https_proxy)
 
-    def connect():
-        # nonlocal conduit # XXX: we'll rebind in python 3.x, instead of array
-        conduit[0] = phlsys_conduit.Conduit(
-            args.instance_uri,
-            args.arcyd_user,
-            args.arcyd_cert,
-            https_proxy=args.https_proxy)
+        with arcyd_reporter.tag_timer_context('conduit connect'):
+            phlsys_tryloop.try_loop_delay(
+                connect, delays, onException=on_tryloop_exception)
 
-    with arcyd_reporter.tag_timer_context('conduit connect'):
-        phlsys_tryloop.try_loop_delay(
-            connect, delays, onException=on_tryloop_exception)
-
-    conduit = conduit[0]
-    arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')
+        conduit = conduit[0]
+        arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')
+        conduits[key] = conduit
+    else:
+        conduit = conduits[key]
 
     out.display("process (" + args.repo_desc + "): ")
     arcyd_conduit = abdt_conduit.Conduit(conduit)
