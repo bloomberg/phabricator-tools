@@ -126,6 +126,20 @@ def setup_repo_arg_parser(parser):
         help="path to the repository on disk")
 
     parser.add_argument(
+        '--repo-snoop-url',
+        metavar="URL",
+        type=str,
+        help="URL to use to snoop the latest contents of the repository, this "
+             "is used by Arcyd to more efficiently determine if it needs to "
+             "fetch the repository or not.  The efficiency comes from "
+             "re-using connections to the same host when querying.  The "
+             "contents returned by the URL are expected to change every time "
+             "the git repository changes, a good example of a URL to supply "
+             "is to the 'info/refs' address if you're serving up the repo "
+             "over http or https.  "
+             "e.g. 'http://server.test/git/myrepo/info/refs'.")
+
+    parser.add_argument(
         '--https-proxy',
         metavar="PROXY",
         type=str,
@@ -250,7 +264,7 @@ def get_retry_delays():
     return retry_delays
 
 
-def run_once(repo, args, out, arcyd_reporter, conduits):
+def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
@@ -263,10 +277,11 @@ def run_once(repo, args, out, arcyd_reporter, conduits):
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
-            _run_once(args, out, reporter, arcyd_reporter, conduits)
+            _run_once(
+                args, out, reporter, arcyd_reporter, conduits, url_watcher)
 
 
-def _run_once(args, out, reporter, arcyd_reporter, conduits):
+def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
     sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
@@ -280,6 +295,41 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits):
     pluginManager = phlsys_pluginmanager.PluginManager(
         args.plugins, args.trusted_plugins)
 
+    # prepare delays in the event of trouble when fetching or connecting
+    # TODO: perhaps this policy should be decided higher-up
+    arcyd_conduit = _fetch_and_connect(
+        url_watcher, reporter, conduits, args, out, arcyd_reporter)
+
+    out.display("process (" + args.repo_desc + "): ")
+
+    branch_url_callable = None
+    if args.branch_url_format:
+        def make_branch_url(branch_name):
+            return args.branch_url_format.format(branch=branch_name)
+        branch_url_callable = make_branch_url
+
+    sys_clone = phlsys_git.GitClone(args.repo_path)
+    arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
+    arcyd_clone = abdt_git.Clone(
+        sys_clone, "origin", args.repo_desc, branch_url_callable)
+    branches = arcyd_clone.get_managed_branches()
+
+    try:
+        abdi_processrepo.process_branches(
+            branches,
+            arcyd_conduit,
+            mailer,
+            pluginManager,
+            reporter)
+    except Exception:
+        reporter.on_traceback(traceback.format_exc())
+        raise
+
+    reporter.on_completed()
+
+
+def _fetch_and_connect(
+        url_watcher, reporter, conduits, args, out, arcyd_reporter):
     # prepare delays in the event of trouble when fetching or connecting
     # TODO: perhaps this policy should be decided higher-up
     delays = [
@@ -301,13 +351,16 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits):
         phlsys_subprocess.run_commands("git remote prune origin")
         phlsys_subprocess.run_commands("git fetch")
 
-    with phlsys_fs.chdir_context(args.repo_path):
-        out.display("fetch (" + args.repo_desc + "): ")
-        with arcyd_reporter.tag_timer_context('git fetch'):
-            phlsys_tryloop.try_loop_delay(
-                prune_and_fetch,
-                delays,
-                onException=on_tryloop_exception)
+    # fetch only if we need to
+    snoop_url = args.repo_snoop_url
+    if not snoop_url or url_watcher.has_url_recently_changed(snoop_url):
+        with phlsys_fs.chdir_context(args.repo_path):
+            out.display("fetch (" + args.repo_desc + "): ")
+            with arcyd_reporter.tag_timer_context('git fetch'):
+                phlsys_tryloop.try_loop_delay(
+                    prune_and_fetch,
+                    delays,
+                    onException=on_tryloop_exception)
 
     key = (
         args.instance_uri, args.arcyd_user, args.arcyd_cert, args.https_proxy)
@@ -339,32 +392,7 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits):
     else:
         arcyd_conduit = conduits[key]
 
-    out.display("process (" + args.repo_desc + "): ")
-
-    branch_url_callable = None
-    if args.branch_url_format:
-        def make_branch_url(branch_name):
-            return args.branch_url_format.format(branch=branch_name)
-        branch_url_callable = make_branch_url
-
-    sys_clone = phlsys_git.GitClone(args.repo_path)
-    arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
-    arcyd_clone = abdt_git.Clone(
-        sys_clone, "origin", args.repo_desc, branch_url_callable)
-    branches = arcyd_clone.get_managed_branches()
-
-    try:
-        abdi_processrepo.process_branches(
-            branches,
-            arcyd_conduit,
-            mailer,
-            pluginManager,
-            reporter)
-    except Exception:
-        reporter.on_traceback(traceback.format_exc())
-        raise
-
-    reporter.on_completed()
+    return arcyd_conduit
 
 
 #------------------------------------------------------------------------------

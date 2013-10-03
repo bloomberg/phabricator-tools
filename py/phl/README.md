@@ -81,6 +81,10 @@ Emit enhanced traceback strings with local variables.
 Decorators for tracing out the execution of functions and methods.
 * `phlsys_tryloop.py` -
 Conveniently retry exception-prone operations.
+* `phlurl_request.py` -
+Utilities for making requests with URLs.
+* `phlurl_watcher.py` -
+Watch URLs for recent changes, batch updates and re-use connections.
 
 -----
 *please note: this file is generated, edits will be lost*

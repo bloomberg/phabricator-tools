@@ -37,6 +37,7 @@ import time
 import phlsys_scheduleunreliables
 import phlsys_statusline
 import phlsys_tryloop
+import phlurl_watcher
 
 import abdi_processargs
 import abdt_arcydreporter
@@ -112,9 +113,10 @@ class DelayedRetrySleepOperation(object):
 
 class RefreshCachesOperation(object):
 
-    def __init__(self, conduits, reporter):
+    def __init__(self, conduits, url_watcher, reporter):
         super(RefreshCachesOperation, self).__init__()
         self._conduits = conduits
+        self._url_watcher = url_watcher
         self._reporter = reporter
 
     def do(self):
@@ -155,10 +157,17 @@ class RefreshCachesOperation(object):
             self._reporter.on_tryloop_exception(e, delay)
             logging.error(str(e) + "\nwill wait " + str(delay))
 
-        for key in self._conduits:
-            conduit = self._conduits[key]
+        with self._reporter.tag_timer_context('refresh conduit cache'):
+            for key in self._conduits:
+                conduit = self._conduits[key]
+                phlsys_tryloop.try_loop_delay(
+                    conduit.refresh_cache_on_cycle,
+                    delays,
+                    onException=on_tryloop_exception)
+
+        with self._reporter.tag_timer_context('refresh git watcher'):
             phlsys_tryloop.try_loop_delay(
-                conduit.refresh_cache_on_cycle,
+                self._url_watcher.refresh,
                 delays,
                 onException=on_tryloop_exception)
 
@@ -257,6 +266,7 @@ def _process(args, reporter):
 
     operations = []
     conduits = {}
+    url_watcher = phlurl_watcher.Watcher()
     for repo, repo_args in repos:
 
         process_func = functools.partial(
@@ -265,7 +275,8 @@ def _process(args, reporter):
             repo_args,
             out,
             reporter,
-            conduits)
+            conduits,
+            url_watcher)
 
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,
@@ -290,7 +301,7 @@ def _process(args, reporter):
 
     operations.append(
         RefreshCachesOperation(
-            conduits, reporter))
+            conduits, url_watcher, reporter))
 
     if args.no_loop:
         def process_once():

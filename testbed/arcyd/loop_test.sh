@@ -64,6 +64,8 @@ echo --review-url-format >> repo_arcyd.cfg
 echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
 echo --branch-url-format >> repo_arcyd.cfg
 echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
+echo --repo-snoop-url >> repo_arcyd.cfg
+echo 'http://localhost:8000/info/refs' >> repo_arcyd.cfg
 
 touch instance_local.cfg
 echo --instance-uri >> instance_local.cfg
@@ -86,6 +88,13 @@ echo admin@server.example >> email_admin.cfg
 
 echo 'press enter to stop.'
 
+# run an http server for Git in the background, for snooping
+cd origin
+    mv hooks/post-update.sample hooks/post-update
+    python -m SimpleHTTPServer 8000 &
+    webserver_pid=$!
+cd -
+
 # run arcyd in the background
 ${arcyd} \
     process-repos \
@@ -97,17 +106,26 @@ ${arcyd} \
     --kill-file killfile \
     --sleep-secs 1 \
 &
+arcyd_pid=$!
 
 # run poke_loop.sh in the background
 cd dev
     ${pokeloop} > /dev/null &
+    pokeloop_pid=$!
 cd -
 
 function cleanup() {
+
+    set +e
+
     # kill arycd and poke_loop
     touch killfile
     touch dev/__kill_poke__
-    wait
+    wait $arcyd_pid
+    wait $pokeloop_pid
+
+    echo $webserver_pid
+    kill $webserver_pid
 
     # display the sent mails
     pwd
@@ -116,6 +134,8 @@ function cleanup() {
     # clean up
     cd ${olddir}
     rm -rf ${tempdir}
+
+    echo finished.
 }
 
 trap cleanup EXIT
