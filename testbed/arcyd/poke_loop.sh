@@ -9,13 +9,13 @@ basedir=$(dirname "$0")  # directory the script lives in
 arcyon="${basedir}/../../bin/arcyon"
 
 phaburi="http://127.0.0.1"
-arcyduser='phab'
-arcydcert=xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrv\
-afgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w\
-6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk\
-3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
+aliceuser='alice'
+alicecert=35yxukrjcltwgzfmgsnj2klc2jbrnzehqz3c36ijxnicwysv3xenxymwz532pyhimpxh\
+7jryynh32su2ajxahd3gp7qshyik2qwf6ntuim2acxvjnko6p2q4mhacpvugqou2wpmyqwj4hkchgc\
+5vh33lur723r4dexy5b3aj35v4v6ffork727ww5qk5yhhcmolbcqg3rxl6qpf53spn4aopneg\
+gtb675hmpx3xya3et7jrowzlkl3yw3sktvdu
 
-arcyoncreds="--uri ${phaburi} --user ${arcyduser} --cert ${arcydcert}"
+arcyoncreds="--uri ${phaburi} --user ${aliceuser} --cert ${alicecert}"
 
 function poke() {
     feature=$(tr -dc "[:alpha:]" < /dev/urandom | head -c 8)
@@ -31,7 +31,7 @@ function poke() {
     # find and accept most recent reviewable revision, if any
     revisionid=$(${arcyon} query --max-results 1 --statuses 'Needs Review' --format-type ids ${arcyoncreds})
     if [ -n "$revisionid" ]; then
-        ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+        ${arcyon} comment ${revisionid} --action accept ${arcyoncreds}
     fi
 }
 
