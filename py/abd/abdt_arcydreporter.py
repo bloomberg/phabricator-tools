@@ -16,6 +16,7 @@
 #   ArcydReporter
 #    .start_sleep
 #    .update_sleep
+#    .on_tryloop_exception
 #    .finish_sleep
 #    .start_cache_refresh
 #    .finish_cache_refresh
@@ -248,6 +249,9 @@ class ArcydReporter(object):
     def update_sleep(self, duration):
         _ = duration  # NOQA
         self._write_status(ARCYD_STATUS_SLEEPING)
+
+    def on_tryloop_exception(self, e, delay):
+        pass  # TBD
 
     def finish_sleep(self):
         self._write_status(ARCYD_STATUS_IDLE)
