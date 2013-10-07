@@ -71,7 +71,6 @@ def _render_branch_report(formatter, branch_report):
         else:
             divclass = 'redcard'
 
-        formatter.section_break()
         with formatter.singletag_context('div', class_=divclass):
             formatter.heading(name)
             if branch_url:

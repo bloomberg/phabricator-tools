@@ -61,6 +61,8 @@ a:hover {
 .greencard {
     background-color: #5C5;
     padding: 6px;
+    float: left;
+    margin: 5px;
     border-radius: 6px 6px 6px 6px;
     box-shadow: 0px 0px 30px #111;
 }
@@ -68,6 +70,8 @@ a:hover {
 .redcard {
     background-color: #E55;
     padding: 6px;
+    float: left;
+    margin: 5px;
     border-radius: 6px 6px 6px 6px;
     box-shadow: 0px 0px 30px #111;
 }
