@@ -21,9 +21,9 @@ import hashlib
 import phlurl_request
 
 
-_HashValueHasChanged = collections.namedtuple(
+_HashHexdigestHasChanged = collections.namedtuple(
     'phlurl_watcher__HashValueHasChanged',
-    ['hash_value', 'has_changed'])
+    ['hash_hexdigest', 'has_changed'])
 
 
 class Watcher(object):
@@ -36,11 +36,13 @@ class Watcher(object):
         if url in self._results:
             old_result = self._results[url].has_changed
             if old_result:
-                hash_value = self._results[url].hash_value
-                self._results[url] = _HashValueHasChanged(hash_value, False)
+                hash_hexdigest = self._results[url].hash_hexdigest
+                self._results[url] = _HashHexdigestHasChanged(
+                    hash_hexdigest, False)
             return old_result
         content = phlurl_request.get(url)
-        self._results[url] = _HashValueHasChanged(hashlib.sha1(content), False)
+        self._results[url] = _HashHexdigestHasChanged(
+            hashlib.sha1(content).hexdigest(), False)
         return True
 
     def refresh(self):
@@ -49,10 +51,20 @@ class Watcher(object):
         url_contents = phlurl_request.get_many(self._results.keys())
         for url, contents in url_contents.iteritems():
             old_result = self._results[url]
-            new_hash = hashlib.sha1(contents)
-            old_hash = old_result.hash_value
+
+            # Note that hash objects can't be compared directly so we much
+            # first convert them to a representation that can be compared, in
+            # this case we've chosen the hexdigest.
+            #
+            # Note that if you do try to compare hash objects then it seems to
+            # do the 'is' comparison rather than 'is equal to'
+            #
+            new_hash = hashlib.sha1(contents).hexdigest()
+            old_hash = old_result.hash_hexdigest
             has_changed = old_result.has_changed or (new_hash != old_hash)
-            self._results[url] = _HashValueHasChanged(new_hash, has_changed)
+
+            self._results[url] = _HashHexdigestHasChanged(
+                new_hash, has_changed)
 
 
 #------------------------------------------------------------------------------
