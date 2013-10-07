@@ -9,6 +9,7 @@ trap "echo FAILED!; exit 1" EXIT
 # cd to the dir of this script, so paths are relative
 cd "$(dirname "$0")"
 
+pokeloop="$(pwd)/poke_loop.sh"
 arcyd="$(pwd)/../../proto/arcyd"
 arcyon="$(pwd)/../../bin/arcyon"
 
@@ -31,6 +32,7 @@ touch savemail.txt
 mkdir origin
 cd origin
 git init --bare
+mv hooks/post-update.sample hooks/post-update
 cd ..
 
 git clone origin dev
@@ -63,6 +65,8 @@ echo --review-url-format >> repo_arcyd.cfg
 echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
 echo --branch-url-format >> repo_arcyd.cfg
 echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
+echo --repo-snoop-url >> repo_arcyd.cfg
+echo 'http://localhost:8000/info/refs' >> repo_arcyd.cfg
 
 touch instance_local.cfg
 echo --instance-uri >> instance_local.cfg
@@ -83,6 +87,14 @@ touch email_arcyd.cfg
 echo --admin-email >> email_admin.cfg
 echo admin@server.example >> email_admin.cfg
 
+echo 'press enter to stop.'
+
+# run an http server for Git in the background, for snooping
+cd origin
+    python -m SimpleHTTPServer 8000 < /dev/null > /dev/null 2>&1 &
+    webserver_pid=$!
+cd -
+
 # run arcyd in the background
 ${arcyd} \
     process-repos \
@@ -92,23 +104,36 @@ ${arcyd} \
     --repo-configs @repo_arcyd.cfg \
     --status-path arcyd_status.json \
     --kill-file killfile \
-    --sleep-secs 0 > stdout \
+    --sleep-secs 1 \
+    < /dev/null > /dev/null \
 &
+arcyd_pid=$!
 
+function cleanup() {
+
+    set +e
+
+    # kill arycd
+    touch killfile
+    wait $arcyd_pid
+
+    echo $webserver_pid
+    kill $webserver_pid
+
+    # display the sent mails
+    pwd
+    cat savemail.txt
+
+    # clean up
+    cd ${olddir}
+    rm -rf ${tempdir}
+
+    echo finished.
+}
+
+trap cleanup EXIT
 cd dev
-/usr/bin/env bash
+    /usr/bin/env bash
 cd -
-
-# kill arycd
-touch killfile
-wait
-
-# display the sent mails
-pwd
-cat savemail.txt
-
-# clean up
-cd ${olddir}
-rm -rf ${tempdir}
-
 trap - EXIT
+cleanup
