@@ -28,6 +28,7 @@ $arcyd process-repos -h
 $arcyd arcyd-status-html -h
 $arcyd repo-status-html -h
 $arcyd dev-status-html -h
+$arcyd instaweb -h
 
 function setup_repos() {
     mkdir origin

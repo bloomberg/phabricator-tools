@@ -108,6 +108,15 @@ ${arcyd} \
 &
 arcyd_pid=$!
 
+# run arcyd instaweb in the background
+${arcyd} \
+    instaweb \
+    --report-file arcyd_status.json \
+    --repo-file-dir touches \
+    --port 8001 \
+&
+instaweb_pid=$!
+
 # run poke_loop.sh in the background
 cd dev
     ${pokeloop} > /dev/null &
@@ -117,6 +126,10 @@ cd -
 function cleanup() {
 
     set +e
+
+    echo $instaweb_pid
+    kill $instaweb_pid
+    wait $instaweb_pid
 
     # kill arycd and poke_loop
     touch killfile

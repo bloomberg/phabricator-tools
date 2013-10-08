@@ -105,6 +105,15 @@ cd origin
     webserver_pid=$!
 cd -
 
+# run arcyd instaweb in the background
+${arcyd} \
+    instaweb \
+    --report-file arcyd_status.json \
+    --repo-file-dir touches \
+    --port 8001 \
+&
+instaweb_pid=$!
+
 # run arcyd in the background
 ${arcyd} \
     process-repos \
@@ -123,12 +132,17 @@ function cleanup() {
 
     set +e
 
+    echo $instaweb_pid
+    kill $instaweb_pid
+    wait $instaweb_pid
+
     # kill arycd
     touch killfile
     wait $arcyd_pid
 
     echo $webserver_pid
     kill $webserver_pid
+    wait $webserver_pid
 
     # display the sent mails
     pwd

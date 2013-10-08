@@ -5,6 +5,8 @@ Arcyd - daemon to watch git repos, create and land reviews automatically.
 Render arcyd status file as meaningful html to present to users.
 * `abdcmd_devstatushtml.py` -
 Help develop status pages by providing simulating various statuses.
+* `abdcmd_instaweb.py` -
+Start a local webserver to report the status of an arcyd instance.
 * `abdcmd_processrepos.py` -
 Command to process multiple repos.
 * `abdcmd_repostatushtml.py` -
