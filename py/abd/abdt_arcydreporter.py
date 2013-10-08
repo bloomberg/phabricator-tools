@@ -21,6 +21,7 @@
 #    .start_repo
 #    .tag_timer_context
 #    .tag_timer_decorate_object_methods
+#    .tag_timer_decorate_object_methods_individually
 #    .fail_repo
 #    .finish_repo
 #    .close
@@ -298,6 +299,14 @@ class ArcydReporter(object):
             if inspect.isfunction(attribute):
                 new_method = types.MethodType(
                     self._tag_timer_decorate(tag, attribute), object_)
+                object_.__dict__[name] = new_method
+
+    def tag_timer_decorate_object_methods_individually(self, object_, tag):
+        for name, attribute in object_.__class__.__dict__.iteritems():
+            if inspect.isfunction(attribute):
+                description = '.'.join([tag, name])
+                new_method = types.MethodType(
+                    self._tag_timer_decorate(description, attribute), object_)
                 object_.__dict__[name] = new_method
 
     def fail_repo(self):

@@ -317,6 +317,9 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     arcyd_clone = abdt_git.Clone(
         sys_clone, "origin", args.repo_desc, branch_url_callable)
     branches = arcyd_clone.get_managed_branches()
+    for branch in branches:
+        arcyd_reporter.tag_timer_decorate_object_methods_individually(
+            branch, 'branch')
 
     try:
         abdi_processrepo.process_branches(
@@ -398,6 +401,8 @@ def _fetch_and_connect(
         reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
         reviewstate_cache.set_conduit(conduit)
         arcyd_conduit = abdt_conduit.Conduit(conduit, reviewstate_cache)
+        arcyd_reporter.tag_timer_decorate_object_methods_individually(
+            arcyd_conduit, 'conduit')
         conduits[key] = arcyd_conduit
     else:
         arcyd_conduit = conduits[key]
