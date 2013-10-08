@@ -8,6 +8,7 @@
 #   getFromfilePrefixChars
 #   setupParser
 #   process
+#   render_content
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -51,15 +52,20 @@ def _read_json_file(filename):
 
 
 def process(args):
+    print render_content(
+        args.repo_report_file, args.branches_report_file)
+
+
+def render_content(repo_report_file, branches_report_file):
     formatter = abdweb_htmlformatter.HtmlFormatter()
-    repo_report = _read_json_file(args.repo_report_file)
-    branch_report = _read_json_file(args.branches_report_file)
+    repo_report = _read_json_file(repo_report_file)
+    branch_report = _read_json_file(branches_report_file)
     abdweb_repocontent.render(formatter, repo_report, branch_report)
     content = formatter.get_content()
 
     formatter = abdweb_htmlformatter.HtmlFormatter()
     abdweb_page.render(formatter, content)
-    print formatter.get_content()
+    return formatter.get_content()
 
 
 #------------------------------------------------------------------------------

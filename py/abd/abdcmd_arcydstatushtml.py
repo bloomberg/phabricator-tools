@@ -8,6 +8,7 @@
 #   getFromfilePrefixChars
 #   setupParser
 #   process
+#   render_content
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -64,18 +65,25 @@ def _read_json_file(filename):
 
 
 def process(args):
+    content = render_content(
+        args.reset_file, args.pause_file, args.report_file, args.base_url)
+    print content
+
+
+def render_content(reset_file, pause_file, report_file, base_url):
+
     is_reset_scheduled = False
     is_pause_scheduled = False
-    if args.reset_file:
-        is_reset_scheduled = os.path.isfile(args.reset_file)
-    if args.pause_file:
-        is_pause_scheduled = os.path.isfile(args.pause_file)
+    if reset_file:
+        is_reset_scheduled = os.path.isfile(reset_file)
+    if pause_file:
+        is_pause_scheduled = os.path.isfile(pause_file)
 
     formatter = abdweb_htmlformatter.HtmlFormatter()
-    report = _read_json_file(args.report_file)
+    report = _read_json_file(report_file)
     abdweb_arcydcontent.render(
         formatter,
-        args.base_url,
+        base_url,
         report,
         is_reset_scheduled=is_reset_scheduled,
         is_pause_scheduled=is_pause_scheduled)
@@ -83,7 +91,7 @@ def process(args):
 
     formatter = abdweb_htmlformatter.HtmlFormatter()
     abdweb_page.render(formatter, content)
-    print formatter.get_content()
+    return formatter.get_content()
 
 
 #------------------------------------------------------------------------------
