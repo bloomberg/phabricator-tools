@@ -57,13 +57,13 @@ echo arcyd test >> repo_arcyd.cfg
 echo --repo-path >> repo_arcyd.cfg
 echo arcyd >> repo_arcyd.cfg
 echo --try-touch-path >> repo_arcyd.cfg
-echo touches/repo_origin.try >> repo_arcyd.cfg
+echo touches/repo_arcyd.cfg.try >> repo_arcyd.cfg
 echo --ok-touch-path >> repo_arcyd.cfg
-echo touches/repo_origin.ok >> repo_arcyd.cfg
+echo touches/repo_arcyd.cfg.ok >> repo_arcyd.cfg
 echo --review-url-format >> repo_arcyd.cfg
-echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
-echo --branch-url-format >> repo_arcyd.cfg
-echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
+echo 'http://127.0.0.1/D{review}' >> repo_arcyd.cfg
+# echo --branch-url-format >> repo_arcyd.cfg
+# echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
 echo --repo-snoop-url >> repo_arcyd.cfg
 echo 'http://localhost:8000/info/refs' >> repo_arcyd.cfg
 
