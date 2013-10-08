@@ -39,8 +39,18 @@ git clone origin dev
 cd dev
 git config user.name 'Bob User'
 git config user.email 'bob@server.test'
-touch README
-git add README
+
+echo 'feature=$(tr -dc "[:alpha:]" < /dev/urandom | head -c 8)' >> poke.sh
+echo 'branch="arcyd-review/${feature}/master"' >> poke.sh
+echo 'echo poke feature ${feature}' >> poke.sh
+echo 'git checkout -b ${branch} origin/master' >> poke.sh
+echo 'touch ${feature}' >> poke.sh
+echo 'git add .' >> poke.sh
+echo 'git commit -am "poked feature ${feature}"' >> poke.sh
+echo 'git push -u origin ${branch}' >> poke.sh
+
+chmod +x poke.sh
+git add .
 git commit -m 'intial commit'
 git push origin master
 cd ..
