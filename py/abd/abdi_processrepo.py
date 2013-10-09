@@ -194,8 +194,8 @@ def try_create_review(
             print "failed to create failed review:"
             print e
             branch.mark_bad_pre_review()
+            reporter.no_users_on_branch(e.emails)
             if mail_on_fail:
-                reporter.no_users_on_branch(e.emails)
                 mailer.noUsersOnBranch(
                     e.review_branch_name, e.base_name, e.emails)
 
