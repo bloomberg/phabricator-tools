@@ -243,6 +243,19 @@ class RepoReporter(object):
         by visiting a link like this (substitute your own base url)
         https://my.phabricator.domain/settings/panel/email/
 
+        Quick fix steps from your working copy, on the review branch:
+
+        first, fix your email address:
+        $ git config --global user.email 'EMAIL ADDRESS KNOWN TO PHABRICATOR'
+
+        then either create an empty commit with the now correct email address:
+        $ git commit --allow-empty --no-edit -m 'empty commit with real author'
+        $ git push
+
+        or, amend the last commit with correct email address:
+        $ git commit --amend --reset-author
+        $ git push --force
+
         """.format(emails=emails).strip() + '\n\n'
 
     def finish_branch(self, status, review_id):
