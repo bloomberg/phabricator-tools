@@ -211,6 +211,7 @@ class RepoReporter(object):
         self._update_write_repo_status(
             REPO_STATUS_FAILED,
             traceback)
+        self._arcyd_reporter.fail_repo()
 
     def on_completed(self):
         self._is_updating = False
