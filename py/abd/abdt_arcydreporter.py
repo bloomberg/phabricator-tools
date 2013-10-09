@@ -298,6 +298,12 @@ class ArcydReporter(object):
         self._write_status(ARCYD_STATUS_UPDATING)
 
     def finish_repo(self):
+        if self._repo is None:
+            # if we fail_repo then we'll finish_repo after so allow
+            # finishing when there's no current repo
+            # (we still want to set the repo to None in fail_repo or we'll
+            #  accidentally set it to OK in this function)
+            return
         self._repo[REPO_ATTRIB_STATUS] = REPO_STATUS_OK
         self._repos[self._repo[REPO_ATTRIB_NAME]] = self._repo
         self._repo = None
