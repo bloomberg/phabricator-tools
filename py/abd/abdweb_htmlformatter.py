@@ -23,6 +23,7 @@
 
 from __future__ import absolute_import
 
+import cgi
 import contextlib
 
 
@@ -47,7 +48,7 @@ class HtmlFormatter(object):
 
     def text(self, text):
         with self.tags_context('pre'):
-            self.raw(text)
+            self.raw(cgi.escape(text))
 
     def get_content(self):
         return self._string
