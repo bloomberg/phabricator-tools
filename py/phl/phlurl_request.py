@@ -25,6 +25,7 @@ from __future__ import absolute_import
 
 import collections
 import httplib
+import traceback
 import urlparse
 
 
@@ -122,6 +123,24 @@ def group_urls(url_list):
     return GroupUrlResult(http=http_requests, https=https_requests)
 
 
+def _request(connection, verb, path, url):
+    try:
+        connection.request(verb, path)
+        content = connection.getresponse().read()
+        return content
+    except Exception as e:
+        tb = traceback.format_exc()
+        message = """Was trying to {verb} the url {url}.
+
+This exception was triggered from this original exception:
+    {exception}
+
+Here is the original traceback:
+{traceback}
+        """.format(verb=verb, url=url, exception=repr(e), traceback=tb).strip()
+        raise Error(message)
+
+
 def get_many(url_list):
     """Return a dict of {url: content_str} from the supplied 'url_list'.
 
@@ -137,16 +156,12 @@ def get_many(url_list):
     for host_port, request_list in urls.http.iteritems():
         http = httplib.HTTPConnection(host_port[0], host_port[1])
         for path, url in request_list:
-            http.request('GET', path)
-            content = http.getresponse().read()
-            results[url] = content
+            results[url] = _request(http, 'GET', path, url)
 
     for host_port, request_list in urls.https.iteritems():
         https = httplib.HTTPSConnection(host_port[0], host_port[1])
         for path, url in request_list:
-            https.request('GET', path)
-            content = https.getresponse().read()
-            results[url] = content
+            results[url] = _request(https, 'GET', path, url)
 
     return results
 
