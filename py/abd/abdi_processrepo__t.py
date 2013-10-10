@@ -16,6 +16,7 @@ import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
 import abdt_reporeporter
+import abdt_shareddictoutput
 
 import abdi_processrepo
 
@@ -87,7 +88,7 @@ class Test(unittest.TestCase):
         self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
         self.arcyd_reporter_data = {}
         self.arcyd_reporter = abdt_arcydreporter.ArcydReporter(
-            abdt_arcydreporter.SharedDictOutput(self.arcyd_reporter_data))
+            abdt_shareddictoutput.ToDict(self.arcyd_reporter_data))
 
     def tearDown(self):
         pass
@@ -101,8 +102,8 @@ class Test(unittest.TestCase):
             'abdi_processrepo__t:Test repo',
             'http://my.phabricator/{review}',
             'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
-            abdt_reporeporter.SharedDictOutput(self.reporter_try),
-            abdt_reporeporter.SharedDictOutput(self.reporter_ok))
+            abdt_shareddictoutput.ToDict(self.reporter_try),
+            abdt_shareddictoutput.ToDict(self.reporter_ok))
 
         with contextlib.closing(self.reporter):
             abdi_processrepo.process_branches(

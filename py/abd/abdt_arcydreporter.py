@@ -5,10 +5,6 @@
 # abdt_arcydreporter
 #
 # Public Classes:
-#   SharedFileDictOutput
-#    .write
-#   SharedDictOutput
-#    .write
 #   Timer
 #    .start
 #    .stop
@@ -69,11 +65,9 @@ import contextlib
 import datetime
 import functools
 import inspect
-import json
 import traceback
 import types
 
-import phlsys_fs
 
 ARCYD_STATUS = 'status'
 ARCYD_STATUS_DESCRIPTION = 'status-description'
@@ -136,32 +130,6 @@ ARCYD_LIST_STATISTICS = [
     ARCYD_STAT_LAST_CYCLE_TIME,
     ARCYD_STAT_TAG_TIMES,
 ]
-
-
-class SharedFileDictOutput(object):
-
-    def __init__(self, filename):
-        super(SharedFileDictOutput, self).__init__()
-        self._filename = filename
-
-    def write(self, d):
-        assert isinstance(d, dict)
-        with phlsys_fs.write_file_lock_context(self._filename) as f:
-            f.write(json.dumps(d))
-
-
-class SharedDictOutput(object):
-
-    def __init__(self, shared_d):
-        super(SharedDictOutput, self).__init__()
-        self._shared_d = shared_d
-        assert isinstance(self._shared_d, dict)
-
-    def write(self, d):
-        assert isinstance(d, dict)
-        # copy contents to other dict
-        self._shared_d.clear()
-        self._shared_d.update(d)
 
 
 @contextlib.contextmanager

@@ -5,10 +5,6 @@
 # abdt_reporeporter
 #
 # Public Classes:
-#   SharedFileDictOutput
-#    .write
-#   SharedDictOutput
-#    .write
 #   RepoReporter
 #    .on_tryloop_exception
 #    .on_traceback
@@ -46,9 +42,6 @@
 
 from __future__ import absolute_import
 
-import json
-
-import phlsys_fs
 
 REPO_ATTRIB_NAME = 'name'
 REPO_ATTRIB_STATUS = 'status'
@@ -105,32 +98,6 @@ def _branch_status_to_string(status):
     elif status:
         return RESULT_BRANCH_STATUS_OK
     return RESULT_BRANCH_STATUS_BAD
-
-
-class SharedFileDictOutput(object):
-
-    def __init__(self, filename):
-        super(SharedFileDictOutput, self).__init__()
-        self._filename = filename
-
-    def write(self, d):
-        assert isinstance(d, dict)
-        with phlsys_fs.write_file_lock_context(self._filename) as f:
-            f.write(json.dumps(d))
-
-
-class SharedDictOutput(object):
-
-    def __init__(self, shared_d):
-        super(SharedDictOutput, self).__init__()
-        self._shared_d = shared_d
-        assert isinstance(self._shared_d, dict)
-
-    def write(self, d):
-        assert isinstance(d, dict)
-        # copy contents to other dict
-        self._shared_d.clear()
-        self._shared_d.update(d)
 
 
 def _exercise_branch_url_format_string(branch_format_string):

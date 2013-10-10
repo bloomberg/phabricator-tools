@@ -41,6 +41,7 @@ import phlurl_watcher
 
 import abdi_processargs
 import abdt_arcydreporter
+import abdt_shareddictoutput
 
 
 def getFromfilePrefixChars():
@@ -227,7 +228,7 @@ def process(args):
     on_exception = abdi_processargs.make_exception_message_handler(
         args, "arcyd stopped with exception", "")
 
-    reporter_data = abdt_arcydreporter.SharedFileDictOutput(args.status_path)
+    reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
     with contextlib.closing(
             abdt_arcydreporter.ArcydReporter(reporter_data)) as reporter:
 

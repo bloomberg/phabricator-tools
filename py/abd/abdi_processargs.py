@@ -43,6 +43,7 @@ import abdmail_mailer
 import abdt_conduit
 import abdt_git
 import abdt_reporeporter
+import abdt_shareddictoutput
 
 import abdi_processrepo
 
@@ -265,8 +266,8 @@ def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
         args.repo_desc,
         args.review_url_format,
         args.branch_url_format,
-        abdt_reporeporter.SharedFileDictOutput(args.try_touch_path),
-        abdt_reporeporter.SharedFileDictOutput(args.ok_touch_path))
+        abdt_shareddictoutput.ToFile(args.try_touch_path),
+        abdt_shareddictoutput.ToFile(args.ok_touch_path))
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):

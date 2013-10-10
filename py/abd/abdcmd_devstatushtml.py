@@ -19,6 +19,7 @@ import contextlib
 
 import abdt_arcydreporter
 import abdt_reporeporter
+import abdt_shareddictoutput
 import abdweb_arcydcontent
 import abdweb_htmlformatter
 import abdweb_page
@@ -81,7 +82,7 @@ def _exercise_reporeporter():
 
     report = {}
     arcyd_reporter = abdt_arcydreporter.ArcydReporter(
-        abdt_arcydreporter.SharedDictOutput(report))
+        abdt_shareddictoutput.ToDict(report))
 
     arcyd_reporter.start_repo('name', 'human-name')
 
@@ -93,8 +94,8 @@ def _exercise_reporeporter():
         "exception repo",
         'http://my.phabricator/{review}',
         'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
-        abdt_reporeporter.SharedDictOutput(repo_report),
-        abdt_reporeporter.SharedDictOutput(branch_report))
+        abdt_shareddictoutput.ToDict(repo_report),
+        abdt_shareddictoutput.ToDict(branch_report))
 
     with contextlib.closing(reporter):
         _write('updating')
@@ -113,8 +114,8 @@ def _exercise_reporeporter():
         "myrepo",
         'http://my.phabricator/{review}',
         'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
-        abdt_reporeporter.SharedDictOutput(repo_report),
-        abdt_reporeporter.SharedDictOutput(branch_report))
+        abdt_shareddictoutput.ToDict(repo_report),
+        abdt_shareddictoutput.ToDict(branch_report))
 
     with contextlib.closing(reporter):
         reporter.start_branch('mybranch')
@@ -150,7 +151,7 @@ def _exercise_arcydreporter():
     # simulate unhandled exception during processing repo
 
     reporter = abdt_arcydreporter.ArcydReporter(
-        abdt_arcydreporter.SharedDictOutput(report))
+        abdt_shareddictoutput.ToDict(report))
 
     with contextlib.closing(reporter):
         _write('arcyd_exception_start')

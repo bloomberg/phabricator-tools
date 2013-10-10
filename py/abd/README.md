@@ -47,6 +47,8 @@ Callables for re-integrating branches upstream.
 Naming conventions for abd.
 * `abdt_reporeporter.py` -
 Report the state of a repository.
+* `abdt_shareddictoutput.py` -
+Provide equivalent classes that write dictionaries to shared resources.
 * `abdt_workingbranch.py` -
 Git operations on working branches.
 * `abdweb_arcydcontent.py` -
