@@ -37,7 +37,6 @@ import phlsys_pluginmanager
 import phlsys_sendmail
 import phlsys_strtotime
 import phlsys_subprocess
-import phlsys_traceback
 import phlsys_tryloop
 
 import abdmail_mailer
@@ -239,12 +238,6 @@ def make_exception_message_handler(args, subject, body_prefix):
 
     def msg_exception(message):
         tb = traceback.format_exc()
-        _send_mail(
-            mailsender, emails, uname, subject, tb, body_prefix, message)
-
-        # now risk trying to make a more detailed exception mail
-        # (experimental, may fail)
-        tb = phlsys_traceback.format_exc()
         _send_mail(
             mailsender, emails, uname, subject, tb, body_prefix, message)
 
