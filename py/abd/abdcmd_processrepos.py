@@ -154,8 +154,9 @@ class RefreshCachesOperation(object):
         delays = itertools.chain(delays, forever)
 
         # log.error if we get an exception when fetching
-        def on_tryloop_exception(e, delay):
+        def on_tryloop_exception_phab(e, delay):
             self._reporter.on_tryloop_exception(e, delay)
+            self._reporter.log_system_exception('conduit-refresh', '', e)
             logging.error(str(e) + "\nwill wait " + str(delay))
 
         with self._reporter.tag_timer_context('refresh conduit cache'):
@@ -164,13 +165,19 @@ class RefreshCachesOperation(object):
                 phlsys_tryloop.try_loop_delay(
                     conduit.refresh_cache_on_cycle,
                     delays,
-                    onException=on_tryloop_exception)
+                    onException=on_tryloop_exception_phab)
+
+        # log.error if we get an exception when fetching
+        def on_tryloop_exception_git(e, delay):
+            self._reporter.on_tryloop_exception(e, delay)
+            self._reporter.log_system_exception('git-snoop', '', e)
+            logging.error(str(e) + "\nwill wait " + str(delay))
 
         with self._reporter.tag_timer_context('refresh git watcher'):
             phlsys_tryloop.try_loop_delay(
                 self._url_watcher.refresh,
                 delays,
-                onException=on_tryloop_exception)
+                onException=on_tryloop_exception_git)
 
         self._reporter.finish_cache_refresh()
         return True

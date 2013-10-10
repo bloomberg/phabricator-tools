@@ -174,6 +174,8 @@ def _exercise_arcydreporter():
         reporter.finish_repo()
         reporter.start_repo('repeatrepo-machine', 'repeatrepo')
         reporter.finish_repo()
+        reporter.log_system_error('error', 'description of error')
+        reporter.log_system_error('other-error', 'description of other error')
         reporter.start_repo('updating_repo-machine', 'updating_repo')
         _write('arcyd_many_repos')
         reporter.finish_repo()

@@ -9,6 +9,7 @@
 #   render_repo
 #   render_stats
 #   render_controls
+#   render_error_log
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -70,8 +71,14 @@ def render(
     formatter.horizontal_rule()
 
     repos = report[abdt_arcydreporter.ARCYD_REPOS]
-    for repo in repos:
-        render_repo(base_url, repo, formatter)
+    with formatter.singletag_context('div', class_='container'):
+        for repo in repos:
+            render_repo(base_url, repo, formatter)
+
+    log_system_error = report[abdt_arcydreporter.ARCYD_LOG_SYSTEM_ERROR]
+    if log_system_error:
+        formatter.horizontal_rule()
+        render_error_log('system errors', log_system_error, formatter)
 
 
 def render_repo(base_url, repo, formatter):
@@ -122,6 +129,18 @@ def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):
             with formatter.tags_context('td'):
                 formatter.action_button(
                     'unpause Arcyd', 'unpause', is_pause_scheduled)
+
+
+def render_error_log(name, item_list, formatter):
+    formatter.heading(name)
+    for item in item_list:
+        with formatter.singletag_context('div', class_='redcard'):
+            time = item[abdt_arcydreporter.ARCYD_LOGITEM_DATETIME]
+            identifier = item[abdt_arcydreporter.ARCYD_LOGITEM_IDENTIFIER]
+            detail = item[abdt_arcydreporter.ARCYD_LOGITEM_DETAIL]
+            formatter.heading(identifier)
+            formatter.text("{time} UTC".format(time=time))
+            formatter.text(detail)
 
 
 #------------------------------------------------------------------------------

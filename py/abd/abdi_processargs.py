@@ -336,9 +336,9 @@ def _fetch_and_connect(
         datetime.timedelta(seconds=1000),
     ]
 
-    # log.error if we get an exception when fetching
-    def on_tryloop_exception(e, delay):
+    def on_tryloop_exception_git(e, delay):
         reporter.on_tryloop_exception(e, delay)
+        arcyd_reporter.log_system_exception('fetch/prune', args.repo_desc, e)
         logging.error(str(e) + "\nwill wait " + str(delay))
 
     def prune_and_fetch():
@@ -354,7 +354,7 @@ def _fetch_and_connect(
                 phlsys_tryloop.try_loop_delay(
                     prune_and_fetch,
                     delays,
-                    onException=on_tryloop_exception)
+                    onException=on_tryloop_exception_git)
 
     key = (
         args.instance_uri, args.arcyd_user, args.arcyd_cert, args.https_proxy)
@@ -364,6 +364,12 @@ def _fetch_and_connect(
         # and this 'conduit' will remain 'None'
         # XXX: we can do better in python 3.x (nonlocal?)
         conduit = [None]
+
+        def on_tryloop_exception_conduit(e, delay):
+            reporter.on_tryloop_exception(e, delay)
+            arcyd_reporter.log_system_exception(
+                'conduit-connect', args.instance_uri, e)
+            logging.error(str(e) + "\nwill wait " + str(delay))
 
         def connect():
             # nonlocal conduit # XXX: we'll rebind in python 3.x, instead
@@ -375,7 +381,7 @@ def _fetch_and_connect(
 
         with arcyd_reporter.tag_timer_context('conduit connect'):
             phlsys_tryloop.try_loop_delay(
-                connect, delays, onException=on_tryloop_exception)
+                connect, delays, onException=on_tryloop_exception_conduit)
 
         conduit = conduit[0]
         arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')

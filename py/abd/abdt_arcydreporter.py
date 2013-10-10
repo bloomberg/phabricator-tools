@@ -13,6 +13,8 @@
 #    .start_sleep
 #    .update_sleep
 #    .on_tryloop_exception
+#    .log_system_error
+#    .log_system_exception
 #    .finish_sleep
 #    .start_cache_refresh
 #    .finish_cache_refresh
@@ -32,6 +34,7 @@
 #   ARCYD_CURRENT_REPO
 #   ARCYD_REPOS
 #   ARCYD_STATISTICS
+#   ARCYD_LOG_SYSTEM_ERROR
 #   ARCYD_LIST_ATTRIB
 #   ARCYD_STATUS_STARTING
 #   ARCYD_STATUS_UPDATING
@@ -53,6 +56,9 @@
 #   ARCYD_STAT_LAST_CYCLE_TIME
 #   ARCYD_STAT_TAG_TIMES
 #   ARCYD_LIST_STATISTICS
+#   ARCYD_LOGITEM_DATETIME
+#   ARCYD_LOGITEM_IDENTIFIER
+#   ARCYD_LOGITEM_DETAIL
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -74,6 +80,9 @@ ARCYD_STATUS_DESCRIPTION = 'status-description'
 ARCYD_CURRENT_REPO = 'current-repo'
 ARCYD_REPOS = 'repos'
 ARCYD_STATISTICS = 'statistics'
+ARCYD_LOG_SYSTEM_ERROR = 'log-system-error'
+# ARCYD_LOG_USER_ERROR = 'log-user-error'
+# ARCYD_LOG_USER_ACTION = 'log-user-action'
 
 ARCYD_LIST_ATTRIB = [
     ARCYD_CURRENT_REPO,
@@ -81,6 +90,7 @@ ARCYD_LIST_ATTRIB = [
     ARCYD_STATUS_DESCRIPTION,
     ARCYD_REPOS,
     ARCYD_STATISTICS,
+    ARCYD_LOG_SYSTEM_ERROR,
 ]
 
 ARCYD_STATUS_STARTING = 'starting'
@@ -130,6 +140,10 @@ ARCYD_LIST_STATISTICS = [
     ARCYD_STAT_LAST_CYCLE_TIME,
     ARCYD_STAT_TAG_TIMES,
 ]
+
+ARCYD_LOGITEM_DATETIME = 'logitem-datetime'
+ARCYD_LOGITEM_IDENTIFIER = 'logitem-identifier'
+ARCYD_LOGITEM_DETAIL = 'logitem-detail'
 
 
 @contextlib.contextmanager
@@ -213,6 +227,7 @@ class ArcydReporter(object):
 
         self._cycle_timer = _CycleTimer()
         self._tag_times = collections.defaultdict(float)
+        self._log_system_error = list()
 
         self._write_status(ARCYD_STATUS_STARTING)
 
@@ -229,7 +244,23 @@ class ArcydReporter(object):
         tb = traceback.format_exc()
         self._write_status(
             ARCYD_STATUS_TRYLOOP_EXCEPTION,
-            str(e) + "\nwill retry in " + str(delay) + '\n\n' + tb)
+            "will retry in " + str(delay) + '\n' + str(e) + '\n\n' + tb)
+
+    def _add_log_item(self, log, identifier, detail):
+        now = str(datetime.datetime.utcnow())
+        d = {
+            ARCYD_LOGITEM_DATETIME: now,
+            ARCYD_LOGITEM_IDENTIFIER: identifier,
+            ARCYD_LOGITEM_DETAIL: detail,
+        }
+        log.append(d)
+
+    def log_system_error(self, identifier, detail):
+        self._add_log_item(self._log_system_error, identifier, detail)
+
+    def log_system_exception(self, identifier, detail, exception):
+        message = detail + '\n' + repr(exception)
+        self.log_system_error(identifier, message)
 
     def finish_sleep(self):
         self._write_status(ARCYD_STATUS_IDLE)
@@ -302,6 +333,7 @@ class ArcydReporter(object):
             ARCYD_CURRENT_REPO: self._repo,
             ARCYD_REPOS: [self._repos[k] for k in self._repos],
             ARCYD_STATISTICS: statistics,
+            ARCYD_LOG_SYSTEM_ERROR: self._log_system_error,
         }
         assert set(d.keys()) == set(ARCYD_LIST_ATTRIB)
         self._output.write(d)
