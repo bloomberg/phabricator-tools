@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   render
+#   render_repo
 #   render_stats
 #   render_controls
 #
@@ -64,37 +65,29 @@ def render(
 
     repo = report[abdt_arcydreporter.ARCYD_CURRENT_REPO]
     if repo:
-        repo_name = repo[abdt_arcydreporter.REPO_ATTRIB_NAME]
-        repo_human_name = repo[abdt_arcydreporter.REPO_ATTRIB_HUMAN_NAME]
-        repo_status = repo[abdt_arcydreporter.REPO_ATTRIB_STATUS]
-
-        if repo_status == abdt_arcydreporter.REPO_STATUS_OK:
-            divclass = 'greencard'
-        elif repo_status == abdt_arcydreporter.REPO_STATUS_UPDATING:
-            divclass = 'activeinset'
-        else:
-            divclass = 'redcard'
-
-        with formatter.singletag_context('div', class_=divclass):
-            formatter.link(_join_url(base_url, repo_name), repo_human_name)
+        render_repo(base_url, repo, formatter)
 
     formatter.horizontal_rule()
 
     repos = report[abdt_arcydreporter.ARCYD_REPOS]
     for repo in repos:
-        repo_name = repo[abdt_arcydreporter.REPO_ATTRIB_NAME]
-        repo_human_name = repo[abdt_arcydreporter.REPO_ATTRIB_HUMAN_NAME]
-        repo_status = repo[abdt_arcydreporter.REPO_ATTRIB_STATUS]
+        render_repo(base_url, repo, formatter)
 
-        if repo_status == abdt_arcydreporter.REPO_STATUS_OK:
-            divclass = 'greencard'
-        elif repo_status == abdt_arcydreporter.REPO_STATUS_UPDATING:
-            divclass = 'activeinset'
-        else:
-            divclass = 'redcard'
 
-        with formatter.singletag_context('div', class_=divclass):
-            formatter.link(_join_url(base_url, repo_name), repo_human_name)
+def render_repo(base_url, repo, formatter):
+    repo_name = repo[abdt_arcydreporter.REPO_ATTRIB_NAME]
+    repo_human_name = repo[abdt_arcydreporter.REPO_ATTRIB_HUMAN_NAME]
+    repo_status = repo[abdt_arcydreporter.REPO_ATTRIB_STATUS]
+
+    if repo_status == abdt_arcydreporter.REPO_STATUS_OK:
+        divclass = 'greencard'
+    elif repo_status == abdt_arcydreporter.REPO_STATUS_UPDATING:
+        divclass = 'activeinset'
+    else:
+        divclass = 'redcard'
+
+    with formatter.singletag_context('div', class_=divclass):
+        formatter.link(_join_url(base_url, repo_name), repo_human_name)
 
 
 def render_stats(stats, formatter):
