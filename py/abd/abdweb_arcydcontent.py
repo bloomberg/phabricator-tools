@@ -53,6 +53,12 @@ def render(
     status = report[abdt_arcydreporter.ARCYD_STATUS]
     formatter.text('status: {status}'.format(status=status))
 
+    description = report[abdt_arcydreporter.ARCYD_STATUS_DESCRIPTION]
+    if description:
+        with formatter.singletag_context('div', class_='container'):
+            with formatter.singletag_context('div', class_='redcard'):
+                formatter.text(description)
+
     stats = report[abdt_arcydreporter.ARCYD_STATISTICS]
     render_stats(stats, formatter)
 

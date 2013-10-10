@@ -202,6 +202,7 @@ class RepoReporter(object):
 
     def on_tryloop_exception(self, e, delay):
         self._is_updating = False
+        self._arcyd_reporter.on_tryloop_exception(e, delay)
         self._update_write_repo_status(
             REPO_STATUS_FAILED,
             str(e) + "\nwill wait " + str(delay))

@@ -44,6 +44,11 @@ a:hover {
     box-shadow: 0px 0px 30px #111;
 }
 
+div.container {
+    overflow: hidden;
+    width: 100%;
+}
+
 .redinset {
     background-color: #E55;
     padding: 6px;

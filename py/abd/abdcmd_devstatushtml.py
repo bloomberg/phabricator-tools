@@ -83,6 +83,8 @@ def _exercise_reporeporter():
     arcyd_reporter = abdt_arcydreporter.ArcydReporter(
         abdt_arcydreporter.SharedDictOutput(report))
 
+    arcyd_reporter.start_repo('name', 'human-name')
+
     # simulate unhandled exception during processing repo
 
     reporter = abdt_reporeporter.RepoReporter(
@@ -178,6 +180,8 @@ def _exercise_arcydreporter():
         _write('arcyd_sleeping')
         reporter.finish_sleep()
         _write('arcyd_idle')
+        reporter.on_tryloop_exception('exception', 'delay')
+        _write('arcyd_tryloop_exception')
     _write('arcyd_stopped')
 
 
