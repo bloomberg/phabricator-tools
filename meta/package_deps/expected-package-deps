@@ -1,7 +1,7 @@
 ('abdt', ['phlcon', 'phldef', 'phlgit', 'phlgitu', 'phlsys'])
 ('phlgit', ['phlsys'])
 ('aoncmd', ['aont', 'phlcon', 'phlsys'])
-('abdweb', ['abdt'])
+('abdweb', ['abdt', 'phlurl'])
 ('phlcon', ['phldef', 'phlsys'])
 ('abdcmd', ['abdi', 'abdt', 'abdweb', 'phlsys', 'phlurl'])
 ('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phlmail', 'phlsys'])

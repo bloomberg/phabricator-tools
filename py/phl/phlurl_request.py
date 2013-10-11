@@ -8,6 +8,7 @@
 #   Error
 #
 # Public Functions:
+#   join_url
 #   split_url
 #   group_urls
 #   get_many
@@ -20,13 +21,31 @@
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-
 from __future__ import absolute_import
 
 import collections
 import httplib
 import traceback
 import urlparse
+
+
+def join_url(base_url, leaf):
+    """Return the result of joining two parts of a url together.
+
+    Usage Examples:
+
+        >>> join_url('http://example.com/', 'mypage/')
+        'http://example.com/mypage/'
+
+        >>> join_url('http://example.com', 'mypage/')
+        'http://example.com/mypage/'
+
+    :base_url: the start of the new url
+    :leaf: the end of the new url
+    :returns: the joined url
+
+    """
+    return '/'.join([base_url.rstrip('/'), leaf])
 
 
 SplitUrlResult = collections.namedtuple(

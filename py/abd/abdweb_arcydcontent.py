@@ -14,29 +14,11 @@
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-
 from __future__ import absolute_import
 
+import phlurl_request
+
 import abdt_arcydreporter
-
-
-def _join_url(base_url, leaf):
-    """Return the result of joining two parts of a url together.
-
-    Usage Examples:
-
-        >>> _join_url('http://example.com/', 'mypage/')
-        'http://example.com/mypage/'
-
-        >>> _join_url('http://example.com', 'mypage/')
-        'http://example.com/mypage/'
-
-    :base_url: the start of the new url
-    :leaf: the end of the new url
-    :returns: the joined url
-
-    """
-    return '/'.join([base_url.rstrip('/'), leaf])
 
 
 def render(
@@ -94,7 +76,8 @@ def render_repo(base_url, repo, formatter):
         divclass = 'redcard'
 
     with formatter.singletag_context('div', class_=divclass):
-        formatter.link(_join_url(base_url, repo_name), repo_human_name)
+        formatter.link(phlurl_request.join_url(
+            base_url, repo_name), repo_human_name)
 
 
 def render_stats(stats, formatter):
