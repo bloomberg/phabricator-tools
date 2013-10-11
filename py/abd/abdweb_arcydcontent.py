@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   render
+#   render_status
 #   render_repo
 #   render_stats
 #   render_controls
@@ -35,16 +36,9 @@ def render(
     formatter.horizontal_rule()
 
     status = report[abdt_arcydreporter.ARCYD_STATUS]
-    formatter.text('status: {status}'.format(status=status))
-
-    description = report[abdt_arcydreporter.ARCYD_STATUS_DESCRIPTION]
-    if description:
-        with formatter.singletag_context('div', class_='container'):
-            with formatter.singletag_context('div', class_='redcard'):
-                formatter.text(description)
-
     stats = report[abdt_arcydreporter.ARCYD_STATISTICS]
-    render_stats(stats, formatter)
+    description = report[abdt_arcydreporter.ARCYD_STATUS_DESCRIPTION]
+    render_status(status, stats, formatter, description)
 
     repo = report[abdt_arcydreporter.ARCYD_CURRENT_REPO]
     if repo:
@@ -61,6 +55,29 @@ def render(
     if log_system_error:
         formatter.horizontal_rule()
         render_error_log('system errors', log_system_error, formatter)
+
+    formatter.horizontal_rule()
+    render_stats(stats, formatter)
+
+
+def render_status(status, stats, formatter, description):
+    this_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
+    last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
+    if this_duration and last_duration:
+        if this_duration > last_duration:
+            formatter.heading('this cycle: {:.2f} secs'.format(this_duration))
+        else:
+            formatter.heading('last cycle: {:.2f} secs'.format(last_duration))
+    elif this_duration:
+        formatter.heading('this cycle: {:.2f} secs'.format(this_duration))
+    elif last_duration:
+        formatter.heading('last cycle: {:.2f} secs'.format(last_duration))
+    if status:
+        formatter.text('status: {status}'.format(status=status))
+    if description:
+        with formatter.singletag_context('div', class_='container'):
+            with formatter.singletag_context('div', class_='redcard'):
+                formatter.text(description)
 
 
 def render_repo(base_url, repo, formatter):
@@ -116,14 +133,15 @@ def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):
 
 def render_error_log(name, item_list, formatter):
     formatter.heading(name)
-    for item in item_list:
-        with formatter.singletag_context('div', class_='redcard'):
-            time = item[abdt_arcydreporter.ARCYD_LOGITEM_DATETIME]
-            identifier = item[abdt_arcydreporter.ARCYD_LOGITEM_IDENTIFIER]
-            detail = item[abdt_arcydreporter.ARCYD_LOGITEM_DETAIL]
-            formatter.heading(identifier)
-            formatter.text("{time} UTC".format(time=time))
-            formatter.text(detail)
+    with formatter.singletag_context('div', class_='container'):
+        for item in item_list:
+            with formatter.singletag_context('div', class_='redcard'):
+                time = item[abdt_arcydreporter.ARCYD_LOGITEM_DATETIME]
+                identifier = item[abdt_arcydreporter.ARCYD_LOGITEM_IDENTIFIER]
+                detail = item[abdt_arcydreporter.ARCYD_LOGITEM_DETAIL]
+                formatter.heading(identifier)
+                formatter.text("{time} UTC".format(time=time))
+                formatter.text(detail)
 
 
 #------------------------------------------------------------------------------
