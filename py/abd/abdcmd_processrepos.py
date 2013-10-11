@@ -232,12 +232,13 @@ def process(args):
     abdi_processargs.setup_sigterm_handler()
     abdi_processargs.configure_sendmail(args)
 
-    on_exception = abdi_processargs.make_exception_message_handler(
-        args, "arcyd stopped with exception", "")
-
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
-    with contextlib.closing(
-            abdt_arcydreporter.ArcydReporter(reporter_data)) as reporter:
+    reporter = abdt_arcydreporter.ArcydReporter(reporter_data)
+
+    on_exception = abdi_processargs.make_exception_message_handler(
+        args, reporter, None, "arcyd stopped with exception", "")
+
+    with contextlib.closing(reporter):
 
         try:
             _process(args, reporter)
@@ -257,7 +258,6 @@ def process(args):
 def _process(args, reporter):
 
     retry_delays = abdi_processargs.get_retry_delays()
-    on_exception_delay = abdi_processargs.make_exception_delay_handler(args)
 
     repos = []
     for repo in args.repo_configs:
@@ -286,6 +286,8 @@ def _process(args, reporter):
             conduits,
             url_watcher)
 
+        on_exception_delay = abdi_processargs.make_exception_delay_handler(
+            args, reporter, repo)
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,
             list(retry_delays),  # make a copy to be sure
@@ -294,6 +296,8 @@ def _process(args, reporter):
         operations.append(operation)
 
     def on_pause():
+        on_exception_delay = abdi_processargs.make_exception_delay_handler(
+            args, reporter, None)
         on_exception_delay("until_file_removed")
 
     operations.append(

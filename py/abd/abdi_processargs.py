@@ -229,7 +229,8 @@ def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
         to_addresses=emails)
 
 
-def make_exception_message_handler(args, subject, body_prefix):
+def make_exception_message_handler(
+        args, arcyd_reporter, repo, subject, body_prefix):
     uname = str(platform.uname())
     emails = args.sys_admin_emails
 
@@ -242,12 +243,21 @@ def make_exception_message_handler(args, subject, body_prefix):
         _send_mail(
             mailsender, emails, uname, subject, tb, body_prefix, message)
 
+        short_tb = traceback.format_exc(1)
+        detail = ""
+        if repo:
+            detail += "processing repo: {repo}\n".format(repo=repo)
+        detail += "exception: {exception}".format(exception=short_tb)
+        arcyd_reporter.log_system_error('processargs', detail)
+
     return msg_exception
 
 
-def make_exception_delay_handler(args):
+def make_exception_delay_handler(args, arcyd_reporter, repo):
     return make_exception_message_handler(
         args,
+        arcyd_reporter,
+        repo,
         "arcyd paused with exception",
         "will wait: ")
 
