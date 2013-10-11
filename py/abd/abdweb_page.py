@@ -94,6 +94,25 @@ div.container {
       -webkit-animation: pulsate 1s ease-out;
     -webkit-animation-iteration-count: infinite;
 }
+
+tr.stats:nth-child(odd) {
+    background-color:#eee;
+}
+
+tr.stats:nth-child(even) {
+    background-color:#fff;
+}
+
+th.stats {
+    padding: 15px;
+    background-color: black;
+    color: white;
+}
+
+td.stats {
+    padding: 10px;
+    color: black;
+}
 """
 
 

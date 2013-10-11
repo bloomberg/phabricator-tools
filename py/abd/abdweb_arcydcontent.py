@@ -101,16 +101,26 @@ def render_stats(stats, formatter):
     current_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
     last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
     tag_times = stats[abdt_arcydreporter.ARCYD_STAT_TAG_TIMES]
+
+    if current_duration or last_duration or tag_times:
+        formatter.heading('stats')
+
     if current_duration:
         formatter.text(
             'current cycle time: {:.2f} secs'.format(current_duration))
+
     if last_duration:
         formatter.text(
             'last cycle time: {:.2f} secs'.format(last_duration))
+
     if tag_times:
-        for tag, time in tag_times.iteritems():
-            formatter.text(
-                '{tag} time: {time:.2f} secs'.format(tag=tag, time=time))
+        time_tags = [(time, tag) for tag, time in tag_times.iteritems()]
+        time_tags.sort()
+        formatter.table_from_tuple_list(
+            time_tags,
+            ['time', 'tag'],
+            ['{:.2f} secs', '{}'],
+            'stats')
 
 
 def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):

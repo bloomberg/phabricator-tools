@@ -14,6 +14,7 @@
 #    .horizontal_rule
 #    .link
 #    .action_button
+#    .table_from_tuple_list
 #    .tags_context
 #    .singletag_context
 #
@@ -81,6 +82,19 @@ class HtmlFormatter(object):
                 "<input type='submit' value='{text}' disabled>".format(
                     text=text))
         self.raw("</form>")
+
+    def table_from_tuple_list(
+            self, item_list, heading_list, format_list, class_):
+        with self.singletag_context('table', class_=class_):
+            with self.singletag_context('tr', class_=class_):
+                for heading in heading_list:
+                    with self.singletag_context('th', class_=class_):
+                        self.raw(heading)
+            for item in item_list:
+                with self.singletag_context('tr', class_=class_):
+                    for i, field in enumerate(item):
+                        with self.singletag_context('td', class_=class_):
+                            self.raw(format_list[i].format(field))
 
     @contextlib.contextmanager
     def tags_context(self, *tags):
