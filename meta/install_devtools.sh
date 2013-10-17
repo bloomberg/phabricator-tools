@@ -6,5 +6,3 @@ sudo pip install flake8
 sudo pip install snakefood
 sudo pip install autopep8
 sudo pip install docformatter
-#sudo apt-get install puppet
-#(cd ../vagrant && ./puppet-apply.sh)
