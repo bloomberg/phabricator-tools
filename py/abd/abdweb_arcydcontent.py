@@ -116,6 +116,7 @@ def render_stats(stats, formatter):
     if tag_times:
         time_tags = [(time, tag) for tag, time in tag_times.iteritems()]
         time_tags.sort()
+        time_tags.reverse()
         formatter.table_from_tuple_list(
             time_tags,
             ['time', 'tag'],
