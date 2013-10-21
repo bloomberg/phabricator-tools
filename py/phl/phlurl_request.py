@@ -28,6 +28,8 @@ import httplib
 import traceback
 import urlparse
 
+_HTTPLIB_TIMEOUT = 600
+
 
 def join_url(base_url, leaf):
     """Return the result of joining two parts of a url together.
@@ -165,6 +167,9 @@ def get_many(url_list):
 
     Attempts to re-use connections where possible.
 
+    Note that this shouldn't be used to download large files, there is a
+    default timeout in place to prevent blocking for large amounts of time.
+
     :url_list: a list of string urls, e.g. 'http://www.bloomberg.com/'
     :returns: a list of string contents
 
@@ -173,12 +178,14 @@ def get_many(url_list):
     results = {}
 
     for host_port, request_list in urls.http.iteritems():
-        http = httplib.HTTPConnection(host_port[0], host_port[1])
+        http = httplib.HTTPConnection(
+            host_port[0], host_port[1], timeout=_HTTPLIB_TIMEOUT)
         for path, url in request_list:
             results[url] = _request(http, 'GET', path, url)
 
     for host_port, request_list in urls.https.iteritems():
-        https = httplib.HTTPSConnection(host_port[0], host_port[1])
+        https = httplib.HTTPSConnection(
+            host_port[0], host_port[1], timeout=_HTTPLIB_TIMEOUT)
         for path, url in request_list:
             results[url] = _request(https, 'GET', path, url)
 
@@ -187,6 +194,9 @@ def get_many(url_list):
 
 def get(url):
     """Return the content of the supplied url.
+
+    Note that this shouldn't be used to download large files, there is a
+    default timeout in place to prevent blocking for large amounts of time.
 
     :url: a string url, e.g. 'http://www.bloomberg.com/'
     :returns: the string content
