@@ -1,15 +1,11 @@
-"""Wrapper around 'git rev-parse'."""
+"""Wrapper around 'git show'."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgit_revparse
-#
-# Public Classes:
-#   Error
+# phlgit_show
 #
 # Public Functions:
-#   get_sha1_or_none
-#   get_sha1
+#   object_
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -18,36 +14,15 @@
 from __future__ import absolute_import
 
 
-class Error(Exception):
-    pass
+def object_(clone, ref):
+    """Return the content of the specified object.
 
-
-def get_sha1_or_none(clone, ref):
-    """Return string of the ref's commit hash if valid, else None.
-
-    :clone: supports call()
-    :ref: string of the reference to parse
-    :returns: string of the ref's commit hash if valid, else None.
+    :clone: the git clone to get the object from
+    :ref: the ref of the object, e.g. 'origin/master', 'ed3a1', etc.
+    :returns: the contents of the object
 
     """
-    commit = clone.call("rev-parse", "--revs-only", ref).strip()
-    return commit if commit else None
-
-
-def get_sha1(clone, ref):
-    """Return string of the ref's commit hash.
-
-    Raise if the ref is invalid.
-
-    :clone: supports call()
-    :ref: string of the reference to parse
-    :returns: string of the ref's commit hash
-
-    """
-    commit = get_sha1_or_none(clone, ref)
-    if commit is None:
-        raise Error("ref '{}' is invalid.".format(ref))
-    return commit
+    return clone.call('show', ref)
 
 
 #------------------------------------------------------------------------------

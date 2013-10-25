@@ -52,6 +52,7 @@ import abdt_differ
 import abdt_exception
 import abdt_gittypes
 import abdt_lander
+import abdt_landinglog
 import abdt_naming
 import abdt_workingbranch
 
@@ -353,6 +354,10 @@ class Branch(object):
 
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
+
+        review_hash = phlgit_revparse.get_sha1(
+            self._clone, self._tracking_branch.remote_branch)
+
         self._clone.checkout_forced_new_branch(
             self._tracking_branch.base,
             self._tracking_branch.remote_base)
@@ -371,10 +376,17 @@ class Branch(object):
                 self.review_branch_name(),
                 self._tracking_branch.base)
 
+        landing_hash = phlgit_revparse.get_sha1(
+            self._clone, self._tracking_branch.base)
+
         self._clone.push(self._tracking_branch.base)
         self._clone.push_delete(self._tracking_branch.branch)
         self._clone.push_delete(self.review_branch_name())
         # TODO: we probably want to do a better job of cleaning up locally
+
+        abdt_landinglog.prepend(
+            self._clone, review_hash, self.review_branch_name(), landing_hash)
+        abdt_landinglog.push_log(self._clone, self._clone.get_remote())
 
         self._review_branch = None
         self._tracking_branch = None

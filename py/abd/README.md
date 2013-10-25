@@ -43,6 +43,8 @@ Abstraction for Arcyd's git operations.
 Define useful aggregates for interacting with git without passing alot.
 * `abdt_lander.py` -
 Callables for re-integrating branches upstream.
+* `abdt_landinglog.py` -
+Operations for maintaining a list of landed branches in upstream repo.
 * `abdt_naming.py` -
 Naming conventions for abd.
 * `abdt_reporeporter.py` -

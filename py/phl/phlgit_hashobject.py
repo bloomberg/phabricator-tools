@@ -1,15 +1,11 @@
-"""Wrapper around 'git rev-parse'."""
+"""Wrapper around 'git hash-object'."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgit_revparse
-#
-# Public Classes:
-#   Error
+# phlgit_hashobject
 #
 # Public Functions:
-#   get_sha1_or_none
-#   get_sha1
+#   write_string
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -18,36 +14,23 @@
 from __future__ import absolute_import
 
 
-class Error(Exception):
-    pass
+def write_string(clone, s):
+    """Return the hash of the supplied string 's' and write the object.
 
+    Note that if an object with the same hash (should be the same content) is
+    already in the object store then nothing will be written.  The hash will
+    still be returned.
 
-def get_sha1_or_none(clone, ref):
-    """Return string of the ref's commit hash if valid, else None.
+    Note that the hash returned is that of (<some header> + s) so you will not
+    get the same result if you simply did:
+        hashlib.sha1(s)
 
-    :clone: supports call()
-    :ref: string of the reference to parse
-    :returns: string of the ref's commit hash if valid, else None.
-
-    """
-    commit = clone.call("rev-parse", "--revs-only", ref).strip()
-    return commit if commit else None
-
-
-def get_sha1(clone, ref):
-    """Return string of the ref's commit hash.
-
-    Raise if the ref is invalid.
-
-    :clone: supports call()
-    :ref: string of the reference to parse
-    :returns: string of the ref's commit hash
+    :clone: the git clone to store the object in
+    :s: the string to calculate the SHA1 of and to write to the object store
+    :returns: the SHA1 of the object
 
     """
-    commit = get_sha1_or_none(clone, ref)
-    if commit is None:
-        raise Error("ref '{}' is invalid.".format(ref))
-    return commit
+    return clone.call('hash-object', '-w', '--stdin', stdin=s).strip()
 
 
 #------------------------------------------------------------------------------

@@ -23,6 +23,8 @@ Wrapper around 'git config'.
 Wrapper around 'git diff'.
 * `phlgit_fetch.py` -
 Dependable wrapper for invocations of git fetch.
+* `phlgit_hashobject.py` -
+Wrapper around 'git hash-object'.
 * `phlgit_log.py` -
 Wrapper around 'git log'.
 * `phlgit_merge.py` -
@@ -33,6 +35,8 @@ Wrapper around 'git push'.
 Dependable wrapper for invocations of git rebase.
 * `phlgit_revparse.py` -
 Wrapper around 'git rev-parse'.
+* `phlgit_show.py` -
+Wrapper around 'git show'.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
 * `phlmail_format.py` -
