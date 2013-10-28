@@ -49,7 +49,16 @@ echo 'git add .' >> poke.sh
 echo 'git commit -am "poked feature ${feature}"' >> poke.sh
 echo 'git push -u origin ${branch}' >> poke.sh
 
+echo "arcyon='${arcyon}'" >> accept.sh
+echo "arcyoncreds='${arcyoncreds}'" >> accept.sh
+echo 'revisionid=$(${arcyon} query --max-results 1 --statuses "Needs Review" --format-type ids ${arcyoncreds})' >> accept.sh
+echo 'if [ -n "$revisionid" ]; then' >> accept.sh
+echo '${arcyon} comment ${revisionid} --action accept ${arcyoncreds}' >> accept.sh
+echo 'fi' >> accept.sh
+
 chmod +x poke.sh
+chmod +x accept.sh
+
 git add .
 git commit -m 'intial commit'
 git push origin master
