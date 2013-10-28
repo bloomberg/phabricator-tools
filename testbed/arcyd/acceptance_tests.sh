@@ -12,6 +12,7 @@ cd "$(dirname "$0")"
 
 arcyd="$(pwd)/../../proto/arcyd"
 arcyon="$(pwd)/../../bin/arcyon"
+barc="$(pwd)/../../proto/barc"
 
 phaburi="http://127.0.0.1"
 arcyduser='phab'
@@ -324,6 +325,15 @@ function test_empty_branch() {
     cd -
 }
 
+function test_branch_gc() {
+    # gc the review branches
+    cd dev
+        git checkout master
+        git config --add remote.origin.fetch '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
+        git fetch
+        ${barc} gc -f
+    cd -
+}
 
 ###############################################################################
 # run the actual tests
@@ -340,6 +350,7 @@ test_unknown_user
 test_bad_base
 test_merge_conflict
 test_empty_branch
+test_branch_gc
 
 # display the sent mails
 pwd

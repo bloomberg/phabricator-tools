@@ -7,6 +7,7 @@ cd "$(dirname "$0")"
 
 arcyd="$(pwd)/../../proto/arcyd"
 arcyon="$(pwd)/../../bin/arcyon"
+barc="$(pwd)/../../proto/barc"
 
 phaburi="http://127.0.0.1"
 arcyduser='phab'
@@ -195,6 +196,13 @@ if [ ${badauthor_revisionid} = ${revisionid} ]; then
     echo 'FAILED! fixed bad author didnt create a review'
     exit 1
 fi
+
+# clean up the landed branches
+cd dev
+    git config --add remote.origin.fetch '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
+    git fetch
+    $barc gc -f
+cd -
 
 cat savemail.txt
 
