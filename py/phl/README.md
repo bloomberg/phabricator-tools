@@ -71,6 +71,8 @@ A poor substitute for PHP's strtotime function.
 Help to wrap up modules as subcommands.
 * `phlsys_subprocess.py` -
 Interact with other programs using command-line semantics.
+* `phlsys_textconvert.py` -
+Convert between unicode and ascii easily.
 * `phlsys_timedeltatostr.py` -
 Convert timedeltas to strings.
 * `phlsys_timedqueue.py` -

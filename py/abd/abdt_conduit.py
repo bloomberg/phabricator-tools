@@ -30,6 +30,7 @@ from __future__ import absolute_import
 import phlcon_differential
 import phlcon_user
 import phlsys_conduit
+import phlsys_textconvert
 
 import abdt_exception
 
@@ -90,8 +91,8 @@ class Conduit(object):
         :returns: the string of the commit message
 
         """
-        return phlcon_differential.get_commit_message(
-            self._conduit, revisionid)
+        msg = phlcon_differential.get_commit_message(self._conduit, revisionid)
+        return phlsys_textconvert.lossy_unicode_to_ascii(msg)
 
     def create_revision_as_user(self, raw_diff, fields, username):
         """Return the id of a newly created revision based on specified args.
