@@ -49,6 +49,8 @@ A mail sender that sends mail via a configured sendmail.
 Wrapper to integrate with Arcanist's .arcconfig file.
 * `phlsys_arcrc.py` -
 Wrapper to integrate with Arcanist's ~/.arcrc file.
+* `phlsys_choice.py` -
+Prompt the user to choose from some options on the command-line.
 * `phlsys_compiface.py` -
 Ensure that two or more interfaces match, useful for validating mocks.
 * `phlsys_conduit.py` -

@@ -8,6 +8,7 @@
 #   is_tree_same
 #   is_identical
 #   get_local
+#   get_local_with_sha1
 #   get_remote
 #
 # -----------------------------------------------------------------------------
@@ -50,8 +51,22 @@ def _get_refs(clone):
     #     SHA1      Refname
     out = clone.call('show-ref')
     flat = out.split()  # convert to ['SHA1', 'Refname', 'SHA1', 'Refname']
+
     # convert to [Refname, Refname, Refname]
     refs = [flat[i + 1] for i in range(0, len(flat) - 1, 2)]
+    return refs
+
+
+def _get_sha1_ref_pairs(clone):
+    # the output list is like:
+    #     SHA1      Refname
+    #     SHA1      Refname
+    #     SHA1      Refname
+    out = clone.call('show-ref')
+    flat = out.split()  # convert to ['SHA1', 'Refname', 'SHA1', 'Refname']
+
+    # convert to [('SHA1', 'Refname'), ('SHA1', 'Refname')]
+    refs = [(flat[i], flat[i + 1]) for i in range(0, len(flat) - 1, 2)]
     return refs
 
 
@@ -59,9 +74,26 @@ def _filter_refs_in_namespace(refs, namespace):
     return [ref[len(namespace):] for ref in refs if ref.startswith(namespace)]
 
 
+def _filter_sha1_ref_pairs_in_namespace(refs, namespace):
+    ns = namespace
+    return [(i[0], i[1][len(ns):]) for i in refs if i[1].startswith(ns)]
+
+
 def get_local(clone):
     refs = _get_refs(clone)
     return _filter_refs_in_namespace(refs, "refs/heads/")
+
+
+def get_local_with_sha1(clone):
+    """Return a list of (sha1, branch_name) from all the local branches.
+
+    :clone: supports clone.call() for interacting with git
+    :returns: a list of branches paired with their hashes
+
+    """
+    refs = _get_sha1_ref_pairs(clone)
+    refs = _filter_sha1_ref_pairs_in_namespace(refs, "refs/heads/")
+    return refs
 
 
 def get_remote(clone, remote):
