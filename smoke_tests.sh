@@ -38,3 +38,4 @@ function run_test_script() {
 
 run_test_script "testbed/arcyd" "exercise_arcyd.sh"
 run_test_script "testbed/arcyon" "exercise_arcyon.sh"
+run_test_script "testbed/barc" "smoketest.sh"

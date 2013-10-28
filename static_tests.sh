@@ -30,7 +30,7 @@ PYTHONPATH=py/phl pychecker \
     --quiet --only --no-import --exec --constant1 --initattr --changetypes \
     --no-deprecated \
     --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
-    py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
+    py/abd/*.py py/aon/*.py py/bar/*.py py/phl/*.py py/pig/*.py
 
 ###############################################################################
 # pylint
@@ -40,7 +40,7 @@ PYTHONPATH=py/phl pychecker \
 #
 # pylint \
 #     --errors-only \
-#     py/abd/*.py py/aon/*.py py/phl/*.py py/pig/*.py
+#     py/abd/*.py py/aon/*.py py/bar/*.py py/phl/*.py py/pig/*.py
 #
 
 ###############################################################################

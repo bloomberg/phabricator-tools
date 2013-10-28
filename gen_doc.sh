@@ -15,7 +15,7 @@ set -e # exit immediately on error
 
 python meta/docgen/updatemodcontents.py \
     --force-insert \
-    `find py/phl py/abd py/aon py/pig meta/docgen meta/autofix -iname '*.py' | grep -v __t`
+    `find py/phl py/abd py/aon py/bar py/pig meta/docgen meta/autofix -iname '*.py' | grep -v __t`
 
 ###############################################################################
 # update package group documentation .md files
@@ -37,6 +37,7 @@ function write_group_doc {
 
 write_group_doc abd
 write_group_doc aon
+write_group_doc bar
 write_group_doc phl
 write_group_doc pig
 

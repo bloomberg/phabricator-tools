@@ -7,7 +7,7 @@ all_file=$(mktemp)
 
 PYTHONPATH='phl'
 
-binaries='abd/abdcmd_arcyd.py aon/aoncmd_arcyon.py pig/pigcmd_phabping.py'
+binaries='abd/abdcmd_arcyd.py aon/aoncmd_arcyon.py bar/barcmd_barc.py pig/pigcmd_phabping.py'
 
 # we need to include something from phl so it counts under 'internal'
 from_phl='phl/phlsys_subprocess.py'
