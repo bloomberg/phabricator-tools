@@ -31,6 +31,8 @@ Wrapper around 'git merge'.
 Wrapper around 'git push'.
 * `phlgit_rebase.py` -
 Dependable wrapper for invocations of git rebase.
+* `phlgit_revparse.py` -
+Wrapper around 'git rev-parse'.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
 * `phlmail_format.py` -

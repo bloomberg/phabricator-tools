@@ -46,7 +46,7 @@
 from __future__ import absolute_import
 
 import phlgit_log
-import phlgitu_ref
+import phlgit_revparse
 
 import abdt_differ
 import abdt_exception
@@ -212,7 +212,7 @@ class Branch(object):
         Useful if 'get_author_names_emails' fails.
 
         """
-        if phlgitu_ref.parse_ref_hash(
+        if phlgit_revparse.get_sha1_or_none(
                 self._clone, self._review_branch.remote_base) is None:
             hashes = phlgit_log.get_last_n_commit_hashes_from_ref(
                 self._clone, 1, self._review_branch.remote_branch)

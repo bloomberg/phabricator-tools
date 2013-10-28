@@ -1,12 +1,11 @@
-"""Utilities for working with git refs."""
+"""Wrapper around 'git rev-parse'."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgitu_ref
+# phlgit_revparse
 #
 # Public Functions:
-#   make_remote
-#   make_local
+#   get_sha1_or_none
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -15,30 +14,16 @@
 from __future__ import absolute_import
 
 
-def make_remote(ref, remote):
-    """Return a Git reference based on a local name and a remote name.
+def get_sha1_or_none(clone, ref):
+    """Return string of the ref's commit hash if valid, else None.
 
-    Usage example:
-        >>> make_remote("mywork", "origin")
-        'refs/remotes/origin/mywork'
-
-        >>> make_remote("mywork", "github")
-        'refs/remotes/github/mywork'
+    :clone: supports call()
+    :ref: string of the reference to parse
+    :returns: string of the ref's commit hash if valid, else None.
 
     """
-    return "refs/remotes/" + remote + "/" + ref
-
-
-def make_local(ref):
-    """Return a fully qualified Git reference based on a local name.
-
-    Usage example:
-        >>> make_local("mywork")
-        'refs/heads/mywork'
-
-    """
-    # TODO: check that it isn't already fully qualified
-    return "refs/heads/" + ref
+    commit = clone.call("rev-parse", "--revs-only", ref).strip()
+    return commit if commit else None
 
 
 #------------------------------------------------------------------------------
