@@ -15,6 +15,7 @@ Will safely clean up local branches which have already been landed.
 #   get_current_branch
 #   prune_force
 #   prune_dryrun
+#   print_branch
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -175,13 +176,12 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
                 prune_func(clone, local_name, original_name, sha1, landed_sha1)
                 did_something = True
             else:
-                print "not pruning '{}'".format(local_name)
-                print "  ({})".format(sha1)
-                print "  which matches landed"
-                print "    '{}'".format(original_name)
-                print "    ({})".format(landed_sha1)
-                print "  use '--aggressive' to remove"
-                print
+                print_branch(
+                    "not pruning",
+                    local_name,
+                    original_name,
+                    sha1,
+                    landed_sha1)
     return did_something
 
 
@@ -195,38 +195,26 @@ def get_current_branch(clone):
 
 
 def prune_force(clone, local_name, original_name, sha1, landed_sha1):
-    if local_name == original_name:
-        print "pruning '{}'".format(local_name)
-        print "  ({})".format(sha1)
-        print "  which matches landed with the same name"
-        print "    ({})".format(landed_sha1)
-        clone.call('branch', '-D', local_name)
-        print
-    else:
-        print "pruning '{}'".format(local_name)
-        print "  ({})".format(sha1)
-        print "  which matches landed"
-        print "    '{}'".format(original_name)
-        print "    ({})".format(landed_sha1)
-        clone.call('branch', '-D', local_name)
-        print
+    print_branch("pruning", local_name, original_name, sha1, landed_sha1)
+    clone.call('branch', '-D', local_name)
 
 
 def prune_dryrun(clone, local_name, original_name, sha1, landed_sha1):
     _ = clone  # NOQA
+    print_branch("would prune", local_name, original_name, sha1, landed_sha1)
+
+
+def print_branch(verb_statement, local_name, original_name, sha1, landed_sha1):
+    print "{} '{}'".format(verb_statement, local_name)
+    print "  ({})".format(sha1)
     if local_name == original_name:
-        print "pruning '{}'".format(local_name)
-        print "    ({})".format(sha1)
         print "  which matches landed with the same name"
         print "    ({})".format(landed_sha1)
-        print
     else:
-        print "would prune '{}'".format(local_name)
-        print "  ({})".format(sha1)
         print "  which matches landed"
         print "    '{}'".format(original_name)
         print "    ({})".format(landed_sha1)
-        print
+    print
 
 
 #------------------------------------------------------------------------------
