@@ -96,8 +96,8 @@ def process(args):
         if not would_do_something:
             print "nothing to do."
         else:
-            print
             choice = phlsys_choice.yes_or_no("perform the pruning?", 'no')
+            print
             if choice:
                 _prune_branches(
                     clone, args, prune_force, log_dict, local_branches)
@@ -132,7 +132,7 @@ def _fetch_log(clone, always_update, never_update):
 
     if not has_landinglog:
         print "fetching landing log from origin for the first time.."
-        clone.call('fetch', 'origin', landinglog_ref)
+        clone.call('fetch', 'origin', landinglog_fetch)
         print
     else:
         if always_update:
@@ -167,14 +167,16 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
             log_data = log_dict[sha1]
             original_name = log_data[0]
             landed_sha1 = log_data[1]
-            if local_name == current_branch:
-                print
-                err = "cannot prune {}, it's the current branch".format(
-                    current_branch)
-                print >> sys.stderr, err
-            elif local_name == original_name or args.aggressive:
-                prune_func(clone, local_name, original_name, sha1, landed_sha1)
-                did_something = True
+            if local_name == original_name or args.aggressive:
+                if local_name == current_branch:
+                    err = "cannot prune {}, it's the current branch".format(
+                        current_branch)
+                    print >> sys.stderr, err
+                    print
+                else:
+                    prune_func(
+                        clone, local_name, original_name, sha1, landed_sha1)
+                    did_something = True
             else:
                 print_branch(
                     "not pruning",
