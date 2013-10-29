@@ -331,7 +331,7 @@ function test_branch_gc() {
         git checkout master
         git config --add remote.origin.fetch '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
         git fetch
-        ${barc} gc -f
+        ${barc} gc --force --update
     cd -
 }
 

@@ -5,6 +5,7 @@
 # phlsys_choice
 #
 # Public Functions:
+#   yes_or_no
 #   yes_or_no_or_abort
 #   prompt_with_options
 #
@@ -13,6 +14,29 @@
 # =============================================================================
 
 from __future__ import absolute_import
+
+
+def yes_or_no(prompt, default="yes"):
+    """Return True if the user chooses 'yes', False if they choose 'no'.
+
+    :prompt: the string prompt to display when asking the question
+    :default: the string default to assume if the user just presses 'enter'
+    :returns: True or False from the choice of 'yes' or 'no'
+
+    """
+    yes_choices = ['yes', 'y']
+    no_choices = ['no', 'n']
+
+    choice = prompt_with_options(
+        prompt, [yes_choices, no_choices], default)
+
+    if choice == yes_choices:
+        result = True
+    else:
+        assert choice == no_choices
+        result = False
+
+    return result
 
 
 def yes_or_no_or_abort(prompt, default="yes"):

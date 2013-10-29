@@ -201,7 +201,7 @@ fi
 cd dev
     git config --add remote.origin.fetch '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
     git fetch
-    $barc gc -f
+    $barc gc --update --force
 cd -
 
 cat savemail.txt

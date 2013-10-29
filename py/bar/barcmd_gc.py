@@ -35,73 +35,125 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    force_or_dryrun_group = parser.add_argument_group(
-        "choose either force or dry-run")
-    force_or_dryrun = force_or_dryrun_group.add_mutually_exclusive_group(
+    force_or_interact_group = parser.add_argument_group(
+        "choose either force or interactive")
+
+    force_or_interact = force_or_interact_group.add_mutually_exclusive_group(
         required=True)
-    force_or_dryrun.add_argument(
+
+    force_or_interact.add_argument(
         '--force', '-f',
         action='store_true',
-        help='actually perform the removals')
-    force_or_dryrun.add_argument(
-        '--dry-run', '-n',
+        help='perform the removals without prompting')
+
+    force_or_interact.add_argument(
+        '--interactive', '-i',
         action='store_true',
-        help='preview what would be done if you specify --force')
+        help='show a summary of what would be done and ask to proceed')
 
     parser.add_argument(
-        '--aggressive', '-a',
+        '--aggressive',
         action='store_true',
-        help='aggressively remove branches')
+        help='remove branches which match landed reviews by sha1 only')
+
+    should_update = parser.add_mutually_exclusive_group()
+
+    should_update.add_argument(
+        '--update', '-u',
+        action='store_true',
+        help='update landinglog without prompting')
+
+    should_update.add_argument(
+        '--no-update', '-n',
+        action='store_true',
+        help='dont update landinglog, dont prompt')
 
 
 def process(args):
+    # XXX: only supports 'origin' remote at present
+
     clone = phlsys_git.GitClone('.')
 
-    fetch_urls = clone.call(
-        'config', '--get-all', 'remote.origin.fetch').splitlines()
-
-    landinglog_ref = 'refs/arcyd/landinglog'
-    landinglog_fetch = '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
-    if landinglog_fetch not in fetch_urls:
-        remote_refs = clone.call('ls-remote').split()[1::2]
-        if landinglog_ref not in remote_refs:
-            print >> sys.stderr, str(
-                "FATAL: this repo doesn't seem to have a landing log yet "
-                "perhaps it's not managed by arcyd or no branches have ever "
-                "been landed.")
-            return 1
-
-        print "this repo doesn't seem to be set up to fetch the landing log."
-        choice = phlsys_choice.yes_or_no_or_abort(
-            "would you like to set this up now and fetch origin?")
-        if choice is None:
-            print 'aborting.'
-            return 1
-        elif choice:
-            clone.call(
-                'config', '--add', 'remote.origin.fetch', landinglog_fetch)
-            print 'set up to fetch landinglog, fetching ...'
-            clone.call('fetch')
-            print 'fetched.'
-        else:
-            print 'continuing without setting up to fetch landinglog.'
+    _fetch_log(clone, args.update, args.no_update)
 
     log = abdt_landinglog.get_log(clone)
     log_dict = {i.review_sha1: (i.name, i.landed_sha1) for i in log}
 
-    if args.force:
-        prune_func = prune_force
-    else:
-        assert args.dry_run
-        prune_func = prune_dryrun
-
     local_branches = phlgit_branch.get_local_with_sha1(clone)
 
-    did_something = _prune_branches(
-        clone, args, prune_func, log_dict, local_branches)
+    if args.force:
+        did_something = _prune_branches(
+            clone, args, prune_force, log_dict, local_branches)
+        if not did_something:
+            print "nothing to do."
+        else:
+            print "done."
+    else:
+        assert args.interactive
+        would_do_something = _prune_branches(
+            clone, args, prune_dryrun, log_dict, local_branches)
+        if not would_do_something:
+            print "nothing to do."
+        else:
+            print
+            choice = phlsys_choice.yes_or_no("perform the pruning?", 'no')
+            if choice:
+                _prune_branches(
+                    clone, args, prune_force, log_dict, local_branches)
+                print "done."
+            else:
+                print "stopped."
 
-    if not did_something:
-        print "nothing to do."
+
+def _fetch_log(clone, always_update, never_update):
+    landinglog_ref = 'refs/arcyd/landinglog'
+    local_landinglog_ref = 'refs/arcyd/origin/landinglog'
+    landinglog_fetch = '+{}:{}'.format(landinglog_ref, local_landinglog_ref)
+
+    local_refs = clone.call('show-ref').split()[1::2]
+    has_landinglog = local_landinglog_ref in local_refs
+
+    if not has_landinglog and never_update:
+        print >> sys.stderr, str(
+            "FATAL: the landing log has never been retrieved and "
+            "'--no-update' was specified, nothing to do.")
+        sys.exit(1)
+
+    if not has_landinglog:
+        # see if the remote has a landing log
+        remote_refs = clone.call('ls-remote').split()[1::2]
+        if landinglog_ref not in remote_refs:
+            print >> sys.stderr, str(
+                "FATAL: origin doesn't seem to have a landing log yet "
+                "perhaps it's not managed by arcyd or no branches have ever "
+                "been landed.")
+            sys.exit(1)
+
+    if not has_landinglog:
+        print "fetching landing log from origin for the first time.."
+        clone.call('fetch', 'origin', landinglog_ref)
+        print
+    else:
+        if always_update:
+            print "fetching landing log from origin .."
+            clone.call('fetch', 'origin', landinglog_fetch)
+            print
+        elif never_update:
+            # nothing to do
+            pass
+        else:
+            choice = phlsys_choice.yes_or_no_or_abort(
+                "update landing log from origin now?")
+            if choice is None:
+                print 'aborting.'
+                sys.exit(1)
+            elif choice:
+                print "fetching landing log from origin .."
+                clone.call('fetch', 'origin', landinglog_fetch)
+                print
+            else:
+                # they chose 'no', continue without fetching
+                print
 
 
 def _prune_branches(clone, args, prune_func, log_dict, local_branches):
@@ -115,6 +167,7 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
             original_name = log_data[0]
             landed_sha1 = log_data[1]
             if local_name == current_branch:
+                print
                 err = "cannot prune {}, it's the current branch".format(
                     current_branch)
                 print >> sys.stderr, err
@@ -122,9 +175,13 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
                 prune_func(clone, local_name, original_name, sha1, landed_sha1)
                 did_something = True
             else:
-                print "not pruning '{}', matches landed '{}'".format(
-                    local_name, original_name)
-                print "use '--aggressive' to remove"
+                print "not pruning '{}'".format(local_name)
+                print "  ({})".format(sha1)
+                print "  which matches landed"
+                print "    '{}'".format(original_name)
+                print "    ({})".format(landed_sha1)
+                print "  use '--aggressive' to remove"
+                print
     return did_something
 
 
@@ -139,23 +196,37 @@ def get_current_branch(clone):
 
 def prune_force(clone, local_name, original_name, sha1, landed_sha1):
     if local_name == original_name:
-        print "pruning '{}' ({}), landed as ({})".format(
-            local_name, sha1, landed_sha1)
+        print "pruning '{}'".format(local_name)
+        print "  ({})".format(sha1)
+        print "  which matches landed with the same name"
+        print "    ({})".format(landed_sha1)
         clone.call('branch', '-D', local_name)
+        print
     else:
-        print "pruning '{}' ({}), matches landed {} ({})".format(
-            local_name, sha1, original_name, landed_sha1)
+        print "pruning '{}'".format(local_name)
+        print "  ({})".format(sha1)
+        print "  which matches landed"
+        print "    '{}'".format(original_name)
+        print "    ({})".format(landed_sha1)
         clone.call('branch', '-D', local_name)
+        print
 
 
 def prune_dryrun(clone, local_name, original_name, sha1, landed_sha1):
     _ = clone  # NOQA
     if local_name == original_name:
-        print "would prune '{}' ({}), landed as ({})".format(
-            local_name, sha1, landed_sha1)
+        print "pruning '{}'".format(local_name)
+        print "    ({})".format(sha1)
+        print "  which matches landed with the same name"
+        print "    ({})".format(landed_sha1)
+        print
     else:
-        print "would prune '{}' ({}), matches landed {} ({})".format(
-            local_name, sha1, original_name, landed_sha1)
+        print "would prune '{}'".format(local_name)
+        print "  ({})".format(sha1)
+        print "  which matches landed"
+        print "    '{}'".format(original_name)
+        print "    ({})".format(landed_sha1)
+        print
 
 
 #------------------------------------------------------------------------------
