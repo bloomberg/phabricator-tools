@@ -89,8 +89,6 @@ def process(args):
     log = abdt_landinglog.get_log(clone)
     log_dict = {i.review_sha1: (i.name, i.landed_sha1) for i in log}
 
-    current_branch = get_current_branch(clone)
-
     if args.force:
         prune_func = prune_force
     else:
@@ -99,6 +97,15 @@ def process(args):
 
     local_branches = phlgit_branch.get_local_with_sha1(clone)
 
+    did_something = _prune_branches(
+        clone, args, prune_func, log_dict, local_branches)
+
+    if not did_something:
+        print "nothing to do."
+
+
+def _prune_branches(clone, args, prune_func, log_dict, local_branches):
+    current_branch = get_current_branch(clone)
     did_something = False
     for branch in local_branches:
         sha1 = branch[0]
@@ -108,9 +115,9 @@ def process(args):
             original_name = log_data[0]
             landed_sha1 = log_data[1]
             if local_name == current_branch:
-                print >> sys.stderr, str(
-                    "cannot prune {}, it's the current branch").format(
-                        current_branch)
+                err = "cannot prune {}, it's the current branch".format(
+                    current_branch)
+                print >> sys.stderr, err
             elif local_name == original_name or args.aggressive:
                 prune_func(clone, local_name, original_name, sha1, landed_sha1)
                 did_something = True
@@ -118,9 +125,7 @@ def process(args):
                 print "not pruning '{}', matches landed '{}'".format(
                     local_name, original_name)
                 print "use '--aggressive' to remove"
-
-    if not did_something:
-        print "nothing to do."
+    return did_something
 
 
 def get_current_branch(clone):
