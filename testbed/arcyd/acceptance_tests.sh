@@ -328,9 +328,7 @@ function test_empty_branch() {
 function test_branch_gc() {
     # gc the review branches
     cd dev
-        git checkout master
-        git config --add remote.origin.fetch '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
-        git fetch
+        git checkout master  # we can't remove the current branch, be on master
         ${barc} gc --force --update
     cd -
 }

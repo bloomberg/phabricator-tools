@@ -199,8 +199,7 @@ fi
 
 # clean up the landed branches
 cd dev
-    git config --add remote.origin.fetch '+refs/arcyd/landinglog:refs/arcyd/origin/landinglog'
-    git fetch
+    git checkout master  # we can't remove the current branch, so be on master
     $barc gc --update --force
 cd -
 
