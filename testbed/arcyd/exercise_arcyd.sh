@@ -200,7 +200,9 @@ fi
 # clean up the landed branches
 cd dev
     git checkout master  # we can't remove the current branch, so be on master
-    $barc gc --update --force
+
+    # XXX: landinglog has been disabled for now
+    #$barc gc --update --force
 cd -
 
 cat savemail.txt

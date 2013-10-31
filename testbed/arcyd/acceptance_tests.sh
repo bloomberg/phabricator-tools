@@ -329,7 +329,9 @@ function test_branch_gc() {
     # gc the review branches
     cd dev
         git checkout master  # we can't remove the current branch, be on master
-        ${barc} gc --force --update
+
+        # XXX: landinglog has been disabled for now
+        # ${barc} gc --force --update
     cd -
 }
 
