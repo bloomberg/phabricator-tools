@@ -22,6 +22,8 @@
 
 from __future__ import absolute_import
 
+import phlcon_differential
+
 import abdcmnt_commenter
 import abdt_branch
 import abdt_conduitgit
@@ -40,12 +42,13 @@ def create_review(conduit, branch, plugin_manager):
     # TODO: we should also cc other users on the branch
     # TODO: if there are emails that don't match up to users then we should
     #       note that on the review and perhaps use the mailer to notify them
-    name, email, user = abdt_conduitgit.getPrimaryNameEmailAndUserFromBranch(
+    name, email, user, phid = abdt_conduitgit.getPrimaryUserDetailsFromBranch(
         conduit, branch)
 
     print "- author: " + user
 
     used_default_test_plan = False
+    removed_self_reviewer = False
 
     parsed = abdt_conduitgit.getFieldsFromBranch(conduit, branch)
     if parsed.errors:
@@ -58,6 +61,14 @@ def create_review(conduit, branch, plugin_manager):
                 errors=parsed.errors,
                 fields=parsed.fields,
                 digest=branch.make_message_digest())
+
+    # remove the author from reviewer list if present
+    reviewer_phids_key = phlcon_differential.MessageFields.reviewer_phids
+    if reviewer_phids_key in parsed.fields:
+        reviewer_phids = parsed.fields[reviewer_phids_key]
+        if phid in reviewer_phids:
+            reviewer_phids.remove(phid)
+            removed_self_reviewer = True
 
     rawDiff = branch.make_raw_diff()
 
@@ -72,6 +83,11 @@ def create_review(conduit, branch, plugin_manager):
     if used_default_test_plan:
         commenter.usedDefaultTestPlan(
             branch.review_branch_name(), _DEFAULT_TEST_PLAN)
+
+    if removed_self_reviewer:
+        commenter.removedSelfReviewer(
+            branch.review_branch_name(),
+            branch.make_message_digest())
 
     plugin_manager.hook(
         "after_create_review",

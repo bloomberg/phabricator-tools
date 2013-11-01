@@ -104,13 +104,13 @@ function run_arcyd() {
     ${arcyd} \
         arcyd-status-html \
         arcyd_status.json \
-        https://server.test/arcyd
+        https://server.test/arcyd > /dev/null
     echo $?
 
     ${arcyd} \
         repo-status-html \
         touches/repo_origin.try \
-        touches/repo_origin.ok
+        touches/repo_origin.ok > /dev/null
     echo $?
 }
 
@@ -221,22 +221,33 @@ function test_bad_base() {
     run_arcyd
 }
 
-# function test_self_review() {
-#     test_name='test_happy_path'
-#     branch_name="arcyd-review/${test_name}/master"
-#
-#     # create a review branch
-#     cd dev
-#         git checkout -b ${branch_name}
-#         echo hello > ${test_name}
-#         git add ${test_name}
-#         git commit -m "exercise_arcyd: ${test_name}"
-#         git push origin ${branch_name}
-#     cd -
-#     run_arcyd
-#
-#     # XXX: actually test here
-# }
+function test_self_review() {
+    test_name='test_self_review'
+    branch_name="arcyd-review/${test_name}/master"
+
+    # create a review branch
+    cd dev
+        git checkout -b ${branch_name} origin/master
+        echo hello > ${test_name}
+        git add ${test_name}
+        commit_message=$(printf "exercise_arcyd: ${test_name}\n\nreviewers: bob")
+        git commit -m "${commit_message}"
+        git push origin ${branch_name}
+    cd -
+    run_arcyd
+
+    # find and accept the review
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+    run_arcyd
+
+    # make sure the revision is closed and landed
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Closed'
+    cd dev
+        deleted_prefix='deleted.*'
+        git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
+    cd -
+}
 
 function test_merge_conflict() {
     test_name='test_merge_conflict'
@@ -348,6 +359,7 @@ run_arcyd
 test_happy_path
 test_unknown_user
 test_bad_base
+test_self_review
 test_merge_conflict
 test_empty_branch
 test_branch_gc

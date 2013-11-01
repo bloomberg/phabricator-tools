@@ -5,7 +5,7 @@
 # abdt_conduitgit
 #
 # Public Functions:
-#   getPrimaryNameEmailAndUserFromBranch
+#   getPrimaryUserDetailsFromBranch
 #   getAnyUserFromBranch
 #   getFieldsFromBranch
 #
@@ -18,18 +18,29 @@ from __future__ import absolute_import
 import abdt_exception
 
 
-def getPrimaryNameEmailAndUserFromBranch(conduit, branch):
+def getPrimaryUserDetailsFromBranch(conduit, branch):
+    """Return a tuple representing the primary user on the supplied 'branch'.
+
+    The primary user is currently determined from the latest user to commit
+    on the branch but this may change later.
+
+    :conduit: an abdt_conduit
+    :branch: an abdt_branch
+    :returns: a (name, email, username, phid) tuple
+
+    """
     names_emails = branch.get_author_names_emails()
     if not names_emails:
         raise abdt_exception.AbdUserException("no history to diff")
     committer = names_emails[-1]
     name = committer[0]
     email = committer[1]
-    user = conduit.query_users_from_emails([email])[0]
-    if not user:
+    found_user = conduit.query_name_and_phid_from_email(email)
+    if found_user is None:
         raise abdt_exception.AbdUserException(
             "first committer is not a Phabricator user")
-    return name, email, user
+    user, phid = found_user
+    return name, email, user, phid
 
 
 def getAnyUserFromBranch(conduit, branch):

@@ -181,7 +181,7 @@ if [ ! ${badauthor_revisionid} = ${revisionid} ]; then
     exit 1
 fi
 
-# update review branch as unknown user
+# update review branch as user 'bob'
 cd dev
     git config user.name 'Bob User'
     git config user.email 'bob@server.test'
@@ -193,7 +193,7 @@ run_arcyd
 # look for a good author review
 badauthor_revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
 if [ ${badauthor_revisionid} = ${revisionid} ]; then
-    echo 'FAILED! fixed bad author didnt create a review'
+    echo 'FAILED! fixed bad author (bob) didnt create a review'
     exit 1
 fi
 

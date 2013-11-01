@@ -13,6 +13,7 @@
 #    .landedReview
 #    .abandonedBranch
 #    .usedDefaultTestPlan
+#    .removedSelfReviewer
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -124,6 +125,27 @@ the 'edit revision' link at the top-right of the page.
         message += "using the 'edit revision' link at the top-right of "
         message += "this review page."
         self._createComment(message, silent=True)
+
+    def removedSelfReviewer(self, branch_name, digest):
+        digest_markup = phlcon_remarkup.code_block(
+            digest, lang="text", isBad=True)
+
+        branch_markup = phlcon_remarkup.monospaced(branch_name)
+
+        message = (
+            "author, you added yourself to the list of reviewers in your "
+            "commit message.\n"
+            "\n"
+            "phabricator does not permit the author of a review to also be a "
+            "reviewer.\n"
+            "\n"
+            "please carefully review the current list of reviewers to make "
+            "sure there are no other errors.\n"
+            "\n"
+            "combined message digest from branch {branch}:\n"
+            "{digest}").format(branch=branch_markup, digest=digest_markup)
+
+        self._createComment(message)
 
     def _createComment(self, message, silent=False):
         self._conduit.create_comment(self._revision_id, message, silent=silent)
