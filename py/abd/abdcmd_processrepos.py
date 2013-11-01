@@ -32,6 +32,7 @@ import functools
 import itertools
 import logging
 import os
+import sys
 import time
 
 import phlsys_scheduleunreliables
@@ -214,7 +215,7 @@ class FileCheckOperation(object):
 
 def tryHandleSpecialFiles(f, on_exception_delay):
     try:
-        f()
+        return f()
     except ResetFileException as e:
         on_exception_delay(None)
         try:
@@ -317,9 +318,12 @@ def _process(args, reporter):
 
     if args.no_loop:
         def process_once():
-            phlsys_scheduleunreliables.process_once(list(operations))
+            return phlsys_scheduleunreliables.process_once(list(operations))
 
-        tryHandleSpecialFiles(process_once, on_exception_delay)
+        new_ops = tryHandleSpecialFiles(process_once, on_exception_delay)
+        if new_ops != set(operations):
+            print 'ERROR: some operations failed'
+            sys.exit(1)
     else:
         def loopForever():
             phlsys_scheduleunreliables.process_loop_forever(list(operations))

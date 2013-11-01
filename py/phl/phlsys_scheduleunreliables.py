@@ -35,6 +35,12 @@ def process_loop_forever(operations):
 
 
 def process_once(operations):
+    """Return the set of still active operations after processing each once.
+
+    :operations: an iterable of objects that support 'do' and 'getDelay'
+    :returns: a set of the still active operations after processing each once.
+
+    """
     # use a copy of the original, as we may modify it
     # we need to do set operations so 'set' is most appropriate
     operations = set(operations)
@@ -42,6 +48,8 @@ def process_once(operations):
     paused_operations = phlsys_timedqueue.TimedQueue()
 
     _process_operations(operations, paused_operations)
+
+    return operations
 
 
 def make_timed_queue():
