@@ -50,7 +50,7 @@ def is_no_such_error(e):
 
 
 def query_user_from_email(conduit, email):
-    """Return a QueryResponse based on the provided emails.
+    """Return a QueryResponse based on the provided email.
 
     If the email does not correspond to a username then return None.
 
@@ -59,7 +59,7 @@ def query_user_from_email(conduit, email):
     :returns: a QueryResponse or None
 
     """
-    d = {"emails": [email], "limit": len(email)}
+    d = {"emails": [email], "limit": 1}
     response = None
     try:
         response = conduit.call("user.query", d)
