@@ -27,9 +27,7 @@ from __future__ import absolute_import
 
 import argparse
 import contextlib
-import datetime
 import functools
-import itertools
 import logging
 import os
 import sys
@@ -113,6 +111,18 @@ class DelayedRetrySleepOperation(object):
         return True
 
 
+def _critical_tryloop(f, identifier, detail, reporter):
+    def on_tryloop_exception(e, delay):
+        reporter.on_tryloop_exception(e, delay)
+        reporter.log_system_exception(identifier, detail, e)
+        logging.error(str(e) + "\nwill wait " + str(delay))
+
+    delays = phlsys_tryloop.make_default_endless_retry()
+
+    phlsys_tryloop.try_loop_delay(
+        f, delays, onException=on_tryloop_exception)
+
+
 class RefreshCachesOperation(object):
 
     def __init__(self, conduits, url_watcher, reporter):
@@ -124,61 +134,18 @@ class RefreshCachesOperation(object):
     def do(self):
         self._reporter.start_cache_refresh()
 
-        # prepare delays in the event of trouble when refreshing
-        # TODO: perhaps this policy should be decided higher-up
-        delays = [
-            datetime.timedelta(seconds=1),
-            datetime.timedelta(seconds=1),
-            datetime.timedelta(seconds=1),
-            datetime.timedelta(seconds=1),
-            datetime.timedelta(seconds=1),
-            datetime.timedelta(seconds=10),
-            datetime.timedelta(seconds=10),
-            datetime.timedelta(seconds=10),
-            datetime.timedelta(seconds=10),
-            datetime.timedelta(seconds=10),
-            datetime.timedelta(seconds=10),
-            datetime.timedelta(minutes=1),
-            datetime.timedelta(minutes=1),
-            datetime.timedelta(minutes=1),
-            datetime.timedelta(minutes=1),
-            datetime.timedelta(minutes=1),
-            datetime.timedelta(minutes=10),
-            datetime.timedelta(minutes=10),
-            datetime.timedelta(minutes=10),
-            datetime.timedelta(minutes=10),
-            datetime.timedelta(minutes=10),
-            datetime.timedelta(minutes=10),
-        ]
-
-        forever = itertools.repeat(datetime.timedelta(minutes=10))
-        delays = itertools.chain(delays, forever)
-
-        # log.error if we get an exception when fetching
-        def on_tryloop_exception_phab(e, delay):
-            self._reporter.on_tryloop_exception(e, delay)
-            self._reporter.log_system_exception('conduit-refresh', '', e)
-            logging.error(str(e) + "\nwill wait " + str(delay))
-
         with self._reporter.tag_timer_context('refresh conduit cache'):
             for key in self._conduits:
                 conduit = self._conduits[key]
-                phlsys_tryloop.try_loop_delay(
+                _critical_tryloop(
                     conduit.refresh_cache_on_cycle,
-                    delays,
-                    onException=on_tryloop_exception_phab)
-
-        # log.error if we get an exception when fetching
-        def on_tryloop_exception_git(e, delay):
-            self._reporter.on_tryloop_exception(e, delay)
-            self._reporter.log_system_exception('git-snoop', '', e)
-            logging.error(str(e) + "\nwill wait " + str(delay))
+                    "conduit-refresh",
+                    conduit.describe(),
+                    self._reporter)
 
         with self._reporter.tag_timer_context('refresh git watcher'):
-            phlsys_tryloop.try_loop_delay(
-                self._url_watcher.refresh,
-                delays,
-                onException=on_tryloop_exception_git)
+            _critical_tryloop(
+                self._url_watcher.refresh, 'git-snoop', '', self._reporter)
 
         self._reporter.finish_cache_refresh()
         return True
