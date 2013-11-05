@@ -47,6 +47,7 @@ from __future__ import absolute_import
 
 import phlgit_log
 import phlgit_revparse
+import phlsys_tryloop
 
 import abdt_differ
 import abdt_exception
@@ -380,9 +381,13 @@ class Branch(object):
             self._clone, self._tracking_branch.base)
 
         self._clone.push(self._tracking_branch.base)
-        self._clone.push_delete(self._tracking_branch.branch)
-        self._clone.push_delete(self.review_branch_name())
-        # TODO: we probably want to do a better job of cleaning up locally
+
+        def try_loop(f):
+            delays = phlsys_tryloop.make_default_short_retry()
+            phlsys_tryloop.try_loop_delay(f, delays)
+
+        try_loop(lambda: self._clone.push_delete(self._tracking_branch.branch))
+        try_loop(lambda: self._clone.push_delete(self.review_branch_name()))
 
         abdt_landinglog.prepend(
             self._clone, review_hash, self.review_branch_name(), landing_hash)
@@ -390,7 +395,9 @@ class Branch(object):
         # XXX: don't push the ref for now, not every repo will allow us to
         #      write to refs/arcyd/*, we'll still accumulate the log in case
         #      this changes.
-        #abdt_landinglog.push_log(self._clone, self._clone.get_remote())
+        # try_loop(
+        #     lambda: abdt_landinglog.push_log(
+        #         self._clone, self._clone.get_remote()))
 
         self._review_branch = None
         self._tracking_branch = None
