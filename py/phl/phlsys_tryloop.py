@@ -5,6 +5,9 @@
 # phlsys_tryloop
 #
 # Public Functions:
+#   make_delay_secs_repeats
+#   make_default_short_retry
+#   make_default_endless_retry
 #   try_loop_delay
 #
 # -----------------------------------------------------------------------------
@@ -13,8 +16,63 @@
 
 from __future__ import absolute_import
 
+import datetime
 import itertools
 import time
+
+
+def make_delay_secs_repeats(seconds, repeats):
+    """Return a list of delays of the specified 'seconds', 'repeats' long.
+
+    The output suitable for use with 'try_loop_delay'.
+
+    Usage example:
+        >>> make_delay_secs_repeats(10, 2)
+        [datetime.timedelta(0, 10), datetime.timedelta(0, 10)]
+
+    :seconds: the number of seconds to wait for
+    :repeats: how many times to wait
+    :returns: a list of datetime.timedelta
+
+    """
+    return [datetime.timedelta(seconds=seconds)] * repeats
+
+
+def make_default_short_retry():
+    """Return a list of delays suitable as a 'default' retry.
+
+    The output suitable for use with 'try_loop_delay'.
+
+    :returns: a list of datetime.timedelta
+
+    """
+    return make_delay_secs_repeats(seconds=3, repeats=3)
+
+
+def make_default_endless_retry():
+    """Return an endless iterable of delays suitable as a 'default' retry.
+
+    The output suitable for use with 'try_loop_delay'.
+
+    This is the sort of thing you might want to use if you are willing to retry
+    something forever.
+
+    The delays used gradually increase so that whichever system is being tried
+    is not overly stressed.
+
+    :returns: an endless iterable of datetime.timedelta
+
+    """
+    delays = []
+
+    delays += [datetime.timedelta(seconds=1)] * 5
+    delays += [datetime.timedelta(seconds=10)] * 5
+    delays += [datetime.timedelta(minutes=1)] * 5
+
+    forever = itertools.repeat(datetime.timedelta(minutes=10))
+    delays = itertools.chain(delays, forever)
+
+    return delays
 
 
 def try_loop_delay(

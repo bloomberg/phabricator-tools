@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import datetime
+import itertools
 import unittest
 
 import phlsys_tryloop
@@ -21,6 +22,8 @@ import phlsys_tryloop
 # [ D] exceptions not derived from exceptionToIgnore raise through tryLoopDelay
 # [ E] tryLoopDelay calls 'onException' if exceptionToIgnore is intercepted
 # [  ] tryLoopDelay waits 'delay' seconds between attempts
+# [ F] endless_retry makes many valid increasing delays
+# [ G] short_retry makes a finite amount of valid delays
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
@@ -28,6 +31,8 @@ import phlsys_tryloop
 # [ C] test_C_RetriesEachDelay
 # [ D] test_D_RaiseThrough
 # [ E] test_E_CallsOnException
+# [ F] test_F_ValidLongIncreasingEndlessRetry
+# [ G] test_G_ValidFiniteShortRetry
 #==============================================================================
 
 
@@ -120,6 +125,32 @@ class Test(unittest.TestCase):
 
         self.assertEqual(1 + numDelays, len(fail_counter))
         self.assertEqual(len(fail_counter), len(on_exception_counter))
+
+    def test_F_ValidLongIncreasingEndlessRetry(self):
+        # [ F] endless_retry makes many valid increasing delays
+        delays = phlsys_tryloop.make_default_endless_retry()
+
+        first_secs = None
+        last_secs = None
+        for i in itertools.islice(delays, 1000):
+            secs = i.total_seconds()
+            self.assertGreaterEqual(secs, 0)
+            self.assertTrue(last_secs is None or secs >= last_secs)
+            if first_secs is None:
+                first_secs = secs
+            last_secs = secs
+
+        self.assertGreater(last_secs, first_secs)
+
+    def test_G_ValidFiniteShortRetry(self):
+        # [ G] short_retry makes a finite amount of valid delays
+        is_empty = True
+        for i in phlsys_tryloop.make_default_short_retry():
+            is_empty = False
+            secs = i.total_seconds()
+            self.assertGreaterEqual(secs, 0)
+            self.assertLess(secs, 3600)  # one hour is definitely not short
+        self.assertFalse(is_empty)
 
 
 #------------------------------------------------------------------------------
