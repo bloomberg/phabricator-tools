@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   Conduit
+#    .describe
 #    .refresh_cache_on_cycle
 #    .create_comment
 #    .create_empty_revision_as_user
@@ -49,6 +50,19 @@ class Conduit(object):
         super(Conduit, self).__init__()
         self._conduit = conduit
         self._reviewstate_cache = reviewstate_cache
+
+    def describe(self):
+        """Return a string description of this conduit for a human to read.
+
+        :returns: a string
+
+        """
+        description = None
+        if self._conduit.conduit_uri:
+            description = self._conduit.conduit_uri
+        else:
+            description = 'conduit is None'
+        return description
 
     def refresh_cache_on_cycle(self):
         """Refresh the stored state of revisions and users.

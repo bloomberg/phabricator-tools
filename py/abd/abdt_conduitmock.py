@@ -17,6 +17,7 @@
 #    .users
 #    .revisions
 #   ConduitMock
+#    .describe
 #    .create_comment
 #    .refresh_cache_on_cycle
 #    .create_empty_revision_as_user
@@ -193,6 +194,14 @@ class ConduitMock(object):
         if self._data is None:
             self._data = ConduitMockData()
         phlsys_tracedecorator.decorate_object_methods(self, _mock_to_str)
+
+    def describe(self):
+        """Return a string description of this conduit for a human to read.
+
+        :returns: a string
+
+        """
+        return 'abdt_conduitmock.ConduitMock'
 
     def create_comment(self, revision, message, silent=False):
         """Make a comment on the specified 'revision'.

@@ -6,6 +6,7 @@
 # cover those concerns.
 #
 # Concerns:
+# [ A] can describe a conduit with non-empty string
 # [ B] can query users from emails that are known
 # [ B] can query users from invalid emails without error
 # [ B] can query users from unknown emails without error
@@ -85,6 +86,10 @@ class Test(unittest.TestCase):
         pass
 
     def test_A_Breathing(self):
+        # [ A] can describe a conduit with non-empty string
+        self.assertIsInstance(self.conduit.describe(), basestring)
+        self.assertGreater(len(self.conduit.describe()), 0)
+
         # generally exercise all of the conduit methods
         alice = self.test_data.ALICE.user
         bob = self.test_data.BOB.user

@@ -11,6 +11,7 @@
 #    .clear_act_as_user
 #    .get_act_as_user
 #    .get_user
+#    .conduit_uri
 #    .call
 #    .ping
 #
@@ -155,7 +156,7 @@ class ConduitException(Exception):
 SESSION_ERROR = "ERR-INVALID-SESSION"
 
 
-class Conduit():
+class Conduit(object):
 
     # TODO: make this configurable
     testUri = phldef_conduit.TEST_URI
@@ -195,6 +196,10 @@ class Conduit():
 
     def get_user(self):
         return self._username
+
+    @property
+    def conduit_uri(self):
+        return self._conduit_uri
 
     def _authenticate(self):
 
