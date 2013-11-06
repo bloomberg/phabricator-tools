@@ -19,6 +19,8 @@
 
 from __future__ import absolute_import
 
+import itertools
+
 
 def push_asymmetrical_force(clone, localBranch, remoteBranch, remoteName):
     clone.call('push', remoteName, localBranch + ":" + remoteBranch, "--force")
@@ -66,16 +68,18 @@ def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):
         ":" + old_remote)
 
 
-def delete(clone, branch, remote):
+def delete(clone, remote, branch, *args):
     """Delete 'branch' from the specified remote.
 
     :clone: supports call()
-    :branch: string name of the branch
     :remote: string name of the remote
+    :branch: string name of the branch
+    :*args: (optional) more string names of branches
     :returns: None
 
     """
-    clone.call('push', remote, ":" + branch)
+    removals = [':' + b for b in itertools.chain([branch], args)]
+    clone.call('push', remote, *removals)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

@@ -415,8 +415,9 @@ class Branch(object):
         _try_loop(lambda: self._clone.push(self._tracking_branch.base))
 
         _try_loop(
-            lambda: self._clone.push_delete(self._tracking_branch.branch))
-        _try_loop(lambda: self._clone.push_delete(self.review_branch_name()))
+            lambda: self._clone.push_delete(
+                self._tracking_branch.branch,
+                self.review_branch_name()))
 
         abdt_landinglog.prepend(
             self._clone, review_hash, self.review_branch_name(), landing_hash)

@@ -167,14 +167,15 @@ class Clone(object):
         """
         phlgit_push.push(self._clone, branch, self._remote)
 
-    def push_delete(self, branch):
+    def push_delete(self, branch, *args):
         """Delete 'branch' from the remote.
 
         :branch: string name of the branch
+        :*args: (optional) more string names of branches
         :returns: None
 
         """
-        phlgit_push.delete(self._clone, branch, self._remote)
+        phlgit_push.delete(self._clone, self._remote, branch, *args)
 
     def set_name_email(self, name, email):
         """Return output from Git performing a squash merge.
