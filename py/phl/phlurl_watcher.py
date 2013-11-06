@@ -41,8 +41,10 @@ class Watcher(object):
                     hash_hexdigest, False)
             return old_result
         content = phlurl_request.get(url)
+        # pylint: disable=E1101
         self._results[url] = _HashHexdigestHasChanged(
             hashlib.sha1(content).hexdigest(), False)
+        # pylint: enable=E1101
         return True
 
     def refresh(self):
@@ -59,7 +61,9 @@ class Watcher(object):
             # Note that if you do try to compare hash objects then it seems to
             # do the 'is' comparison rather than 'is equal to'
             #
+            # pylint: disable=E1101
             new_hash = hashlib.sha1(contents).hexdigest()
+            # pylint: enable=E1101
             old_hash = old_result.hash_hexdigest
             has_changed = old_result.has_changed or (new_hash != old_hash)
 
