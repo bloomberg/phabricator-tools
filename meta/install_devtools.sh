@@ -1,4 +1,5 @@
 set -e  # exit on error
+sudo apt-get install pylint
 sudo apt-get install pychecker
 sudo apt-get install python-pip
 sudo pip install nose

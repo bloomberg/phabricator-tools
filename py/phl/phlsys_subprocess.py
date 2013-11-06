@@ -110,7 +110,14 @@ def run(*args, **kwargs):
         sys.stderr.write(
             "OSError: unable to locate command: {0}\n".format(" ".join(cmd)))
         raise
-    if (p.returncode != 0):
+
+    # pylint has faulty detection of POpen members:
+    # http://www.logilab.org/ticket/46273
+    # pylint: disable=E1101
+    returncode = p.returncode  # pylint: disable=E1101
+    # pylint: enable=E1101
+
+    if (returncode != 0):
         error_msg = "cmd: {0}\n".format(" ".join(cmd))
         if workingDir:
             error_msg += "workingDir: {0}\n".format(workingDir)
@@ -123,7 +130,7 @@ def run(*args, **kwargs):
             stdin=stdin,
             stdout=out,
             stderr=err,
-            exitcode=p.returncode,
+            exitcode=returncode,
             workingdir=workingDir)
     return RunResult(stdout=out, stderr=err)
 

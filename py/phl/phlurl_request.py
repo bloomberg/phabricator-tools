@@ -97,6 +97,9 @@ def split_url(url):
     """
     original_url = url
     url = urlparse.urlsplit(url)
+
+    # pylint: disable=E1103
+    # pylint doesn't seem to know the members of SplitResult
     if url.query:
         path = '?'.join([url.path, url.query])
     else:
@@ -104,6 +107,7 @@ def split_url(url):
 
     return SplitUrlResult(
         original_url, url.scheme, url.hostname, url.port, path)
+    # pylint: enable=E1103
 
 
 def group_urls(url_list):

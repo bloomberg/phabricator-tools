@@ -20,6 +20,14 @@ libscripts=$(find py/ -iname '*.py' |  tr '\n' ' ')
 allscripts="$(ls bin/* proto/* meta/docgen/*.py meta/autofix/*.py) $libscripts"
 
 ###############################################################################
+# pylint
+###############################################################################
+PYTHONPATH=py/phl pylint \
+    --rcfile=.pylint.rc \
+    --errors-only \
+    py/abd/*.py py/aon/*.py py/bar/*.py py/phl/*.py py/pig/*.py
+
+###############################################################################
 # pychecker
 ###############################################################################
 
@@ -31,17 +39,6 @@ PYTHONPATH=py/phl pychecker \
     --no-deprecated \
     --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
     py/abd/*.py py/aon/*.py py/bar/*.py py/phl/*.py py/pig/*.py
-
-###############################################################################
-# pylint
-###############################################################################
-# disabled for now, doesn't seem to add significant value; recent work looks
-# interesting though
-#
-# pylint \
-#     --errors-only \
-#     py/abd/*.py py/aon/*.py py/bar/*.py py/phl/*.py py/pig/*.py
-#
 
 ###############################################################################
 # flake8
