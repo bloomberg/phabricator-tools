@@ -23,7 +23,6 @@
 from __future__ import absolute_import
 
 import phlcon_differential
-import phlsys_tryloop
 
 import abdcmnt_commenter
 import abdt_branch
@@ -101,11 +100,8 @@ def create_differential_review(conduit, user, parsed, branch, raw_diff):
     print "- creating revision"
     revision_id = conduit.create_revision_as_user(
         raw_diff, parsed.fields, user)
-
     print "- created " + str(revision_id)
-    phlsys_tryloop.try_loop_delay(
-        lambda: branch.mark_ok_new_review(revision_id),
-        phlsys_tryloop.make_default_short_retry())
+    branch.mark_ok_new_review(revision_id)
 
     print "- commenting on " + str(revision_id)
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
