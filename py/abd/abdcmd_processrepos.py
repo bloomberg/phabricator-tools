@@ -28,19 +28,19 @@ from __future__ import absolute_import
 import argparse
 import contextlib
 import functools
-import logging
 import os
 import sys
 import time
 
 import phlsys_scheduleunreliables
 import phlsys_statusline
-import phlsys_tryloop
 import phlurl_watcher
 
 import abdi_processargs
 import abdt_arcydreporter
+import abdt_logging
 import abdt_shareddictoutput
+import abdt_tryloop
 
 
 def getFromfilePrefixChars():
@@ -111,18 +111,6 @@ class DelayedRetrySleepOperation(object):
         return True
 
 
-def _critical_tryloop(f, identifier, detail, reporter):
-    def on_tryloop_exception(e, delay):
-        reporter.on_tryloop_exception(e, delay)
-        reporter.log_system_exception(identifier, detail, e)
-        logging.error(str(e) + "\nwill wait " + str(delay))
-
-    delays = phlsys_tryloop.make_default_endless_retry()
-
-    phlsys_tryloop.try_loop_delay(
-        f, delays, onException=on_tryloop_exception)
-
-
 class RefreshCachesOperation(object):
 
     def __init__(self, conduits, url_watcher, reporter):
@@ -137,15 +125,14 @@ class RefreshCachesOperation(object):
         with self._reporter.tag_timer_context('refresh conduit cache'):
             for key in self._conduits:
                 conduit = self._conduits[key]
-                _critical_tryloop(
+                abdt_tryloop.critical_tryloop(
                     conduit.refresh_cache_on_cycle,
                     "conduit-refresh",
-                    conduit.describe(),
-                    self._reporter)
+                    conduit.describe())
 
         with self._reporter.tag_timer_context('refresh git watcher'):
-            _critical_tryloop(
-                self._url_watcher.refresh, 'git-snoop', '', self._reporter)
+            abdt_tryloop.critical_tryloop(
+                self._url_watcher.refresh, 'git-snoop', '')
 
         self._reporter.finish_cache_refresh()
         return True
@@ -193,10 +180,6 @@ def tryHandleSpecialFiles(f, on_exception_delay):
 
 def process(args):
 
-    # XXX: catch all exceptions at this level
-    # XXX: catch all exceptions at this level
-    # XXX: catch all exceptions at this level
-
     abdi_processargs.setup_sigterm_handler()
     abdi_processargs.configure_sendmail(args)
 
@@ -206,7 +189,8 @@ def process(args):
     on_exception = abdi_processargs.make_exception_message_handler(
         args, reporter, None, "arcyd stopped with exception", "")
 
-    with contextlib.closing(reporter):
+    arcyd_reporter_context = abdt_logging.arcyd_reporter_context
+    with contextlib.closing(reporter), arcyd_reporter_context(reporter):
 
         try:
             _process(args, reporter)

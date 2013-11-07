@@ -22,6 +22,7 @@
 #    .get_repo_name
 #    .get_browse_url
 #    .get_clone
+#    .describe
 #    .make_message_digest
 #    .make_raw_diff
 #    .verify_review_branch_base
@@ -269,6 +270,10 @@ class BranchMock(object):
     def get_clone(self):
         """Return the abdt_clone for this branch."""
         assert False
+
+    def describe(self):
+        """Return a string description of this branch for a human to read."""
+        return "description!"
 
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.

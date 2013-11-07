@@ -21,6 +21,7 @@
 #    .get_repo_name
 #    .get_browse_url
 #    .get_clone
+#    .describe
 #    .make_message_digest
 #    .make_raw_diff
 #    .verify_review_branch_base
@@ -45,11 +46,8 @@
 
 from __future__ import absolute_import
 
-import logging
-
 import phlgit_log
 import phlgit_revparse
-import phlsys_tryloop
 
 import abdt_differ
 import abdt_exception
@@ -57,6 +55,7 @@ import abdt_gittypes
 import abdt_lander
 import abdt_landinglog
 import abdt_naming
+import abdt_tryloop
 import abdt_workingbranch
 
 # TODO: allow this to be passed in
@@ -77,21 +76,6 @@ def calc_is_ok(branch):
         return None
 
     return not branch.is_status_bad()
-
-
-def _try_loop(f):
-    """Retry operation 'f' if it raises, give up after a few attempts.
-
-    :f: something you can call, like so - f()
-    :returns: None
-
-    """
-    def log_on_exception(e, delay):
-        logging.warning('abdt_branch._try_loop: {} - will wait {}'.format(
-            repr(e), delay))
-
-    delays = phlsys_tryloop.make_default_short_retry()
-    phlsys_tryloop.try_loop_delay(f, delays, onException=log_on_exception)
 
 
 class Branch(object):
@@ -263,6 +247,15 @@ class Branch(object):
             self._review_branch.remote_branch)
         return hashes
 
+    def describe(self):
+        """Return a string description of this branch for a human to read."""
+        branch_description = "(null branch)"
+        if not self.is_null():
+            branch_description = self.review_branch_name()
+            if self.is_abandoned():
+                branch_description += " (abandoned)"
+        return "{}, {}".format(self.get_repo_name(), branch_description)
+
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.
 
@@ -319,7 +312,7 @@ class Branch(object):
         def action():
             self._clone.push_delete(self._tracking_branch.branch)
 
-        _try_loop(action)
+        self._tryloop(action, "push-delete-tracking")
 
     def abandon(self):
         """Remove information associated with the abandoned review branch."""
@@ -339,7 +332,7 @@ class Branch(object):
                 self._make_git_context(),
                 self._review_branch,
                 self._tracking_branch)
-        _try_loop(action)
+        self._tryloop(action, "mark-bad-land")
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
@@ -348,7 +341,7 @@ class Branch(object):
                 self._make_git_context(),
                 self._review_branch,
                 self._tracking_branch)
-        _try_loop(action)
+        self._tryloop(action, "mark-bad-in-review")
 
     def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
@@ -357,7 +350,7 @@ class Branch(object):
                 self._make_git_context(),
                 self._review_branch,
                 revision_id)
-        _try_loop(action)
+        self._tryloop(action, "mark-new-bad-in-review")
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
@@ -365,7 +358,7 @@ class Branch(object):
             self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
                 self._make_git_context(),
                 self._review_branch)
-        _try_loop(action)
+        self._tryloop(action, "mark-bad-pre-review")
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
@@ -374,7 +367,7 @@ class Branch(object):
                 self._make_git_context(),
                 self._review_branch,
                 self._tracking_branch)
-        _try_loop(action)
+        self._tryloop(action, "mark-ok-in-review")
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""
@@ -383,7 +376,7 @@ class Branch(object):
                 self._make_git_context(),
                 self._review_branch,
                 revision_id)
-        _try_loop(action)
+        self._tryloop(action, "mark_ok_new_review")
 
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
@@ -412,12 +405,15 @@ class Branch(object):
         landing_hash = phlgit_revparse.get_sha1(
             self._clone, self._tracking_branch.base)
 
-        _try_loop(lambda: self._clone.push(self._tracking_branch.base))
+        self._tryloop(
+            lambda: self._clone.push(self._tracking_branch.base),
+            "push-landed-base")
 
-        _try_loop(
+        self._tryloop(
             lambda: self._clone.push_delete(
                 self._tracking_branch.branch,
-                self.review_branch_name()))
+                self.review_branch_name()),
+            "push-delete-landed")
 
         abdt_landinglog.prepend(
             self._clone, review_hash, self.review_branch_name(), landing_hash)
@@ -425,9 +421,10 @@ class Branch(object):
         # XXX: don't push the ref for now, not every repo will allow us to
         #      write to refs/arcyd/*, we'll still accumulate the log in case
         #      this changes.
-        # _try_loop(
+        # self._tryloop(
         #     lambda: abdt_landinglog.push_log(
-        #         self._clone, self._clone.get_remote()))
+        #         self._clone, self._clone.get_remote()),
+        #     "push-landinglog")
 
         self._review_branch = None
         self._tracking_branch = None
@@ -437,6 +434,9 @@ class Branch(object):
     def _make_git_context(self):
         return abdt_gittypes.GitContext(
             self._clone, self._clone.get_remote(), branches=None)
+
+    def _tryloop(self, f, identifier):
+        return abdt_tryloop.tryloop(f, identifier, self.describe())
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

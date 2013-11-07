@@ -167,6 +167,7 @@ def assert_branch_is_new(fixture, branch, branch_name, base):
     fixture.assertEqual(branch.base_branch_name(), base)
     fixture.assertEqual(branch.review_branch_name(), branch_name)
     fixture.assertIsNone(branch.review_id_or_none())
+    branch.describe()  # exercise 'describe'
 
 
 def assert_branch_bad_pre_review(fixture, branch, branch_name, base, rev_id):
@@ -207,6 +208,7 @@ def assert_branch_is_active(fixture, branch, branch_name, base, rev_id):
         fixture.assertIsNone(branch.review_id_or_none())
     else:
         fixture.assertEqual(branch.review_id_or_none(), rev_id)
+    branch.describe()  # exercise 'describe'
 
 
 #------------------------------------------------------------------------------
