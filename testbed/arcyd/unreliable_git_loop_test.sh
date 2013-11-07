@@ -5,4 +5,4 @@
 # cd to the dir of this script, so paths are relative
 cd "$(dirname "$0")"
 
-./_loop.sh "$(pwd)/../../proto/arcyd"
+./_loop.sh "python $(pwd)/bad_git_push_arcyd.py"
