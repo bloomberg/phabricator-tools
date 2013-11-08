@@ -418,13 +418,10 @@ class Branch(object):
         abdt_landinglog.prepend(
             self._clone, review_hash, self.review_branch_name(), landing_hash)
 
-        # XXX: don't push the ref for now, not every repo will allow us to
-        #      write to refs/arcyd/*, we'll still accumulate the log in case
-        #      this changes.
-        # self._tryloop(
-        #     lambda: abdt_landinglog.push_log(
-        #         self._clone, self._clone.get_remote()),
-        #     "push-landinglog")
+        self._tryloop(
+            lambda: abdt_landinglog.push_log(
+                self._clone, self._clone.get_remote()),
+            "push-landinglog")
 
         self._review_branch = None
         self._tracking_branch = None
