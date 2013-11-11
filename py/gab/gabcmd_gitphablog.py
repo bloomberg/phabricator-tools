@@ -63,6 +63,12 @@ FIELDS_TEXT = [
 ALL_VALID_FIELDS = FIELDS_LISTS + FIELDS_SINGLE_VALUE + FIELDS_TEXT
 
 
+def _get_set_or_none(list_or_none):
+    if list_or_none is not None:
+        list_or_none = set(list_or_none)
+    return list_or_none
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -95,7 +101,27 @@ def parse_args():
         action='store_true',
         help="show only revisions that were not Phabricator-reviewed")
 
-    return parser.parse_args()
+    parser.add_argument(
+        '--approved-by-any-of',
+        metavar='USERNAME',
+        type=str,
+        nargs='+',
+        help="show only Phabricator-reviewed revisions approved by these.")
+
+    parser.add_argument(
+        '--approved-by-none-of',
+        metavar='USERNAME',
+        type=str,
+        nargs='+',
+        help="show only revisions not approved by these.")
+
+    args = parser.parse_args()
+
+    # these lists need to be sets for correctness and performance
+    args.approved_by_any_of = _get_set_or_none(args.approved_by_any_of)
+    args.approved_by_none_of = _get_set_or_none(args.approved_by_none_of)
+
+    return args
 
 
 def main():
@@ -128,11 +154,29 @@ def main():
 def passes_filters(args, revision, fields):
     is_phab_reviewed = 'differential revision' in fields
 
+    # approved_by should be a set of approvers or None
+    approved_by = fields.get('reviewed by', None)
+    if is_phab_reviewed:
+        if approved_by is not None:
+            approved_by = set(approved_by)
+    else:
+        approved_by = None
+
     if args.only_phab_reviewed and not is_phab_reviewed:
         return False
 
     if args.no_phab_reviewed and is_phab_reviewed:
         return False
+
+    required_approvers = args.approved_by_any_of
+    if required_approvers:
+        if not approved_by or not approved_by.issubset(required_approvers):
+            return False
+
+    banned_approvers = args.approved_by_none_of
+    if banned_approvers:
+        if approved_by and not approved_by.isdisjoint(banned_approvers):
+            return False
 
     return True
 
