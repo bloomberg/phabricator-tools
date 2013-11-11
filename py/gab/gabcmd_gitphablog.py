@@ -84,17 +84,16 @@ def parse_args():
         type=argparse.FileType('r'),
         help="optional file to read list of commit from, use '-' to read from "
              "stdin")
-#
-#     parser.add_argument(
-#         '--only-phab-reviewed',
-#         action='store_true',
-#         help="show only Phabricator-reviewed revisions")
-#
-#     parser.add_argument(
-#         '--no-phab-reviewed',
-#         action='store_true',
-#         help="show only revisions that were not Phabricator-reviewed")
-#
+
+    parser.add_argument(
+        '--only-phab-reviewed',
+        action='store_true',
+        help="show only Phabricator-reviewed revisions")
+
+    parser.add_argument(
+        '--no-phab-reviewed',
+        action='store_true',
+        help="show only revisions that were not Phabricator-reviewed")
 
     return parser.parse_args()
 
@@ -104,6 +103,9 @@ def main():
 
     for revision in get_revision_generator(args):
         fields = parse_fields(revision.message)
+
+        if not passes_filters(args, revision, fields):
+            continue
 
         # all bets are off if there's no differential revision
         review_url = fields.get('differential revision', None)
@@ -121,6 +123,18 @@ def main():
             commit_hash=revision.abbrev_hash,
             review_url=review_url,
             reviewer=reviewed_by)
+
+
+def passes_filters(args, revision, fields):
+    is_phab_reviewed = 'differential revision' in fields
+
+    if args.only_phab_reviewed and not is_phab_reviewed:
+        return False
+
+    if args.no_phab_reviewed and is_phab_reviewed:
+        return False
+
+    return True
 
 
 def get_revision_generator(args):
