@@ -43,6 +43,7 @@ import string
 Revision = collections.namedtuple(
     "phlgit_log__Revision", [
         'hash',
+        'abbrev_hash',
         'author_email', 'author_name',
         'committer_email', 'committer_name',
         'subject',
@@ -158,19 +159,20 @@ def make_revision_from_full_message(message):
 
     Raise an Exception if the message doesn't parse successfully.
 
-    :message: from 'git log HEAD^! --format:"%H%n%ae%n%an%n%ce%n%cn%n%s%n%b"'
+    :message: 'git log HEAD^! --format:"%H%n%h%n%ae%n%an%n%ce%n%cn%n%s%n%b"'
     :returns: a 'phlgit_log__Revision'
 
     """
     lines = message.splitlines()
     return Revision(
         hash=lines[0],
-        author_email=lines[1],
-        author_name=lines[2],
-        committer_email=lines[3],
-        committer_name=lines[4],
-        subject=lines[5],
-        message='\n'.join(lines[6:]))
+        abbrev_hash=lines[1],
+        author_email=lines[2],
+        author_name=lines[3],
+        committer_email=lines[4],
+        committer_name=lines[5],
+        subject=lines[6],
+        message='\n'.join(lines[7:]))
 
 
 def make_revision_from_hash(clone, commitHash):
@@ -183,7 +185,7 @@ def make_revision_from_hash(clone, commitHash):
     :returns: a 'phlgit_log__Revision' based on the 'commitHash'
 
     """
-    fmt = "%H%n%ae%n%an%n%ce%n%cn%n%s%n%b"
+    fmt = "%H%n%h%n%ae%n%an%n%ce%n%cn%n%s%n%b"
     fullMessage = clone.call("log", commitHash + "^!", "--format=" + fmt)
     revision = make_revision_from_full_message(fullMessage)
     return revision
