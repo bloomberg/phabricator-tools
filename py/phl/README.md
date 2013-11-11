@@ -33,6 +33,8 @@ Wrapper around 'git merge'.
 Wrapper around 'git push'.
 * `phlgit_rebase.py` -
 Dependable wrapper for invocations of git rebase.
+* `phlgit_revlist.py` -
+Wrapper around 'git rev-list'.
 * `phlgit_revparse.py` -
 Wrapper around 'git rev-parse'.
 * `phlgit_show.py` -
