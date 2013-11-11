@@ -18,6 +18,7 @@ from __future__ import absolute_import
 import argparse
 import collections
 import re
+import signal
 
 import phlgit_log
 import phlgit_revlist
@@ -125,6 +126,14 @@ def parse_args():
 
 
 def main():
+    # ignore SIGPIPE or we'll be incompatible with commands like 'head'
+    #
+    # see:
+    # http://newbebweb.blogspot.co.uk/2012/02/python-head-ioerror-errno-32-
+    #                                                               broken.html
+    #
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
     args = parse_args()
 
     for revision in get_revision_generator(args):
