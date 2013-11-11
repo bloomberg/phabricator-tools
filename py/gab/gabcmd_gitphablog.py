@@ -63,7 +63,7 @@ FIELDS_TEXT = [
 ALL_VALID_FIELDS = FIELDS_LISTS + FIELDS_SINGLE_VALUE + FIELDS_TEXT
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=__doc__,
@@ -95,7 +95,35 @@ def main():
 #         action='store_true',
 #         help="show only revisions that were not Phabricator-reviewed")
 #
-    args = parser.parse_args()
+
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    for revision in get_revision_generator(args):
+        fields = parse_fields(revision.message)
+
+        # all bets are off if there's no differential revision
+        review_url = fields.get('differential revision', None)
+        if review_url is None:
+            fields = {}
+            review_url = ""
+
+        reviewed_by = fields.get('reviewed by', None)
+        if reviewed_by is not None:
+            reviewed_by = ','.join(reviewed_by)
+        else:
+            reviewed_by = ""
+
+        print "{commit_hash} {review_url} {reviewer}".format(
+            commit_hash=revision.abbrev_hash,
+            review_url=review_url,
+            reviewer=reviewed_by)
+
+
+def get_revision_generator(args):
 
     clone = phlsys_git.GitClone('.')
 
@@ -120,25 +148,7 @@ def main():
     make_rev = phlgit_log.make_revision_from_hash
     revision_generator = (make_rev(clone, commit) for commit in commit_list)
 
-    for revision in revision_generator:
-        fields = parse_fields(revision.message)
-
-        # all bets are off if there's no differential revision
-        review_url = fields.get('differential revision', None)
-        if review_url is None:
-            fields = {}
-            review_url = ""
-
-        reviewed_by = fields.get('reviewed by', None)
-        if reviewed_by is not None:
-            reviewed_by = ','.join(reviewed_by)
-        else:
-            reviewed_by = ""
-
-        print "{commit_hash} {review_url} {reviewer}".format(
-            commit_hash=revision.abbrev_hash,
-            review_url=review_url,
-            reviewer=reviewed_by)
+    return revision_generator
 
 
 def parse_fields(message_body):
