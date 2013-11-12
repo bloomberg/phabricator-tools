@@ -48,7 +48,10 @@ def render(
 
     repos = report[abdt_arcydreporter.ARCYD_REPOS]
     with formatter.singletag_context('div', class_='container'):
-        for repo in repos:
+        sorted_repos = sorted(
+            repos, key=lambda x: x[abdt_arcydreporter.REPO_ATTRIB_HUMAN_NAME])
+
+        for repo in sorted_repos:
             render_repo(base_url, repo, formatter)
 
     log_system_error = report[abdt_arcydreporter.ARCYD_LOG_SYSTEM_ERROR]
