@@ -157,7 +157,7 @@ class LandingException(AbdUserException):
 
         :message: any available error message
         :review_branch_name: name of the branch being reviewed
-        :base_name: name of the missing base branch
+        :base_name: name of the base branch
 
         """
         new_message = (
