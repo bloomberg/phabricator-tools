@@ -44,6 +44,8 @@ class Commenter(object):
         if isinstance(e, abdt_exception.AbdBaseException):
             if isinstance(e, abdt_exception.CommitMessageParseException):
                 self._commitMessageParseException(e)
+            elif isinstance(e, abdt_exception.LandingPushBaseException):
+                self._landingPushBaseException(e)
             elif isinstance(e, abdt_exception.LandingException):
                 self._landingException(e)
             elif isinstance(e, abdt_exception.LargeDiffException):
@@ -188,6 +190,34 @@ the 'edit revision' link at the top-right of the page.
             "- push to {branch}\n"
             "\n"
             "{reviewer} may then accept review with the new changes.\n"
+        ).format(
+            base=base,
+            branch=branch,
+            author=author,
+            errors=errors,
+            reviewer=reviewer)
+
+        self._createComment(message)
+
+    def _landingPushBaseException(self, e):
+        base = phlcon_remarkup.monospaced(e.base_name)
+        branch = phlcon_remarkup.monospaced(e.review_branch_name)
+        author = phlcon_remarkup.bold('author')
+        errors = phlcon_remarkup.code_block(str(e), lang="text", isBad=True)
+        reviewer = phlcon_remarkup.bold('reviewer')
+
+        message = (
+            "failed to push landed revision to {base}, see below.\n"
+            "\n"
+            "errors:\n"
+            "{errors}"
+            "this might be down to permissioning or maybe someone else "
+            "updated the branch before we pushed.\n"
+            "\n"
+            "if there's a permissioning error then please ask the admin of "
+            "this repository to resolve it before proceeding.\n"
+            "\n"
+            "{reviewer} may accept review again to retry the landing.\n"
         ).format(
             base=base,
             branch=branch,

@@ -251,6 +251,11 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
                 branch.mark_bad_land()
                 commenter.exception(e)
                 conduit.set_requires_revision(review_id)
+            except abdte.LandingPushBaseException as e:
+                print "landing push base exception"
+                # we don't need to set bad_land here, requiring revision is ok
+                commenter.exception(e)
+                conduit.set_requires_revision(review_id)
             except abdte.AbdUserException as e:
                 print "user exception"
                 branch.mark_bad_in_review()

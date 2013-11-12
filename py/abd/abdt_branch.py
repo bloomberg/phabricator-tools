@@ -405,9 +405,15 @@ class Branch(object):
         landing_hash = phlgit_revparse.get_sha1(
             self._clone, self._tracking_branch.base)
 
-        self._tryloop(
-            lambda: self._clone.push(self._tracking_branch.base),
-            "push-landed-base")
+        # don't tryloop here as it's more expected that we can't push the base
+        # due to permissioning or some other error
+        try:
+            self._clone.push(self._tracking_branch.base)
+        except Exception as e:
+            raise abdt_exception.LandingPushBaseException(
+                str(e),
+                self.review_branch_name(),
+                self._tracking_branch.base)
 
         self._tryloop(
             lambda: self._clone.push_delete(

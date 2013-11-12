@@ -300,6 +300,46 @@ function test_merge_conflict() {
     cd -
 }
 
+function test_push_error() {
+    test_name='test_push_error'
+    branch_name="arcyd-review/${test_name}/master"
+
+    # create a review branch
+    cd dev
+        git checkout -b ${branch_name} origin/master
+        echo hello > ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: ${test_name}"
+        git push origin ${branch_name}
+    cd -
+    run_arcyd
+
+    # prevent writes to origin
+    chmod -R u-w origin
+
+    # find and accept the review
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+    run_arcyd
+
+    # make sure the revision is 'Needs revision'
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Needs Revision'
+
+    # accept the review again
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+
+    # enable writes to origin and try to land again
+    chmod -R u+w origin
+    run_arcyd
+
+    # make sure the revision is closed and landed
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Closed'
+    cd dev
+        deleted_prefix='deleted.*'
+        git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
+    cd -
+}
+
 function test_empty_branch() {
     test_name='test_empty_branch'
     branch_name="arcyd-review/${test_name}/master"
@@ -359,6 +399,7 @@ test_unknown_user
 test_bad_base
 test_self_review
 test_merge_conflict
+test_push_error
 test_empty_branch
 test_branch_gc
 
