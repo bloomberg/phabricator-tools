@@ -435,6 +435,7 @@ class Branch(object):
     def _tryloop(self, f, identifier):
         return abdt_tryloop.tryloop(f, identifier, self.describe())
 
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #
