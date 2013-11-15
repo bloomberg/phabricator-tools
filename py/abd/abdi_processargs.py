@@ -299,8 +299,6 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     pluginManager = phlsys_pluginmanager.PluginManager(
         args.plugins, args.trusted_plugins)
 
-    # prepare delays in the event of trouble when fetching or connecting
-    # TODO: perhaps this policy should be decided higher-up
     arcyd_conduit = _fetch_and_connect(
         url_watcher, reporter, conduits, args, out, arcyd_reporter)
 
