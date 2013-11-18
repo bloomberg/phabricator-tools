@@ -109,7 +109,7 @@ def check_XC_MoveBetweenAllMarkedStates(fixture):
     # visit all the states reachable from bad_pre_review
     suite = {
         'initial_states': [bad_pre_review],
-        'transitions': [ok_new_review, bad_new_in_review]
+        'transitions': [ok_new_review, bad_new_in_review, bad_pre_review]
     }
     for initial in suite['initial_states']:
         for transition in suite['transitions']:

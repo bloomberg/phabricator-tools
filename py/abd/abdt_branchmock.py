@@ -350,6 +350,7 @@ class BranchMock(object):
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
         assert self.review_id_or_none() is None
+        assert self.is_status_bad_pre_review() or self.is_new()
         self._data.status = abdt_naming.WB_STATUS_BAD_PREREVIEW
         self._data.has_new_commits = False
         self._data.revision_id = None

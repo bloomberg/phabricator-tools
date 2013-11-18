@@ -352,6 +352,9 @@ class Branch(object):
         assert self.review_id_or_none() is None
 
         def action():
+            if not self.is_new():
+                # 'push_bad_new_in_review' wont clean up our existing tracker
+                self._push_delete_tracking_branch()
             self._tracking_branch = abdt_workingbranch.push_bad_new_in_review(
                 self._make_git_context(),
                 self._review_branch,
@@ -361,6 +364,7 @@ class Branch(object):
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
         assert self.review_id_or_none() is None
+        assert self.is_status_bad_pre_review() or self.is_new()
 
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
@@ -384,6 +388,9 @@ class Branch(object):
         assert self.review_id_or_none() is None
 
         def action():
+            if not self.is_new():
+                # 'push_bad_new_in_review' wont clean up our existing tracker
+                self._push_delete_tracking_branch()
             self._tracking_branch = abdt_workingbranch.push_ok_new_in_review(
                 self._make_git_context(),
                 self._review_branch,

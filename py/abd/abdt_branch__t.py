@@ -9,6 +9,7 @@
 # [XB] can test is_abandoned, is_null, is_new
 # [XC] can move between all states without error
 # [XD] can set and retrieve repo name, branch link
+# [ C] can move bad_pre_review -> 'new' states without duplicating branches
 # [  ] can detect if review branch has new commits (after ff, merge, rebase)
 # [  ] can get raw diff from branch
 # [  ] can get author names and emails from branch
@@ -35,6 +36,7 @@
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
 # [XD] check_XD_SetRetrieveRepoNameBranchLink
+# [ C] test_C_BadPreReviewToNew
 #==============================================================================
 
 from __future__ import absolute_import
@@ -44,6 +46,7 @@ import shutil
 import tempfile
 import unittest
 
+import phlgit_branch
 import phlgit_checkout
 import phlgit_commit
 import phlgit_fetch
@@ -154,6 +157,36 @@ class Test(unittest.TestCase):
         self.assertIs(branch.has_new_commits(), True)
         branch.mark_ok_in_review()
         self.assertIs(branch.has_new_commits(), False)
+
+    def test_C_BadPreReviewToNew(self):
+        # can move bad_pre_review -> 'new' states without duplicating branches
+        base, branch_name, branch = self._setup_for_untracked_branch()
+
+        transition_list = [
+            branch.mark_ok_new_review, branch.mark_new_bad_in_review
+        ]
+
+        for do_transition in transition_list:
+            branches = phlgit_branch.get_remote(self.clone_arcyd, 'origin')
+            branch.mark_bad_pre_review()
+            branches_bad_pre = phlgit_branch.get_remote(
+                self.clone_arcyd, 'origin')
+            do_transition(102)
+            branches_new = phlgit_branch.get_remote(self.clone_arcyd, 'origin')
+
+            # we expect to have gained one branch when starting to track as
+            # 'bad_pre_review'.
+            self.assertEqual(len(branches_bad_pre), len(branches) + 1)
+
+            # we expect to have the same number of branches after moving with
+            # 'mark_ok_new_review'
+            self.assertEqual(len(branches_bad_pre), len(branches_new))
+
+            # remove the tracking branch and make sure the count has gone down
+            branch.clear_mark()
+            branches_cleared = phlgit_branch.get_remote(
+                self.clone_arcyd, 'origin')
+            self.assertEqual(len(branches_cleared), len(branches))
 
     def test_XB_UntrackedBranch(self):
         abdt_branchtester.check_XB_UntrackedBranch(self)
