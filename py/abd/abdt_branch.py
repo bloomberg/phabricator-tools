@@ -424,10 +424,18 @@ class Branch(object):
         abdt_landinglog.prepend(
             self._clone, review_hash, self.review_branch_name(), landing_hash)
 
-        self._tryloop(
-            lambda: abdt_landinglog.push_log(
-                self._clone, self._clone.get_remote()),
-            "push-landinglog")
+        # push the landing log, don't care if it fails to push
+        try:
+            def push_landinglog():
+                abdt_landinglog.push_log(
+                    self._clone, self._clone.get_remote())
+
+            self._tryloop(push_landinglog, "push-landinglog")
+        except Exception:
+            # XXX: don't worry if we can't push the landinglog, this is most
+            #      likely a permissioning issue but not a showstopper.
+            #      we should probably nag on the review instead.
+            pass
 
         self._review_branch = None
         self._tracking_branch = None
