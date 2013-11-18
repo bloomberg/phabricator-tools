@@ -50,6 +50,7 @@ def create_review(conduit, branch, plugin_manager):
     used_default_test_plan = False
     removed_self_reviewer = False
 
+    # try to get phabricator to parse the commit message and give us fields
     parsed = abdt_conduitgit.getFieldsFromBranch(conduit, branch)
     if parsed.errors:
         used_default_test_plan = True
