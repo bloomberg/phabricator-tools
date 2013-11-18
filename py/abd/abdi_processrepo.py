@@ -235,7 +235,6 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
         if branch.is_status_bad_pre_review():
             print "try again to create review for " + review_branch_name
             has_new_commits = branch.has_new_commits()
-            branch.clear_mark()
             try_create_review(
                 mailer,
                 conduit,

@@ -175,7 +175,7 @@ function test_unknown_user() {
         exit 1
     fi
 
-    # update review branch as unknown user
+    # update review branch as known user
     cd dev
         git config user.name 'Bob User'
         git config user.email 'bob@server.test'
@@ -190,6 +190,9 @@ function test_unknown_user() {
         echo 'FAILED! fixed bad author didnt create a review'
         exit 1
     fi
+
+    # make sure arcyd can process the review
+    run_arcyd
 }
 
 function test_bad_base() {
