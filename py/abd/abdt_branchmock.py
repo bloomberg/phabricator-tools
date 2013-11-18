@@ -330,41 +330,39 @@ class BranchMock(object):
 
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
+        assert self.review_id_or_none() is not None
         self._data.status = abdt_naming.WB_STATUS_BAD_LAND
         self._data.has_new_commits = False
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
-        # XXX: from the existence of 'mark_new_bad_in_review' it seems like
-        #      some checking is required here
+        assert self.review_id_or_none() is not None
         self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
         self._data.has_new_commits = False
 
     def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
-        # XXX: from the existence of 'mark_bad_in_review' it seems like
-        #      some checking is required here
+        assert self.review_id_or_none() is None
         self._data.status = abdt_naming.WB_STATUS_BAD_INREVIEW
         self._data.revision_id = int(revision_id)
         self._data.has_new_commits = False
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
+        assert self.review_id_or_none() is None
         self._data.status = abdt_naming.WB_STATUS_BAD_PREREVIEW
         self._data.has_new_commits = False
         self._data.revision_id = None
 
     def mark_ok_in_review(self):
-        # XXX: from the existence of 'mark_ok_new_review' it seems like
-        #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
+        assert self.review_id_or_none() is not None
         self._data.status = abdt_naming.WB_STATUS_OK
         self._data.has_new_commits = False
 
     def mark_ok_new_review(self, revision_id):
-        # XXX: from the existence of 'mark_ok_in_review' it seems like
-        #      some checking is required here
         """Mark this version of the review branch as 'ok in review'."""
+        assert self.review_id_or_none() is None
         self._data.status = abdt_naming.WB_STATUS_OK
         self._data.revision_id = int(revision_id)
         self._data.has_new_commits = False

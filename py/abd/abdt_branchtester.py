@@ -90,7 +90,7 @@ def check_XC_MoveBetweenAllMarkedStates(fixture):
         rev_id[0] = None
         branch.mark_bad_pre_review()
         assert_branch_bad_pre_review(
-            fixture, branch, branch_name, base, rev_id[0])
+            fixture, branch, branch_name, base)
 
     def bad_in_review():
         branch.mark_bad_in_review()
@@ -106,19 +106,37 @@ def check_XC_MoveBetweenAllMarkedStates(fixture):
         branch.mark_bad_land()
         assert_branch_bad_land(fixture, branch, branch_name, base, rev_id[0])
 
-    initial_states = [ok_new_review, bad_new_in_review, bad_pre_review]
-    transitions = [bad_in_review, ok_in_review, bad_land]
+    # visit all the states reachable from bad_pre_review
+    suite = {
+        'initial_states': [bad_pre_review],
+        'transitions': [ok_new_review, bad_new_in_review]
+    }
+    for initial in suite['initial_states']:
+        for transition in suite['transitions']:
+            print '', initial.__name__
+            print '', transition.__name__
+            initial()
+            print 'rev_id', branch.review_id_or_none()
+            transition()
+            branch.clear_mark()
 
-    for initial in initial_states:
-        for transition1 in transitions:
-            for transition2 in transitions:
+    # visit all the states reachable from the initial in_review states
+    # travel between each of the non-'new' in_review states
+    suite = {
+        'initial_states': [ok_new_review, bad_new_in_review],
+        'transitions': [bad_in_review, ok_in_review, bad_land]
+    }
+    for initial in suite['initial_states']:
+        for transition1 in suite['transitions']:
+            for transition2 in suite['transitions']:
+                print '', initial.__name__
+                print '', transition1.__name__
+                print '', transition2.__name__
                 initial()
-                print rev_id[0]
+                print 'rev_id', branch.review_id_or_none()
                 transition1()
                 transition2()
-                # print '', initial.__name__
-                # print '', transition1.__name__
-                # print '', transition2.__name__
+                branch.clear_mark()
 
 
 def check_XD_SetRetrieveRepoNameBranchLink(fixture):
@@ -170,11 +188,11 @@ def assert_branch_is_new(fixture, branch, branch_name, base):
     branch.describe()  # exercise 'describe'
 
 
-def assert_branch_bad_pre_review(fixture, branch, branch_name, base, rev_id):
+def assert_branch_bad_pre_review(fixture, branch, branch_name, base):
     fixture.assertIs(branch.is_status_bad_pre_review(), True)
     fixture.assertIs(branch.is_status_bad_land(), False)
     fixture.assertIs(branch.is_status_bad(), True)
-    assert_branch_is_active(fixture, branch, branch_name, base, rev_id)
+    assert_branch_is_active(fixture, branch, branch_name, base, None)
 
 
 def assert_branch_bad_in_review(fixture, branch, branch_name, base, rev_id):

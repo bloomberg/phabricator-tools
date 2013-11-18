@@ -327,6 +327,8 @@ class Branch(object):
 
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
+        assert self.review_id_or_none() is not None
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_land(
                 self._make_git_context(),
@@ -336,6 +338,8 @@ class Branch(object):
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
+        assert self.review_id_or_none() is not None
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_in_review(
                 self._make_git_context(),
@@ -345,6 +349,8 @@ class Branch(object):
 
     def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
+        assert self.review_id_or_none() is None
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_new_in_review(
                 self._make_git_context(),
@@ -354,6 +360,8 @@ class Branch(object):
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
+        assert self.review_id_or_none() is None
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
                 self._make_git_context(),
@@ -362,6 +370,8 @@ class Branch(object):
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
+        assert self.review_id_or_none() is not None
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_ok_in_review(
                 self._make_git_context(),
@@ -371,6 +381,8 @@ class Branch(object):
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""
+        assert self.review_id_or_none() is None
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_ok_new_in_review(
                 self._make_git_context(),
