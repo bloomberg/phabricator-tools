@@ -155,7 +155,7 @@ def main():
     for revision in get_revision_generator(args):
         fields = parse_fields(revision.message)
 
-        if not passes_filters(args, revision, fields):
+        if not passes_filters(args, fields):
             continue
 
         # all bets are off if there's no differential revision
@@ -176,7 +176,7 @@ def main():
             reviewer=reviewed_by)
 
 
-def passes_filters(args, revision, fields):
+def passes_filters(args, fields):
     is_phab_reviewed = 'differential revision' in fields
 
     # approved_by should be a set of approvers or None
