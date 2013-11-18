@@ -9,37 +9,33 @@
 
 set -e # exit immediately on error
 
+# cd to the dir of this script, so we can run scripts in the same dir
+cd "$(dirname "$0")"
+
 ###############################################################################
 # update 'contents block' documentation at the top of each component
 ###############################################################################
 
 python meta/docgen/updatemodcontents.py \
     --force-insert \
-    `find py/phl py/abd py/aon py/bar py/pig meta/docgen meta/autofix -iname '*.py' | grep -v __t`
+    `find py/ meta/docgen meta/autofix -iname '*.py' | grep -v __t`
 
 ###############################################################################
 # update package group documentation .md files
 ###############################################################################
 
-function write_group_doc {
-    group=$1
-    dir="py/$group"
-    mdfile="py/$group/README.md"
-    echo "# $group" > $mdfile
+for dir in $(find py/ -mindepth 1 -maxdepth 1 -type d); do
+    group=$(basename "${dir}")
+    mdfile="${dir}/README.md"
+    echo "# ${group}" > ${mdfile}
     python meta/docgen/genmoddoc.py \
         --docfile - \
-        `find $dir -iname '*.py' | grep -v __t` \
-        >> $mdfile
-    echo >> $mdfile
-    echo '-----' >> $mdfile
-    echo '*please note: this file is generated, edits will be lost*' >> $mdfile
-}
-
-write_group_doc abd
-write_group_doc aon
-write_group_doc bar
-write_group_doc phl
-write_group_doc pig
+        `find ${dir} -iname '*.py' | grep -v __t` \
+        >> ${mdfile}
+    echo >> ${mdfile}
+    echo '-----' >> ${mdfile}
+    echo '*please note: this file is generated, edits will be lost*' >> ${mdfile}
+done
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

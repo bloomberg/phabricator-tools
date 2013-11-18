@@ -9,6 +9,22 @@ or calculated from commits that you provide as parameters.
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
+# gabcmd_gitphablog
+#
+# Public Functions:
+#   parse_args
+#   main
+#   passes_filters
+#   get_revision_generator
+#   parse_fields
+#   parse_valid_fields
+#
+# Public Assignments:
+#   FIELDS_LISTS
+#   FIELDS_SINGLE_VALUE
+#   FIELDS_TEXT
+#   ALL_VALID_FIELDS
+#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
