@@ -297,8 +297,8 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     pluginManager = phlsys_pluginmanager.PluginManager(
         args.plugins, args.trusted_plugins)
 
-    arcyd_conduit = _fetch_and_connect(
-        url_watcher, conduits, args, out, arcyd_reporter)
+    _fetch(url_watcher, args, out, arcyd_reporter)
+    arcyd_conduit = _connect(conduits, args, arcyd_reporter)
 
     out.display("process (" + args.repo_desc + "): ")
 
@@ -331,8 +331,7 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     reporter.on_completed()
 
 
-def _fetch_and_connect(
-        url_watcher, conduits, args, out, arcyd_reporter):
+def _fetch(url_watcher, args, out, arcyd_reporter):
 
     def prune_and_fetch():
         phlsys_subprocess.run_commands("git remote prune origin")
@@ -346,6 +345,9 @@ def _fetch_and_connect(
             with arcyd_reporter.tag_timer_context('git fetch'):
                 abdt_tryloop.tryloop(
                     prune_and_fetch, 'fetch/prune', args.repo_desc)
+
+
+def _connect(conduits, args, arcyd_reporter):
 
     key = (
         args.instance_uri, args.arcyd_user, args.arcyd_cert, args.https_proxy)
