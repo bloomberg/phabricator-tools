@@ -111,7 +111,12 @@ the 'edit revision' link at the top-right of the page.
         message = "user deleted branch "
         message += phlcon_remarkup.monospaced(branch_name) + " "
         message += "which was linked to this review.\n"
-        message += "this review is now abandoned."
+        message += "\n"
+        message += "if this review is accepted then nothing will be landed "
+        message += "because there is no associated branch.\n"
+        message += "\n"
+        message += "if the branch is pushed again, then a completely new "
+        message += "review will be created.\n"
         self._createComment(message, silent=True)
 
     def usedDefaultTestPlan(self, branch_name, test_plan):
