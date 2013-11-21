@@ -155,6 +155,9 @@ function test_unknown_user() {
     test_name='test_unknown_user'
     branch_name="arcyd-review/${test_name}/master"
 
+    # record the id of the last review, so we can see if we create a new one or not
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+
     # create a review branch as unknown user
     cd dev
         git fetch
