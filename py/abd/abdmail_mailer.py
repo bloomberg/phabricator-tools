@@ -50,12 +50,44 @@ class Mailer(object):
 
             If you appear in the 'unknown emails' list then
             please register by visiting this link, simply
-            logging in will resolve the issue:
+            logging in and registering your email address will
+            resolve the issue:
 
                 {uri}
 
             You are receiving this message because you are
             either in the unknown email list or an admin.
+
+            If want to / have to use a different email address
+            to register with Phabricator then you will need to
+            ensure the latest commit on your branch uses the
+            correct email address.
+
+            You can view your email address like so:
+
+                $ git config --global user.email
+
+            and set it like so:
+
+                $ git config --global user.email "name@server.test"
+
+            If you only want to change your email address
+            for the git repo you are currently in, then
+            drop the '--global' bit:
+
+                $ git config user.email "name@server.test"
+
+            You'll should push the branches again but with
+            a commit that use the right email address.
+            The no-fuss way to do this is the following:
+
+                $ git checkout {branch}
+                $ git commit --reuse-message=HEAD --reset-author --allow-empty
+                $ git push origin {branch}
+
+            This will copy the message from the last commit
+            on the branch and create a new, empty commit
+            with the new authorship information.
         """).format(
             repo=self._repository_name,
             branch=branch_name,
