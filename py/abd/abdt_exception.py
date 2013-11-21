@@ -72,19 +72,22 @@ class AbdSystemException(AbdBaseException):
 
 class MissingBaseException(AbdUserException):
 
-    def __init__(self, review_branch_name, base_name):
+    def __init__(self, review_branch_name, description, base_name):
         """Branch which the review branch is based on does not exist.
 
         :review_branch_name: name of the branch being reviewed
+        :description: description part of the branch
         :base_name: name of the missing base branch
 
         """
         message = (
             "abdt_exception__MissingBaseException:\n" +
             "review_branch_name: '" + str(review_branch_name) + "'\n" +
+            "description: '" + str(description) + "'\n" +
             "base_name: '" + str(base_name) + "'\n")
         super(MissingBaseException, self).__init__(message)
         self.review_branch_name = review_branch_name
+        self.description = description
         self.base_name = base_name
 
 

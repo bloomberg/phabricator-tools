@@ -296,10 +296,11 @@ class BranchMock(object):
 
     def verify_review_branch_base(self):
         """Raise exception if review branch has invalid base."""
-        """Raise exception if review branch has invalid base."""
         if not self._data.is_base_ok:
             raise abdt_exception.MissingBaseException(
-                self._data.review_branch, self._data.base_branch)
+                self._data.review_branch,
+                'description',
+                self._data.base_branch)
 
         # TODO: also test raising AbdUserException
         # if not self._is_based_on(

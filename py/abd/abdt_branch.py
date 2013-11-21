@@ -292,7 +292,9 @@ class Branch(object):
         """Raise exception if review branch has invalid base."""
         if self._review_branch.base not in self._clone.get_remote_branches():
             raise abdt_exception.MissingBaseException(
-                self._review_branch.branch, self._review_branch.base)
+                self._review_branch.branch,
+                self._review_branch.description,
+                self._review_branch.base)
         if not self._is_based_on(
                 self._review_branch.branch, self._review_branch.base):
             raise abdt_exception.AbdUserException(

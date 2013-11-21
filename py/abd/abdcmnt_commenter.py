@@ -50,6 +50,8 @@ class Commenter(object):
                 self._landingException(e)
             elif isinstance(e, abdt_exception.LargeDiffException):
                 self._diffException(e)
+            elif isinstance(e, abdt_exception.MissingBaseException):
+                self._missingBaseException(e)
             else:
                 self._userException(e)
         else:
@@ -241,6 +243,37 @@ the 'edit revision' link at the top-right of the page.
         message += "summary:\n"
         message += phlcon_remarkup.code_block(
             str(e.diff_summary), lang="text", isBad=True)
+
+        self._createComment(message)
+
+    def _missingBaseException(self, e):
+        field_table = phlcon_remarkup.dict_to_table({
+            'description': e.description,
+            'base': e.base_name})
+        remove_instructions = phlcon_remarkup.code_block(
+            "git push origin :{branch}".format(branch=e.review_branch_name),
+            lang="shell")
+        message = (
+            "the specified base branch does not exist: {base}\n"
+            "\n"
+            "the 'base' is the branch to diff against and to land on when "
+            "the review is approved.\n"
+            "\n"
+            "here's how the branch name {branch} was interpreted:\n"
+            "{field_table}\n"
+            "as author you should clean up like so:\n"
+            "\n"
+            "- abandon this review using the 'comment' drop down at the "
+            "bottom of this page.\n"
+            "- remove the associated review branch like so:\n"
+            "{remove_instructions}\n"
+            "in the future please ensure that the base branch exists "
+            "before creating a review to land on it."
+        ).format(
+            base=phlcon_remarkup.monospaced(e.base_name),
+            branch=phlcon_remarkup.monospaced(e.review_branch_name),
+            field_table=field_table,
+            remove_instructions=remove_instructions)
 
         self._createComment(message)
 
