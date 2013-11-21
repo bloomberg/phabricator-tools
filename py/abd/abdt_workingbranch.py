@@ -94,7 +94,7 @@ def _push_new_status_branch(gitContext, review_branch, status, revision_id):
     working_branch = abdt_gittypes.makeGitWorkingBranch(
         working_branch, gitContext.remote)
 
-    phlgit_push.push_asymmetrical(
+    phlgit_push.push_asymmetrical_force(
         clone,
         phlgitu_ref.make_remote(review_branch.branch, remote),
         phlgitu_ref.make_local(working_branch_name),

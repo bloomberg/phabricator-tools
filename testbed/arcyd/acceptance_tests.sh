@@ -178,6 +178,16 @@ function test_unknown_user() {
         exit 1
     fi
 
+    # update review branch as another unknown user, use amend so that
+    # if Arcyd doesn't force push the tracking branch then it will fail
+    cd dev
+        git config user.name 'Other Unknown User'
+        git config user.email 'other.unknown@server.test'
+        git commit --amend --reset-author --no-edit
+        git push origin ${branch_name} --force
+    cd -
+    run_arcyd
+
     # update review branch as known user
     cd dev
         git config user.name 'Bob User'
