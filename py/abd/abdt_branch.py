@@ -368,6 +368,10 @@ class Branch(object):
         assert self.review_id_or_none() is None
         assert self.is_status_bad_pre_review() or self.is_new()
 
+        # early out if this operation is redundant, pushing is expensive
+        if self.is_status_bad_pre_review() and not self.has_new_commits():
+            return
+
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
                 self._make_git_context(),
