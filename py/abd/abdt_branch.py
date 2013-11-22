@@ -22,6 +22,7 @@
 #    .get_browse_url
 #    .get_clone
 #    .describe
+#    .describe_new_commits
 #    .make_message_digest
 #    .make_raw_diff
 #    .verify_review_branch_base
@@ -255,6 +256,26 @@ class Branch(object):
             if self.is_abandoned():
                 branch_description += " (abandoned)"
         return "{}, {}".format(self.get_repo_name(), branch_description)
+
+    def describe_new_commits(self):
+        """Return a string description of the new commits on the branch."""
+        hashes = None
+        previous = None
+        latest = self._review_branch.remote_branch
+
+        if self.is_new():
+            previous = self._review_branch.remote_base
+        else:
+            previous = self._tracking_branch.remote_branch
+
+        hashes = self._clone.get_range_hashes(previous, latest)
+        hashes.reverse()
+        revisions = self._clone.make_revisions_from_hashes(hashes)
+
+        message = ""
+        for r in revisions:
+            message += r.abbrev_hash + " " + r.subject + "\n"
+        return message
 
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.

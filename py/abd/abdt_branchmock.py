@@ -23,6 +23,7 @@
 #    .get_browse_url
 #    .get_clone
 #    .describe
+#    .describe_new_commits
 #    .make_message_digest
 #    .make_raw_diff
 #    .verify_review_branch_base
@@ -274,6 +275,10 @@ class BranchMock(object):
     def describe(self):
         """Return a string description of this branch for a human to read."""
         return "description!"
+
+    def describe_new_commits(self):
+        """Return a string description of the new commits on the branch."""
+        return "new commits description!"
 
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.

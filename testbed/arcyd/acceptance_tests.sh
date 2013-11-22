@@ -152,6 +152,19 @@ function test_happy_path() {
     cd -
     run_arcyd
 
+    # update the review branch
+    cd dev
+        echo au reviour > ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: ${test_name} - commit 3"
+        echo adio > ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: ${test_name} - commit 4"
+        git push origin ${branch_name}
+        git branch -r | grep "origin/${branch_name}"
+    cd -
+    run_arcyd
+
     # find and accept the review
     revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
     ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}

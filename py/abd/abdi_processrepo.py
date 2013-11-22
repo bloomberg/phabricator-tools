@@ -150,7 +150,10 @@ def update_in_review(conduit, branch):
     review_id_str = str(review_id)
 
     print "- updating revision " + review_id_str
-    conduit.update_revision(review_id, rawDiff, "update")
+    conduit.update_revision(
+        review_id,
+        rawDiff,
+        '``` lang=text\n' + branch.describe_new_commits() + '```')
 
     branch.mark_ok_in_review()
 

@@ -105,9 +105,11 @@ class Test(unittest.TestCase):
         self.assertIs(branch.has_new_commits(), False)
         phlgit_fetch.all_prune(self.clone_arcyd)
         self.assertIs(branch.has_new_commits(), True)
+        branch.describe_new_commits()  # just exercise
         self.assertIn(filename, branch.make_raw_diff())
         branch.mark_ok_in_review()
         self.assertIs(branch.has_new_commits(), False)
+        branch.describe_new_commits()  # just exercise
 
         # exercise queries a bit
         self.assertIn(filename, branch.make_raw_diff())
@@ -155,6 +157,7 @@ class Test(unittest.TestCase):
         self.assertIs(branch.has_new_commits(), False)
         phlgit_fetch.all_prune(self.clone_arcyd)
         self.assertIs(branch.has_new_commits(), True)
+        branch.describe_new_commits()  # just exercise
         branch.mark_ok_in_review()
         self.assertIs(branch.has_new_commits(), False)
 
