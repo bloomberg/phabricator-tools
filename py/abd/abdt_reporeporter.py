@@ -212,13 +212,17 @@ class RepoReporter(object):
         by visiting a link like this (substitute your own base url)
         https://my.phabricator.domain/settings/panel/email/
 
+        If you want to / have to use a different email address to register
+        with Phabricator then you will need to ensure the latest commit on
+        your branch uses the same email address.
+
         Quick fix steps from your working copy, on the review branch:
 
         first, fix your email address:
         $ git config --global user.email 'EMAIL ADDRESS KNOWN TO PHABRICATOR'
 
-        then either create an empty commit with the now correct email address:
-        $ git commit --allow-empty --no-edit -m 'empty commit with real author'
+        create an empty commit with the previous message but new author:
+        $ git commit --reuse-message=HEAD --reset-author --allow-empty
         $ git push
 
         or, amend the last commit with correct email address:
