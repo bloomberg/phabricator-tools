@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   object_
+#   file_on_ref
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -23,6 +24,20 @@ def object_(clone, ref):
 
     """
     return clone.call('show', ref)
+
+
+def file_on_ref(clone, path, ref):
+    """Return the content of the file at specified 'path' on branch 'ref'.
+
+    Raise if the file or ref does not exist.
+
+    :clone: the git clone to get the object from, will do clone.call(...)
+    :path: the string path to the file on the branch, e.g. 'src/main.cpp'
+    :ref: the string ref of the branch, e.g. 'feature/red_button'
+    :returns: the string contents of the file
+
+    """
+    return clone.call('show', '{}:{}'.format(ref, path))
 
 
 #------------------------------------------------------------------------------
