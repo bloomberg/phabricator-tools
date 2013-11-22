@@ -58,7 +58,7 @@ class Mailer(object):
             You are receiving this message because you are
             either in the unknown email list or an admin.
 
-            If want to / have to use a different email address
+            If you want to / have to use a different email address
             to register with Phabricator then you will need to
             ensure the latest commit on your branch uses the
             correct email address.
@@ -77,7 +77,7 @@ class Mailer(object):
 
                 $ git config user.email "name@server.test"
 
-            You'll should push the branches again but with
+            You should push the branches again but with
             a commit that use the right email address.
             The no-fuss way to do this is the following:
 
