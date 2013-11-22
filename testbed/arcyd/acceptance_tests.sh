@@ -38,15 +38,29 @@ function setup_repos() {
 
     git clone origin dev
     cd dev
+
+    # write the initial commit
     git config user.name 'Bob User'
     git config user.email 'bob@server.test'
     touch README
     git add README
     git commit -m 'intial commit'
     git push origin master
+
+    # write the config
+    git checkout --orphan config
+    git rm --cached -rf -- .
+    git clean -fd
+    echo '{"admin_emails": ["repo.admin@server.test"]}' > repo.json
+    git add repo.json
+    git commit -m 'initial config'
+    git push origin refs/heads/config:refs/config/arcyd
+    git checkout master
+
     cd ..
 
-    git clone origin arcyd
+    git clone origin arcyd \
+        --config remotes.origin.fetch=+refs/config/arcyd:refs/config/origin/arcyd
 }
 
 function configure_arcyd() {

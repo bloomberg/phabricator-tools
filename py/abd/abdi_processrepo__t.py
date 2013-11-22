@@ -15,6 +15,7 @@ import abdt_arcydreporter
 import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
+import abdt_repoconfig
 import abdt_reporeporter
 import abdt_shareddictoutput
 
@@ -96,14 +97,20 @@ class Test(unittest.TestCase):
     def _process_branches(self, branches):
         self.reporter_try = {}
         self.reporter_ok = {}
+
+        config = abdt_repoconfig.Data()
+        config.branch_url_format = (
+            'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}')
+        config.review_url_format = 'http://my.phabricator/{review}'
+
         self.reporter = abdt_reporeporter.RepoReporter(
             self.arcyd_reporter,
             'abdi_processrepo__t:Test repo:machine name',
             'abdi_processrepo__t:Test repo',
-            'http://my.phabricator/{review}',
-            'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
             abdt_shareddictoutput.ToDict(self.reporter_try),
             abdt_shareddictoutput.ToDict(self.reporter_ok))
+
+        self.reporter.set_config(config)
 
         with contextlib.closing(self.reporter):
             abdi_processrepo.process_branches(

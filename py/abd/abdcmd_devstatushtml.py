@@ -18,6 +18,7 @@ from __future__ import absolute_import
 import contextlib
 
 import abdt_arcydreporter
+import abdt_repoconfig
 import abdt_reporeporter
 import abdt_shareddictoutput
 import abdweb_arcydcontent
@@ -86,16 +87,21 @@ def _exercise_reporeporter():
 
     arcyd_reporter.start_repo('name', 'human-name')
 
+    config = abdt_repoconfig.Data()
+    config.branch_url_format = (
+        'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}')
+    config.review_url_format = 'http://my.phabricator/{review}'
+
     # simulate unhandled exception during processing repo
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
         "exception repo-machine-name",
         "exception repo",
-        'http://my.phabricator/{review}',
-        'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
         abdt_shareddictoutput.ToDict(repo_report),
         abdt_shareddictoutput.ToDict(branch_report))
+
+    reporter.set_config(config)
 
     with contextlib.closing(reporter):
         _write('updating')
@@ -112,10 +118,10 @@ def _exercise_reporeporter():
         arcyd_reporter,
         "myrepo-machine-name",
         "myrepo",
-        'http://my.phabricator/{review}',
-        'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}',
         abdt_shareddictoutput.ToDict(repo_report),
         abdt_shareddictoutput.ToDict(branch_report))
+
+    reporter.set_config(config)
 
     with contextlib.closing(reporter):
         reporter.start_branch('mybranch')

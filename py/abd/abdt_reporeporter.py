@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   RepoReporter
+#    .set_config
 #    .on_tryloop_exception
 #    .on_traceback
 #    .on_completed
@@ -100,18 +101,6 @@ def _branch_status_to_string(status):
     return RESULT_BRANCH_STATUS_BAD
 
 
-def _exercise_branch_url_format_string(branch_format_string):
-    """Exercise the supplied string so as to reveal defects early."""
-    branch = 'blahbranch'
-    branch_format_string.format(branch=branch)
-
-
-def _exercise_review_url_format_string(review_format_string):
-    """Exercise the supplied string so as to reveal defects early."""
-    review = 123
-    review_format_string.format(review=review)
-
-
 class RepoReporter(object):
 
     def __init__(
@@ -119,8 +108,6 @@ class RepoReporter(object):
             arcyd_reporter,
             repo,
             repo_name,
-            review_url_format,
-            branch_url_format,
             try_output,
             ok_output):
         """Initialise a new reporter to report to the specified outputs.
@@ -136,12 +123,11 @@ class RepoReporter(object):
         """
         super(RepoReporter, self).__init__()
         self._arcyd_reporter = arcyd_reporter
-        self._review_url_format = review_url_format
-        self._branch_url_format = branch_url_format
         self._try_output = try_output
         self._ok_output = ok_output
         self._is_updating = True
         self._branches = []
+        self._config = None
 
         self._arcyd_reporter.start_repo(repo, repo_name)
 
@@ -160,12 +146,10 @@ class RepoReporter(object):
         # make sure we've initialised all the expected attributes
         assert set(self._repo_attribs.keys()) == set(REPO_LIST_ATTRIB)
 
-        if self._review_url_format:
-            _exercise_review_url_format_string(self._review_url_format)
-        if self._branch_url_format:
-            _exercise_branch_url_format_string(self._branch_url_format)
-
         self._update_write_repo_status(REPO_STATUS_UPDATING)
+
+    def set_config(self, config):
+        self._config = config
 
     def on_tryloop_exception(self, e, delay):
         self._is_updating = False
@@ -234,12 +218,15 @@ class RepoReporter(object):
     def finish_branch(self, status, review_id):
         branch_name = self._repo_attribs[REPO_ATTRIB_STATUS_BRANCH]
 
+        # fill in urls from pre-configured formats if possible
         branch_url = ''
         review_url = ''
-        if review_id is not None and self._review_url_format:
-            review_url = self._review_url_format.format(review=int(review_id))
-        if self._branch_url_format:
-            branch_url = self._branch_url_format.format(branch=branch_name)
+        branch_fmt = self._config.branch_url_format if self._config else None
+        review_fmt = self._config.review_url_format if self._config else None
+        if branch_fmt:
+            branch_url = branch_fmt.format(branch=branch_name)
+        if review_id is not None and review_fmt:
+            review_url = review_fmt.format(review=int(review_id))
 
         status_str = _branch_status_to_string(status)
         d = {

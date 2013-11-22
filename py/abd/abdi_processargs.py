@@ -39,6 +39,7 @@ import phlsys_subprocess
 import abdmail_mailer
 import abdt_conduit
 import abdt_git
+import abdt_repoconfig
 import abdt_reporeporter
 import abdt_shareddictoutput
 import abdt_tryloop
@@ -272,8 +273,6 @@ def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
         arcyd_reporter,
         repo,
         args.repo_desc,
-        args.review_url_format,
-        args.branch_url_format,
         abdt_shareddictoutput.ToFile(args.try_touch_path),
         abdt_shareddictoutput.ToFile(args.ok_touch_path))
 
@@ -283,35 +282,75 @@ def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
                 args, out, reporter, arcyd_reporter, conduits, url_watcher)
 
 
+def _set_attrib_if_not_none(config, key, value):
+    if value:
+        getattr(config, key)  # raise if 'key' doesn't exist already
+        setattr(config, key, value)
+
+
+def _make_config_from_args(args):
+    config = abdt_repoconfig.Data()
+    if args.admin_email:
+        config.admin_emails = [args.admin_email]
+    _set_attrib_if_not_none(
+        config, 'description', args.repo_desc)
+    _set_attrib_if_not_none(
+        config, 'branch_url_format', args.branch_url_format)
+    _set_attrib_if_not_none(
+        config, 'review_url_format', args.review_url_format)
+    return config
+
+
+def _determine_config(args, sys_clone):
+    # combine all the available configs
+    default_config = abdt_repoconfig.make_default_data()
+    args_config = _make_config_from_args(args)
+    repo_config = abdt_repoconfig.data_from_repo_or_none(sys_clone)
+    config = abdt_repoconfig.merge_data_objects(
+        default_config, args_config, repo_config)
+    abdt_repoconfig.validate_data(config)
+    return config
+
+
 def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
+
+    sys_clone = phlsys_git.GitClone(args.repo_path)
+    config = _determine_config(args, sys_clone)
+
+    did_fetch = _fetch_if_needed(
+        url_watcher, args, out, arcyd_reporter, config.description)
+
+    if did_fetch:
+        # determine the config again now that we've fetched the repo
+        config = _determine_config(args, sys_clone)
+
+    arcyd_conduit = _connect(conduits, args, arcyd_reporter)
+
+    reporter.set_config(config)
 
     sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
 
     mailer = abdmail_mailer.Mailer(
         sender,
-        [args.admin_email],
-        args.repo_desc,
+        config.admin_emails,
+        config.description,
         args.instance_uri)  # TODO: this should be a URI for users not conduit
 
     pluginManager = phlsys_pluginmanager.PluginManager(
         args.plugins, args.trusted_plugins)
 
-    _fetch(url_watcher, args, out, arcyd_reporter)
-    arcyd_conduit = _connect(conduits, args, arcyd_reporter)
-
-    out.display("process (" + args.repo_desc + "): ")
+    out.display("process (" + config.description + "): ")
 
     branch_url_callable = None
-    if args.branch_url_format:
+    if config.branch_url_format:
         def make_branch_url(branch_name):
-            return args.branch_url_format.format(branch=branch_name)
+            return config.branch_url_format.format(branch=branch_name)
         branch_url_callable = make_branch_url
 
-    sys_clone = phlsys_git.GitClone(args.repo_path)
     arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
     arcyd_clone = abdt_git.Clone(
-        sys_clone, "origin", args.repo_desc, branch_url_callable)
+        sys_clone, "origin", config.description, branch_url_callable)
     branches = arcyd_clone.get_managed_branches()
     for branch in branches:
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
@@ -331,7 +370,9 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     reporter.on_completed()
 
 
-def _fetch(url_watcher, args, out, arcyd_reporter):
+def _fetch_if_needed(url_watcher, args, out, arcyd_reporter, repo_desc):
+
+    did_fetch = False
 
     def prune_and_fetch():
         phlsys_subprocess.run_commands("git remote prune origin")
@@ -341,10 +382,13 @@ def _fetch(url_watcher, args, out, arcyd_reporter):
     snoop_url = args.repo_snoop_url
     if not snoop_url or url_watcher.has_url_recently_changed(snoop_url):
         with phlsys_fs.chdir_context(args.repo_path):
-            out.display("fetch (" + args.repo_desc + "): ")
+            out.display("fetch (" + repo_desc + "): ")
             with arcyd_reporter.tag_timer_context('git fetch'):
                 abdt_tryloop.tryloop(
-                    prune_and_fetch, 'fetch/prune', args.repo_desc)
+                    prune_and_fetch, 'fetch/prune', repo_desc)
+                did_fetch = True
+
+    return did_fetch
 
 
 def _connect(conduits, args, arcyd_reporter):
