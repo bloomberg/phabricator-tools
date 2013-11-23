@@ -31,6 +31,7 @@ import aoncmd_paste
 import aoncmd_query
 import aoncmd_rawdiff
 import aoncmd_showconfig
+import aoncmd_taskcreate
 import aoncmd_updaterevision
 
 _USAGE_EXAMPLES = """
@@ -75,6 +76,8 @@ def main():
         "update-revision", aoncmd_updaterevision, subparsers)
     phlsys_subcommand.setup_parser("get-diff", aoncmd_getdiff, subparsers)
     phlsys_subcommand.setup_parser("paste", aoncmd_paste, subparsers)
+    phlsys_subcommand.setup_parser(
+        "task-create", aoncmd_taskcreate, subparsers)
 
     args = parser.parse_args()
 
