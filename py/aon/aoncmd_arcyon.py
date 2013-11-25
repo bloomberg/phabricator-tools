@@ -82,7 +82,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        args.func(args)
+        return args.func(args)
     except phlsys_makeconduit.InsufficientInfoException as e:
         print "ERROR - insufficient information"
         print e
