@@ -125,13 +125,12 @@ def process(args):
         print(result.uri)
     else:  # args.format_summary:
         message = (
-            "Created a new task '{task_id}', can view it at this URL:\n"
+            "Created a new task '{task_id}', you can view it at this URL:\n"
             "  {url}"
         ).format(
             task_id=result.id,
             url=result.uri)
         print(message)
-
 
 
 #------------------------------------------------------------------------------

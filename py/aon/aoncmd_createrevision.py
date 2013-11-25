@@ -176,7 +176,7 @@ def process(args):
         print result["uri"]
     else:  # args.format_summary:
         print (
-            "Created a new revision '{rev_id}', can view it at this URL:\n"
+            "Created a new revision '{rev_id}', you can view it at this URL:\n"
             "  {url}"
         ).format(
             rev_id=result["revisionid"],
