@@ -121,6 +121,10 @@ def setupParser(parser):
         '--format-id',
         action='store_true',
         help='will print just the id of the new revision, for scripting.')
+    output.add_argument(
+        '--format-url',
+        action='store_true',
+        help='will print just the url of the new revision, for scripting.')
 
 #   parser.add_argument(
 #       '--deps', '--depends-on',
@@ -171,6 +175,8 @@ def process(args):
 
     if args.format_id:
         print result["revisionid"]
+    elif args.format_url:
+        print result["uri"]
     else:  # args.format_summary:
         print (
             "Created a new revision '{rev_id}', can view it at this URL:\n"

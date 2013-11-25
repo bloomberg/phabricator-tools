@@ -102,7 +102,11 @@ def setupParser(parser):
     output.add_argument(
         '--format-id',
         action='store_true',
-        help='will print just the id of the new revision, for scripting.')
+        help='will print just the id of the revision, for scripting.')
+    output.add_argument(
+        '--format-url',
+        action='store_true',
+        help='will print just the url of the revision, for scripting.')
 
     aont_conduitargs.addArguments(parser)
 
@@ -130,6 +134,8 @@ def process(args):
 
     if args.format_id:
         print result["revisionid"]
+    elif args.format_url:
+        print result["uri"]
     else:  # args.format_summary:
         print (
             "Updated revision '{rev_id}', can view it at this URL:\n"

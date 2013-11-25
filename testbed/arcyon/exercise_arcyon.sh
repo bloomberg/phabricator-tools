@@ -32,6 +32,7 @@ $arcyon get-diff -d $diffid --ls
 $arcyon get-diff -d $diffid2 --ls
 id2="$($arcyon create-revision -t title2 -p plan --diff-id $diffid --format-id)"
 id3=$($arcyon update-revision $id2 update --diff-id $diffid2 --format-id)
+$arcyon update-revision $id2 update --diff-id $diffid2 --format-url
 
 if [ "$id2" != "$id3" ]; then
     false

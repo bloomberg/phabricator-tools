@@ -9,6 +9,10 @@ usage examples:
     Created a new task '99', can view it at this URL:
       http://127.0.0.1/T99
 
+    create a new task with just a title, only show url:
+    $ arcyon task-create 'title' --format-url
+    http://127.0.0.1/T99
+
     create a new task with just a title, only show id:
     $ arcyon task-create 'title' --format-id
     99
@@ -93,6 +97,10 @@ def setupParser(parser):
         '--format-id',
         action='store_true',
         help='will print just the id of the new task, for scripting.')
+    output.add_argument(
+        '--format-url',
+        action='store_true',
+        help='will print just the url of the new task, for scripting.')
 
     aont_conduitargs.addArguments(parser)
 
@@ -113,6 +121,8 @@ def process(args):
 
     if args.format_id:
         print(result.id)
+    elif args.format_url:
+        print(result.uri)
     else:  # args.format_summary:
         message = (
             "Created a new task '{task_id}', can view it at this URL:\n"
