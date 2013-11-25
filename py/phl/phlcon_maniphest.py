@@ -42,13 +42,16 @@ CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
     ])
 
 
-def create_task(conduit, title, description="", priority=None):
+def create_task(
+        conduit, title, description="", priority=None, owner=None, ccs=None):
     """Create a new Maniphest task using the supplied 'conduit'.
 
     :conduit: supports call()
     :title: string title of the new task
     :description: string long description of the new task
     :priority: integer priority of the new task (see PRIORITIES)
+    :owner: PHID of the owner or None
+    :ccs: PHIDs of the users to cc or None
     :returns: a CreateTaskResponse
 
     """
@@ -58,6 +61,10 @@ def create_task(conduit, title, description="", priority=None):
     }
     if priority is not None:
         d['priority'] = priority
+    if owner is not None:
+        d['ownerPHID'] = owner
+    if ccs is not None:
+        d['ccPHIDs'] = ccs
     response = conduit.call("maniphest.createtask", d)
     return CreateTaskResponse(**response)
 

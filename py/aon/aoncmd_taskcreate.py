@@ -43,6 +43,7 @@ import sys
 import textwrap
 
 import phlcon_maniphest
+import phlcon_user
 import phlsys_makeconduit
 
 import aont_conduitargs
@@ -60,34 +61,51 @@ def setupParser(parser):
         key=lambda x: phlcon_maniphest.PRIORITIES[x])
 
     priorities = parser.add_argument_group(
-        'priority arguments',
+        'optional priority arguments',
         'use any of ' + textwrap.fill(
             str(priority_name_list)))
     output_group = parser.add_argument_group(
         'Output format arguments',
         'Mutually exclusive, defaults to "--format-summary"')
     output = output_group.add_mutually_exclusive_group()
+    opt = parser.add_argument_group(
+        'Optional task arguments',
+        'You can supply these later via the web interface if you wish')
+
+    priorities.add_argument(
+        '--priority',
+        '-p',
+        choices=priority_name_list,
+        metavar="PRIORITY",
+        default=None,
+        type=str,
+        help="perform an action on a review")
 
     parser.add_argument(
         'title',
         metavar='STRING',
         help='the short title of the task',
         type=str)
-
-    parser.add_argument(
+    opt.add_argument(
         '--description',
         '-d',
         metavar='STRING',
         help='the long description of the task',
         type=str)
-
-    priorities.add_argument(
-        '--priority', '-p',
-        choices=priority_name_list,
-        metavar="PRIORITY",
-        default=None,
-        type=str,
-        help="perform an action on a review")
+    opt.add_argument(
+        '--owner',
+        '-o',
+        metavar='USER',
+        help='the username of the owner',
+        type=str)
+    opt.add_argument(
+        '--ccs',
+        '-c',
+        nargs="*",
+        metavar='USER',
+        default=[],
+        help='a list of usernames to cc on the task',
+        type=str)
 
     output.add_argument(
         '--format-summary',
@@ -110,14 +128,23 @@ def process(args):
         print('you must supply a non-empty title', file=sys.stderr)
         return 1
 
+    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+
     # create_task expects an integer
     priority = None
     if args.priority is not None:
         priority = phlcon_maniphest.PRIORITIES[args.priority]
 
-    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+    # conduit expects PHIDs not plain usernames
+    user_phids = phlcon_user.UserPhidCache(conduit)
+    if args.owner:
+        user_phids.add_hint(args.owner)
+    user_phids.add_hint_list(args.ccs)
+    owner = user_phids.get_phid(args.owner) if args.owner else None
+    ccs = [user_phids.get_phid(user) for user in args.ccs]
+
     result = phlcon_maniphest.create_task(
-        conduit, args.title, args.description, priority)
+        conduit, args.title, args.description, priority, owner, ccs)
 
     if args.format_id:
         print(result.id)
