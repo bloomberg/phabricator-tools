@@ -5,6 +5,8 @@ Wrapper to call Phabricator's Differential Conduit API.
 Wrapper to call Phabricator's Maniphest Conduit API.
 * `phlcon_paste.py` -
 Wrapper to call Phabricator's Paste Conduit API.
+* `phlcon_project.py` -
+Wrapper to call Phabricator's Project Conduit API.
 * `phlcon_remarkup.py` -
 Helpers to easily generate properly formatted remarkup.
 * `phlcon_reviewstatecache.py` -

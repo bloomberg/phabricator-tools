@@ -1,15 +1,16 @@
-"""Wrapper to call Phabricator's Maniphest Conduit API."""
+"""Wrapper to call Phabricator's Project Conduit API."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlcon_maniphest
+# phlcon_project
 #
 # Public Functions:
-#   create_task
+#   query_some
+#   query_all
+#   make_project_to_phid_dict
 #
 # Public Assignments:
-#   PRIORITIES
-#   CreateTaskResponse
+#   QueryResponse
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -20,62 +21,55 @@ from __future__ import absolute_import
 import phlsys_namedtuple
 
 
-# Enumerate the priorities that a Maniphest task may have
-# from ManiphestTaskPriority.php
-PRIORITIES = {
-    'unbreak_now': 100,
-    'triage': 90,
-    'high': 80,
-    'normal': 50,
-    'low': 25,
-    'wish': 0,
-}
-
-CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
-    'CreateTaskResponse',
-    required=['id', 'uri'],
+QueryResponse = phlsys_namedtuple.make_named_tuple(
+    'QueryResponse',
+    required=['name', 'phid'],
     defaults={},
-    ignored=[
-        'authorPHID', 'status', 'phid', 'description', 'objectName', 'title',
-        'auxiliary', 'ccPHIDs', 'priority', 'ownerPHID', 'dateModified',
-        'dateCreated', 'projectPHIDs'
-    ])
+    ignored=['dateCreated', 'members', 'dateModified', 'id'])
 
 
-def create_task(
-        conduit,
-        title,
-        description="",
-        priority=None,
-        owner=None,
-        ccs=None,
-        projects=None):
-    """Create a new Maniphest task using the supplied 'conduit'.
+def query_some(conduit, max_items, offset):
+    """Return a list of some projects from the supplied conduit.
 
     :conduit: supports call()
-    :title: string title of the new task
-    :description: string long description of the new task
-    :priority: integer priority of the new task (see PRIORITIES)
-    :owner: PHID of the owner or None
-    :ccs: PHIDs of the users to cc or None
-    :projects: PHIDs of the projects to add to or None
-    :returns: a CreateTaskResponse
+    :max_items: the maximum number of items to return
+    :offset: the offset into the list of all possible items
+    :returns: a list of QueryResponse
 
     """
     d = {
-        "title": title,
-        "description": description,
+        'limit': max_items,
+        'offset': offset,
     }
-    if priority is not None:
-        d['priority'] = priority
-    if owner is not None:
-        d['ownerPHID'] = owner
-    if ccs is not None:
-        d['ccPHIDs'] = ccs
-    if projects is not None:
-        d['projectPHIDs'] = projects
-    response = conduit.call("maniphest.createtask", d)
-    return CreateTaskResponse(**response)
+    response = conduit.call("project.query", d)
+    results = [QueryResponse(**r) for phid, r in response.iteritems()]
+    return results
+
+
+def query_all(conduit):
+    """Return a list of all projects from the supplied conduit.
+
+    :conduit: supports call()
+    :returns: a list of QueryResponse
+
+    """
+    window_size = 5000
+    items = query_some(conduit, window_size, 0)
+    count = 1
+    while len(items) == window_size * count:
+        items += query_some(conduit, window_size, window_size * count)
+        count += 1
+    return items
+
+
+def make_project_to_phid_dict(conduit):
+    """Return a name->phid dictionary of all projects from 'conduit'.
+
+    :conduit: supports call()
+    :returns: a dict mapping from project name to project phid
+
+    """
+    return {i.name: i.phid for i in query_all(conduit)}
 
 
 #------------------------------------------------------------------------------

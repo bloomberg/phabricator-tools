@@ -43,6 +43,7 @@ import sys
 import textwrap
 
 import phlcon_maniphest
+import phlcon_project
 import phlcon_user
 import phlsys_makeconduit
 
@@ -86,6 +87,7 @@ def setupParser(parser):
         metavar='STRING',
         help='the short title of the task',
         type=str)
+
     opt.add_argument(
         '--description',
         '-d',
@@ -105,6 +107,13 @@ def setupParser(parser):
         metavar='USER',
         default=[],
         help='a list of usernames to cc on the task',
+        type=str)
+    opt.add_argument(
+        '--projects',
+        nargs="*",
+        metavar='PROJECT',
+        default=[],
+        help='a list of project names to add the task to',
         type=str)
 
     output.add_argument(
@@ -143,8 +152,14 @@ def process(args):
     owner = user_phids.get_phid(args.owner) if args.owner else None
     ccs = [user_phids.get_phid(user) for user in args.ccs]
 
+    # conduit expects PHIDs not plain project names
+    projects = None
+    if args.projects:
+        project_to_phid = phlcon_project.make_project_to_phid_dict(conduit)
+        projects = [project_to_phid[p] for p in args.projects]
+
     result = phlcon_maniphest.create_task(
-        conduit, args.title, args.description, priority, owner, ccs)
+        conduit, args.title, args.description, priority, owner, ccs, projects)
 
     if args.format_id:
         print(result.id)
