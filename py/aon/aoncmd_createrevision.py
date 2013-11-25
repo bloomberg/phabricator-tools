@@ -154,15 +154,12 @@ def process(args):
     if args.ccs:
         fields[MessageFields.cc_phids] = args.ccs
 
-    # convert all the usernames to userPHIDs
-    # TODO: extract function and share with 'query'
-    users = [u for users in fields.itervalues() for u in users]
-    users = list(set(users))
-    userToPhid = {}
-    if users:
-        userToPhid = phlcon_user.make_username_phid_dict(conduit, users)
+    # conduit expects PHIDs not plain usernames
+    user_phids = phlcon_user.UserPhidCache(conduit)
+    for users in fields.itervalues():
+        user_phids.add_hint_list(users)
     for key in fields.iterkeys():
-        fields[key] = [userToPhid[u] for u in fields[key]]
+        fields[key] = [user_phids.get_phid(u) for u in fields[key]]
 
     fields[MessageFields.title] = args.title
     fields[MessageFields.test_plan] = args.test_plan

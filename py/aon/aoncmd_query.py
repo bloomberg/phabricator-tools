@@ -269,16 +269,14 @@ def _process_user_fields(me, conduit, args):
         args.responsible_users,
         args.responsible_me)
 
-    users = [u for users in d.itervalues() for u in users]
-    users = list(set(users))
-    userToPhid = {}
-    if users:
-        userToPhid = phlcon_user.make_username_phid_dict(conduit, users)
+    # conduit expects PHIDs not plain usernames
+    user_phids = phlcon_user.UserPhidCache(conduit)
+    for users in d.itervalues():
+        user_phids.add_hint_list(users)
 
-    # XXX: check for duplicates in author and reviewer
-    # XXX: check for bad userToPhid
     for key in d.iterkeys():
-        d[key] = [userToPhid[u] for u in d[key]]
+        d[key] = [user_phids.get_phid(u) for u in d[key]]
+
     return d
 
 

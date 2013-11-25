@@ -4,6 +4,12 @@
 # -----------------------------------------------------------------------------
 # phlcon_user
 #
+# Public Classes:
+#   UserPhidCache
+#    .add_hint
+#    .add_hint_list
+#    .get_phid
+#
 # Public Functions:
 #   is_no_such_error
 #   query_user_from_email
@@ -32,6 +38,38 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
     required=['phid', 'userName', 'realName', 'image', 'uri', 'roles'],
     defaults={},
     ignored=['currentStatus', 'currentStatusUntil'])
+
+
+class UserPhidCache(object):
+
+    """Efficiently retrieve the PHID for specified usernames."""
+
+    def __init__(self, conduit):
+        """Construct a cache attached to the specified 'conduit'."""
+        super(UserPhidCache, self).__init__()
+        self._user_to_phid = {}
+        self._hinted_users = set()
+        self._conduit = conduit
+
+    def add_hint(self, user):
+        """Register 'user' as a user we'll later query."""
+        if user not in self._user_to_phid:
+            self._hinted_users.add(user)
+
+    def add_hint_list(self, user_list):
+        """Register all 'user_list' as users we'll later query."""
+        for user in user_list:
+            self.add_hint(user)
+
+    def get_phid(self, user):
+        """Return the PHID for the specified 'user'."""
+        self.add_hint(user)
+        if user not in self._user_to_phid:
+            results = make_username_phid_dict(
+                self._conduit, list(self._hinted_users))
+            self._user_to_phid.update(results)
+            self._hinted_users = set()
+        return self._user_to_phid[user]
 
 
 def is_no_such_error(e):
