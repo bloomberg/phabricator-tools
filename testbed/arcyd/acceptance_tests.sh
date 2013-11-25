@@ -60,7 +60,7 @@ function setup_repos() {
     cd ..
 
     git clone origin arcyd \
-        --config remotes.origin.fetch=+refs/config/arcyd:refs/config/origin/arcyd
+        --config remote.origin.fetch=+refs/config/arcyd:refs/config/origin/arcyd
 }
 
 function configure_arcyd() {
