@@ -65,6 +65,10 @@ def setupParser(parser):
         'Diff arguments',
         'Mutually exclusive, one is required')
     diffsrc = diffsrc_group.add_mutually_exclusive_group(required=True)
+    output_group = parser.add_argument_group(
+        'Output format arguments',
+        'Mutually exclusive, defaults to "--format-summary"')
+    output = output_group.add_mutually_exclusive_group()
 
     diffsrc.add_argument(
         '--diff-id',
@@ -91,6 +95,15 @@ def setupParser(parser):
              'page',
         type=str)
 
+    output.add_argument(
+        '--format-summary',
+        action='store_true',
+        help='will print a human-readable summary of the result.')
+    output.add_argument(
+        '--format-id',
+        action='store_true',
+        help='will print just the id of the new revision, for scripting.')
+
     aont_conduitargs.addArguments(parser)
 
 
@@ -114,7 +127,16 @@ def process(args):
     }
 
     result = conduit.call("differential.updaterevision", d)
-    print result["revisionid"]
+
+    if args.format_id:
+        print result["revisionid"]
+    else:  # args.format_summary:
+        print (
+            "Updated revision '{rev_id}', can view it at this URL:\n"
+            "  {url}"
+        ).format(
+            rev_id=result["revisionid"],
+            url=result["uri"])
 
 
 #------------------------------------------------------------------------------

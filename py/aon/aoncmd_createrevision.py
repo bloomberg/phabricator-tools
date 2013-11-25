@@ -6,14 +6,15 @@ you can use the 'revision id' output from this command as input to the
 usage examples:
     create a new revision by piping in a diff:
     $ diff -u file1 file2 | arcyon create-revision -t title -p plan -f -
-    99
+    Created a new revision '99', you can visit it at this URL:
+      http://127.0.0.1/D99
 
-    create a new revision from diff 1:
-    $ arcyon create-revision -d 1 -t 'title' -p 'test plan'
+    create a new revision from diff 1, print id only (for scripting):
+    $ arcyon create-revision -d 1 -t 'title' -p 'test plan' --format-id
     99
 
     create a new revision from diff 1, add a reviewer and a cc:
-    $ arcyon create-revision -d 1 -t title -p test -r reviewer -c cc
+    $ arcyon create-revision -d 1 -t what -p test -r reviewer -c cc --format-id
     99
 
 """
@@ -57,6 +58,10 @@ def setupParser(parser):
     opt = parser.add_argument_group(
         'Optional revision arguments',
         'You can supply these later via the web interface if you wish')
+    output_group = parser.add_argument_group(
+        'Output format arguments',
+        'Mutually exclusive, defaults to "--format-summary"')
+    output = output_group.add_mutually_exclusive_group()
 
     diffsrc.add_argument(
         '--diff-id',
@@ -108,6 +113,15 @@ def setupParser(parser):
         help='a list of usernames to cc on the review',
         type=str)
 
+    output.add_argument(
+        '--format-summary',
+        action='store_true',
+        help='will print a human-readable summary of the result.')
+    output.add_argument(
+        '--format-id',
+        action='store_true',
+        help='will print just the id of the new revision, for scripting.')
+
 #   parser.add_argument(
 #       '--deps', '--depends-on',
 #       nargs="*",
@@ -154,7 +168,16 @@ def process(args):
     d = {'diffid': diff_id, 'fields': fields}
 
     result = conduit.call("differential.createrevision", d)
-    print result["revisionid"]
+
+    if args.format_id:
+        print result["revisionid"]
+    else:  # args.format_summary:
+        print (
+            "Created a new revision '{rev_id}', can view it at this URL:\n"
+            "  {url}"
+        ).format(
+            rev_id=result["revisionid"],
+            url=result["uri"])
 
 
 #------------------------------------------------------------------------------

@@ -1,5 +1,8 @@
-trap "echo FAILED!; exit 1" ERR
+trap "echo 'FAILED!'; exit 1" ERR
 set -x
+
+# cd to the dir of this script, so paths are relative
+cd "$(dirname "$0")"
 
 arcyon='../../bin/arcyon'
 
@@ -13,7 +16,7 @@ $arcyon show-config -h
 $arcyon update-revision -h
 $arcyon task-create -h
 
-id="$($arcyon create-revision -t title -p plan --summary ssss -f diff1)"
+id="$($arcyon create-revision -t title -p plan --summary ssss -f diff1 --format-id)"
 $arcyon get-diff -r $id --ls
 $arcyon update-revision $id update -f diff2
 $arcyon get-diff -r $id --ls
@@ -27,8 +30,12 @@ diffid="$($arcyon raw-diff diff1)"
 diffid2="$($arcyon raw-diff diff2)"
 $arcyon get-diff -d $diffid --ls
 $arcyon get-diff -d $diffid2 --ls
-id2="$($arcyon create-revision -t title2 -p plan --diff-id $diffid)"
-$arcyon update-revision $id2 update --diff-id $diffid2
+id2="$($arcyon create-revision -t title2 -p plan --diff-id $diffid --format-id)"
+id3=$($arcyon update-revision $id2 update --diff-id $diffid2 --format-id)
+
+if [ "$id2" != "$id3" ]; then
+    false
+fi
 
 $arcyon query --format-type ids | grep $id2
 
