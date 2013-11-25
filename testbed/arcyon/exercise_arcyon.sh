@@ -35,5 +35,6 @@ $arcyon query --format-type ids | grep $id2
 $arcyon comment $id2 -m 'hello there!'
 
 $arcyon task-create 'exercise task-create'
+$arcyon task-create 'exercise task-create' -d 'description' -p wish
 
 $arcyon paste "test paste" -f diff1

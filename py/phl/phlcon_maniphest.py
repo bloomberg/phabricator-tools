@@ -8,6 +8,7 @@
 #   create_task
 #
 # Public Assignments:
+#   PRIORITIES
 #   CreateTaskResponse
 #
 # -----------------------------------------------------------------------------
@@ -17,6 +18,18 @@
 from __future__ import absolute_import
 
 import phlsys_namedtuple
+
+
+# Enumerate the priorities that a Maniphest task may have
+# from ManiphestTaskPriority.php
+PRIORITIES = {
+    'unbreak_now': 100,
+    'triage': 90,
+    'high': 80,
+    'normal': 50,
+    'low': 25,
+    'wish': 0,
+}
 
 CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
     'CreateTaskResponse',
@@ -29,12 +42,13 @@ CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
     ])
 
 
-def create_task(conduit, title, description=""):
+def create_task(conduit, title, description="", priority=None):
     """Create a new Maniphest task using the supplied 'conduit'.
 
     :conduit: supports call()
     :title: string title of the new task
     :description: string long description of the new task
+    :priority: integer priority of the new task (see PRIORITIES)
     :returns: a CreateTaskResponse
 
     """
@@ -42,6 +56,8 @@ def create_task(conduit, title, description=""):
         "title": title,
         "description": description,
     }
+    if priority is not None:
+        d['priority'] = priority
     response = conduit.call("maniphest.createtask", d)
     return CreateTaskResponse(**response)
 

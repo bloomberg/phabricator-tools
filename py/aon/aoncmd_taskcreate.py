@@ -31,6 +31,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import sys
+import textwrap
 
 import phlcon_maniphest
 import phlsys_makeconduit
@@ -43,6 +44,16 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
+
+    # make a list of priority names in increasing order of importance
+    priority_name_list = phlcon_maniphest.PRIORITIES.keys()
+    priority_name_list.sort(
+        key=lambda x: phlcon_maniphest.PRIORITIES[x])
+
+    priorities = parser.add_argument_group(
+        'priority arguments',
+        'use any of ' + textwrap.fill(
+            str(priority_name_list)))
 
     parser.add_argument(
         'title',
@@ -57,6 +68,14 @@ def setupParser(parser):
         help='the long description of the task',
         type=str)
 
+    priorities.add_argument(
+        '--priority', '-p',
+        choices=priority_name_list,
+        metavar="PRIORITY",
+        default=None,
+        type=str,
+        help="perform an action on a review")
+
     aont_conduitargs.addArguments(parser)
 
 
@@ -65,9 +84,14 @@ def process(args):
         print('you must supply a non-empty title', file=sys.stderr)
         return 1
 
+    # create_task expects an integer
+    priority = None
+    if args.priority is not None:
+        priority = phlcon_maniphest.PRIORITIES[args.priority]
+
     conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
     result = phlcon_maniphest.create_task(
-        conduit, args.title, args.description)
+        conduit, args.title, args.description, priority)
 
     print(result.uri)
 
