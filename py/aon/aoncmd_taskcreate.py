@@ -8,6 +8,10 @@ usage examples:
     $ arcyon task-create 'title'
     99
 
+    create a new task with a title and description:
+    $ arcyon task-create 'title' -d 'a description of the task'
+    99
+
 """
 # =============================================================================
 # CONTENTS
@@ -43,7 +47,14 @@ def setupParser(parser):
     parser.add_argument(
         'title',
         metavar='STRING',
-        help='the title of the task',
+        help='the short title of the task',
+        type=str)
+
+    parser.add_argument(
+        '--description',
+        '-d',
+        metavar='STRING',
+        help='the long description of the task',
         type=str)
 
     aont_conduitargs.addArguments(parser)
@@ -55,7 +66,9 @@ def process(args):
         return 1
 
     conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
-    result = phlcon_maniphest.create_task(conduit, args.title)
+    result = phlcon_maniphest.create_task(
+        conduit, args.title, args.description)
+
     print(result.uri)
 
 

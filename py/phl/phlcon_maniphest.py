@@ -29,15 +29,20 @@ CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
     ])
 
 
-def create_task(conduit, title):
+def create_task(conduit, title, description=""):
     """Create a new Maniphest task using the supplied 'conduit'.
 
     :conduit: supports call()
     :title: string title of the new task
+    :description: string long description of the new task
     :returns: a CreateTaskResponse
 
     """
-    response = conduit.call("maniphest.createtask", {"title": title})
+    d = {
+        "title": title,
+        "description": description,
+    }
+    response = conduit.call("maniphest.createtask", d)
     return CreateTaskResponse(**response)
 
 
