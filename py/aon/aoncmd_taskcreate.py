@@ -6,7 +6,7 @@ you can use the 'task id' output from this command as input to the
 usage examples:
     create a new task with just a title:
     $ arcyon task-create 'title'
-    Created a new task '99', can view it at this URL:
+    Created a new task '99', you can view it at this URL:
       http://127.0.0.1/T99
 
     create a new task with just a title, only show url:
@@ -80,7 +80,7 @@ def setupParser(parser):
         metavar="PRIORITY",
         default=None,
         type=str,
-        help="perform an action on a review")
+        help="the priority or importance of the task")
 
     parser.add_argument(
         'title',
