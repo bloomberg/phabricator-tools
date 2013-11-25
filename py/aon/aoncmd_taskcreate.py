@@ -6,10 +6,15 @@ you can use the 'task id' output from this command as input to the
 usage examples:
     create a new task with just a title:
     $ arcyon task-create 'title'
+    Created a new task '99', can view it at this URL:
+      http://127.0.0.1/T99
+
+    create a new task with just a title, only show id:
+    $ arcyon task-create 'title' --format-id
     99
 
     create a new task with a title and description:
-    $ arcyon task-create 'title' -d 'a description of the task'
+    $ arcyon task-create 'title' -d 'a description of the task' --format-id
     99
 
 """
@@ -54,6 +59,10 @@ def setupParser(parser):
         'priority arguments',
         'use any of ' + textwrap.fill(
             str(priority_name_list)))
+    output_group = parser.add_argument_group(
+        'Output format arguments',
+        'Mutually exclusive, defaults to "--format-summary"')
+    output = output_group.add_mutually_exclusive_group()
 
     parser.add_argument(
         'title',
@@ -76,6 +85,15 @@ def setupParser(parser):
         type=str,
         help="perform an action on a review")
 
+    output.add_argument(
+        '--format-summary',
+        action='store_true',
+        help='will print a human-readable summary of the result.')
+    output.add_argument(
+        '--format-id',
+        action='store_true',
+        help='will print just the id of the new task, for scripting.')
+
     aont_conduitargs.addArguments(parser)
 
 
@@ -93,7 +111,17 @@ def process(args):
     result = phlcon_maniphest.create_task(
         conduit, args.title, args.description, priority)
 
-    print(result.uri)
+    if args.format_id:
+        print(result.id)
+    else:  # args.format_summary:
+        message = (
+            "Created a new task '{task_id}', can view it at this URL:\n"
+            "  {url}"
+        ).format(
+            task_id=result.id,
+            url=result.uri)
+        print(message)
+
 
 
 #------------------------------------------------------------------------------
