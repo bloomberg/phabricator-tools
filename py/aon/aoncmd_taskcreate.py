@@ -24,6 +24,9 @@ usage examples:
 # =============================================================================
 
 from __future__ import absolute_import
+from __future__ import print_function
+
+import sys
 
 import phlcon_maniphest
 import phlsys_makeconduit
@@ -47,9 +50,13 @@ def setupParser(parser):
 
 
 def process(args):
+    if not args.title.strip():
+        print('you must supply a non-empty title', file=sys.stderr)
+        return 1
+
     conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
     result = phlcon_maniphest.create_task(conduit, args.title)
-    print result.uri
+    print(result.uri)
 
 
 #------------------------------------------------------------------------------
