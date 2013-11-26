@@ -78,6 +78,51 @@ def create_task(
     return CreateTaskResponse(**response)
 
 
+def update_task(
+        conduit,
+        id,
+        title=None,
+        description=None,
+        priority=None,
+        owner=None,
+        ccs=None,
+        projects=None,
+        comment=None):
+    """Update a Maniphest task using the supplied 'conduit'.
+
+    :conduit: supports call()
+    :id: the id of the task to update
+    :title: new string title of the new task or None
+    :description: new string long description of the new task or None
+    :priority: new integer priority of the new task (see PRIORITIES) or None
+    :owner: PHID of the owner or None
+    :ccs: PHIDs of the users to cc or None
+    :projects: PHIDs of the projects to add to or None
+    :comment: string comment to make on the task or None
+    :returns: a CreateTaskResponse
+
+    """
+    d = {
+        "id": id,
+    }
+    if title is not None:
+        d['title'] = title
+    if description is not None:
+        d['description'] = description
+    if priority is not None:
+        d['priority'] = priority
+    if owner is not None:
+        d['ownerPHID'] = owner
+    if ccs is not None:
+        d['ccPHIDs'] = ccs
+    if projects is not None:
+        d['projectPHIDs'] = projects
+    if comment is not None:
+        d['comments'] = comment
+    response = conduit.call("maniphest.update", d)
+    return CreateTaskResponse(**response)
+
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

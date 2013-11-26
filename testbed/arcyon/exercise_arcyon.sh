@@ -43,6 +43,8 @@ $arcyon query --format-type ids | grep $id2
 $arcyon comment $id2 -m 'hello there!'
 
 $arcyon task-create 'exercise task-create'
-$arcyon task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob
+taskid=$($arcyon task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob --format-id)
+$arcyon task-update $taskid -m 'just a comment'
+$arcyon task-update $taskid -t 'exercise task-update' -d 'new description' -p low -o bob --ccs phab alice -m 'updated loads'
 
 $arcyon paste "test paste" -f diff1
