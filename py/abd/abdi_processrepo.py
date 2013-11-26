@@ -153,7 +153,7 @@ def update_in_review(conduit, branch):
     conduit.update_revision(
         review_id,
         rawDiff,
-        '``` lang=text\n' + branch.describe_new_commits() + '```')
+        'update\n\n``` lang=text\n' + branch.describe_new_commits() + '```')
 
     branch.mark_ok_in_review()
 
