@@ -12,7 +12,7 @@ usage examples:
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# aoncmd_taskcreate
+# aoncmd_taskupdate
 #
 # Public Functions:
 #   getFromfilePrefixChars

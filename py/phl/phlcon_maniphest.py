@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   create_task
+#   update_task
 #
 # Public Assignments:
 #   PRIORITIES
