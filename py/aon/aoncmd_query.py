@@ -8,7 +8,7 @@ usage examples:
     $ arcyon query --format-type ids
 
     list all your open revisions:
-    $ arcyon query --author-mine --status-type open
+    $ arcyon query --author-me --status-type open
 
     list all open revisions updated over a week ago
     $ arcyon query --status-type open --update-min-age "1 weeks"
