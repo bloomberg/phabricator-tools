@@ -17,6 +17,8 @@ Create a raw diff in differential.
 show the configuration as discovered from the current directory.
 * `aoncmd_taskcreate.py` -
 Create a new task in maniphest.
+* `aoncmd_taskquery.py` -
+display and filter the list of maniphest tasks.
 * `aoncmd_taskupdate.py` -
 Update a task in maniphest.
 * `aoncmd_updaterevision.py` -

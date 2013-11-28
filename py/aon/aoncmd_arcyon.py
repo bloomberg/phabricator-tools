@@ -32,6 +32,7 @@ import aoncmd_query
 import aoncmd_rawdiff
 import aoncmd_showconfig
 import aoncmd_taskcreate
+import aoncmd_taskquery
 import aoncmd_taskupdate
 import aoncmd_updaterevision
 
@@ -84,6 +85,8 @@ def main():
         "task-create", aoncmd_taskcreate, subparsers)
     phlsys_subcommand.setup_parser(
         "task-update", aoncmd_taskupdate, subparsers)
+    phlsys_subcommand.setup_parser(
+        "task-query", aoncmd_taskquery, subparsers)
 
     args = parser.parse_args()
 

@@ -7,9 +7,15 @@
 # Public Functions:
 #   create_task
 #   update_task
+#   query
 #
 # Public Assignments:
 #   PRIORITIES
+#   PRIORITY_DESCRIPTIONS
+#   PRIORITY_DESCRIPTIONS_TO_VALUES
+#   STATUSES
+#   STATUS_FILTERS
+#   ORDERS
 #   CreateTaskResponse
 #
 # -----------------------------------------------------------------------------
@@ -32,15 +38,61 @@ PRIORITIES = {
     'wish': 0,
 }
 
+# from ManiphestTaskPriority.php
+PRIORITY_DESCRIPTIONS = {
+    PRIORITIES['unbreak_now']: 'Unbreak Now!',
+    PRIORITIES['triage']: 'Needs Triage',
+    PRIORITIES['high']: 'High',
+    PRIORITIES['normal']: 'Normal',
+    PRIORITIES['low']: 'Low',
+    PRIORITIES['wish']: 'Wishlist',
+}
+
+# from ManiphestTaskPriority.php
+PRIORITY_DESCRIPTIONS_TO_VALUES = {
+    desc: val for val, desc in PRIORITY_DESCRIPTIONS.iteritems()
+}
+
+# from ManiphestTaskStatus.php
+STATUSES = {
+    0: 'Open',
+    1: 'Resolved',
+    2: 'Wontfix',
+    3: 'Invalid',
+    4: 'Duplicate',
+    5: 'Spite',
+}
+
+# from ManiphestTaskQuery.php
+STATUS_FILTERS = {
+    'any': 'status-any',
+    'open': 'status-open',
+    'closed': 'status-closed',
+    'resolved': 'status-resolved',
+    'wontfix': 'status-wontfix',
+    'invalid': 'status-invalid',
+    'spite': 'status-spite',
+    'duplicate': 'status-duplicate',
+}
+
+# from ManiphestTaskQuery.php
+ORDERS = {
+    'priority': 'order-priority',
+    'created': 'order-created',
+    'modified': 'order-modified',
+    'title': 'order-title',
+}
+
 CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
     'CreateTaskResponse',
-    required=['id', 'uri'],
-    defaults={},
-    ignored=[
-        'authorPHID', 'status', 'phid', 'description', 'objectName', 'title',
-        'auxiliary', 'ccPHIDs', 'priority', 'ownerPHID', 'dateModified',
+    required=[
+        'id', 'uri', 'title', 'status', 'priority',
+        'authorPHID', 'phid', 'description', 'objectName',
+        'auxiliary', 'ccPHIDs', 'ownerPHID', 'dateModified',
         'dateCreated', 'projectPHIDs'
-    ])
+    ],
+    defaults={},
+    ignored=[])
 
 
 def create_task(
@@ -123,6 +175,71 @@ def update_task(
     response = conduit.call("maniphest.update", d)
     return CreateTaskResponse(**response)
 
+
+def query(
+        conduit,
+        ids=None,
+        authors=None,
+        owners=None,
+        ccs=None,
+        projects=None,
+        status=None,
+        limit=None,
+        offset=None,
+        order=None,
+        text=None):
+    """Query Maniphest tasks using the supplied 'conduit'.
+
+    :conduit: supports call()
+    :ids: a list of specific task ids to restrict the query to
+    :authors: a list of author PHIDs to restrict the query to (any of)
+    :owners: a list of owner PHIDs to restrict the query to (any of)
+    :ccs: a list of owner PHIDs to restrict the query to (any of)
+    :projects: a list of project PHIDs to restrict the query to (any of)
+    :status: a particular value of STATUS_FILTERS to apply
+    :limit: int limit of results to return, defaults to server value if None
+    :offset: int offset into the list of results to return
+    :order: one of ORDERS to impose an ordering on results
+    :text: string to search tasks for
+    :returns: a CreateTaskResponse
+
+    """
+    d = {
+        'ids': ids,
+        'authorPHIDs': authors,
+        'ownerPHIDs': owners,
+        'ccPHIDs': ccs,
+        'projectPHIDs': projects,
+        'status': status,
+        'limit': limit,
+        'offset': offset,
+        'order': order,
+        'fullText': text,
+    }
+
+    response = conduit.call("maniphest.query", d)
+    result = []
+
+    if response:
+        # oddly we get an empty list instead of a dictionary if no results, so
+        # iteritems() isn't appropriate in that case.
+        result = [CreateTaskResponse(**v) for k, v in response.iteritems()]
+
+        # order is broken because conduit returns a dict (unordered) instead of
+        # a list, we have to impose order here instead, note that it's still
+        # important to pass ordering to conduit in case there is a limit on the
+        # number of results returned
+        priority_desc_to_val = PRIORITY_DESCRIPTIONS_TO_VALUES
+        order_to_key = {
+            None: lambda x: x.dateModified,
+            ORDERS['title']: lambda x: x.title,
+            ORDERS['created']: lambda x: -x.dateCreated,
+            ORDERS['modified']: lambda x: -x.dateModified,
+            ORDERS['priority']: lambda x: -priority_desc_to_val[x.priority],
+        }
+        result.sort(key=order_to_key[order])
+
+    return result
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

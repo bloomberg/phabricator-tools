@@ -1,6 +1,6 @@
 usage: arcyon [-h]
               
-              {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update}
+              {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
               ...
 
 Arcyon - util to interact with Conduit API from the command-line.
@@ -10,7 +10,7 @@ dedicated command-line tool. This should make it easier to write shell scripts
 which extend Phabricator.
 
 positional arguments:
-  {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update}
+  {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
     show-config         show the configuration as discovered from the current
                         directory.
     query               display and filter the list of differential revisions.
@@ -22,6 +22,7 @@ positional arguments:
     paste               Create a new paste.
     task-create         Create a new task in maniphest.
     task-update         Update a task in maniphest.
+    task-query          display and filter the list of maniphest tasks.
 
 optional arguments:
   -h, --help            show this help message and exit

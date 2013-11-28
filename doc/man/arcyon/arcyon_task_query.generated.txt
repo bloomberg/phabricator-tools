@@ -1,0 +1,106 @@
+usage: arcyon task-query [-h] [--priorities [PRIORITY [PRIORITY ...]]]
+                         [--order PRIORITY] [--ids INT [INT ...]]
+                         [--owners USER [USER ...]]
+                         [--authors USER [USER ...]] [--ccs USER [USER ...]]
+                         [--projects PROJECT [PROJECT ...]]
+                         [--status {resolved,duplicate,spite,closed,wontfix,open,any,invalid}]
+                         [--text STRING] [--max-results INT]
+                         [--offset-results INT]
+                         [--format-short | --format-ids | --format-string FORMAT_STRING | --format-python | --format-json]
+                         [--uri ADDRESS] [--user NAME] [--cert HEX]
+
+display and filter the list of maniphest tasks.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+optional priority arguments:
+  use any of ['wish', 'low', 'normal', 'high', 'triage', 'unbreak_now']
+
+  --priorities [PRIORITY [PRIORITY ...]], -p [PRIORITY [PRIORITY ...]]
+                        filter by priority of the task
+
+Output format arguments:
+  Mutually exclusive, defaults to "--format-short"
+
+  --format-short        will print a short human-readable summary of each
+                        task.
+  --format-ids          will print just the ids of the tasks, for scripting.
+  --format-string FORMAT_STRING
+                        will print using the supplied format string, e.g.
+                        "{id}" to print a list of ids. use --format-python to
+                        list all the available attributes for printing.
+  --format-python       will pretty-print the response as a python object.
+  --format-json         will pretty-print the response in json.
+
+Optional task arguments:
+  --order PRIORITY      the ordering of the returned results
+  --ids INT [INT ...]   specific task ids to restrict the query to
+  --owners USER [USER ...], -o USER [USER ...]
+                        specific owners usernames to restrict the query to
+  --authors USER [USER ...]
+                        specific author usernames to restrict the query to
+  --ccs USER [USER ...], -c USER [USER ...]
+                        specific cc usernames to restrict the query to
+  --projects PROJECT [PROJECT ...]
+                        a list of project names to restrict the query
+  --status {resolved,duplicate,spite,closed,wontfix,open,any,invalid}
+                        a list of project names to restrict the query
+  --text STRING         string to search the full text of each task for.
+  --max-results INT     limit the number of results returned, if unspecified
+                        then the server default limit is used (seems to be
+                        1000).
+  --offset-results INT  where there is a limit on the number of results, you
+                        can supply an offset to return the next batch of
+                        results. e.g. if the number of results is limited to
+                        100, then to see the next "page"of results, supply an
+                        offset of 100. To see "page 3" of the results, supply
+                        an offset of 200 and so on. Theres no way to count the
+                        total number of results at present.
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS         address of the phabricator instance to connect to.
+  --user NAME           name of the user to connect as.
+  --cert HEX            long certificate string of the user to connect as, you
+                        can find this string here:
+                        http://your.phabricator/settings/panel/conduit/.
+                        generally you wouldn't expect to enter this on the
+                        command-line and would make an ~/.arcrc file by using
+                        '$ arc install-certificate'.
+
+you can use the 'task id' output from this command as input to the
+'arcyon task-update' command.
+
+usage examples:
+    list all tasks:
+    $ arcyon task-query
+
+output formats:
+    --format-ids
+        3
+        2
+        1
+
+    --format-short
+        8 / Open / High / rethink the blob module
+        7 / Open / High / document the lifecycle of a request
+        3 / Open / Low / extract methods out of the doWork() function
+
+    --format-python
+        [{'description': u'',
+          'id': u'1',
+          'objectName': u'T1',
+          'priority': u'Needs Triage',
+          'status': u'0',
+          ...
+
+    --format-json
+        [
+          {
+            "description": "",
+            "id": "1",
+            "objectName": "T1",
+        ...

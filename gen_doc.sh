@@ -53,6 +53,7 @@ ${arcyon} get-diff -h > doc/man/arcyon/arcyon_get_diff.generated.txt
 ${arcyon} paste -h > doc/man/arcyon/arcyon_paste.generated.txt
 ${arcyon} task-create -h > doc/man/arcyon/arcyon_task_create.generated.txt
 ${arcyon} task-update -h > doc/man/arcyon/arcyon_task_update.generated.txt
+${arcyon} task-query -h > doc/man/arcyon/arcyon_task_query.generated.txt
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.

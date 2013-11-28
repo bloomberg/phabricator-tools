@@ -15,6 +15,7 @@ $arcyon raw-diff -h
 $arcyon show-config -h
 $arcyon update-revision -h
 $arcyon task-create -h
+$arcyon task-query -h
 
 id="$($arcyon create-revision -t title -p plan --summary ssss -f diff1 --format-id)"
 $arcyon get-diff -r $id --ls
@@ -44,6 +45,13 @@ $arcyon comment $id2 -m 'hello there!'
 
 $arcyon task-create 'exercise task-create'
 taskid=$($arcyon task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob --format-id)
+$arcyon task-query
+taskid2=$($arcyon task-query --max-results 1 --format-ids)
+
+if [ "$taskid" != "$taskid2" ]; then
+    false
+fi
+
 $arcyon task-update $taskid -m 'just a comment'
 $arcyon task-update $taskid -t 'exercise task-update' -d 'new description' -p low -o bob --ccs phab alice -m 'updated loads'
 
