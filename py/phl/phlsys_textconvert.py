@@ -7,6 +7,9 @@
 # Public Functions:
 #   lossy_unicode_to_ascii
 #
+# Public Assignments:
+#   UNICODE_REPLACEMENTS
+#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
@@ -14,6 +17,31 @@
 from __future__ import absolute_import
 
 import unicodedata
+
+# Unicode characters with sensible ASCII equivalents
+UNICODE_REPLACEMENTS = {
+    u"\u2010": u"-",    # Hyphen
+    u"\u2011": u"-",    # Non-breaking hyphen
+    u"\u2013": u"-",    # Figure dash
+    u"\u2013": u"-",    # En-dash
+    u"\u2014": u"-",    # Em-dash
+    u"\u2015": u"-",    # Horizontal bar
+    u"\u2212": u"-",    # Minus sign
+
+    u"\u00b4": u"'",    # Acute accent
+    u"\u2018": u"'",    # Left single quote
+    u"\u2019": u"'",    # Right single quote
+    u"\u201c": u'"',    # Left double quote
+    u"\u201d": u'"',    # Right double quote
+
+    u"\u00b7": u"*",    # Middle dot
+    u"\u2022": u"*",    # Bullet
+    u"\u2023": u">",    # Triangular bullet
+    u"\u2024": u"*",    # One dot leader
+    u"\u2043": u"-",    # Hyphen bullet
+    u"\u25b8": u">",    # Black right-pointing small triangle
+    u"\u25e6": u"o",    # White bullet
+}
 
 
 def lossy_unicode_to_ascii(unicode_str):
@@ -38,12 +66,18 @@ def lossy_unicode_to_ascii(unicode_str):
     :returns: the best effort ascii representation of 'unicode_str'
 
     """
-    # first decompose all the glyphs as much as possible - often multiple
+    # first, apply a set of pre-defined substitutions to preserve common cases
+    # like em-dashes and smart quotes.
+    substituted = unicode_str
+    for src, dst in UNICODE_REPLACEMENTS.iteritems():
+        substituted = substituted.replace(src, dst)
+
+    # next, decompose all the glyphs as much as possible - often multiple
     # characters are combined into a single unicode glyph which could be
     # represented ok by themselves.
-    decomposed = unicodedata.normalize('NFKD', unicode_str)
+    decomposed = unicodedata.normalize('NFKD', substituted)
 
-    # next, encode as ascii, replacing all characters that can't be encoded
+    # finally, encode as ascii, replacing all characters that can't be encoded
     # with '?' instead.
     replaced = decomposed.encode('ascii', 'replace')
 
