@@ -194,6 +194,7 @@ def _setupParserFilters(filters, self_filters, user_filters, time_filters):
         help="add yourself to the subscribers filter")
     self_filters.add_argument(
         '--responsible-me',
+        '--mine',
         action='store_true',
         help="add yourself to the responsibleUsers filter")
 
