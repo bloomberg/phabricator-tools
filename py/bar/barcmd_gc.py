@@ -60,9 +60,14 @@ def setupParser(parser):
     should_update = parser.add_mutually_exclusive_group()
 
     should_update.add_argument(
+        '--prompt-update',
+        action='store_true',
+        help='ask the user if landinglog should be updated')
+
+    should_update.add_argument(
         '--update', '-u',
         action='store_true',
-        help='update landinglog without prompting')
+        help='update landinglog without prompting (default)')
 
     should_update.add_argument(
         '--no-update', '-n',
@@ -75,7 +80,7 @@ def process(args):
 
     clone = phlsys_git.GitClone('.')
 
-    _fetch_log(clone, args.update, args.no_update)
+    _fetch_log(clone, args.update, args.no_update, args.prompt_update)
 
     log = abdt_landinglog.get_log(clone)
     log_dict = {i.review_sha1: (i.name, i.landed_sha1) for i in log}
@@ -106,7 +111,11 @@ def process(args):
                 print "stopped."
 
 
-def _fetch_log(clone, always_update, never_update):
+def _fetch_log(clone, always_update, never_update, prompt_update):
+    # default to always_update
+    if not never_update and not prompt_update:
+        always_update = True
+
     landinglog_ref = 'refs/arcyd/landinglog'
     local_landinglog_ref = 'refs/arcyd/origin/landinglog'
     landinglog_fetch = '+{}:{}'.format(landinglog_ref, local_landinglog_ref)
@@ -143,6 +152,7 @@ def _fetch_log(clone, always_update, never_update):
             # nothing to do
             pass
         else:
+            assert prompt_update
             choice = phlsys_choice.yes_or_no_or_abort(
                 "update landing log from origin now?")
             if choice is None:
