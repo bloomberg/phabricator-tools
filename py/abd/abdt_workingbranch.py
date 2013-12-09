@@ -88,8 +88,8 @@ def _push_new_status_branch(gitContext, review_branch, status, revision_id):
         review_branch.base,
         revision_id)
 
-    working_branch = abdt_naming.makeWorkingBranchFromName(
-        working_branch_name)
+    naming = abdt_naming.ClassicNaming()
+    working_branch = naming.make_tracker_branch_from_name(working_branch_name)
 
     working_branch = abdt_gittypes.makeGitWorkingBranch(
         working_branch, gitContext.remote)

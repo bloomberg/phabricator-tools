@@ -24,7 +24,6 @@
 #   makeReviewBranchName
 #   makeWorkingBranchName
 #   makeReviewBranchFromName
-#   makeWorkingBranchFromName
 #   getWorkingBranches
 #
 # Public Assignments:
@@ -249,40 +248,6 @@ def makeReviewBranchFromName(branch_name):
         base='/'.join(parts[1:]))
 
 
-def makeWorkingBranchFromName(branch_name):
-    """Return the WorkingBranch for 'branch_name' or None if invalid.
-
-    Usage example:
-        >>> makeWorkingBranchFromName('dev/arcyd/ok/mywork/master/99')
-        ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
-                                   status='ok',
-                                   description='mywork',
-                                   base='master',
-                                   id='99')
-
-        >>> makeWorkingBranchFromName('invalid/mywork/master')
-
-    :branch_name: string name of the working branch
-    :returns: WorkingBranch or None if invalid
-
-    """
-    suffix = getWithoutPrefix(branch_name, getWorkingBranchPrefix())
-    if not suffix:
-        return None  # review branches must start with the prefix
-
-    parts = suffix.split("/")
-    if len(parts) < 4:
-        return None  # suffix should be status/description/base(/...)/id
-
-    return WorkingBranch(
-        branch=branch_name,
-        status=parts[0],
-        description=parts[1],
-        base='/'.join(parts[2:-1]),
-        id=parts[-1])
-
-
 class ClassicNaming(object):
 
     def __init__(self):
@@ -370,15 +335,19 @@ def getWorkingBranches(branch_list):
 class TestNaming(unittest.TestCase):
 
     def test(self):
+        naming = ClassicNaming()
+
         b = "invalidreviewname"
         self.assertFalse(isReviewBranchPrefixed(b))
         self.assertFalse(makeReviewBranchFromName(b))
-        self.assertFalse(makeWorkingBranchFromName(b))
+        self.assertRaises(
+            Error, lambda: naming.make_tracker_branch_from_name(b))
 
         b = getReviewBranchPrefix()
         self.assertFalse(isReviewBranchPrefixed(b))
         self.assertFalse(makeReviewBranchFromName(b))
-        self.assertFalse(makeWorkingBranchFromName(b))
+        self.assertRaises(
+            Error, lambda: naming.make_tracker_branch_from_name(b))
 
         b = makeReviewBranchName("mywork", "master")
         self.assertTrue(isReviewBranchPrefixed(b))
@@ -387,12 +356,13 @@ class TestNaming(unittest.TestCase):
         self.assertEqual(r.branch, b)
         self.assertEqual(r.description, "mywork")
         self.assertEqual(r.base, "master")
-        self.assertFalse(makeWorkingBranchFromName(b))
+        self.assertRaises(
+            Error, lambda: naming.make_tracker_branch_from_name(b))
 
         b = makeWorkingBranchName("ok", "mywork", "master", 1)
         self.assertFalse(isReviewBranchPrefixed(b))
         self.assertFalse(makeReviewBranchFromName(b))
-        w = makeWorkingBranchFromName(b)
+        w = naming.make_tracker_branch_from_name(b)
         self.assertTrue(w)
         self.assertEqual(w.branch, b)
         self.assertEqual(w.status, "ok")
