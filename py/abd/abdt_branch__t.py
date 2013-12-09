@@ -219,7 +219,7 @@ class Test(unittest.TestCase):
 
         naming = abdt_naming.ClassicNaming()
 
-        branch_name = abdt_naming.makeReviewBranchName(description, base)
+        branch_name = naming.make_review_branch_name(description, base)
         self.repo_dev.call('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 

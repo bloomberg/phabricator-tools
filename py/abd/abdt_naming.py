@@ -10,6 +10,7 @@
 #    .make_tracker_branch_from_name
 #    .make_tracker_branch_name
 #    .make_review_branch_from_name
+#    .make_review_branch_name
 #
 # Public Functions:
 #   getReviewBranchPrefix
@@ -20,7 +21,6 @@
 #   isStatusBadLand
 #   isReviewBranchPrefixed
 #   makeReviewBranchNameFromWorkingBranch
-#   makeReviewBranchName
 #   getWorkingBranches
 #
 # Public Assignments:
@@ -149,33 +149,13 @@ def makeReviewBranchNameFromWorkingBranch(working_branch):
     return branch_name
 
 
-def makeReviewBranchName(description, base):
-    """Return the unique string name of the review branch for these params.
-
-    Review branches are of the form:
-        <review branch prefix>/description/base
-
-    Usage Example:
-        >>> makeReviewBranchName('mywork', 'master')
-        'arcyd-review/mywork/master'
-
-    :description: string descriptive name of the branch
-    :base: string name of the branch to diff against and land on
-    :returns: string name of the review branch
-
-    """
-    branch_name = getReviewBranchPrefix()
-    branch_name += description
-    branch_name += "/" + base
-    return branch_name
-
-
 class ClassicNaming(object):
 
     def __init__(self):
         super(ClassicNaming, self).__init__()
         self._tracking_branch_prefix = 'dev/arcyd/'
         self._reserve_branch_prefix = 'dev/arcyd/reserve'
+        self._review_branch_prefix = 'arcyd-review/'
 
     def make_tracker_branch_from_name(self, branch_name):
         """Return the WorkingBranch for 'branch_name' or None if invalid.
@@ -280,6 +260,28 @@ class ClassicNaming(object):
             branch=branch_name,
             description=parts[0],
             base='/'.join(parts[1:]))
+
+    def make_review_branch_name(self, description, base):
+        """Return the unique string name of the review branch for these params.
+
+        Review branches are of the form:
+            <review branch prefix>/description/base
+
+        Usage Example:
+            >>> naming = ClassicNaming()
+            >>> make_name = naming.make_review_branch_name
+            >>> make_name('mywork', 'master')
+            'arcyd-review/mywork/master'
+
+        :description: string descriptive name of the branch
+        :base: string name of the branch to diff against and land on
+        :returns: string name of the review branch
+
+        """
+        branch_name = self._review_branch_prefix
+        branch_name += description
+        branch_name += "/" + base
+        return branch_name
 
 
 def getWorkingBranches(branch_list):
