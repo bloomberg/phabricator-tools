@@ -8,8 +8,6 @@
 #   Error
 #   ClassicNaming
 #    .make_tracker_branch_from_name
-#   TestNaming
-#    .test
 #
 # Public Functions:
 #   getReviewBranchPrefix
@@ -44,7 +42,6 @@
 from __future__ import absolute_import
 
 import collections
-import unittest
 
 WB_STATUS_OK = "ok"
 WB_STATUS_PREFIX_BAD = "bad_"
@@ -330,45 +327,6 @@ def getWorkingBranches(branch_list):
         except Error:
             pass  # ignore naming errors, we only want the valid branches
     return working_branch_list
-
-
-class TestNaming(unittest.TestCase):
-
-    def test(self):
-        naming = ClassicNaming()
-
-        b = "invalidreviewname"
-        self.assertFalse(isReviewBranchPrefixed(b))
-        self.assertFalse(makeReviewBranchFromName(b))
-        self.assertRaises(
-            Error, lambda: naming.make_tracker_branch_from_name(b))
-
-        b = getReviewBranchPrefix()
-        self.assertFalse(isReviewBranchPrefixed(b))
-        self.assertFalse(makeReviewBranchFromName(b))
-        self.assertRaises(
-            Error, lambda: naming.make_tracker_branch_from_name(b))
-
-        b = makeReviewBranchName("mywork", "master")
-        self.assertTrue(isReviewBranchPrefixed(b))
-        r = makeReviewBranchFromName(b)
-        self.assertTrue(r)
-        self.assertEqual(r.branch, b)
-        self.assertEqual(r.description, "mywork")
-        self.assertEqual(r.base, "master")
-        self.assertRaises(
-            Error, lambda: naming.make_tracker_branch_from_name(b))
-
-        b = makeWorkingBranchName("ok", "mywork", "master", 1)
-        self.assertFalse(isReviewBranchPrefixed(b))
-        self.assertFalse(makeReviewBranchFromName(b))
-        w = naming.make_tracker_branch_from_name(b)
-        self.assertTrue(w)
-        self.assertEqual(w.branch, b)
-        self.assertEqual(w.status, "ok")
-        self.assertEqual(w.description, "mywork")
-        self.assertEqual(w.base, "master")
-        self.assertEqual(w.id, "1")
 
 
 #------------------------------------------------------------------------------
