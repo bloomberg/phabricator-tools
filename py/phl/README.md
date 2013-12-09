@@ -83,6 +83,8 @@ Conveniently schedule unreliable tasks, retry them after a delay.
 A simple wrapper to call sendmail-like binary.
 * `phlsys_statusline.py` -
 Print a status line, carriage return to stay on the same line.
+* `phlsys_string.py` -
+String utility functions.
 * `phlsys_strtotime.py` -
 A poor substitute for PHP's strtotime function.
 * `phlsys_subcommand.py` -

@@ -17,7 +17,6 @@
 #   isStatusBadPreReview
 #   isStatusBadLand
 #   isReviewBranchPrefixed
-#   getWithoutPrefix
 #   makeReviewBranchNameFromWorkingBranch
 #   makeReviewBranchName
 #   makeWorkingBranchName
@@ -42,6 +41,9 @@
 from __future__ import absolute_import
 
 import collections
+
+import phlsys_string
+
 
 WB_STATUS_OK = "ok"
 WB_STATUS_PREFIX_BAD = "bad_"
@@ -117,28 +119,6 @@ def isStatusBadLand(working_branch):
 def isReviewBranchPrefixed(name):
     prefix = getReviewBranchPrefix()
     return (len(name) > len(prefix)) and name.startswith(prefix)
-
-
-def getWithoutPrefix(string, prefix):
-    """Return 'string' with 'prefix' removed.
-
-    If 'string' does not start with 'prefix' then None is returned.
-
-    Usage examples:
-
-    >>> getWithoutPrefix('dog/cat/', 'dog/')
-    'cat/'
-
-    >>> getWithoutPrefix('dog/cat/', 'mouse/')
-
-    :string: string to operate on
-    :prefix: string prefix to remove
-    :returns: string representing 'string' with 'prefix' removed or None
-
-    """
-    if string.startswith(prefix):
-        return string[len(prefix):]
-    return None
 
 
 WorkingBranch = collections.namedtuple(
@@ -231,7 +211,7 @@ def makeReviewBranchFromName(branch_name):
     :returns: ReviewBranch or None if invalid
 
     """
-    suffix = getWithoutPrefix(branch_name, getReviewBranchPrefix())
+    suffix = phlsys_string.after_prefix(branch_name, getReviewBranchPrefix())
     if not suffix:
         return None  # review branches must start with the prefix
 
@@ -278,7 +258,9 @@ class ClassicNaming(object):
         if branch_name == self._reserve_branch_prefix:
             raise Error()  # ignore the reserved branch
 
-        suffix = getWithoutPrefix(branch_name, self._tracking_branch_prefix)
+        suffix = phlsys_string.after_prefix(
+            branch_name, self._tracking_branch_prefix)
+
         if not suffix:
             raise Error()  # review branches must start with the prefix
 
