@@ -248,7 +248,7 @@ class ClassicNaming(object):
 
         """
         suffix = phlsys_string.after_prefix(
-            branch_name, getReviewBranchPrefix())
+            branch_name, self._review_branch_prefix)
         if not suffix:
             raise Error()  # review branches must start with the prefix
 
