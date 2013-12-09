@@ -74,8 +74,7 @@ class Test(unittest.TestCase):
         self.repo_central = phlsys_git.GitClone(tempfile.mkdtemp())
         self.repo_dev = phlsys_git.GitClone(tempfile.mkdtemp())
         sys_clone = phlsys_git.GitClone(tempfile.mkdtemp())
-        self.clone_arcyd = abdt_git.Clone(
-            sys_clone, 'origin', "myrepo", "http://git/{branch}")
+        self.clone_arcyd = abdt_git.Clone(sys_clone, 'origin', 'myrepo')
 
         self.repo_central.call("init", "--bare")
 

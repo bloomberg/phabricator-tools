@@ -349,9 +349,11 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
         branch_url_callable = make_branch_url
 
     arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
-    arcyd_clone = abdt_git.Clone(
-        sys_clone, "origin", config.description, branch_url_callable)
-    branches = arcyd_clone.get_managed_branches()
+    arcyd_clone = abdt_git.Clone(sys_clone, "origin", config.description)
+
+    branches = abdt_git.get_managed_branches(
+        arcyd_clone, config.description, branch_url_callable)
+
     for branch in branches:
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
             branch, 'branch')

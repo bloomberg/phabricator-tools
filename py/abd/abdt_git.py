@@ -19,8 +19,10 @@
 #    .set_name_email
 #    .call
 #    .get_remote
-#    .get_managed_branches
 #    .working_dir
+#
+# Public Functions:
+#   get_managed_branches
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -45,13 +47,12 @@ import abdt_naming
 class Clone(object):
 
     def __init__(
-            self, clone, remote, description, branch_link_callable=None):
+            self, clone, remote, description):
         """Initialise a new Clone.
 
         :clone: the clone to attach to and delegate calls to
         :remote: name of the remote to use
         :description: short identification of the repo for humans
-        :branch_link_callable: we call this with a branch to get a link
         :returns: None
 
         """
@@ -59,7 +60,6 @@ class Clone(object):
         self._clone = clone
         self._remote = remote
         self._description = description
-        self._branch_link_callable = branch_link_callable
 
     def is_identical(self, branch1, branch2):
         """Return True if the branches point to the same commit.
@@ -199,64 +199,72 @@ class Clone(object):
     def get_remote(self):
         return self._remote
 
-    def get_managed_branches(self):
-        remote_branches = self.get_remote_branches()
-        wbList = abdt_naming.getWorkingBranches(remote_branches)
-        makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
-        rbDict = dict((makeRb(wb), wb) for wb in wbList)
-
-        managed_branches = []
-        lander = abdt_lander.squash
-        self._add_abandoned_branches(
-            managed_branches, remote_branches, wbList, lander)
-        self._add_paired_branches(
-            managed_branches, remote_branches, rbDict, lander)
-        return managed_branches
-
-    def _add_abandoned_branches(
-            self, abandoned_list, branches, working_branches, lander):
-        for b in working_branches:
-            rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(b)
-            if rb not in branches:
-                working_branch = abdt_gittypes.makeGitWorkingBranch(
-                    b, self._remote)
-                abandoned_list.append(
-                    abdt_branch.Branch(
-                        self, None, working_branch, lander, self._description))
-
-    def _add_paired_branches(
-            self, paired, branches, rb_to_wb, lander):
-        for b in branches:
-            if abdt_naming.isReviewBranchPrefixed(b):
-                review_branch = abdt_naming.makeReviewBranchFromName(b)
-                if review_branch is None:
-                    # TODO: handle this case properly
-                    continue
-
-                review_branch = abdt_gittypes.makeGitReviewBranch(
-                    review_branch, self._remote)
-                working_branch = None
-                if b in rb_to_wb.keys():
-                    working_branch = rb_to_wb[b]
-                    working_branch = abdt_gittypes.makeGitWorkingBranch(
-                        working_branch, self._remote)
-
-                branch_url = None
-                if self._branch_link_callable:
-                    branch_url = self._branch_link_callable(b)
-
-                paired.append(
-                    abdt_branch.Branch(
-                        self,
-                        review_branch,
-                        working_branch,
-                        lander,
-                        self._description,
-                        branch_url))
-
     @property
     def working_dir(self):
         return self._clone.working_dir
+
+
+def get_managed_branches(git, repo_desc, branch_link_callable=None):
+    remote_branches = git.get_remote_branches()
+    wbList = abdt_naming.getWorkingBranches(remote_branches)
+    makeRb = abdt_naming.makeReviewBranchNameFromWorkingBranch
+    rbDict = dict((makeRb(wb), wb) for wb in wbList)
+
+    managed_branches = []
+    lander = abdt_lander.squash
+    managed_branches += _add_abandoned_branches(
+        git, remote_branches, wbList, lander, repo_desc)
+    managed_branches += _add_paired_branches(
+        git, remote_branches, rbDict, lander, repo_desc, branch_link_callable)
+
+    return managed_branches
+
+
+def _add_abandoned_branches(
+        git, branches, working_branches, lander, repo_desc):
+    abandoned_list = []
+    for b in working_branches:
+        rb = abdt_naming.makeReviewBranchNameFromWorkingBranch(b)
+        if rb not in branches:
+            working_branch = abdt_gittypes.makeGitWorkingBranch(
+                b, git.get_remote())
+            abandoned_list.append(
+                abdt_branch.Branch(
+                    git, None, working_branch, lander, repo_desc))
+    return abandoned_list
+
+
+def _add_paired_branches(
+        git, branches, rb_to_wb, lander, repo_desc, branch_link_callable):
+    paired = []
+    for b in branches:
+        if abdt_naming.isReviewBranchPrefixed(b):
+            review_branch = abdt_naming.makeReviewBranchFromName(b)
+            if review_branch is None:
+                # TODO: handle this case properly
+                continue
+
+            review_branch = abdt_gittypes.makeGitReviewBranch(
+                review_branch, git.get_remote())
+            working_branch = None
+            if b in rb_to_wb.keys():
+                working_branch = rb_to_wb[b]
+                working_branch = abdt_gittypes.makeGitWorkingBranch(
+                    working_branch, git.get_remote())
+
+            branch_url = None
+            if branch_link_callable:
+                branch_url = branch_link_callable(b)
+
+            paired.append(
+                abdt_branch.Branch(
+                    git,
+                    review_branch,
+                    working_branch,
+                    lander,
+                    repo_desc,
+                    branch_url))
+    return paired
 
 
 #------------------------------------------------------------------------------
