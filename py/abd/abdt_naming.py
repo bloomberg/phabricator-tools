@@ -21,7 +21,8 @@
 #   isStatusBadLand
 #   isReviewBranchPrefixed
 #   makeReviewBranchNameFromWorkingBranch
-#   getWorkingBranches
+#   get_branches
+#   get_branch_pairs
 #
 # Public Assignments:
 #   WB_STATUS_OK
@@ -33,6 +34,7 @@
 #   WB_DICT_STATUS_DESC
 #   WorkingBranch
 #   ReviewBranch
+#   BranchPair
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -134,6 +136,12 @@ ReviewBranch = collections.namedtuple(
         "branch",
         "description",
         "base"])
+
+
+BranchPair = collections.namedtuple(
+    "abdt_naming__BranchPair", [
+        "review",
+        "tracker"])
 
 
 def makeReviewBranchNameFromWorkingBranch(working_branch):
@@ -284,13 +292,16 @@ class ClassicNaming(object):
         return branch_name
 
 
-def getWorkingBranches(branch_list):
-    """Return a list of WorkingBranch made from strings in 'branch_list'.
+def get_branches(branch_list, func):
+    """Return a list of branches made by func() from strings in 'branch_list'.
 
-    Strings that aren't valid working branch names are ignored.
+    Strings that aren't valid working branch names are ignored, 'func' is
+    expected to raise Error in this case.
 
     Usage example:
-        >>> getWorkingBranches(['dev/arcyd/ok/mywork/master/99'])
+        >>> naming = ClassicNaming()
+        >>> func = naming.make_tracker_branch_from_name
+        >>> get_branches(['dev/arcyd/ok/mywork/master/99'], func)
         ... # doctest: +NORMALIZE_WHITESPACE
         [abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
                                    status='ok',
@@ -298,25 +309,61 @@ def getWorkingBranches(branch_list):
                                    base='master',
                                    id='99')]
 
-        >>> getWorkingBranches([])
+        >>> get_branches([], func)
         []
 
-        >>> getWorkingBranches(['invalid'])
+        >>> get_branches(['invalid'], func)
         []
 
     :branch_list: list of branch name strings
+    :func: the branch factory funtion to use
     :returns: list of WorkingBranch
 
     """
-    working_branch_list = []
-    naming = ClassicNaming()
+    converted_branch_list = []
     for branch in branch_list:
         try:
-            working_branch_list.append(
-                naming.make_tracker_branch_from_name(branch))
+            converted_branch_list.append(
+                func(branch))
         except Error:
             pass  # ignore naming errors, we only want the valid branches
-    return working_branch_list
+    return converted_branch_list
+
+
+def get_branch_pairs(branch_list):
+    """Return a list of BranchPair where items in 'branch_list' are suitable.
+
+    Note that if a review_branch or tracker_branch does not have a pair then
+    the other member of the tuple is set to 'None'.
+
+    :branch_list: a list of branch name strings to generate the pairs from
+    :returns: a list of BranchPair where items in 'branch_list' are suitable
+
+    """
+    naming = ClassicNaming()
+    tracker_branches = get_branches(
+        branch_list, naming.make_tracker_branch_from_name)
+    review_branches = get_branches(
+        branch_list, naming.make_review_branch_from_name)
+
+    # XXX: pychecker and pyflakes don't understand dictcomps yet so do it like
+    #      this instead
+    review_name = makeReviewBranchNameFromWorkingBranch
+    name_to_tracked = dict([(review_name(b), b) for b in tracker_branches])
+    name_to_review = dict([(b.branch, b) for b in review_branches])
+
+    tracked = set(name_to_tracked.keys())
+    actual = set(name_to_review.keys())
+
+    abandoned_trackers = [name_to_tracked[b] for b in tracked - actual]
+    new_reviews = [name_to_review[b] for b in actual - tracked]
+    matched = actual & tracked
+
+    res = [BranchPair(name_to_review[b], name_to_tracked[b]) for b in matched]
+    res += [BranchPair(None, b) for b in abandoned_trackers]
+    res += [BranchPair(b, None) for b in new_reviews]
+
+    return res
 
 
 #------------------------------------------------------------------------------
