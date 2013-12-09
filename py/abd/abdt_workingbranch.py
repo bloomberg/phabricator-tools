@@ -82,13 +82,14 @@ def _push_new_status_branch(gitContext, review_branch, status, revision_id):
     else:
         revision_id = str(revision_id)
 
-    working_branch_name = abdt_naming.makeWorkingBranchName(
+    naming = abdt_naming.ClassicNaming()
+
+    working_branch_name = naming.make_tracker_branch_name(
         status,
         review_branch.description,
         review_branch.base,
         revision_id)
 
-    naming = abdt_naming.ClassicNaming()
     working_branch = naming.make_tracker_branch_from_name(working_branch_name)
 
     working_branch = abdt_gittypes.makeGitWorkingBranch(

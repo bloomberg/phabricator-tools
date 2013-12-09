@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         self.assertRaises(
             abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
 
-        b = abdt_naming.makeWorkingBranchName("ok", "mywork", "master", 1)
+        b = naming.make_tracker_branch_name("ok", "mywork", "master", 1)
         self.assertFalse(abdt_naming.isReviewBranchPrefixed(b))
         self.assertFalse(abdt_naming.makeReviewBranchFromName(b))
         w = naming.make_tracker_branch_from_name(b)

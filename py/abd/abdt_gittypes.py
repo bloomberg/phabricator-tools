@@ -64,7 +64,8 @@ def makeWorkingBranchWithStatus(working_branch, status):
 
     """
     remote = working_branch.remote
-    working_branch = abdt_naming.makeWorkingBranchName(
+    naming = abdt_naming.ClassicNaming()
+    working_branch = naming.make_tracker_branch_name(
         base=working_branch.base,
         status=status,
         description=working_branch.description,
@@ -99,7 +100,8 @@ def makeGitWorkingBranch(working_branch, remote):
 def makeGitWorkingBranchFromParts(
         status, description, base, review_id, remote):
     """Return a GitReviewBranch based on the supplied parts."""
-    working_branch = abdt_naming.makeWorkingBranchName(
+    naming = abdt_naming.ClassicNaming()
+    working_branch = naming.make_tracker_branch_name(
         base=base,
         status=status,
         description=description,

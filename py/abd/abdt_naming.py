@@ -8,6 +8,7 @@
 #   Error
 #   ClassicNaming
 #    .make_tracker_branch_from_name
+#    .make_tracker_branch_name
 #
 # Public Functions:
 #   getReviewBranchPrefix
@@ -19,7 +20,6 @@
 #   isReviewBranchPrefixed
 #   makeReviewBranchNameFromWorkingBranch
 #   makeReviewBranchName
-#   makeWorkingBranchName
 #   makeReviewBranchFromName
 #   getWorkingBranches
 #
@@ -170,31 +170,6 @@ def makeReviewBranchName(description, base):
     return branch_name
 
 
-def makeWorkingBranchName(status, description, base, review_id):
-    """Return the unique string name of the working branch for these params.
-
-    Working branches are of the form:
-        <working branch prefix>/description/base
-
-    Usage example:
-        >>> makeWorkingBranchName('ok', 'mywork', 'master',  99)
-        'dev/arcyd/ok/mywork/master/99'
-
-    :description: string descriptive name of the branch
-    :base: string name of the branch to diff against and land on
-    :id: identifier for the review, converted to str() for convenience
-    :returns: string name of the working branch
-
-    """
-    working_branch = ""
-    working_branch += getWorkingBranchPrefix()
-    working_branch += status
-    working_branch += "/" + description
-    working_branch += "/" + base
-    working_branch += "/" + str(review_id)
-    return working_branch
-
-
 def makeReviewBranchFromName(branch_name):
     """Return the ReviewBranch for 'branch_name' or None if invalid.
 
@@ -274,6 +249,32 @@ class ClassicNaming(object):
             description=parts[1],
             base='/'.join(parts[2:-1]),
             id=parts[-1])
+
+    def make_tracker_branch_name(self, status, description, base, review_id):
+        """Return the unique string name of the tracker branch for params.
+
+        Working branches are of the form:
+            <working branch prefix>/description/base
+
+        Usage example:
+            >>> naming = ClassicNaming()
+            >>> make_name = naming.make_tracker_branch_name
+            >>> make_name('ok', 'mywork', 'master',  99)
+            'dev/arcyd/ok/mywork/master/99'
+
+        :description: string descriptive name of the branch
+        :base: string name of the branch to diff against and land on
+        :id: identifier for the review, converted to str() for convenience
+        :returns: string name of the working branch
+
+        """
+        tracker_branch = ""
+        tracker_branch += self._tracking_branch_prefix
+        tracker_branch += status
+        tracker_branch += "/" + description
+        tracker_branch += "/" + base
+        tracker_branch += "/" + str(review_id)
+        return tracker_branch
 
 
 def getWorkingBranches(branch_list):
