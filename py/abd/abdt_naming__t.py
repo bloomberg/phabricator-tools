@@ -32,19 +32,21 @@ class Test(unittest.TestCase):
 
         b = "invalidreviewname"
         self.assertFalse(abdt_naming.isReviewBranchPrefixed(b))
-        self.assertFalse(abdt_naming.makeReviewBranchFromName(b))
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
         self.assertRaises(
             abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
 
         b = abdt_naming.getReviewBranchPrefix()
         self.assertFalse(abdt_naming.isReviewBranchPrefixed(b))
-        self.assertFalse(abdt_naming.makeReviewBranchFromName(b))
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
         self.assertRaises(
             abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
 
         b = abdt_naming.makeReviewBranchName("mywork", "master")
         self.assertTrue(abdt_naming.isReviewBranchPrefixed(b))
-        r = abdt_naming.makeReviewBranchFromName(b)
+        r = naming.make_review_branch_from_name(b)
         self.assertTrue(r)
         self.assertEqual(r.branch, b)
         self.assertEqual(r.description, "mywork")
@@ -54,7 +56,8 @@ class Test(unittest.TestCase):
 
         b = naming.make_tracker_branch_name("ok", "mywork", "master", 1)
         self.assertFalse(abdt_naming.isReviewBranchPrefixed(b))
-        self.assertFalse(abdt_naming.makeReviewBranchFromName(b))
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
         w = naming.make_tracker_branch_from_name(b)
         self.assertTrue(w)
         self.assertEqual(w.branch, b)

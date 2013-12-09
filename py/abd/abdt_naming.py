@@ -9,6 +9,7 @@
 #   ClassicNaming
 #    .make_tracker_branch_from_name
 #    .make_tracker_branch_name
+#    .make_review_branch_from_name
 #
 # Public Functions:
 #   getReviewBranchPrefix
@@ -20,7 +21,6 @@
 #   isReviewBranchPrefixed
 #   makeReviewBranchNameFromWorkingBranch
 #   makeReviewBranchName
-#   makeReviewBranchFromName
 #   getWorkingBranches
 #
 # Public Assignments:
@@ -170,36 +170,6 @@ def makeReviewBranchName(description, base):
     return branch_name
 
 
-def makeReviewBranchFromName(branch_name):
-    """Return the ReviewBranch for 'branch_name' or None if invalid.
-
-    Usage example:
-        >>> makeReviewBranchFromName('arcyd-review/mywork/master')
-        ... # doctest: +NORMALIZE_WHITESPACE
-        abdt_naming__ReviewBranch(branch='arcyd-review/mywork/master',
-                                  description='mywork',
-                                  base='master')
-
-        >>> makeReviewBranchFromName('invalid/mywork/master')
-
-    :branch_name: string name of the review branch
-    :returns: ReviewBranch or None if invalid
-
-    """
-    suffix = phlsys_string.after_prefix(branch_name, getReviewBranchPrefix())
-    if not suffix:
-        return None  # review branches must start with the prefix
-
-    parts = suffix.split("/")
-    if len(parts) < 2:
-        return None  # suffix should be description/base(/...)
-
-    return ReviewBranch(
-        branch=branch_name,
-        description=parts[0],
-        base='/'.join(parts[1:]))
-
-
 class ClassicNaming(object):
 
     def __init__(self):
@@ -275,6 +245,41 @@ class ClassicNaming(object):
         tracker_branch += "/" + base
         tracker_branch += "/" + str(review_id)
         return tracker_branch
+
+    def make_review_branch_from_name(self, branch_name):
+        """Return the ReviewBranch for 'branch_name' or None if invalid.
+
+        Usage example:
+            >>> naming = ClassicNaming()
+            >>> make_branch = naming.make_review_branch_from_name
+            >>> make_branch('arcyd-review/mywork/master')
+            ... # doctest: +NORMALIZE_WHITESPACE
+            abdt_naming__ReviewBranch(branch='arcyd-review/mywork/master',
+                                    description='mywork',
+                                    base='master')
+
+            >>> make_branch('invalid/mywork/master')
+            Traceback (most recent call last):
+                ...
+            Error
+
+        :branch_name: string name of the review branch
+        :returns: ReviewBranch or None if invalid
+
+        """
+        suffix = phlsys_string.after_prefix(
+            branch_name, getReviewBranchPrefix())
+        if not suffix:
+            raise Error()  # review branches must start with the prefix
+
+        parts = suffix.split("/")
+        if len(parts) < 2:
+            raise Error()  # suffix should be description/base(/...)
+
+        return ReviewBranch(
+            branch=branch_name,
+            description=parts[0],
+            base='/'.join(parts[1:]))
 
 
 def getWorkingBranches(branch_list):

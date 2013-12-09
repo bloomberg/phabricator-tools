@@ -217,12 +217,14 @@ class Test(unittest.TestCase):
         base = 'master'
         description = 'untracked'
 
+        naming = abdt_naming.ClassicNaming()
+
         branch_name = abdt_naming.makeReviewBranchName(description, base)
         self.repo_dev.call('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
         self.clone_arcyd.call('fetch', 'origin')
-        review_branch = abdt_naming.makeReviewBranchFromName(branch_name)
+        review_branch = naming.make_review_branch_from_name(branch_name)
         review_branch = abdt_gittypes.makeGitReviewBranch(
             review_branch, 'origin')
         branch = abdt_branch.Branch(

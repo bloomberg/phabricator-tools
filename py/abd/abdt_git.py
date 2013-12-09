@@ -237,9 +237,10 @@ def _add_abandoned_branches(
 def _add_paired_branches(
         git, branches, rb_to_wb, lander, repo_desc, branch_link_callable):
     paired = []
+    naming = abdt_naming.ClassicNaming()
     for b in branches:
         if abdt_naming.isReviewBranchPrefixed(b):
-            review_branch = abdt_naming.makeReviewBranchFromName(b)
+            review_branch = naming.make_review_branch_from_name(b)
             if review_branch is None:
                 # TODO: handle this case properly
                 continue
