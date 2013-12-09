@@ -5,6 +5,9 @@
 # abdt_naming
 #
 # Public Classes:
+#   Error
+#   ClassicNaming
+#    .make_tracker_branch_from_name
 #   TestNaming
 #    .test
 #
@@ -58,6 +61,10 @@ WB_DICT_STATUS_DESC = {
     WB_STATUS_BAD_INREVIEW:  "bad update during review",
     WB_STATUS_BAD_LAND:      "didn't manage to land the change",
 }
+
+
+class Error(Exception):
+    pass
 
 
 def getReviewBranchPrefix():
@@ -276,6 +283,55 @@ def makeWorkingBranchFromName(branch_name):
         id=parts[-1])
 
 
+class ClassicNaming(object):
+
+    def __init__(self):
+        super(ClassicNaming, self).__init__()
+        self._tracking_branch_prefix = 'dev/arcyd/'
+        self._reserve_branch_prefix = 'dev/arcyd/reserve'
+
+    def make_tracker_branch_from_name(self, branch_name):
+        """Return the WorkingBranch for 'branch_name' or None if invalid.
+
+        Usage example:
+            >>> naming = ClassicNaming()
+            >>> make_branch = naming.make_tracker_branch_from_name
+            >>> make_branch('dev/arcyd/ok/mywork/master/99')
+            ... # doctest: +NORMALIZE_WHITESPACE
+            abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
+                                    status='ok',
+                                    description='mywork',
+                                    base='master',
+                                    id='99')
+
+            >>> make_branch('invalid/mywork/master')
+            Traceback (most recent call last):
+                ...
+            Error
+
+        :branch_name: string name of the working branch
+        :returns: WorkingBranch or None if invalid
+
+        """
+        if branch_name == self._reserve_branch_prefix:
+            raise Error()  # ignore the reserved branch
+
+        suffix = getWithoutPrefix(branch_name, self._tracking_branch_prefix)
+        if not suffix:
+            raise Error()  # review branches must start with the prefix
+
+        parts = suffix.split("/")
+        if len(parts) < 4:
+            raise Error()  # suffix should be status/description/base(/...)/id
+
+        return WorkingBranch(
+            branch=branch_name,
+            status=parts[0],
+            description=parts[1],
+            base='/'.join(parts[2:-1]),
+            id=parts[-1])
+
+
 def getWorkingBranches(branch_list):
     """Return a list of WorkingBranch made from strings in 'branch_list'.
 
@@ -301,12 +357,13 @@ def getWorkingBranches(branch_list):
 
     """
     working_branch_list = []
-    prefix = getWorkingBranchPrefix()
-    reserved = getReservedBranchPrefix()
+    naming = ClassicNaming()
     for branch in branch_list:
-        if branch.startswith(prefix) and not branch.startswith(reserved):
+        try:
             working_branch_list.append(
-                makeWorkingBranchFromName(branch))
+                naming.make_tracker_branch_from_name(branch))
+        except Error:
+            pass  # ignore naming errors, we only want the valid branches
     return working_branch_list
 
 
