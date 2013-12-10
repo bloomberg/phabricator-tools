@@ -6,6 +6,16 @@
 #
 # Public Classes:
 #   Error
+#   TrackerBranch
+#    .branch
+#    .status
+#    .description
+#    .base
+#    .id
+#   ReviewBranch
+#    .branch
+#    .description
+#    .base
 #   ClassicNaming
 #    .make_tracker_branch_from_name
 #    .make_tracker_branch_name
@@ -28,8 +38,6 @@
 #   WB_STATUS_BAD_INREVIEW
 #   WB_STATUS_BAD_LAND
 #   WB_DICT_STATUS_DESC
-#   WorkingBranch
-#   ReviewBranch
 #   BranchPair
 #
 # -----------------------------------------------------------------------------
@@ -98,19 +106,68 @@ def isStatusBadLand(working_branch):
     return working_branch.status == WB_STATUS_BAD_LAND
 
 
-WorkingBranch = collections.namedtuple(
-    "abdt_naming__WorkingBranch", [
-        "branch",
-        "status",
-        "description",
-        "base",
-        "id"])
+class TrackerBranch(object):
 
-ReviewBranch = collections.namedtuple(
-    "abdt_naming__ReviewBranch", [
-        "branch",
-        "description",
-        "base"])
+    def __init__(self, naming, branch, status, description, base, rev_id):
+        super(TrackerBranch, self).__init__()
+        self._naming = naming
+        self._branch = branch
+        self._status = status
+        self._description = description
+        self._base = base
+        self._id = rev_id
+
+    @property
+    def branch(self):
+        return self._branch
+
+    @property
+    def status(self):
+        return self._status
+
+    @property
+    def description(self):
+        return self._description
+
+    @property
+    def base(self):
+        return self._base
+
+    @property
+    def id(self):
+        return self._id
+
+    def __str__(self):
+        return 'abdt_naming.TrackerBranch("{}")'.format(self.branch)
+
+    __repr__ = __str__
+
+
+class ReviewBranch(object):
+
+    def __init__(self, naming, branch, description, base):
+        super(ReviewBranch, self).__init__()
+        self._naming = naming
+        self._branch = branch
+        self._description = description
+        self._base = base
+
+    @property
+    def branch(self):
+        return self._branch
+
+    @property
+    def description(self):
+        return self._description
+
+    @property
+    def base(self):
+        return self._base
+
+    def __str__(self):
+        return 'abdt_naming.ReviewBranch("{}")'.format(self.branch)
+
+    __repr__ = __str__
 
 
 BranchPair = collections.namedtuple(
@@ -148,11 +205,7 @@ class ClassicNaming(object):
             >>> make_branch = naming.make_tracker_branch_from_name
             >>> make_branch('dev/arcyd/ok/mywork/master/99')
             ... # doctest: +NORMALIZE_WHITESPACE
-            abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
-                                    status='ok',
-                                    description='mywork',
-                                    base='master',
-                                    id='99')
+            abdt_naming.TrackerBranch("dev/arcyd/ok/mywork/master/99")
 
             >>> make_branch('invalid/mywork/master')
             Traceback (most recent call last):
@@ -176,12 +229,13 @@ class ClassicNaming(object):
         if len(parts) < 4:
             raise Error()  # suffix should be status/description/base(/...)/id
 
-        return WorkingBranch(
+        return TrackerBranch(
+            naming=self,
             branch=branch_name,
             status=parts[0],
             description=parts[1],
             base='/'.join(parts[2:-1]),
-            id=parts[-1])
+            rev_id=parts[-1])
 
     def make_tracker_branch_name(self, status, description, base, review_id):
         """Return the unique string name of the tracker branch for params.
@@ -217,9 +271,7 @@ class ClassicNaming(object):
             >>> make_branch = naming.make_review_branch_from_name
             >>> make_branch('arcyd-review/mywork/master')
             ... # doctest: +NORMALIZE_WHITESPACE
-            abdt_naming__ReviewBranch(branch='arcyd-review/mywork/master',
-                                    description='mywork',
-                                    base='master')
+            abdt_naming.ReviewBranch("arcyd-review/mywork/master")
 
             >>> make_branch('invalid/mywork/master')
             Traceback (most recent call last):
@@ -240,6 +292,7 @@ class ClassicNaming(object):
             raise Error()  # suffix should be description/base(/...)
 
         return ReviewBranch(
+            naming=self,
             branch=branch_name,
             description=parts[0],
             base='/'.join(parts[1:]))
@@ -278,11 +331,7 @@ def _get_branches(branch_list, func):
         >>> func = naming.make_tracker_branch_from_name
         >>> _get_branches(['dev/arcyd/ok/mywork/master/99'], func)
         ... # doctest: +NORMALIZE_WHITESPACE
-        [abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
-                                   status='ok',
-                                   description='mywork',
-                                   base='master',
-                                   id='99')]
+        [abdt_naming.TrackerBranch("dev/arcyd/ok/mywork/master/99")]
 
         >>> _get_branches([], func)
         []
