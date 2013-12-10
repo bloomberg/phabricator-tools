@@ -115,7 +115,7 @@ class Branch(object):
         else:
             return isinstance(
                 self._review_branch,
-                abdt_gittypes.GitReviewBranch)
+                abdt_naming.ReviewBranch)
 
     def _tracking_branch_valid_or_none(self):
         if not self._has_tracking_branch():
@@ -123,7 +123,7 @@ class Branch(object):
         else:
             return isinstance(
                 self._tracking_branch,
-                abdt_gittypes.GitWorkingBranch)
+                abdt_naming.TrackerBranch)
 
     def _has_review_branch(self):
         return self._review_branch is not None

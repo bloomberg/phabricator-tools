@@ -21,7 +21,6 @@ from __future__ import absolute_import
 import phlgit_push
 import phlgitu_ref
 
-import abdt_gittypes
 import abdt_naming
 
 
@@ -92,9 +91,6 @@ def _push_new_status_branch(gitContext, review_branch, status, revision_id):
 
     working_branch = naming.make_tracker_branch_from_name(working_branch_name)
 
-    working_branch = abdt_gittypes.makeGitWorkingBranch(
-        working_branch, gitContext.remote)
-
     phlgit_push.push_asymmetrical_force(
         clone,
         phlgitu_ref.make_remote(review_branch.branch, remote),
@@ -110,8 +106,7 @@ def _push_status(gitContext, review_branch, working_branch, status):
 
     old_branch = working_branch.branch
 
-    working_branch = abdt_gittypes.makeWorkingBranchWithStatus(
-        working_branch, status)
+    working_branch.update_status(status)
 
     new_branch = working_branch.branch
     if old_branch == new_branch:

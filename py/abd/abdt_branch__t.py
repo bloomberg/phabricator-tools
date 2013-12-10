@@ -58,7 +58,6 @@ import phlsys_git
 import abdt_branch
 import abdt_branchtester
 import abdt_git
-import abdt_gittypes
 import abdt_naming
 
 
@@ -225,8 +224,6 @@ class Test(unittest.TestCase):
 
         self.clone_arcyd.call('fetch', 'origin')
         review_branch = naming.make_review_branch_from_name(branch_name)
-        review_branch = abdt_gittypes.makeGitReviewBranch(
-            review_branch, 'origin')
         branch = abdt_branch.Branch(
             self.clone_arcyd,
             review_branch,

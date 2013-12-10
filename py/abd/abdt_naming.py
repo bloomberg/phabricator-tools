@@ -12,10 +12,17 @@
 #    .description
 #    .base
 #    .id
+#    .remote
+#    .remote_base
+#    .remote_branch
+#    .update_status
 #   ReviewBranch
 #    .branch
 #    .description
 #    .base
+#    .remote
+#    .remote_base
+#    .remote_branch
 #   ClassicNaming
 #    .make_tracker_branch_from_name
 #    .make_tracker_branch_name
@@ -48,6 +55,7 @@ from __future__ import absolute_import
 
 import collections
 
+import phlgitu_ref
 import phlsys_string
 
 
@@ -108,7 +116,15 @@ def isStatusBadLand(working_branch):
 
 class TrackerBranch(object):
 
-    def __init__(self, naming, branch, status, description, base, rev_id):
+    def __init__(
+            self,
+            naming,
+            branch,
+            status,
+            description,
+            base,
+            rev_id,
+            remote):
         super(TrackerBranch, self).__init__()
         self._naming = naming
         self._branch = branch
@@ -116,6 +132,10 @@ class TrackerBranch(object):
         self._description = description
         self._base = base
         self._id = rev_id
+        self._remote = remote
+        self._remote_base = None
+        self._remote_branch = None
+        self._update_remotes()
 
     @property
     def branch(self):
@@ -137,6 +157,30 @@ class TrackerBranch(object):
     def id(self):
         return self._id
 
+    @property
+    def remote(self):
+        return self._remote
+
+    @property
+    def remote_base(self):
+        return self._remote_base
+
+    @property
+    def remote_branch(self):
+        return self._remote_branch
+
+    def update_status(self, status):
+        self._status = status
+        self._branch = self._naming.make_tracker_branch_name(
+            self._status, self._description, self._base, self._id)
+        self._update_remotes()
+
+    def _update_remotes(self):
+        self._remote_base = phlgitu_ref.make_remote(
+            self._base, self._remote)
+        self._remote_branch = phlgitu_ref.make_remote(
+            self._branch, self._remote)
+
     def __str__(self):
         return 'abdt_naming.TrackerBranch("{}")'.format(self.branch)
 
@@ -145,12 +189,22 @@ class TrackerBranch(object):
 
 class ReviewBranch(object):
 
-    def __init__(self, naming, branch, description, base):
+    def __init__(
+            self,
+            naming,
+            branch,
+            description,
+            base,
+            remote):
         super(ReviewBranch, self).__init__()
         self._naming = naming
         self._branch = branch
         self._description = description
         self._base = base
+        self._remote = remote
+        self._remote_base = None
+        self._remote_branch = None
+        self._update_remotes()
 
     @property
     def branch(self):
@@ -163,6 +217,24 @@ class ReviewBranch(object):
     @property
     def base(self):
         return self._base
+
+    @property
+    def remote(self):
+        return self._remote
+
+    @property
+    def remote_base(self):
+        return self._remote_base
+
+    @property
+    def remote_branch(self):
+        return self._remote_branch
+
+    def _update_remotes(self):
+        self._remote_base = phlgitu_ref.make_remote(
+            self._base, self._remote)
+        self._remote_branch = phlgitu_ref.make_remote(
+            self._branch, self._remote)
 
     def __str__(self):
         return 'abdt_naming.ReviewBranch("{}")'.format(self.branch)
@@ -196,6 +268,7 @@ class ClassicNaming(object):
         self._tracking_branch_prefix = 'dev/arcyd/'
         self._reserve_branch_prefix = 'dev/arcyd/reserve'
         self._review_branch_prefix = 'arcyd-review/'
+        self._remote = 'origin'
 
     def make_tracker_branch_from_name(self, branch_name):
         """Return the WorkingBranch for 'branch_name' or None if invalid.
@@ -229,13 +302,16 @@ class ClassicNaming(object):
         if len(parts) < 4:
             raise Error()  # suffix should be status/description/base(/...)/id
 
+        base = '/'.join(parts[2:-1])
+
         return TrackerBranch(
             naming=self,
             branch=branch_name,
             status=parts[0],
             description=parts[1],
-            base='/'.join(parts[2:-1]),
-            rev_id=parts[-1])
+            base=base,
+            rev_id=parts[-1],
+            remote=self._remote)
 
     def make_tracker_branch_name(self, status, description, base, review_id):
         """Return the unique string name of the tracker branch for params.
@@ -291,11 +367,14 @@ class ClassicNaming(object):
         if len(parts) < 2:
             raise Error()  # suffix should be description/base(/...)
 
+        base = '/'.join(parts[1:])
+
         return ReviewBranch(
             naming=self,
             branch=branch_name,
             description=parts[0],
-            base='/'.join(parts[1:]))
+            base=base,
+            remote=self._remote)
 
     def make_review_branch_name(self, description, base):
         """Return the unique string name of the review branch for these params.

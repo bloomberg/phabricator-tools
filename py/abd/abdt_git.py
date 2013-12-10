@@ -38,7 +38,6 @@ import phlgit_merge
 import phlgit_push
 
 import abdt_branch
-import abdt_gittypes
 import abdt_lander
 import abdt_logging
 import abdt_naming
@@ -217,14 +216,8 @@ def get_managed_branches(git, repo_desc, branch_link_callable=None):
         assert review_branch is not None or tracker_branch is not None
 
         if review_branch is not None:
-            review_branch = abdt_gittypes.makeGitReviewBranch(
-                review_branch, git.get_remote())
             if branch_link_callable:
                 branch_url = branch_link_callable(review_branch.branch)
-
-        if tracker_branch is not None:
-            tracker_branch = abdt_gittypes.makeGitWorkingBranch(
-                tracker_branch, git.get_remote())
 
         managed_branches.append(
             abdt_branch.Branch(
