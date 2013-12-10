@@ -58,7 +58,6 @@ import abdt_lander
 import abdt_landinglog
 import abdt_naming
 import abdt_tryloop
-import abdt_workingbranch
 
 # TODO: allow this to be passed in
 _MAX_DIFF_SIZE = 1.5 * 1024 * 1024
@@ -373,10 +372,10 @@ class Branch(object):
             if not self.is_new():
                 # 'push_bad_new_in_review' wont clean up our existing tracker
                 self._push_delete_tracking_branch()
-            self._tracking_branch = abdt_workingbranch.push_bad_new_in_review(
-                self._clone,
-                self._review_branch,
+            self._push_new(
+                abdt_naming.WB_STATUS_BAD_INREVIEW,
                 revision_id)
+
         self._tryloop(action, "mark-new-bad-in-review")
 
     def mark_bad_pre_review(self):
@@ -389,10 +388,12 @@ class Branch(object):
             return
 
         def action():
-            self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
-                self._clone,
-                self._review_branch)
-        self._tryloop(action, "mark-bad-pre-review")
+            self._push_new(
+                abdt_naming.WB_STATUS_BAD_PREREVIEW,
+                None)
+
+        self._tryloop(
+            action, "mark-bad-pre-review")
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
@@ -410,10 +411,10 @@ class Branch(object):
             if not self.is_new():
                 # 'push_bad_new_in_review' wont clean up our existing tracker
                 self._push_delete_tracking_branch()
-            self._tracking_branch = abdt_workingbranch.push_ok_new_in_review(
-                self._clone,
-                self._review_branch,
+            self._push_new(
+                abdt_naming.WB_STATUS_OK,
                 revision_id)
+
         self._tryloop(action, "mark_ok_new_review")
 
     def land(self, author_name, author_email, message):
@@ -499,6 +500,31 @@ class Branch(object):
                 phlgitu_ref.make_local(old_branch),
                 phlgitu_ref.make_local(new_branch),
                 self._clone.get_remote())
+
+    def _push_new(self, status, revision_id):
+        if revision_id is None:
+            revision_id = "none"
+        else:
+            revision_id = str(revision_id)
+
+        naming = abdt_naming.ClassicNaming()
+
+        tracking_branch_name = naming.make_tracker_branch_name(
+            status,
+            self._review_branch.description,
+            self._review_branch.base,
+            revision_id)
+
+        tracking_branch = naming.make_tracker_branch_from_name(
+            tracking_branch_name)
+
+        phlgit_push.push_asymmetrical_force(
+            self._clone,
+            self._review_branch.remote_branch,
+            phlgitu_ref.make_local(tracking_branch.branch),
+            tracking_branch.remote)
+
+        self._tracking_branch = tracking_branch
 
     def _tryloop(self, f, identifier):
         return abdt_tryloop.tryloop(f, identifier, self.describe())
