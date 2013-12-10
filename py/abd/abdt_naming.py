@@ -21,7 +21,6 @@
 #   isStatusBadLand
 #   isReviewBranchPrefixed
 #   makeReviewBranchNameFromWorkingBranch
-#   get_branches
 #   get_branch_pairs
 #
 # Public Assignments:
@@ -292,7 +291,7 @@ class ClassicNaming(object):
         return branch_name
 
 
-def get_branches(branch_list, func):
+def _get_branches(branch_list, func):
     """Return a list of branches made by func() from strings in 'branch_list'.
 
     Strings that aren't valid working branch names are ignored, 'func' is
@@ -301,7 +300,7 @@ def get_branches(branch_list, func):
     Usage example:
         >>> naming = ClassicNaming()
         >>> func = naming.make_tracker_branch_from_name
-        >>> get_branches(['dev/arcyd/ok/mywork/master/99'], func)
+        >>> _get_branches(['dev/arcyd/ok/mywork/master/99'], func)
         ... # doctest: +NORMALIZE_WHITESPACE
         [abdt_naming__WorkingBranch(branch='dev/arcyd/ok/mywork/master/99',
                                    status='ok',
@@ -309,10 +308,10 @@ def get_branches(branch_list, func):
                                    base='master',
                                    id='99')]
 
-        >>> get_branches([], func)
+        >>> _get_branches([], func)
         []
 
-        >>> get_branches(['invalid'], func)
+        >>> _get_branches(['invalid'], func)
         []
 
     :branch_list: list of branch name strings
@@ -341,9 +340,9 @@ def get_branch_pairs(branch_list):
 
     """
     naming = ClassicNaming()
-    tracker_branches = get_branches(
+    tracker_branches = _get_branches(
         branch_list, naming.make_tracker_branch_from_name)
-    review_branches = get_branches(
+    review_branches = _get_branches(
         branch_list, naming.make_review_branch_from_name)
 
     # XXX: pychecker and pyflakes don't understand dictcomps yet so do it like
