@@ -19,7 +19,6 @@
 #   isStatusBad
 #   isStatusBadPreReview
 #   isStatusBadLand
-#   isReviewBranchPrefixed
 #   makeReviewBranchNameFromWorkingBranch
 #   get_branch_pairs
 #
@@ -115,11 +114,6 @@ def isStatusBadLand(working_branch):
 
     """
     return working_branch.status == WB_STATUS_BAD_LAND
-
-
-def isReviewBranchPrefixed(name):
-    prefix = getReviewBranchPrefix()
-    return (len(name) > len(prefix)) and name.startswith(prefix)
 
 
 WorkingBranch = collections.namedtuple(
