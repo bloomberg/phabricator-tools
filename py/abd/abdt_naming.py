@@ -14,8 +14,6 @@
 #
 # Public Functions:
 #   getReviewBranchPrefix
-#   getWorkingBranchPrefix
-#   getReservedBranchPrefix
 #   isStatusBad
 #   isStatusBadPreReview
 #   isStatusBadLand
@@ -68,22 +66,6 @@ class Error(Exception):
 def getReviewBranchPrefix():
     # don't see a reason to change this atm
     return "arcyd-review/"
-
-
-def getWorkingBranchPrefix():
-    # this may want to be configurable from the command-line, we'll probably
-    # want to wrap the functions in this module in a class and store the
-    # convention variables per-instance; will get the whole thing working
-    # first and worry about that later.
-    return "dev/arcyd/"
-
-
-def getReservedBranchPrefix():
-    # this may want to be configurable from the command-line, we'll probably
-    # want to wrap the functions in this module in a class and store the
-    # convention variables per-instance; will get the whole thing working
-    # first and worry about that later.
-    return "dev/arcyd/reserve"
 
 
 def isStatusBad(working_branch):
