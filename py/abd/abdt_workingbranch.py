@@ -24,58 +24,55 @@ import phlgitu_ref
 import abdt_naming
 
 
-def push_bad_pre_review(gitContext, review_branch):
+def push_bad_pre_review(clone, review_branch):
     return _push_new_status_branch(
-        gitContext,
+        clone,
         review_branch,
         abdt_naming.WB_STATUS_BAD_PREREVIEW,
         None)
 
 
-def push_ok_new_in_review(gitContext, review_branch, revision_id):
+def push_ok_new_in_review(clone, review_branch, revision_id):
     return _push_new_status_branch(
-        gitContext,
+        clone,
         review_branch,
         abdt_naming.WB_STATUS_OK,
         revision_id)
 
 
-def push_ok_in_review(gitContext, review_branch, working_branch):
+def push_ok_in_review(clone, review_branch, working_branch):
     return _push_status(
-        gitContext,
+        clone,
         review_branch,
         working_branch,
         abdt_naming.WB_STATUS_OK)
 
 
-def push_bad_in_review(gitContext, review_branch, working_branch):
+def push_bad_in_review(clone, review_branch, working_branch):
     return _push_status(
-        gitContext,
+        clone,
         review_branch,
         working_branch,
         abdt_naming.WB_STATUS_BAD_INREVIEW)
 
 
-def push_bad_new_in_review(gitContext, review_branch, revision_id):
+def push_bad_new_in_review(clone, review_branch, revision_id):
     return _push_new_status_branch(
-        gitContext,
+        clone,
         review_branch,
         abdt_naming.WB_STATUS_BAD_INREVIEW,
         revision_id)
 
 
-def push_bad_land(gitContext, review_branch, working_branch):
+def push_bad_land(clone, review_branch, working_branch):
     return _push_status(
-        gitContext,
+        clone,
         review_branch,
         working_branch,
         abdt_naming.WB_STATUS_BAD_LAND)
 
 
-def _push_new_status_branch(gitContext, review_branch, status, revision_id):
-    clone = gitContext.clone
-    remote = gitContext.remote
-
+def _push_new_status_branch(clone, review_branch, status, revision_id):
     if revision_id is None:
         revision_id = "none"
     else:
@@ -93,17 +90,14 @@ def _push_new_status_branch(gitContext, review_branch, status, revision_id):
 
     phlgit_push.push_asymmetrical_force(
         clone,
-        phlgitu_ref.make_remote(review_branch.branch, remote),
-        phlgitu_ref.make_local(working_branch_name),
-        remote)
+        review_branch.remote_branch,
+        phlgitu_ref.make_local(working_branch.branch),
+        working_branch.remote)
 
     return working_branch
 
 
-def _push_status(gitContext, review_branch, working_branch, status):
-    clone = gitContext.clone
-    remote = gitContext.remote
-
+def _push_status(clone, review_branch, working_branch, status):
     old_branch = working_branch.branch
 
     working_branch.update_status(status)
@@ -114,14 +108,14 @@ def _push_status(gitContext, review_branch, working_branch, status):
             clone,
             review_branch.remote_branch,
             phlgitu_ref.make_local(new_branch),
-            remote)
+            working_branch.remote)
     else:
         phlgit_push.move_asymmetrical(
             clone,
             review_branch.remote_branch,
             phlgitu_ref.make_local(old_branch),
             phlgitu_ref.make_local(new_branch),
-            remote)
+            working_branch.remote)
 
     return working_branch
 

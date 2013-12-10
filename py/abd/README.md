@@ -39,8 +39,6 @@ Generate git diffs between branches suitable for Differential reviews.
 Exception hierarchy for abd user and system errors.
 * `abdt_git.py` -
 Abstraction for Arcyd's git operations.
-* `abdt_gittypes.py` -
-Define useful aggregates for interacting with git without passing alot.
 * `abdt_lander.py` -
 Callables for re-integrating branches upstream.
 * `abdt_landinglog.py` -

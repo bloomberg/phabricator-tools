@@ -52,7 +52,6 @@ import phlgit_revparse
 
 import abdt_differ
 import abdt_exception
-import abdt_gittypes
 import abdt_lander
 import abdt_landinglog
 import abdt_naming
@@ -354,7 +353,7 @@ class Branch(object):
 
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_land(
-                self._make_git_context(),
+                self._clone,
                 self._review_branch,
                 self._tracking_branch)
         self._tryloop(action, "mark-bad-land")
@@ -365,7 +364,7 @@ class Branch(object):
 
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_in_review(
-                self._make_git_context(),
+                self._clone,
                 self._review_branch,
                 self._tracking_branch)
         self._tryloop(action, "mark-bad-in-review")
@@ -379,7 +378,7 @@ class Branch(object):
                 # 'push_bad_new_in_review' wont clean up our existing tracker
                 self._push_delete_tracking_branch()
             self._tracking_branch = abdt_workingbranch.push_bad_new_in_review(
-                self._make_git_context(),
+                self._clone,
                 self._review_branch,
                 revision_id)
         self._tryloop(action, "mark-new-bad-in-review")
@@ -395,7 +394,7 @@ class Branch(object):
 
         def action():
             self._tracking_branch = abdt_workingbranch.push_bad_pre_review(
-                self._make_git_context(),
+                self._clone,
                 self._review_branch)
         self._tryloop(action, "mark-bad-pre-review")
 
@@ -405,7 +404,7 @@ class Branch(object):
 
         def action():
             self._tracking_branch = abdt_workingbranch.push_ok_in_review(
-                self._make_git_context(),
+                self._clone,
                 self._review_branch,
                 self._tracking_branch)
         self._tryloop(action, "mark-ok-in-review")
@@ -419,7 +418,7 @@ class Branch(object):
                 # 'push_bad_new_in_review' wont clean up our existing tracker
                 self._push_delete_tracking_branch()
             self._tracking_branch = abdt_workingbranch.push_ok_new_in_review(
-                self._make_git_context(),
+                self._clone,
                 self._review_branch,
                 revision_id)
         self._tryloop(action, "mark_ok_new_review")
@@ -487,10 +486,6 @@ class Branch(object):
         self._tracking_branch = None
 
         return result
-
-    def _make_git_context(self):
-        return abdt_gittypes.GitContext(
-            self._clone, self._clone.get_remote(), branches=None)
 
     def _tryloop(self, f, identifier):
         return abdt_tryloop.tryloop(f, identifier, self.describe())
