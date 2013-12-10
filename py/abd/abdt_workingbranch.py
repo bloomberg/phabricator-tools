@@ -7,10 +7,7 @@
 # Public Functions:
 #   push_bad_pre_review
 #   push_ok_new_in_review
-#   push_ok_in_review
-#   push_bad_in_review
 #   push_bad_new_in_review
-#   push_bad_land
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -40,36 +37,12 @@ def push_ok_new_in_review(clone, review_branch, revision_id):
         revision_id)
 
 
-def push_ok_in_review(clone, review_branch, working_branch):
-    return _push_status(
-        clone,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_OK)
-
-
-def push_bad_in_review(clone, review_branch, working_branch):
-    return _push_status(
-        clone,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_BAD_INREVIEW)
-
-
 def push_bad_new_in_review(clone, review_branch, revision_id):
     return _push_new_status_branch(
         clone,
         review_branch,
         abdt_naming.WB_STATUS_BAD_INREVIEW,
         revision_id)
-
-
-def push_bad_land(clone, review_branch, working_branch):
-    return _push_status(
-        clone,
-        review_branch,
-        working_branch,
-        abdt_naming.WB_STATUS_BAD_LAND)
 
 
 def _push_new_status_branch(clone, review_branch, status, revision_id):
@@ -93,29 +66,6 @@ def _push_new_status_branch(clone, review_branch, status, revision_id):
         review_branch.remote_branch,
         phlgitu_ref.make_local(working_branch.branch),
         working_branch.remote)
-
-    return working_branch
-
-
-def _push_status(clone, review_branch, working_branch, status):
-    old_branch = working_branch.branch
-
-    working_branch.update_status(status)
-
-    new_branch = working_branch.branch
-    if old_branch == new_branch:
-        phlgit_push.push_asymmetrical_force(
-            clone,
-            review_branch.remote_branch,
-            phlgitu_ref.make_local(new_branch),
-            working_branch.remote)
-    else:
-        phlgit_push.move_asymmetrical(
-            clone,
-            review_branch.remote_branch,
-            phlgitu_ref.make_local(old_branch),
-            phlgitu_ref.make_local(new_branch),
-            working_branch.remote)
 
     return working_branch
 

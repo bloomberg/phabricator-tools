@@ -48,7 +48,9 @@
 from __future__ import absolute_import
 
 import phlgit_log
+import phlgit_push
 import phlgit_revparse
+import phlgitu_ref
 
 import abdt_differ
 import abdt_exception
@@ -351,23 +353,17 @@ class Branch(object):
         """Mark the current version of the review branch as 'bad land'."""
         assert self.review_id_or_none() is not None
 
-        def action():
-            self._tracking_branch = abdt_workingbranch.push_bad_land(
-                self._clone,
-                self._review_branch,
-                self._tracking_branch)
-        self._tryloop(action, "mark-bad-land")
+        self._tryloop(
+            lambda: self._push_status(abdt_naming.WB_STATUS_BAD_LAND),
+            "mark-bad-land")
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
         assert self.review_id_or_none() is not None
 
-        def action():
-            self._tracking_branch = abdt_workingbranch.push_bad_in_review(
-                self._clone,
-                self._review_branch,
-                self._tracking_branch)
-        self._tryloop(action, "mark-bad-in-review")
+        self._tryloop(
+            lambda: self._push_status(abdt_naming.WB_STATUS_BAD_INREVIEW),
+            "mark-bad-in-review")
 
     def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
@@ -402,12 +398,9 @@ class Branch(object):
         """Mark this version of the review branch as 'ok in review'."""
         assert self.review_id_or_none() is not None
 
-        def action():
-            self._tracking_branch = abdt_workingbranch.push_ok_in_review(
-                self._clone,
-                self._review_branch,
-                self._tracking_branch)
-        self._tryloop(action, "mark-ok-in-review")
+        self._tryloop(
+            lambda: self._push_status(abdt_naming.WB_STATUS_OK),
+            "mark-ok-in-review")
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""
@@ -486,6 +479,26 @@ class Branch(object):
         self._tracking_branch = None
 
         return result
+
+    def _push_status(self, status):
+        old_branch = self._tracking_branch.branch
+
+        self._tracking_branch.update_status(status)
+
+        new_branch = self._tracking_branch.branch
+        if old_branch == new_branch:
+            phlgit_push.push_asymmetrical_force(
+                self._clone,
+                self._review_branch.remote_branch,
+                phlgitu_ref.make_local(new_branch),
+                self._tracking_branch.remote)
+        else:
+            phlgit_push.move_asymmetrical(
+                self._clone,
+                self._review_branch.remote_branch,
+                phlgitu_ref.make_local(old_branch),
+                phlgitu_ref.make_local(new_branch),
+                self._clone.get_remote())
 
     def _tryloop(self, f, identifier):
         return abdt_tryloop.tryloop(f, identifier, self.describe())
