@@ -36,7 +36,7 @@ class Test(unittest.TestCase):
         self.assertRaises(
             abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
 
-        b = abdt_naming.getReviewBranchPrefix()
+        b = "arcyd-review/"
         self.assertRaises(
             abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
         self.assertRaises(

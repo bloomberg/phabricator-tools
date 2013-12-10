@@ -33,7 +33,6 @@
 #    .make_review_branch_name_from_tracker
 #
 # Public Functions:
-#   getReviewBranchPrefix
 #   isStatusBad
 #   isStatusBadPreReview
 #   isStatusBadLand
@@ -79,11 +78,6 @@ WB_DICT_STATUS_DESC = {
 
 class Error(Exception):
     pass
-
-
-def getReviewBranchPrefix():
-    # don't see a reason to change this atm
-    return "arcyd-review/"
 
 
 def isStatusBad(working_branch):
