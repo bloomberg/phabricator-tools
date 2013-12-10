@@ -203,8 +203,10 @@ class Clone(object):
         return self._clone.working_dir
 
 
-def get_managed_branches(git, repo_desc, branch_link_callable=None):
-    branch_pairs = abdt_naming.get_branch_pairs(git.get_remote_branches())
+def get_managed_branches(git, repo_desc, naming, branch_link_callable=None):
+    branch_pairs = abdt_naming.get_branch_pairs(
+        git.get_remote_branches(),
+        naming)
 
     managed_branches = []
     lander = abdt_lander.squash

@@ -506,16 +506,8 @@ class Branch(object):
         else:
             revision_id = str(revision_id)
 
-        naming = abdt_naming.ClassicNaming()
-
-        tracking_branch_name = naming.make_tracker_branch_name(
-            status,
-            self._review_branch.description,
-            self._review_branch.base,
-            revision_id)
-
-        tracking_branch = naming.make_tracker_branch_from_name(
-            tracking_branch_name)
+        tracking_branch = self._review_branch.make_tracker(
+            status, revision_id)
 
         phlgit_push.push_asymmetrical_force(
             self._clone,

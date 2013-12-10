@@ -24,6 +24,7 @@
 #    .remote
 #    .remote_base
 #    .remote_branch
+#    .make_tracker
 #   ClassicNaming
 #    .make_tracker_branch_from_name
 #    .make_tracker_branch_name
@@ -237,6 +238,22 @@ class ReviewBranch(object):
     def remote_branch(self):
         return self._remote_branch
 
+    def make_tracker(self, status, rev_id):
+        """Return a TrackerBranch based on this branch and supplied params.
+
+        :status: the status string for the new branch
+        :rev_id: the revision id string for the new branch
+        :returns: a TrackerBranch
+
+        """
+        tracking_branch_name = self._naming.make_tracker_branch_name(
+            status, self.description, self.base, rev_id)
+
+        tracking_branch = self._naming.make_tracker_branch_from_name(
+            tracking_branch_name)
+
+        return tracking_branch
+
     def _update_remotes(self):
         self._remote_base = phlgitu_ref.make_remote(
             self._base, self._remote)
@@ -439,7 +456,7 @@ def _get_branches(branch_list, func):
     return converted_branch_list
 
 
-def get_branch_pairs(branch_list):
+def get_branch_pairs(branch_list, naming):
     """Return a list of BranchPair where items in 'branch_list' are suitable.
 
     Note that if a review_branch or tracker_branch does not have a pair then
@@ -449,7 +466,6 @@ def get_branch_pairs(branch_list):
     :returns: a list of BranchPair where items in 'branch_list' are suitable
 
     """
-    naming = ClassicNaming()
     tracker_branches = _get_branches(
         branch_list, naming.make_tracker_branch_from_name)
     review_branches = _get_branches(
