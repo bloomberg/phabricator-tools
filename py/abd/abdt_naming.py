@@ -15,6 +15,7 @@
 #    .remote
 #    .remote_base
 #    .remote_branch
+#    .review_name
 #    .update_status
 #   ReviewBranch
 #    .branch
@@ -28,13 +29,13 @@
 #    .make_tracker_branch_name
 #    .make_review_branch_from_name
 #    .make_review_branch_name
+#    .make_review_branch_name_from_tracker
 #
 # Public Functions:
 #   getReviewBranchPrefix
 #   isStatusBad
 #   isStatusBadPreReview
 #   isStatusBadLand
-#   makeReviewBranchNameFromWorkingBranch
 #   get_branch_pairs
 #
 # Public Assignments:
@@ -135,6 +136,8 @@ class TrackerBranch(object):
         self._remote = remote
         self._remote_base = None
         self._remote_branch = None
+        self._review_name = self._naming.make_review_branch_name_from_tracker(
+            self)
         self._update_remotes()
 
     @property
@@ -168,6 +171,10 @@ class TrackerBranch(object):
     @property
     def remote_branch(self):
         return self._remote_branch
+
+    @property
+    def review_name(self):
+        return self._review_name
 
     def update_status(self, status):
         self._status = status
@@ -246,19 +253,6 @@ BranchPair = collections.namedtuple(
     "abdt_naming__BranchPair", [
         "review",
         "tracker"])
-
-
-def makeReviewBranchNameFromWorkingBranch(working_branch):
-    """Return the string review branch name for 'working_branch'.
-
-    :working_branch: a WorkingBranch
-    :returns: the string review branch name for 'working_branch'
-
-    """
-    branch_name = getReviewBranchPrefix()
-    branch_name += working_branch.description
-    branch_name += "/" + working_branch.base
-    return branch_name
 
 
 class ClassicNaming(object):
@@ -398,6 +392,18 @@ class ClassicNaming(object):
         branch_name += "/" + base
         return branch_name
 
+    def make_review_branch_name_from_tracker(self, tracker_branch):
+        """Return the string review branch name for 'working_branch'.
+
+        :working_branch: a WorkingBranch
+        :returns: the string review branch name for 'working_branch'
+
+        """
+        branch_name = self._review_branch_prefix
+        branch_name += tracker_branch.description
+        branch_name += "/" + tracker_branch.base
+        return branch_name
+
 
 def _get_branches(branch_list, func):
     """Return a list of branches made by func() from strings in 'branch_list'.
@@ -451,8 +457,7 @@ def get_branch_pairs(branch_list):
 
     # XXX: pychecker and pyflakes don't understand dictcomps yet so do it like
     #      this instead
-    review_name = makeReviewBranchNameFromWorkingBranch
-    name_to_tracked = dict([(review_name(b), b) for b in tracker_branches])
+    name_to_tracked = dict([(b.review_name, b) for b in tracker_branches])
     name_to_review = dict([(b.branch, b) for b in review_branches])
 
     tracked = set(name_to_tracked.keys())

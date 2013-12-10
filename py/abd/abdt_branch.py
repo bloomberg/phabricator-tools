@@ -185,8 +185,7 @@ class Branch(object):
         """Return the string name of the branch the review is based on."""
         if self._review_branch:
             return self._review_branch.branch
-        return abdt_naming.makeReviewBranchNameFromWorkingBranch(
-            self._tracking_branch)
+        return self._tracking_branch.review_name
 
     def review_id_or_none(self):
         """Return the int id of the review or 'None' if there isn't one."""
