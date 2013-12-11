@@ -240,6 +240,11 @@ class ReviewBranch(object):
         :returns: a TrackerBranch
 
         """
+        if rev_id is None:
+            rev_id = "none"
+        else:
+            rev_id = str(rev_id)
+
         tracking_branch_name = self._naming.make_tracker_branch_name(
             status, self.description, self.base, rev_id)
 

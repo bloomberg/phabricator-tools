@@ -501,11 +501,6 @@ class Branch(object):
                 self._clone.get_remote())
 
     def _push_new(self, status, revision_id):
-        if revision_id is None:
-            revision_id = "none"
-        else:
-            revision_id = str(revision_id)
-
         tracking_branch = self._review_branch.make_tracker(
             status, revision_id)
 
