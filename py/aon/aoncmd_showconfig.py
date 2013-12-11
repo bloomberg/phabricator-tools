@@ -36,7 +36,7 @@ def process(args):
     print
     print "uri : ", uri
     print "user: ", user
-    print "cert: ", cert[:32] + '...'
+    print "cert: ", phlsys_makeconduit.obscured_cert(cert)
 
 
 #------------------------------------------------------------------------------

@@ -14,6 +14,7 @@ information is provided.
 #
 # Public Functions:
 #   make_conduit
+#   obscured_cert
 #   get_uri_user_cert_explanation
 #
 # -----------------------------------------------------------------------------
@@ -42,6 +43,16 @@ def _make_exception(*args):
 def make_conduit(uri=None, user=None, cert=None):
     uri, user, cert, _ = get_uri_user_cert_explanation(uri, user, cert)
     return phlsys_conduit.Conduit(uri, user, cert)
+
+
+def obscured_cert(cert):
+    """Return an obscured version of the supplied 'cert' suitable for display.
+
+    :cert: a string of a conduit certificate
+    :returns: a string of an obscured conduit certificate
+
+    """
+    return cert[:4] + '...' + cert[-4:]
 
 
 def get_uri_user_cert_explanation(uri, user, cert):
@@ -148,7 +159,7 @@ def get_uri_user_cert_explanation(uri, user, cert):
                 explanations.append(
                     "got cert from uri's entry in .arcrc\n"
                     "  path: {0}\n"
-                    "  cert: {1}".format(arcrc_path, cert[:16] + '...'))
+                    "  cert: {1}".format(arcrc_path, obscured_cert(cert)))
             if user is None:
                 raise _make_exception(no_user, arcrc_no_entry)
         if user is None:
@@ -168,7 +179,7 @@ def get_uri_user_cert_explanation(uri, user, cert):
             explanations.append(
                 "got cert from uri's entry in .arcrc\n"
                 "  path: {0}\n"
-                "  cert: {1}".format(arcrc_path, cert[:16] + '...'))
+                "  cert: {1}".format(arcrc_path, obscured_cert(cert)))
         if cert is None:
             raise _make_exception(no_cert, arcrc_no_entry)
 
@@ -214,7 +225,7 @@ def _fix_uri(explanations, uri):
         diff = list(difflib.Differ().compare([old_uri], [uri]))
         diff = ['  ' + s.strip() for s in diff]
         diff = '\n'.join(diff)
-        explanations.append("changed uri:\n{0}".format(diff))
+        explanations.append("assumed uri to conduit:\n{0}".format(diff))
     return uri
 
 
