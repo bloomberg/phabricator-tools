@@ -27,6 +27,13 @@ _USAGE_EXAMPLES = """
 usage example:
     Using the example accounts baked into the 'phabricator-tools'
     vagrant/puppet installation. (see ./README)
+
+    to clean up landed local branches:
+    $ barc gc --force --aggressive
+
+    to display help on the 'gc' sub-command:
+    $ barc gc --help
+
     """
 
 

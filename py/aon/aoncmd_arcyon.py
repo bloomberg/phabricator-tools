@@ -41,6 +41,9 @@ usage examples:
     to display the config that arcyon will use:
     $ arcyon show-config
 
+    to display help on the show-config sub-command:
+    $ arcyon show-config --help
+
     to list revisions where you are the author:
     $ arcyon query --author-me
 

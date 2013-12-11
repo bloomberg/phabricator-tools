@@ -88,6 +88,9 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
     --sendmail-binary sendmail \\
     --sendmail-type sendmail \\
 
+    to display help on the 'process-repos' sub-command:
+    $ arcyd process-repos --help
+
     """
 
 
