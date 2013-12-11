@@ -43,6 +43,8 @@ Wrapper around 'git rev-list'.
 Wrapper around 'git rev-parse'.
 * `phlgit_show.py` -
 Wrapper around 'git show'.
+* `phlgit_showref.py` -
+Wrapper around 'git show-ref'.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
 * `phlmail_format.py` -

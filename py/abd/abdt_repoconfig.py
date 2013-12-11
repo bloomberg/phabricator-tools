@@ -26,6 +26,7 @@ import copy
 import json
 
 import phlgit_show
+import phlgit_showref
 
 
 class Data(object):
@@ -200,13 +201,15 @@ def data_from_repo_or_none(repo):
 
     """
     config = None
-    try:
-        config = phlgit_show.file_on_ref(
-            repo,
-            'repo.json',
-            'refs/config/origin/arcyd')
-    except Exception:
-        pass
+
+    # try to get the file content from the special ref, if it exists
+    ref = 'refs/config/origin/arcyd'
+    if ref in phlgit_showref.names(repo):
+        try:
+            config = phlgit_show.file_on_ref(
+                repo, 'repo.json', ref)
+        except Exception:
+            pass
 
     if config is not None:
         config = data_from_json(config)
