@@ -13,6 +13,7 @@ cd "$(dirname "$0")"
 arcyd="$(pwd)/../../proto/arcyd"
 arcyon="$(pwd)/../../bin/arcyon"
 barc="$(pwd)/../../proto/barc"
+mail="$(pwd)/savemail"
 
 phaburi="http://127.0.0.1"
 arcyduser='phab'
@@ -22,13 +23,6 @@ afgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w\
 3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
 
 arcyoncreds="--uri ${phaburi} --user ${arcyduser} --cert ${arcydcert}"
-
-tempdir=$(mktemp -d)
-olddir=$(pwd)
-cd ${tempdir}
-
-mail="${olddir}/savemail"
-touch savemail.txt
 
 function setup_repos() {
     mkdir origin
@@ -56,11 +50,69 @@ function setup_repos() {
     git commit -m 'initial config'
     git push origin refs/heads/config:refs/config/arcyd
     git checkout master
+    git branch -D config
 
     cd ..
 
     git clone origin arcyd \
-        --config remote.origin.fetch=+refs/config/arcyd:refs/config/origin/arcyd
+        --config remote.origin.fetch=+refs/config/*:refs/config/origin/*
+
+    cd arcyd
+    git fetch
+    cd ..
+}
+
+function remove_config() {
+    cd arcyd
+    git push origin :refs/config/arcyd
+    git update-ref -d refs/config/origin/arcyd
+    cd ..
+}
+
+function make_empty_config_ref() {
+    cd dev
+
+    # write the empty config
+    git checkout --orphan config
+    git rm --cached -rf -- .
+    git clean -fd
+    touch README
+    git add README
+    git commit -m 'no config'
+    git push origin -f refs/heads/config:refs/config/arcyd
+    git checkout master
+    git branch -D config
+
+    cd ..
+
+    cd arcyd
+    git fetch
+    echo -- make_empty_config_ref --
+    git show refs/config/origin/arcyd:README
+    cd ..
+}
+
+function make_empty_config() {
+    cd dev
+
+    # write the empty config
+    git checkout --orphan config
+    git rm --cached -rf -- .
+    git clean -fd
+    echo '{}' > repo.json
+    git add repo.json
+    git commit -m 'initial config'
+    git push origin -f refs/heads/config:refs/config/arcyd
+    git checkout master
+    git branch -D config
+
+    cd ..
+
+    cd arcyd
+    git fetch
+    echo -- make_empty_config --
+    git show refs/config/origin/arcyd:repo.json
+    cd ..
 }
 
 function configure_arcyd() {
@@ -432,6 +484,11 @@ function test_branch_gc() {
 # run the actual tests
 ###############################################################################
 
+olddir=$(pwd)
+tempdir=$(mktemp -d)
+cd ${tempdir}
+touch savemail.txt
+
 # set up an install of arcyd
 setup_repos
 configure_arcyd
@@ -446,6 +503,30 @@ test_merge_conflict
 test_push_error
 test_empty_branch
 test_branch_gc
+
+# delete all local working branches for clean slate, reset master to initial commit
+(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
+(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
+
+# remove the config
+remove_config
+test_happy_path
+
+# delete all local working branches for clean slate, reset master to initial commit
+(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
+(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
+
+# make a config ref with no repo.json
+make_empty_config_ref
+test_happy_path
+
+# delete all local working branches for clean slate, reset master to initial commit
+(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
+(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
+
+# make a config ref with empty repo.json
+make_empty_config
+test_happy_path
 
 # display the sent mails
 pwd
