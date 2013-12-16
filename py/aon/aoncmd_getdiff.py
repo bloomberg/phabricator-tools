@@ -67,8 +67,6 @@ import pprint
 
 import phlsys_makeconduit
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
@@ -133,7 +131,7 @@ def setupParser(parser):
              'curly brackets to substitute for field names, e.g. "\{id\}". '
              'you can use "--format-python" to discover the field names.')
 
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def process(args):

@@ -72,8 +72,6 @@ import phlsys_makeconduit
 import phlsys_strtotime
 import phlsys_timedeltatostr
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
@@ -105,7 +103,7 @@ def setupParser(parser):
         help="compose your own output format, e.g. '$id $title', see "
                 "usage examples for more details")
 
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def _setupParserTopLevel(parser):

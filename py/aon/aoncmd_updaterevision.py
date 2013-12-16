@@ -53,8 +53,6 @@ import argparse
 
 import phlsys_makeconduit
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
@@ -108,7 +106,7 @@ def setupParser(parser):
         action='store_true',
         help='will print just the url of the revision, for scripting.')
 
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def process(args):

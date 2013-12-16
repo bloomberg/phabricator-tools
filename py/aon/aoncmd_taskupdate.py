@@ -34,8 +34,6 @@ import phlcon_project
 import phlcon_user
 import phlsys_makeconduit
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
@@ -131,7 +129,7 @@ def setupParser(parser):
         action='store_true',
         help='will print just the url of the new task, for scripting.')
 
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def process(args):

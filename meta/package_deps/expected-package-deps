@@ -1,6 +1,6 @@
 ('abdt', ['phlcon', 'phldef', 'phlgit', 'phlgitu', 'phlsys'])
 ('phlgit', ['phlsys'])
-('aoncmd', ['aont', 'phlcon', 'phlsys'])
+('aoncmd', ['phlcon', 'phlsys'])
 ('abdweb', ['abdt', 'phlurl'])
 ('phlcon', ['phldef', 'phlsys'])
 ('abdcmd', ['abdi', 'abdt', 'abdweb', 'phlsys', 'phlurl'])

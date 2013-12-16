@@ -17,15 +17,13 @@ from __future__ import absolute_import
 
 import phlsys_makeconduit
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
 
 
 def setupParser(parser):
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def process(args):

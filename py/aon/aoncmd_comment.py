@@ -34,8 +34,6 @@ import textwrap
 import phlcon_differential
 import phlsys_makeconduit
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
@@ -89,7 +87,7 @@ def setupParser(parser):
         metavar="NAME",
         help="impersonate a user (admin only)")
 
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def process(args):

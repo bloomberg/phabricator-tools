@@ -13,6 +13,7 @@ information is provided.
 #   InsufficientInfoException
 #
 # Public Functions:
+#   add_argparse_arguments
 #   make_conduit
 #   obscured_cert
 #   get_uri_user_cert_explanation
@@ -38,6 +39,37 @@ class InsufficientInfoException(Exception):
 
 def _make_exception(*args):
     return InsufficientInfoException("\n" + "\n\n".join(args))
+
+
+def add_argparse_arguments(parser):
+    """Add a 'connection arguments' group to the supplied argparse.parser."""
+
+    connection = parser.add_argument_group(
+        'connection arguments',
+        'use these optional parameters to override settings present in your\n'
+        '"~/.arcrc" or ".arcconfig" files')
+
+    connection.add_argument(
+        "--uri",
+        type=str,
+        metavar="ADDRESS",
+        help="address of the phabricator instance to connect to.")
+
+    connection.add_argument(
+        "--user",
+        type=str,
+        metavar="NAME",
+        help="name of the user to connect as.")
+
+    connection.add_argument(
+        "--cert",
+        type=str,
+        metavar="HEX",
+        help="long certificate string of the user to connect as, you can find "
+             "this string here: "
+             "http://your.phabricator/settings/panel/conduit/. generally you "
+             "wouldn't expect to enter this on the command-line and would "
+             "make an ~/.arcrc file by using '$ arc install-certificate'.")
 
 
 def make_conduit(uri=None, user=None, cert=None):

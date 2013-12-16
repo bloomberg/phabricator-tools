@@ -21,8 +21,6 @@ Create a new task in maniphest.
 Update a task in maniphest.
 * `aoncmd_updaterevision.py` -
 Update an existing revision in differential.
-* `aont_conduitargs.py` -
-create an argparser for conduit paramters.
 
 -----
 *please note: this file is generated, edits will be lost*

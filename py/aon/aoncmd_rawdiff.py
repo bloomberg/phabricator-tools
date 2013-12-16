@@ -38,8 +38,6 @@ import sys
 
 import phlsys_makeconduit
 
-import aont_conduitargs
-
 
 def getFromfilePrefixChars():
     return ""
@@ -54,7 +52,7 @@ def setupParser(parser):
         help="where to read the diff from, can be filename or '-' for stdin. "
              "default is stdin if not specified.",
         default=sys.stdin)
-    aont_conduitargs.addArguments(parser)
+    phlsys_makeconduit.add_argparse_arguments(parser)
 
 
 def process(args):
