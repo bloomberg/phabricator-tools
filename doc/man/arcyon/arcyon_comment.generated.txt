@@ -1,0 +1,49 @@
+usage: arcyon comment [-h] [--ids-file FILE] [--message M]
+                      [--message-file FILE] [--silent] [--action ACTION]
+                      [--act-as-user NAME] [--uri ADDRESS] [--user NAME]
+                      [--cert HEX]
+                      [ids [ids ...]]
+
+create a comment on differential reviews.
+
+positional arguments:
+  ids                   the revisions to comment on (e.g. 1)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ids-file FILE       a file to read ids from, use '-' to specify stdin
+  --message M, -m M     the body text of the comment
+  --message-file FILE   a file to read the message from, use '-' for stdin
+  --silent              don't send notification emails for this comment
+  --act-as-user NAME    impersonate a user (admin only)
+
+action arguments:
+  use any of ['comment', 'unabandon', 'commandeer', 'request changes', 'accept',
+  'reopen', 'plan changes', 'request review', 'abandon', 'close',
+  'resign as reviewer']
+
+  --action ACTION, -a ACTION
+                        perform an action on a review
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS         address of the phabricator instance to connect to.
+  --user NAME           name of the user to connect as.
+  --cert HEX            long certificate string of the user to connect as, you
+                        can find this string here:
+                        http://your.phabricator/settings/panel/conduit/.
+                        generally you wouldn't expect to enter this on the
+                        command-line and would make an ~/.arcrc file by using
+                        '$ arc install-certificate'.
+
+usage examples:
+    comment on revision '1':
+    $ arcyon comment 1 -m 'hello revision 1, how are you?'
+
+    accept revision '1':
+    $ arcyon comment 1 -m 'looks good' --action accept
+
+    comment on revisions 1 and 2, reading the message from 'mymessage':
+    $ arcyon comment 1 2 --message-file mymessage

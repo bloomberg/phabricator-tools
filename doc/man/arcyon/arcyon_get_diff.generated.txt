@@ -1,0 +1,98 @@
+usage: arcyon get-diff [-h] (--revision INT | --diff INT)
+                       [--list-files | --format-python | --format-json | --format-unified | --format-files FORMAT_FILES | --format-strings STR STR]
+                       [--uri ADDRESS] [--user NAME] [--cert HEX]
+
+Get a diff from differential, along with metadata.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+Diff arguments:
+  Mutually exclusive, one is required
+
+  --revision INT, -r INT
+                        the id of the revision to get the diff from.
+  --diff INT, -d INT    the id of the diff to retrieve.
+
+Output format arguments:
+  Mutually exclusive, defaults to "--list-files"
+
+  --list-files, --ls    list only the affected paths, shortcut for the
+                        --format-type. this lists the set of files found in
+                        the "currentPath" and "oldPath" fields of the
+                        "changes" field.
+  --format-python       print python representation of the raw response from
+                        the server.
+  --format-json         print json representation of the raw response from the
+                        server.
+  --format-unified      outputs a unified diff that can be used to apply the
+                        changeslocally to the working copy
+  --format-files FORMAT_FILES
+                        write the files to the specified directory (under
+                        left, right)
+  --format-strings STR STR, --fs STR STR
+                        specify two custom format strings for displaying the
+                        items, the first string is applied to the whole
+                        output, the second is applied per item in the
+                        "changes" dictionary. i.e. ("FORMAT-DIFF", "FORMAT-
+                        FOREACH-CHANGE"). the strings will be applied using
+                        Python's str.format(), so you can use curly brackets
+                        to substitute for field names, e.g. "\{id\}". you can
+                        use "--format-python" to discover the field names.
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS         address of the phabricator instance to connect to.
+  --user NAME           name of the user to connect as.
+  --cert HEX            long certificate string of the user to connect as, you
+                        can find this string here:
+                        http://your.phabricator/settings/panel/conduit/.
+                        generally you wouldn't expect to enter this on the
+                        command-line and would make an ~/.arcrc file by using
+                        '$ arc install-certificate'.
+
+usage examples:
+    list the files affected by revision 1
+    $ arcyon get-diff -r 1 --ls
+    /file1
+    /dir/file2
+
+    list the branch and files
+    $ arcyon get-diff -r 1 --fs "{branch}" "{oldPath} -> {currentPath}"
+
+output formats:
+    --format-python
+        {u'bookmark': None,
+        u'branch': None,
+        u'changes': [{u'addLines': u'0',
+                    u'awayPaths': [],
+                    u'commitHash': None,
+                    u'currentPath': u'NEWFILE',
+                    u'delLines': u'0',
+                    ...
+
+    --format-json
+        {
+        "bookmark": null,
+        "branch": null,
+        "changes": [
+            {
+            "addLines": "0",
+            "awayPaths": [],
+            "commitHash": null,
+            "currentPath": "NEWFILE",
+            "delLines": "0",
+            ...
+
+    --format-unified
+        diff -uNard a/ b/
+        +++ a/foo.c
+        --- b/foo.c
+        @@ 1,3 +0,0 @@
+         some
+        +content
+        -contnet
+         file
+        ...

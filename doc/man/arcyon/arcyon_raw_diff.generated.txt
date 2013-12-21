@@ -1,0 +1,40 @@
+usage: arcyon raw-diff [-h] [--uri ADDRESS] [--user NAME] [--cert HEX]
+                       [INFILE]
+
+Create a raw diff in differential.
+
+positional arguments:
+  INFILE         where to read the diff from, can be filename or '-' for
+                 stdin. default is stdin if not specified.
+
+optional arguments:
+  -h, --help     show this help message and exit
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS  address of the phabricator instance to connect to.
+  --user NAME    name of the user to connect as.
+  --cert HEX     long certificate string of the user to connect as, you can
+                 find this string here:
+                 http://your.phabricator/settings/panel/conduit/. generally
+                 you wouldn't expect to enter this on the command-line and
+                 would make an ~/.arcrc file by using '$ arc install-
+                 certificate'.
+
+you can use the 'diff id' output from this command as input to the
+'arcyon create-revision' and 'arcyon update-revision' commands.
+
+usage examples:
+    create a new raw diff by piping in a diff:
+    $ diff -u file1 file2 | arcyon raw-diff
+    99
+
+    create a new raw diff by piping in a file:
+    $ arcyon raw-diff < mydiff
+    99
+
+    create a new raw diff by loading a file:
+    $ arcyon raw-diff mydiff
+    99

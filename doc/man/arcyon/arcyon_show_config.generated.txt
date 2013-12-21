@@ -1,0 +1,19 @@
+usage: arcyon show-config [-h] [--uri ADDRESS] [--user NAME] [--cert HEX]
+
+show the configuration as discovered from the current directory.
+
+optional arguments:
+  -h, --help     show this help message and exit
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS  address of the phabricator instance to connect to.
+  --user NAME    name of the user to connect as.
+  --cert HEX     long certificate string of the user to connect as, you can
+                 find this string here:
+                 http://your.phabricator/settings/panel/conduit/. generally
+                 you wouldn't expect to enter this on the command-line and
+                 would make an ~/.arcrc file by using '$ arc install-
+                 certificate'.

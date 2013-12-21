@@ -1,0 +1,67 @@
+usage: arcyon task-update [-h] [--priority PRIORITY] [--title STRING]
+                          [--description STRING] [--owner USER]
+                          [--ccs [USER [USER ...]]]
+                          [--projects [PROJECT [PROJECT ...]]]
+                          [--comment STRING]
+                          [--format-summary | --format-id | --format-url]
+                          [--uri ADDRESS] [--user NAME] [--cert HEX]
+                          INT
+
+Update a task in maniphest.
+
+positional arguments:
+  INT                   the id of the task
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --title STRING, -t STRING
+                        the short title of the task
+
+optional priority arguments:
+  use any of ['wish', 'low', 'normal', 'high', 'triage', 'unbreak_now']
+
+  --priority PRIORITY, -p PRIORITY
+                        the priority or importance of the task
+
+Output format arguments:
+  Mutually exclusive, defaults to "--format-summary"
+
+  --format-summary      will print a human-readable summary of the result.
+  --format-id           will print just the id of the new task, for scripting.
+  --format-url          will print just the url of the new task, for
+                        scripting.
+
+Optional task arguments:
+  You can supply these later via the web interface if you wish
+
+  --description STRING, -d STRING
+                        the long description of the task
+  --owner USER, -o USER
+                        the username of the owner
+  --ccs [USER [USER ...]], -c [USER [USER ...]]
+                        a list of usernames to cc on the task
+  --projects [PROJECT [PROJECT ...]]
+                        a list of project names to add the task to
+  --comment STRING, -m STRING
+                        an optional comment to make on the task
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS         address of the phabricator instance to connect to.
+  --user NAME           name of the user to connect as.
+  --cert HEX            long certificate string of the user to connect as, you
+                        can find this string here:
+                        http://your.phabricator/settings/panel/conduit/.
+                        generally you wouldn't expect to enter this on the
+                        command-line and would make an ~/.arcrc file by using
+                        '$ arc install-certificate'.
+
+you can use the 'task id' output from the 'arcyon task-create' command as input
+to this command.
+
+usage examples:
+    update task '99' with a new title, only show id:
+    $ arcyon task-update 99 -t 'title' --format-id
+    99

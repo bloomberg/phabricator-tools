@@ -37,6 +37,23 @@ for dir in $(find py/ -mindepth 1 -maxdepth 1 -type d); do
     echo '*please note: this file is generated, edits will be lost*' >> ${mdfile}
 done
 
+###############################################################################
+# update 'man page' documentation in doc/man
+###############################################################################
+
+arcyon='bin/arcyon'
+${arcyon} -h > doc/man/arcyon/arcyon.generated.txt
+${arcyon} show-config -h > doc/man/arcyon/arcyon_show_config.generated.txt
+${arcyon} query -h > doc/man/arcyon/arcyon_query.generated.txt
+${arcyon} comment -h > doc/man/arcyon/arcyon_comment.generated.txt
+${arcyon} raw-diff -h > doc/man/arcyon/arcyon_raw_diff.generated.txt
+${arcyon} create-revision -h > doc/man/arcyon/arcyon_create_revision.generated.txt
+${arcyon} update-revision -h > doc/man/arcyon/arcyon_update_revision.generated.txt
+${arcyon} get-diff -h > doc/man/arcyon/arcyon_get_diff.generated.txt
+${arcyon} paste -h > doc/man/arcyon/arcyon_paste.generated.txt
+${arcyon} task-create -h > doc/man/arcyon/arcyon_task_create.generated.txt
+${arcyon} task-update -h > doc/man/arcyon/arcyon_task_update.generated.txt
+
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
 #

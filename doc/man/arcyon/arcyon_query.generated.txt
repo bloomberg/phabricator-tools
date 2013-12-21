@@ -1,0 +1,140 @@
+usage: arcyon query [-h] [--ids INT [INT ...]] [--ids-stdin] [--translate]
+                    [--max-results INT] [--offset-results INT]
+                    [--order {modified,created}]
+                    [--status-type {open,accepted,closed}]
+                    [--statuses {Closed,Abandoned,Needs Review,Needs Revision,Accepted} [{Closed,Abandoned,Needs Review,Needs Revision,Accepted} ...]]
+                    [--arcanist-projects STR [STR ...]] [--author-me]
+                    [--reviewer-me] [--cc-me] [--subscriber-me]
+                    [--responsible-me] [--authors USER [USER ...]]
+                    [--reviewers USER [USER ...]] [--ccs USER [USER ...]]
+                    [--subscribers USER [USER ...]]
+                    [--responsible-users USER [USER ...]]
+                    [--update-min-age AGE] [--update-max-age AGE]
+                    [--format-type {ids,short,python,json} | --format-string FORMAT]
+                    [--uri ADDRESS] [--user NAME] [--cert HEX]
+
+display and filter the list of differential revisions.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ids INT [INT ...]   optional list of ids to limit the search to, if none
+                        are supplied then all ids are subject to the query.
+  --ids-stdin           read additional list of ids to limit the query to from
+                        stdin.
+  --translate           translate user PHIDs to usernames and add as new
+                        elements to the output dictionary so theyre visible in
+                        python and json output formats.
+  --max-results INT     limit the number of results returned, if unspecified
+                        then the server default limit is used (seems to be
+                        1000).
+  --offset-results INT  where there is a limit on the number of results, you
+                        can supply an offset to return the next batch of
+                        results. e.g. if the number of results is limited to
+                        100, then to see the next "page"of results, supply an
+                        offset of 100. To see "page 3" of the results, supply
+                        an offset of 200 and so on. Theres no way to count the
+                        total number of results at present.
+  --order {modified,created}
+                        specify the order for the server to return revisions
+                        to us. In both cases it's 'most recent first'.
+
+filter parameters:
+  --status-type {open,accepted,closed}
+                        limit output to only this status type
+  --statuses {Closed,Abandoned,Needs Review,Needs Revision,Accepted} [{Closed,Abandoned,Needs Review,Needs Revision,Accepted} ...]
+                        limit output to only these statuses
+  --arcanist-projects STR [STR ...]
+                        add projects to the arcanistProjects filter
+
+self filter parameters:
+  --author-me           add yourself to the authors filter
+  --reviewer-me         add yourself to the reviewers filter
+  --cc-me               add yourself to the ccs filter
+  --subscriber-me       add yourself to the subscribers filter
+  --responsible-me, --mine
+                        add yourself to the responsibleUsers filter
+
+user filter parameters:
+  --authors USER [USER ...]
+                        add usernames to the authors filter
+  --reviewers USER [USER ...]
+                        add usernames to the reviewers filter
+  --ccs USER [USER ...]
+                        add usernames to the ccs filter
+  --subscribers USER [USER ...]
+                        add usernames to the subscribers filter
+  --responsible-users USER [USER ...]
+                        add usernames to the responsibleUsers filter
+
+time filter parameters:
+  time can be specified like "5 hours 20 minutes", use combinations of
+  seconds, minutes, hours, days, weeks. each unit should only appear
+  once.  you may use floating point numbers and negative numbers. e.g.
+  "1 weeks -1.5 days".
+
+  --update-min-age AGE  include reviews which are at least AGE old.
+  --update-max-age AGE  include reviews which are at most AGE old.
+
+output format parameters:
+  choose one only, default is "short"
+
+  --format-type {ids,short,python,json}
+                        see usage examples for sample output
+  --format-string FORMAT
+                        compose your own output format, e.g. '$id $title', see
+                        usage examples for more details
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS         address of the phabricator instance to connect to.
+  --user NAME           name of the user to connect as.
+  --cert HEX            long certificate string of the user to connect as, you
+                        can find this string here:
+                        http://your.phabricator/settings/panel/conduit/.
+                        generally you wouldn't expect to enter this on the
+                        command-line and would make an ~/.arcrc file by using
+                        '$ arc install-certificate'.
+
+usage examples:
+    list all revisions:
+    $ arcyon query
+
+    list ids of all revisions:
+    $ arcyon query --format-type ids
+
+    list all your open revisions:
+    $ arcyon query --author-me --status-type open
+
+    list all open revisions updated over a week ago
+    $ arcyon query --status-type open --update-min-age "1 weeks"
+
+output formats:
+    --format-type ids
+        3
+        2
+        1
+
+    --format-type short
+        8 / Accepted / add NEWFILE
+        7 / Accepted / add NEWFILE
+        3 / Accepted / add NEWFILE
+
+    --format-type python
+        [{u'authorPHID': u'PHID-USER-agn7y2uw2pj4nc5nknhe',
+          u'branch': None,
+          u'ccs': [u'PHID-USER-n334wwtakshsxeau3qij'],
+          u'commits': [],
+          ...
+
+    --format-type json
+        [
+          {
+            "authorPHID": "PHID-USER-agn7y2uw2pj4nc5nknhe",
+            "branch": null,
+            "ccs": [
+            "PHID-USER-n334wwtakshsxeau3qij"
+            ],
+            "commits": [],
+            ...

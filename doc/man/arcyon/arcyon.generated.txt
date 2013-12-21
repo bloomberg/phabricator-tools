@@ -1,0 +1,51 @@
+usage: arcyon [-h]
+              
+              {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update}
+              ...
+
+Arcyon - util to interact with Conduit API from the command-line.
+
+Intended to make the Conduit API easily accessible and discoverable from a
+dedicated command-line tool. This should make it easier to write shell scripts
+which extend Phabricator.
+
+positional arguments:
+  {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update}
+    show-config         show the configuration as discovered from the current
+                        directory.
+    query               display and filter the list of differential revisions.
+    comment             create a comment on differential reviews.
+    raw-diff            Create a raw diff in differential.
+    create-revision     Create a new revision in differential.
+    update-revision     Update an existing revision in differential.
+    get-diff            Get a diff from differential, along with metadata.
+    paste               Create a new paste.
+    task-create         Create a new task in maniphest.
+    task-update         Update a task in maniphest.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+usage examples:
+
+    to display the config that arcyon will use:
+    $ arcyon show-config
+
+    to display help on the show-config sub-command:
+    $ arcyon show-config --help
+
+    to list revisions where you are the author:
+    $ arcyon query --author-me
+
+    to list open revisions where you are the author:
+    $ arcyon query --author-me --status-type open
+
+    to list revisions that are old and open:
+    $ arcyon query --status-type open --min-update-age "2 weeks"
+
+    to comment on revision '1':
+    $ arcyon comment 1 -m 'hello'
+
+    to comment on every revision:
+    $ arcyon query --format-type ids | arcyon comment --ids-file - -m hello
+    
