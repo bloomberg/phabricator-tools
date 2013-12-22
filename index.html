@@ -1,0 +1,217 @@
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Arcyon</title>
+    <style type="text/css" media="screen">
+        a {
+            font-family:"Arial Black", Gadget, sans-serif;
+            color: #000;
+        }
+        a:hover {
+            background-color: #000;
+            color: #fff;
+        }
+        div.note {
+            border-radius: 10vw;
+            box-shadow: 0px 0px 15px rgba(0,0,0,0.8);
+            padding: 3vw 5vw;
+            max-width: 30em;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        div.main {
+            text-align: center;
+            max-width: 30em;
+            padding: 3vw 5vw;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+            radial-gradient(rgba(0,0,0,0.025) 15%, transparent 16%) 0 0,
+            radial-gradient(rgba(0,0,0,0.025) 15%, transparent 16%) 8px 8px;
+            background-color: #ECA;
+            background-size:16px 16px;
+        }
+        th {
+            color: #FFF;
+            background-color:rgba(0,0,0,0.5);
+        }
+        td {
+            color: #FFF;
+            background-color:rgba(0,0,0,0.25);
+        }
+        table tr th:first-child + th {
+            color: #000;
+            background-color:rgba(255,255,255,0.5);
+        }
+        table tr td:first-child + td {
+            color: #000;
+            background-color:rgba(255,255,255,0.25);
+        }
+        .note.p {
+            max-width: 40em;
+        }
+        h1 {
+            color: #FFF;
+            text-shadow: 0.1em 0.1em rgba(0,0,0,0.5);
+        }
+        ul {
+            color: #FFF;
+        }
+        li > span {
+            color: #000;
+        }
+        div.title {
+            color: #FFF;
+            font-size: 10em;
+            text-shadow: 5px 5px #000;
+        }
+        div.first {
+            background-color: #8CC;
+        }
+        .second {
+            background-color: #F83;
+        }
+        .third {
+            background-color: #BC4;
+        }
+        .fourth {
+            background-color: #F77;
+        }
+        .fifth {
+            background-color: #399;
+        }
+        .code {
+            background-color: #444;
+            color: #FFF;
+            border-radius: 0vw;
+            padding: 1vw;
+            font-family: "Lucida Console", Monaco, monospace;
+            box-shadow: 0px 0px 15px rgba(0,0,0,0.8);
+        }
+        .blue {
+            color: #8CC;
+        }
+        .orange {
+            color: #F83;
+        }
+    </style>
+</head>
+<body>
+    <a href="https://github.com/bloomberg/phabricator-tools"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+    <div class="main title">
+        Arcyon
+    </div>
+    <div class="note first">
+        <span style="font-size: 2em">
+        A command-line wrapper around Phabricator's Conduit API.
+        </span>
+    </div>
+    <div class="note second">
+        <h1>
+            What can I do with it?
+        </h1>
+        <p>
+        All sorts of extending and automating:
+        <ul>
+        <li>Scripting house-keeping tasks</li>
+        <li>Getting insight into how your instance is used</li>
+        <li>Integrating Phabricator with other tools in your workflow</li>
+        </ul>
+        </p>
+        <p>
+        <span style="color: #FFF">e.g.</span>
+        say
+        <span style="color: #FFF">"any update?"</span>
+        on all open reviews not updated for 2 weeks:
+        </p>
+
+        <div class="code">
+            <span class="orange">$</span>
+            arcyon query
+            <span class="blue">--min-update-age</span>
+            '2 weeks'
+            <span class="blue">--status-type</span>
+            open
+            <span class="orange">|</span>
+            arcyon comment
+            <span class="blue">--ids-file</span>
+            -
+            <span class="blue">-m</span>
+            'any update?'
+        </div>
+    </div>
+    <div class="note third">
+        <h1>
+            Yay automation! Moar examples plz?
+        </h1>
+        <p>
+        Here are some example scripts:
+        <ul>
+            <li><a href="https://github.com/bloomberg/phabricator-tools/blob/master/examples/arcyon/phlint.sh" target="_blank">automatically download code, lint it and post comments</a></li>
+            <li><a href="https://github.com/bloomberg/phabricator-tools/blob/master/examples/arcyon/nudge_stale_waiting_on.sh" target="_blank">nudge reviews that you're waiting on</a></li>
+            <li><a href="https://github.com/bloomberg/phabricator-tools/blob/master/examples/arcyon/count_reviews_per_week.sh" target="_blank">count the number of reviews per week</a></li>
+            <li><a href="https://github.com/bloomberg/phabricator-tools/blob/master/examples/arcyon/list_top_authors.sh" target="_blank">list the most prolific authors in your instance</a></li>
+            <li><a href="https://github.com/bloomberg/phabricator-tools/blob/master/examples/arcyon/list_my_todo.sh" target="_blank">list reviews waiting on you for review or changes</a></li>
+        </ul>
+        </p>
+        <p>
+        See the current list of Arcyon examples <a href="https://github.com/bloomberg/phabricator-tools/tree/master/examples/arcyon" target="_blank">here</a>.
+        </p>
+    </div>
+    <div class="note fourth">
+        <h1>
+            What commands are supported?
+        </h1>
+        <p>
+        At the time of writing, the 'Differential' API is pretty well covered, with some of the other apps getting coverage too:
+        </p>
+        <table border="0" cellspacing="5" cellpadding="5">
+            <tr><th>Command</th><th>Description</th></tr>
+            <tr><td>create-revision</td><td>create a new review</td></tr>
+            <tr><td>update-revision</td><td>update an existing review</td></tr>
+            <tr><td>query</td><td>display and filter the list of differential revisions</td></tr>
+            <tr><td>comment</td><td>create a comment on differential reviews</td></tr>
+            <tr><td>raw-diff</td><td>create a raw diff in differential</td></tr>
+            <tr><td>create-revision</td><td>create a new revision in differential</td></tr>
+            <tr><td>update-revision</td><td>update an existing revision in differential</td></tr>
+            <tr><td>get-diff</td><td>get a diff from differential, along with metadata</td></tr>
+            <tr><td>paste</td><td>create a new paste</td></tr>
+            <tr><td>task-create</td><td>create a new task in maniphest</td></tr>
+            <tr><td>task-update</td><td>update a task in maniphest</td></tr>
+        </table>
+        <p>
+        See the latest documentation <a href="https://github.com/bloomberg/phabricator-tools/blob/master/doc/man/arcyon/arcyon.generated.txt" target="_blank">here</a>, or ask your copy of arcyon:
+        <div class="code">
+            <span class="orange">$</span>
+            arcyon
+            <span class="blue">-h</span>
+        </div>
+        </p>
+    </div>
+    <div class="note fifth">
+        <h1>
+            What's with the name?
+        </h1>
+        <p>
+            Glad you asked!  It's chosen to be distinctive enough to be
+            easy to search for and short enough to use at the command prompt.
+        </p>
+        <p>
+            To aid in remembering <span style="color: #FFF">arcyon</span>, maybe knowing how it's composed will help:
+        </p>
+        <table border="0" cellspacing="5" cellpadding="5">
+            <tr><th>arc</th><th>y</th><th>on</th></tr>
+            <tr><td>it overlaps with phabricator's 'arc' command</td><td>it's implemented in python</td><td>it wraps the 'cONduit' API</td></tr>
+        </table>
+    </div>
+    <p>
+    <br>
+    <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+    <br>
+    Copyright (C) 2013 Bloomberg L.P.
+    </p>
+</body>
+</html>
