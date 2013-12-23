@@ -118,13 +118,6 @@ def run(*args, **kwargs):
     # pylint: enable=E1101
 
     if (returncode != 0):
-        error_msg = "cmd: {0}\n".format(" ".join(cmd))
-        if workingDir:
-            error_msg += "workingDir: {0}\n".format(workingDir)
-        if stdin:
-            error_msg += "stdin: {0}\n".format(stdin)
-        error_msg += "out: {0}\nerr: {1}\n".format(out, err)
-        sys.stderr.write(error_msg)
         raise CalledProcessError(
             cmd=cmd,
             stdin=stdin,

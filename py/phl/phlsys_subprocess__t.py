@@ -41,13 +41,11 @@ class PhlsysSubprocessTests(unittest.TestCase):
 
     def test_invalid_return_code(self):
         "Passing command returns non zero exit status"
-        with phlsys_fs.nostd() as stderr:
-            cmd = "time"
-            self.assertRaises(
-                phlsys_subprocess.CalledProcessError,
-                phlsys_subprocess.run,
-                cmd)
-            self.assertTrue(cmd in stderr.out)
+        cmd = "time"
+        self.assertRaises(
+            phlsys_subprocess.CalledProcessError,
+            phlsys_subprocess.run,
+            cmd)
 
     def test_run_commands(self):
         "Run simple cmds - returns None"
@@ -69,13 +67,12 @@ class PhlsysSubprocessTests(unittest.TestCase):
 
     def test_invalid_return_code_run_commands(self):
         "Passing incorrect commands returns non zero exit status"
-        with phlsys_fs.nostd() as stderr:
-            cmd = "time"
-            self.assertRaises(
-                phlsys_subprocess.CalledProcessError,
-                phlsys_subprocess.run_commands,
-                cmd)
-            self.assertTrue(cmd in stderr.out)
+        cmd = "time"
+        self.assertRaises(
+            phlsys_subprocess.CalledProcessError,
+            phlsys_subprocess.run_commands,
+            cmd)
+        # self.assertTrue(cmd in stderr.out)
 
 
 #------------------------------------------------------------------------------
