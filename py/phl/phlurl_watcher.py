@@ -8,6 +8,8 @@
 #   Watcher
 #    .has_url_recently_changed
 #    .refresh
+#    .load
+#    .dump
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -17,6 +19,7 @@ from __future__ import absolute_import
 
 import collections
 import hashlib
+import json
 
 import phlurl_request
 
@@ -28,9 +31,12 @@ _HashHexdigestHasChanged = collections.namedtuple(
 
 class Watcher(object):
 
-    def __init__(self):
+    def __init__(self, request_func=None):
         super(Watcher, self).__init__()
         self._results = {}
+        self._request_func = request_func
+        if self._request_func is None:
+            self._request_func = phlurl_request.get
 
     def has_url_recently_changed(self, url):
         if url in self._results:
@@ -40,7 +46,7 @@ class Watcher(object):
                 self._results[url] = _HashHexdigestHasChanged(
                     hash_hexdigest, False)
             return old_result
-        content = phlurl_request.get(url)
+        content = self._request_func(url)
         # pylint: disable=E1101
         self._results[url] = _HashHexdigestHasChanged(
             hashlib.sha1(content).hexdigest(), False)
@@ -69,6 +75,26 @@ class Watcher(object):
 
             self._results[url] = _HashHexdigestHasChanged(
                 new_hash, has_changed)
+
+    def load(self, f):
+        """Load data from the supplied file pointer, overwriting existing data.
+
+        :f: a text file pointer to load from
+        :returns: None
+
+        """
+        results = json.load(f)
+        self._results = dict(
+            (k, _HashHexdigestHasChanged(*v)) for k, v in results.iteritems())
+
+    def dump(self, f):
+        """Dump data to the supplied file pointer.
+
+        :f: a text file pointer to dump to
+        :returns: None
+
+        """
+        json.dump(self._results, f)
 
 
 #------------------------------------------------------------------------------

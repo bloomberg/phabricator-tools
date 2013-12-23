@@ -27,7 +27,6 @@ from __future__ import absolute_import
 
 import argparse
 import contextlib
-import functools
 import os
 import sys
 import time
@@ -234,16 +233,23 @@ def _process(args, reporter):
     operations = []
     conduits = {}
     url_watcher = phlurl_watcher.Watcher()
+
+    urlwatcher_cache_path = os.path.abspath('.arcyd.urlwatcher.cache')
+
+    # load the url watcher cache (if any)
+    if os.path.isfile(urlwatcher_cache_path):
+        with open(urlwatcher_cache_path) as f:
+            url_watcher.load(f)
+
     for repo, repo_args in repos:
 
-        process_func = functools.partial(
-            abdi_processargs.run_once,
-            repo,
-            repo_args,
-            out,
-            reporter,
-            conduits,
-            url_watcher)
+        def process_func():
+            abdi_processargs.run_once(
+                repo, repo_args, out, reporter, conduits, url_watcher)
+
+            # save the urlwatcher cache
+            with open(urlwatcher_cache_path, 'w') as f:
+                url_watcher.dump(f)
 
         on_exception_delay = abdi_processargs.make_exception_delay_handler(
             args, reporter, repo)
