@@ -61,6 +61,8 @@ Prompt the user to choose from some options on the command-line.
 Ensure that two or more interfaces match, useful for validating mocks.
 * `phlsys_conduit.py` -
 Wrapper to call Phabricator's Conduit API.
+* `phlsys_cppcheck.py` -
+Run the external tool 'cppcheck' and process results.
 * `phlsys_dictutil.py` -
 Utility for working with dicts.
 * `phlsys_fs.py` -
