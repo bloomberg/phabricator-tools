@@ -110,7 +110,7 @@ echo 'press enter to stop.'
 
 # run an http server for Git in the background, for snooping
 cd origin
-    python -m SimpleHTTPServer 8000 < /dev/null > /dev/null 2>&1 &
+    python -m SimpleHTTPServer 8000 < /dev/null > webserver.log 2>&1 &
     webserver_pid=$!
 cd -
 
