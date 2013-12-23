@@ -59,7 +59,14 @@ class Test(unittest.TestCase):
         pass
 
     def test_A_Breathing(self):
-        pass
+        rev_id = self._createNonEmptyRevision('test_A_Breathing')
+        conduit = self.phabConduit
+        phlcon_differential.create_inline_comment(
+            conduit, rev_id, 'readme', 2, 'this is an inline comment')
+        phlcon_differential.create_inline_comment(
+            conduit, rev_id, 'readme', 3, 'this another inline comment')
+        phlcon_differential.create_comment(
+            conduit, rev_id, 'this is a message', attach_inlines=True)
 
     def test_B_AcceptedPersistsWhenUpdated(self):
         conduit = self.phabConduit
@@ -272,6 +279,36 @@ Test Plan: I proof-read it and it looked ok
             self.conduit, message)
         create_response = phlcon_differential.create_revision(
             self.conduit, diff_response.id, parse_response.fields)
+        return create_response.revisionid
+
+    def _createNonEmptyRevision(self, title):
+        diff = """
+diff --git a/readme b/readme
+index d4711bb..ee5b241 100644
+--- a/readme
++++ b/readme
+@@ -7,3 +7,4 @@ and one more!!
+ -- and one last(?) one
+ alaric!
+ local stuff!
++manual conduit submission
+"""
+
+        message = "{}\n\nTest Plan: this is the plan".format(title)
+
+        diff_response = phlcon_differential.create_raw_diff(self.conduit, diff)
+
+        get_diff_response = phlcon_differential._get_diff(
+            self.conduit, diff_id=diff_response.id)
+        self.assertEqual(get_diff_response.id, diff_response.id)
+
+        parse_response = phlcon_differential.parse_commit_message(
+            self.conduit, message)
+        self.assertEqual(len(parse_response.errors), 0)
+
+        create_response = phlcon_differential.create_revision(
+            self.conduit, diff_response.id, parse_response.fields)
+
         return create_response.revisionid
 
     def _authorCommentAction(self, revisionid, action):

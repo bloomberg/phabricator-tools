@@ -10,6 +10,7 @@
 #   MessageFields
 #   Error
 #   UpdateClosedRevisionError
+#   WriteDiffError
 #
 # Public Functions:
 #   create_raw_diff
@@ -20,10 +21,14 @@
 #   get_revision_status
 #   update_revision
 #   create_comment
+#   create_inline_comment
 #   get_commit_message
 #   close
 #   create_empty_revision
 #   update_revision_empty
+#   get_revision_diff
+#   get_diff
+#   write_diff_files
 #
 # Public Assignments:
 #   AUTHOR_ACTIONS
@@ -34,12 +39,15 @@
 #   ParseCommitMessageResponse
 #   RevisionResponse
 #   QueryResponse
+#   GetDiffResponse
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 from __future__ import absolute_import
+
+import os
 
 import phlsys_conduit
 import phlsys_dictutil
@@ -161,11 +169,27 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
     ignored=[])
 
 
+GetDiffResponse = phlsys_namedtuple.make_named_tuple(
+    'phlcon_differential__GetDiffResponse',
+    required=['changes'],
+    defaults={},
+    ignored=[
+        'properties', 'sourceControlPath', 'parent', 'lintStatus', 'bookmark',
+        'projectName', 'revisionID', 'creationMethod', 'unitStatus',
+        'sourceControlBaseRevision', 'branch', 'id', 'dateModified',
+        'dateCreated', 'sourceControlSystem', 'description', 'authorEmail',
+        'authorName'])
+
+
 class Error(Exception):
     pass
 
 
 class UpdateClosedRevisionError(Error):
+    pass
+
+
+class WriteDiffError(Error):
     pass
 
 
@@ -304,15 +328,46 @@ def update_revision(conduit, id, diffid, fields, message):
 
 
 def create_comment(
-        conduit, revisionId, message=None, action=None, silent=None):
+        conduit,
+        revisionId,
+        message=None,
+        action=None,
+        silent=None,
+        attach_inlines=None):
     d = {
-        "revision_id": revisionId, "message": message,
-        "action": action, "silent": silent
+        "revision_id": revisionId,
+        "message": message,
+        "action": action,
+        "silent": silent
     }
+    if attach_inlines:
+        d['attach_inlines'] = attach_inlines
     d = phlsys_dictutil.copy_dict_no_nones(d)
     response = conduit.call('differential.createcomment', d)
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
+
+
+def create_inline_comment(
+        conduit,
+        revisionId,
+        file_path,
+        start_line,
+        message,
+        is_right_side=True,
+        line_count=None):
+    d = {
+        "revisionID": revisionId,
+        "filePath": file_path,
+        "content": message,
+        "lineNumber": start_line,
+        "isNewFile": is_right_side,
+        'lineLength': line_count,
+    }
+
+    d = phlsys_dictutil.copy_dict_no_nones(d)
+
+    conduit.call('differential.createinline', d)
 
 
 def get_commit_message(conduit, revision_id):
@@ -364,6 +419,63 @@ def update_revision_empty(conduit, revision_id):
     empty_diff = "diff --git a/ b/"
     diff_id = create_raw_diff(conduit, empty_diff).id
     update_revision(conduit, revision_id, diff_id, [], 'update')
+
+
+def get_revision_diff(conduit, revision_id):
+    result = conduit.call('differential.getdiff', {'revision_id': revision_id})
+    return GetDiffResponse(**result)
+
+
+def get_diff(conduit, diff_id):
+    result = conduit.call('differential.getdiff', {'diff_id': diff_id})
+    return GetDiffResponse(**result)
+
+
+def _write_hunks(hunk_list, base_path, extra_path, diff_prefix_ignore_char):
+
+    # nothing to do if the extra path doesn't exist
+    # may have been deleted or added in this diff
+    if not extra_path or not hunk_list:
+        return
+
+    if len(hunk_list) > 1:
+        raise WriteDiffError('partial file: {}'.format(extra_path))
+    elif int(hunk_list[0]['newOffset']) != 1:
+        raise WriteDiffError('partial file: {}'.format(extra_path))
+    elif int(hunk_list[0]['oldOffset']) != 1:
+        raise WriteDiffError('partial file: {}'.format(extra_path))
+
+    if os.path.isabs(extra_path):
+        raise WriteDiffError('refusing abs path: {}'.format(extra_path))
+
+    path = os.path.join(base_path, extra_path)
+    directory = os.path.dirname(path)
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    try:
+        with open(path, 'w') as outfile:
+            for hunk in hunk_list:
+                for line in hunk["corpus"].splitlines():
+                    if line.startswith(diff_prefix_ignore_char):
+                        pass
+                    else:
+                        print >> outfile, line[1:]
+    except IOError as e:
+        raise WriteDiffError(e)
+    except UnicodeEncodeError as e:
+        raise WriteDiffError(e)
+
+
+def write_diff_files(diff_result, path):
+    left_base_path = os.path.join(path, 'left')
+    right_base_path = os.path.join(path, 'right')
+
+    for change in diff_result.changes:
+        hunks = change["hunks"]
+        _write_hunks(hunks, left_base_path, change["oldPath"], '+')
+        _write_hunks(hunks, right_base_path, change["currentPath"], '-')
 
 
 #------------------------------------------------------------------------------
