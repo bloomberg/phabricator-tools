@@ -8,3 +8,5 @@ tags
 package-deps
 file-deps
 deps
+.linteratecache
+.linteratenovelcache
