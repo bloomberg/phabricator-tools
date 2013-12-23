@@ -56,8 +56,32 @@ echo 'if [ -n "$revisionid" ]; then' >> accept.sh
 echo '${arcyon} comment ${revisionid} --action accept ${arcyoncreds}' >> accept.sh
 echo 'fi' >> accept.sh
 
+echo "arcyd='${arcyd}'" > kill_arcyd.sh
+echo 'cd ..' >> kill_arcyd.sh
+echo 'arcyd_pid=$(cat arcyd.pid)' >> kill_arcyd.sh
+echo 'touch killfile' >> kill_arcyd.sh
+echo 'rm arcyd.pid' >> kill_arcyd.sh
+
+echo "arcyd='${arcyd}'" > start_arcyd.sh
+echo 'cd ..' >> start_arcyd.sh
+echo '${arcyd} \' >> start_arcyd.sh
+    echo 'process-repos \' >> start_arcyd.sh
+    echo '--sys-admin-emails admin@server.test \' >> start_arcyd.sh
+    echo "--sendmail-binary '${mail}' \\" >> start_arcyd.sh
+    echo '--sendmail-type catchmail \' >> start_arcyd.sh
+    echo '--repo-configs @repo_arcyd.cfg \' >> start_arcyd.sh
+    echo '--status-path arcyd_status.json \' >> start_arcyd.sh
+    echo '--kill-file killfile \' >> start_arcyd.sh
+    echo '--sleep-secs 1 \' >> start_arcyd.sh
+    echo '< /dev/null > /dev/null \' >> start_arcyd.sh
+echo '&' >> start_arcyd.sh
+echo 'arcyd_pid=$!' >> start_arcyd.sh
+echo 'echo ${arcyd_pid} > arcyd.pid' >> start_arcyd.sh
+
 chmod +x poke.sh
 chmod +x accept.sh
+chmod +x kill_arcyd.sh
+chmod +x start_arcyd.sh
 
 git add .
 git commit -m 'intial commit'
@@ -138,6 +162,8 @@ ${arcyd} \
 &
 arcyd_pid=$!
 
+echo ${arcyd_pid} > arcyd.pid
+
 function cleanup() {
 
     set +e
@@ -145,6 +171,8 @@ function cleanup() {
     echo $instaweb_pid
     kill $instaweb_pid
     wait $instaweb_pid
+
+    arcyd_pid=$(cat arcyd.pid)
 
     # kill arycd
     touch killfile
