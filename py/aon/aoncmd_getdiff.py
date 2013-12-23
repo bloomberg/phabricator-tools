@@ -65,6 +65,7 @@ from __future__ import absolute_import
 import json
 import pprint
 
+import phlcon_differential
 import phlsys_makeconduit
 
 
@@ -118,6 +119,10 @@ def setupParser(parser):
         help='outputs a unified diff that can be used to apply the changes'
              'locally to the working copy')
     output.add_argument(
+        '--format-files',
+        type=str,
+        help='write the files to the specified directory (under left, right)')
+    output.add_argument(
         '--format-strings',
         '--fs',
         type=str,
@@ -137,14 +142,11 @@ def setupParser(parser):
 def process(args):
     conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
 
-    d = {}
-
     if args.revision:
-        d["revision_id"] = args.revision
-    if args.diff:
-        d["diff_id"] = args.diff
-
-    result = conduit.call("differential.getdiff", d)
+        result = phlcon_differential.get_revision_diff(conduit, args.revision)
+    else:
+        assert args.diff
+        result = phlcon_differential.get_diff(conduit, args.diff)
 
     if args.format_python:
         pprint.pprint(result)
@@ -152,6 +154,8 @@ def process(args):
         print json.dumps(result, sort_keys=True, indent=2)
     elif args.format_unified:
         print unified_diff(result)
+    elif args.format_files:
+        phlcon_differential.write_diff_files(result, args.format_files)
     elif args.format_strings:
         fmt = args.format_strings[0]
         fmt_change = args.format_strings[1]
@@ -162,7 +166,7 @@ def process(args):
                 print fmt_change.format(**change)
     else:  # args.list_files:
         paths = set()
-        for change in result["changes"]:
+        for change in result.changes:
             paths.add(change["currentPath"])
             paths.add(change["oldPath"])
         for path in paths:
@@ -170,7 +174,7 @@ def process(args):
 
 
 def unified_diff(result):
-    for change in result["changes"]:
+    for change in result.changes:
         print '--- ' + change["oldPath"]
         print '+++ ' + change["currentPath"]
         for hunk in change["hunks"]:
@@ -178,6 +182,7 @@ def unified_diff(result):
             hunk_format += " +{newOffset},{newLength} @@"
             print hunk_format.format(**hunk)
             print hunk["corpus"]
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2012 Bloomberg L.P.
