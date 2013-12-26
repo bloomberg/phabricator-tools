@@ -14,6 +14,7 @@
 #    .update_sleep
 #    .on_tryloop_exception
 #    .log_system_error
+#    .log_user_action
 #    .log_system_exception
 #    .finish_sleep
 #    .start_cache_refresh
@@ -36,6 +37,8 @@
 #   ARCYD_REPOS
 #   ARCYD_STATISTICS
 #   ARCYD_LOG_SYSTEM_ERROR
+#   ARCYD_LOG_USER_ACTION
+#   ARCYD_LOG_USER_ACTION_MAX_SIZE
 #   ARCYD_LIST_ATTRIB
 #   ARCYD_STATUS_STARTING
 #   ARCYD_STATUS_UPDATING
@@ -83,7 +86,9 @@ ARCYD_REPOS = 'repos'
 ARCYD_STATISTICS = 'statistics'
 ARCYD_LOG_SYSTEM_ERROR = 'log-system-error'
 # ARCYD_LOG_USER_ERROR = 'log-user-error'
-# ARCYD_LOG_USER_ACTION = 'log-user-action'
+ARCYD_LOG_USER_ACTION = 'log-user-action'
+
+ARCYD_LOG_USER_ACTION_MAX_SIZE = 5
 
 ARCYD_LIST_ATTRIB = [
     ARCYD_CURRENT_REPO,
@@ -92,6 +97,7 @@ ARCYD_LIST_ATTRIB = [
     ARCYD_REPOS,
     ARCYD_STATISTICS,
     ARCYD_LOG_SYSTEM_ERROR,
+    ARCYD_LOG_USER_ACTION,
 ]
 
 ARCYD_STATUS_STARTING = 'starting'
@@ -229,6 +235,7 @@ class ArcydReporter(object):
         self._cycle_timer = _CycleTimer()
         self._tag_times = collections.defaultdict(float)
         self._log_system_error = list()
+        self._log_user_action = list()
 
         self._write_status(ARCYD_STATUS_STARTING)
 
@@ -258,6 +265,12 @@ class ArcydReporter(object):
 
     def log_system_error(self, identifier, detail):
         self._add_log_item(self._log_system_error, identifier, detail)
+
+    def log_user_action(self, identifier, detail):
+        self._add_log_item(self._log_user_action, identifier, detail)
+        if self._log_user_action > ARCYD_LOG_USER_ACTION_MAX_SIZE:
+            max_size = ARCYD_LOG_USER_ACTION_MAX_SIZE
+            self._log_user_action = self._log_user_action[-max_size:]
 
     def log_system_exception(self, identifier, detail, exception):
         message = detail + '\n' + repr(exception)
@@ -343,6 +356,7 @@ class ArcydReporter(object):
             ARCYD_REPOS: [self._repos[k] for k in self._repos],
             ARCYD_STATISTICS: statistics,
             ARCYD_LOG_SYSTEM_ERROR: self._log_system_error,
+            ARCYD_LOG_USER_ACTION: self._log_user_action,
         }
         assert set(d.keys()) == set(ARCYD_LIST_ATTRIB)
         self._output.write(d)

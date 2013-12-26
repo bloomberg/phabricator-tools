@@ -9,6 +9,7 @@
 #   set_arcyd_reporter
 #   clear_arcyd_reporter
 #   on_retry_exception
+#   on_review_event
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -53,8 +54,14 @@ def on_retry_exception(identifier, detail, e, delay):
     logging.error(str(e) + "\nwill wait " + str(delay))
     reporter = _get_reporter()
     if reporter:
-        _REPORTER.on_tryloop_exception(e, delay)
-        _REPORTER.log_system_exception(identifier, detail, e)
+        reporter.on_tryloop_exception(e, delay)
+        reporter.log_system_exception(identifier, detail, e)
+
+
+def on_review_event(identifier, detail):
+    reporter = _get_reporter()
+    if reporter:
+        reporter.log_user_action(identifier, detail)
 
 
 #------------------------------------------------------------------------------

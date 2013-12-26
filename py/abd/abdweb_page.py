@@ -63,6 +63,15 @@ div.container {
     -webkit-animation-iteration-count: infinite;
 }
 
+.bluecard {
+    background-color: #5CC;
+    padding: 6px;
+    float: left;
+    margin: 5px;
+    border-radius: 6px 6px 6px 6px;
+    box-shadow: 0px 0px 30px #111;
+}
+
 .greencard {
     background-color: #5C5;
     padding: 6px;

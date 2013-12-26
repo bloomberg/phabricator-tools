@@ -28,6 +28,7 @@ import abdcmnt_commenter
 import abdt_branch
 import abdt_conduitgit
 import abdt_exception
+import abdt_logging
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 
@@ -96,11 +97,16 @@ def create_review(conduit, branch, plugin_manager):
             "rawDiff": rawDiff, "commenter": commenter}
     )
 
+    abdt_logging.on_review_event(
+        'createrev', '{} created {} from {}'.format(
+            user, revisionid, branch.review_branch_name()))
+
 
 def create_differential_review(conduit, user, parsed, branch, raw_diff):
     print "- creating revision"
     revision_id = conduit.create_revision_as_user(
         raw_diff, parsed.fields, user)
+
     print "- created " + str(revision_id)
     branch.mark_ok_new_review(revision_id)
 
@@ -161,6 +167,10 @@ def update_in_review(conduit, branch):
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.updatedReview(branch.review_branch_name())
 
+    abdt_logging.on_review_event(
+        'updaterev', 'updated {}, {}'.format(
+            review_id, branch.review_branch_name))
+
 
 def land(conduit, branch):
     print "landing " + branch.review_branch_name()
@@ -191,6 +201,10 @@ def land(conduit, branch):
         land_message)
 
     conduit.close_revision(review_id)
+
+    abdt_logging.on_review_event(
+        'landrev', '{} landed {}, {}'.format(
+            name, review_id, review_branch_name))
 
 
 def create_failed_review(conduit, branch, exception):

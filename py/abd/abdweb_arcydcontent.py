@@ -11,6 +11,7 @@
 #   render_stats
 #   render_controls
 #   render_error_log
+#   render_info_log
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -57,7 +58,12 @@ def render(
     log_system_error = report[abdt_arcydreporter.ARCYD_LOG_SYSTEM_ERROR]
     if log_system_error:
         formatter.horizontal_rule()
-        render_error_log('system errors', log_system_error, formatter)
+        render_error_log('recent system errors', log_system_error, formatter)
+
+    log_user_action = report[abdt_arcydreporter.ARCYD_LOG_USER_ACTION]
+    if log_user_action:
+        formatter.horizontal_rule()
+        render_info_log('recent user actions', log_user_action, formatter)
 
     formatter.horizontal_rule()
     render_stats(stats, formatter)
@@ -148,7 +154,7 @@ def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):
 def render_error_log(name, item_list, formatter):
     formatter.heading(name)
     with formatter.singletag_context('div', class_='container'):
-        for item in item_list:
+        for item in reversed(item_list):
             with formatter.singletag_context('div', class_='redcard'):
                 time = item[abdt_arcydreporter.ARCYD_LOGITEM_DATETIME]
                 identifier = item[abdt_arcydreporter.ARCYD_LOGITEM_IDENTIFIER]
@@ -156,6 +162,15 @@ def render_error_log(name, item_list, formatter):
                 formatter.heading(identifier)
                 formatter.text("{time} UTC".format(time=time))
                 formatter.text(detail)
+
+
+def render_info_log(name, item_list, formatter):
+    formatter.heading(name)
+    with formatter.singletag_context('div', class_='container'):
+        for item in reversed(item_list):
+            with formatter.singletag_context('div', class_='bluecard'):
+                detail = item[abdt_arcydreporter.ARCYD_LOGITEM_DETAIL]
+                formatter.raw(detail)
 
 
 #------------------------------------------------------------------------------

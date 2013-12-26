@@ -183,6 +183,7 @@ def _exercise_arcydreporter():
         reporter.log_system_error('error', 'description of error')
         reporter.log_system_error('other-error', 'description of other error')
         reporter.start_repo('updating_repo-machine', 'updating_repo')
+        reporter.log_user_action('createrev', 'user created 1231 from branch')
         _write('arcyd_many_repos')
         reporter.finish_repo()
         reporter.start_sleep(3)
