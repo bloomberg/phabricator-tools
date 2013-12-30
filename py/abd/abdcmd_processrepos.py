@@ -18,6 +18,7 @@
 #   setupParser
 #   tryHandleSpecialFiles
 #   process
+#   process_single_repo
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -27,6 +28,7 @@ from __future__ import absolute_import
 
 import argparse
 import contextlib
+import functools
 import os
 import sys
 import time
@@ -243,13 +245,20 @@ def _process(args, reporter):
 
     for repo, repo_args in repos:
 
-        def process_func():
-            abdi_processargs.run_once(
-                repo, repo_args, out, reporter, conduits, url_watcher)
-
-            # save the urlwatcher cache
-            with open(urlwatcher_cache_path, 'w') as f:
-                url_watcher.dump(f)
+        # create a function to update this particular repo.
+        #
+        # use partial to ensure we capture the value of the variables,
+        # note that a closure would use the latest value of the variables
+        # rather than the value at declaration time.
+        process_func = functools.partial(
+            process_single_repo,
+            repo,
+            repo_args,
+            out,
+            reporter,
+            conduits,
+            url_watcher,
+            urlwatcher_cache_path)
 
         on_exception_delay = abdi_processargs.make_exception_delay_handler(
             args, reporter, repo)
@@ -294,6 +303,22 @@ def _process(args, reporter):
 
         while True:
             tryHandleSpecialFiles(loopForever, on_exception_delay)
+
+
+def process_single_repo(
+        repo,
+        repo_args,
+        out,
+        reporter,
+        conduits,
+        url_watcher,
+        urlwatcher_cache_path):
+    abdi_processargs.run_once(
+        repo, repo_args, out, reporter, conduits, url_watcher)
+
+    # save the urlwatcher cache
+    with open(urlwatcher_cache_path, 'w') as f:
+        url_watcher.dump(f)
 
 
 #------------------------------------------------------------------------------
