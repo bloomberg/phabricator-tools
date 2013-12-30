@@ -132,6 +132,7 @@ ${arcyd} \
     --repo-configs @repo_arcyd.cfg \
     --status-path arcyd_status.json \
     --kill-file killfile \
+    --io-log-file arcyd-io.log \
     --sleep-secs 1 \
     < /dev/null > /dev/null \
 &

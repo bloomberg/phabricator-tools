@@ -35,6 +35,7 @@ import phlsys_conduit
 import phlsys_textconvert
 
 import abdt_exception
+import abdt_logging
 
 
 # TODO: re-order methods as (accessor, mutator)
@@ -87,6 +88,7 @@ class Conduit(object):
         """
         phlcon_differential.create_comment(
             self._conduit, revision, message, silent=silent)
+        self._log('conduit-comment', 'commented on {}'.format(revision))
 
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
@@ -97,6 +99,9 @@ class Conduit(object):
         """
         with phlsys_conduit.act_as_user_context(self._conduit, username):
             revision = phlcon_differential.create_empty_revision(self._conduit)
+        self._log(
+            'conduit-createemptyrev',
+            'created {} as {}'.format(revision, username))
         return revision
 
     def get_commit_message(self, revisionid):
@@ -126,6 +131,9 @@ class Conduit(object):
                 self._conduit, raw_diff).id
             review = phlcon_differential.create_revision(
                 self._conduit, diffid, fields)
+        self._log(
+            'conduit-createrev',
+            'created {} as {}'.format(review.revisionid, username))
         return review.revisionid
 
     def query_name_and_phid_from_email(self, email):
@@ -208,6 +216,9 @@ class Conduit(object):
             except phlcon_differential.UpdateClosedRevisionError:
                 raise abdt_exception.AbdUserException(
                     "CONDUIT: can't update a closed revision")
+        self._log(
+            'conduit-updaterev',
+            'updated {} as {}'.format(revisionid, author_user))
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
@@ -222,6 +233,9 @@ class Conduit(object):
                 self._conduit,
                 revisionid,
                 action=phlcon_differential.Action.rethink)
+        self._log(
+            'conduit-setrequiresrev',
+            'updated {} as {}'.format(revisionid, author_user))
 
     def close_revision(self, revisionid):
         """Set an existing Differential revision to 'closed'.
@@ -233,6 +247,9 @@ class Conduit(object):
         author_user = self._get_author_user(revisionid)
         with phlsys_conduit.act_as_user_context(self._conduit, author_user):
             phlcon_differential.close(self._conduit, revisionid)
+        self._log(
+            'conduit-close',
+            'closed {} as {}'.format(revisionid, author_user))
 
     def abandon_revision(self, revisionid):
         """Set an existing Differential revision to 'abandoned'.
@@ -247,6 +264,9 @@ class Conduit(object):
                 self._conduit,
                 revisionid,
                 action=phlcon_differential.Action.abandon)
+        self._log(
+            'conduit-abandon',
+            'abandoned {} as {}'.format(revisionid, author_user))
 
     # XXX: test function - will disappear when moved to new processrepo tests
     def accept_revision_as_user(self, revisionid, username):
@@ -262,6 +282,9 @@ class Conduit(object):
                 self._conduit,
                 revisionid,
                 action=phlcon_differential.Action.accept)
+        self._log(
+            'conduit-accept',
+            'accepted {} as {}'.format(revisionid, username))
 
     # XXX: test function currently but needed for changing owner in the case
     #      where no valid author is detected on a branch at creation but is
@@ -279,6 +302,13 @@ class Conduit(object):
                 self._conduit,
                 revisionid,
                 action=phlcon_differential.Action.claim)
+        self._log(
+            'conduit-commandeer',
+            'commandeered {} as {}'.format(revisionid, username))
+
+    def _log(self, identifier, description):
+        abdt_logging.on_io_event(identifier, '{}:{}'.format(
+            self.describe(), description))
 
 
 #------------------------------------------------------------------------------

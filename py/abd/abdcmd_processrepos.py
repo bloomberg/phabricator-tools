@@ -81,6 +81,12 @@ def setupParser(parser):
         help="filename to watch for, will reset operations if the file is "
              "detected and remove the file.")
     parser.add_argument(
+        '--io-log-file',
+        metavar="PATH",
+        type=str,
+        default=None,
+        help="filename of the io log file.")
+    parser.add_argument(
         '--sleep-secs',
         metavar="TIME",
         type=int,
@@ -184,7 +190,8 @@ def process(args):
     abdi_processargs.configure_sendmail(args)
 
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
-    reporter = abdt_arcydreporter.ArcydReporter(reporter_data)
+    reporter = abdt_arcydreporter.ArcydReporter(
+        reporter_data, args.io_log_file)
 
     on_exception = abdi_processargs.make_exception_message_handler(
         args, reporter, None, "arcyd stopped with exception", "")

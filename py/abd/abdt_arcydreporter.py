@@ -15,6 +15,7 @@
 #    .on_tryloop_exception
 #    .log_system_error
 #    .log_user_action
+#    .log_io_action
 #    .log_system_exception
 #    .finish_sleep
 #    .start_cache_refresh
@@ -75,6 +76,7 @@ import contextlib
 import datetime
 import functools
 import inspect
+import os
 import traceback
 import types
 
@@ -218,14 +220,18 @@ class _CycleTimer(object):
 
 class ArcydReporter(object):
 
-    def __init__(self, output):
+    def __init__(self, output, io_log_path=None):
         """Initialise a new reporter to report to the specified outputs.
 
         :output: output to write status to
+        :io_log_path: path to log io operations to
 
         """
         super(ArcydReporter, self).__init__()
         self._output = output
+
+        log_path = io_log_path
+        self._io_log_path = os.path.abspath(log_path) if log_path else None
 
         assert self._output
 
@@ -271,6 +277,13 @@ class ArcydReporter(object):
         if self._log_user_action > ARCYD_LOG_USER_ACTION_MAX_SIZE:
             max_size = ARCYD_LOG_USER_ACTION_MAX_SIZE
             self._log_user_action = self._log_user_action[-max_size:]
+
+    def log_io_action(self, identifier, detail):
+        if self._io_log_path:
+            with open(self._io_log_path, 'a') as f:
+                now = str(datetime.datetime.utcnow())
+                description = '{}: {} - {}\n'.format(now, identifier, detail)
+                f.write(description)
 
     def log_system_exception(self, identifier, detail, exception):
         message = detail + '\n' + repr(exception)

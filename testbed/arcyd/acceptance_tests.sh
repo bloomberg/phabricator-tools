@@ -111,6 +111,7 @@ function run_arcyd() {
         --sendmail-type catchmail \
         --repo-configs @repo_arcyd.cfg \
         --status-path arcyd_status.json \
+        --io-log-file arcyd-io.log \
         --sleep-secs 0 \
         --no-loop
     echo $?
@@ -449,6 +450,9 @@ test_branch_gc
 # display the sent mails
 pwd
 cat savemail.txt
+
+# display the io activity
+cat arcyd-io.log
 
 # clean up
 cd ${olddir}

@@ -10,6 +10,7 @@
 #   clear_arcyd_reporter
 #   on_retry_exception
 #   on_review_event
+#   on_io_event
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -62,6 +63,12 @@ def on_review_event(identifier, detail):
     reporter = _get_reporter()
     if reporter:
         reporter.log_user_action(identifier, detail)
+
+
+def on_io_event(identifier, detail):
+    reporter = _get_reporter()
+    if reporter:
+        reporter.log_io_action(identifier, detail)
 
 
 #------------------------------------------------------------------------------

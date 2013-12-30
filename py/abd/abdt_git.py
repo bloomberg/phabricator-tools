@@ -38,6 +38,7 @@ import phlgit_push
 import abdt_branch
 import abdt_gittypes
 import abdt_lander
+import abdt_logging
 import abdt_naming
 
 
@@ -68,7 +69,7 @@ class Clone(object):
         :returns: True if the branches point to the same commit
 
         """
-        return phlgit_branch.is_identical(self._clone, branch1, branch2)
+        return phlgit_branch.is_identical(self, branch1, branch2)
 
     def get_remote_branches(self):
         """Return a list of string names of remote branches.
@@ -76,7 +77,7 @@ class Clone(object):
         :returns: list of string names
 
         """
-        return phlgit_branch.get_remote(self._clone, self._remote)
+        return phlgit_branch.get_remote(self, self._remote)
 
     def checkout_forced_new_branch(self, new_name, based_on):
         """Overwrite and checkout 'new_name' as a new branch from 'based_on'.
@@ -87,7 +88,7 @@ class Clone(object):
 
         """
         phlgit_checkout.new_branch_force_based_on(
-            self._clone, new_name, based_on)
+            self, new_name, based_on)
 
     # TODO: split this into more functions with varying context
     def raw_diff_range(self, base, to, context=None):
@@ -102,7 +103,7 @@ class Clone(object):
         :returns: string of the unified diff
 
         """
-        return phlgit_diff.raw_diff_range(self._clone, base, to, context)
+        return phlgit_diff.raw_diff_range(self, base, to, context)
 
     def get_range_hashes(self, start, end):
         """Return a list of strings of commit hashes from 'start' to 'end'.
@@ -116,7 +117,7 @@ class Clone(object):
         :returns: a list of strings of commit hashes from 'start' to 'end'.
 
         """
-        return phlgit_log.get_range_hashes(self._clone, start, end)
+        return phlgit_log.get_range_hashes(self, start, end)
 
     def make_revisions_from_hashes(self, hashes):
         """Return a list of 'phlgit_log__Revision' from 'hashes'.
@@ -128,7 +129,7 @@ class Clone(object):
         :returns: a list of 'phlgit_log__Revision'
 
         """
-        return phlgit_log.make_revisions_from_hashes(self._clone, hashes)
+        return phlgit_log.make_revisions_from_hashes(self, hashes)
 
     def squash_merge(self, branch, message, author_name, author_email):
         """Return output from Git performing a squash merge.
@@ -142,7 +143,7 @@ class Clone(object):
         """
         # TODO: test that the author is set correctly
         return phlgit_merge.squash(
-            self._clone,
+            self,
             branch,
             message,
             author_name + " <" + author_email + ">")
@@ -156,7 +157,7 @@ class Clone(object):
 
         """
         phlgit_push.push_asymmetrical(
-            self._clone, local_branch, remote_branch, self._remote)
+            self, local_branch, remote_branch, self._remote)
 
     def push(self, branch):
         """Push 'branch' to the remote.
@@ -165,7 +166,7 @@ class Clone(object):
         :returns: None
 
         """
-        phlgit_push.push(self._clone, branch, self._remote)
+        phlgit_push.push(self, branch, self._remote)
 
     def push_delete(self, branch, *args):
         """Delete 'branch' from the remote.
@@ -175,7 +176,7 @@ class Clone(object):
         :returns: None
 
         """
-        phlgit_push.delete(self._clone, self._remote, branch, *args)
+        phlgit_push.delete(self, self._remote, branch, *args)
 
     def set_name_email(self, name, email):
         """Return output from Git performing a squash merge.
@@ -185,9 +186,14 @@ class Clone(object):
         :returns: None
 
         """
-        phlgit_config.set_username_email(self._clone, name, email)
+        phlgit_config.set_username_email(self, name, email)
 
     def call(self, *args, **kwargs):
+        if args and args[0] == 'push':
+            abdt_logging.on_io_event(
+                'git-push',
+                '{}: {} {}'.format(
+                    self._description, ' '.join(args), kwargs))
         return self._clone.call(*args, **kwargs)
 
     def get_remote(self):
