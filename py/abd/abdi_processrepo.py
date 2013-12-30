@@ -168,8 +168,8 @@ def update_in_review(conduit, branch):
     commenter.updatedReview(branch.review_branch_name())
 
     abdt_logging.on_review_event(
-        'updaterev', 'updated {}, {}'.format(
-            review_id, branch.review_branch_name))
+        'updaterev', '{} updated {}'.format(
+            branch.review_branch_name(), review_id))
 
 
 def land(conduit, branch):
