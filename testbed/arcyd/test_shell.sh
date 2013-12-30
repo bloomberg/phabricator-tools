@@ -35,6 +35,8 @@ git init --bare
 mv hooks/post-update.sample hooks/post-update
 cd ..
 
+git init --bare origin2
+
 git clone origin dev
 cd dev
 git config user.name 'Bob User'
@@ -88,7 +90,20 @@ git commit -m 'intial commit'
 git push origin master
 cd ..
 
+git clone origin2 dev2
+cd dev2
+git config user.name 'Unseen User'
+git config user.email 'unseen@server.test'
+
+touch README
+git add README
+
+git commit -m 'intial commit'
+git push origin master
+cd ..
+
 git clone origin arcyd
+git clone origin2 arcyd2
 
 mkdir -p touches
 
@@ -111,6 +126,21 @@ echo 'http://127.0.0.1/D{review}' >> repo_arcyd.cfg
 echo --repo-snoop-url >> repo_arcyd.cfg
 echo 'http://localhost:8000/info/refs' >> repo_arcyd.cfg
 
+touch repo_arcyd2.cfg
+echo @instance_local.cfg >> repo_arcyd2.cfg
+echo @email_arcyd.cfg >> repo_arcyd2.cfg
+echo @email_admin.cfg >> repo_arcyd2.cfg
+echo --repo-desc >> repo_arcyd2.cfg
+echo arcyd2 test >> repo_arcyd2.cfg
+echo --repo-path >> repo_arcyd2.cfg
+echo arcyd2 >> repo_arcyd2.cfg
+echo --try-touch-path >> repo_arcyd2.cfg
+echo touches/repo_arcyd2.cfg.try >> repo_arcyd2.cfg
+echo --ok-touch-path >> repo_arcyd2.cfg
+echo touches/repo_arcyd2.cfg.ok >> repo_arcyd2.cfg
+echo --review-url-format >> repo_arcyd2.cfg
+echo 'http://127.0.0.1/D{review}' >> repo_arcyd2.cfg
+
 touch instance_local.cfg
 echo --instance-uri >> instance_local.cfg
 echo http://127.0.0.1/api/ >> instance_local.cfg
@@ -125,8 +155,6 @@ vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
 touch email_arcyd.cfg
 echo --arcyd-email >> email_arcyd.cfg
 echo phab-role-account@server.example >> email_arcyd.cfg
-
-touch email_arcyd.cfg
 echo --admin-email >> email_admin.cfg
 echo admin@server.example >> email_admin.cfg
 
@@ -154,6 +182,7 @@ ${arcyd} \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
     --repo-configs @repo_arcyd.cfg \
+    --repo-configs @repo_arcyd2.cfg \
     --status-path arcyd_status.json \
     --kill-file killfile \
     --io-log-file arcyd-io.log \
