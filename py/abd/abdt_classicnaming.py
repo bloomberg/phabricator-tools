@@ -28,6 +28,7 @@ class Naming(object):
     def __init__(self):
         super(Naming, self).__init__()
         self._tracking_branch_prefix = 'dev/arcyd/'
+        self._new_tracking_branch_prefix = 'dev/arcyd/trackers'
         self._reserve_branch_prefix = 'dev/arcyd/reserve'
         self._review_branch_prefix = 'arcyd-review/'
         self._remote = 'origin'
@@ -42,6 +43,11 @@ class Naming(object):
             ... # doctest: +NORMALIZE_WHITESPACE
             abdt_naming.TrackerBranch("dev/arcyd/ok/mywork/master/99")
 
+            >>> make_branch('dev/arcyd/trackers/x/ok/r/master/do/99')
+            Traceback (most recent call last):
+                ...
+            Error
+
             >>> make_branch('invalid/mywork/master')
             Traceback (most recent call last):
                 ...
@@ -53,6 +59,9 @@ class Naming(object):
         """
         if branch_name == self._reserve_branch_prefix:
             raise abdt_naming.Error()  # ignore the reserved branch
+
+        if branch_name.startswith(self._new_tracking_branch_prefix):
+            raise abdt_naming.Error()  # ignore all new tracker branches
 
         suffix = phlsys_string.after_prefix(
             branch_name, self._tracking_branch_prefix)
