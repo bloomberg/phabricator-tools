@@ -24,6 +24,18 @@ afgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w\
 
 arcyoncreds="--uri ${phaburi} --user ${arcyduser} --cert ${arcydcert}"
 
+# here $1 is 'base' and $2 is 'description
+classic_arcyd_branch_awk_string='{ printf "arcyd-review/%s/%s", $2, $1 }'
+arcyd_branch_awk_string="${classic_arcyd_branch_awk_string}"
+
+function set_branch_name() {
+    base=$1
+    description=$2
+
+    # here $1 is 'base' and $2 is 'description
+    branch_name=$(echo "${base} ${description}" | awk "${arcyd_branch_awk_string}")
+}
+
 function setup_repos() {
     mkdir origin
     cd origin
@@ -183,7 +195,7 @@ function run_arcyd() {
 
 function test_happy_path() {
     test_name='test_happy_path'
-    branch_name="arcyd-review/${test_name}/master"
+    set_branch_name "master" "${test_name}"
 
     # create a review branch
     cd dev
@@ -233,7 +245,7 @@ function test_happy_path() {
 
 function test_unknown_user() {
     test_name='test_unknown_user'
-    branch_name="arcyd-review/${test_name}/master"
+    set_branch_name "master" "${test_name}"
 
     # record the id of the last review, so we can see if we create a new one or not
     revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
@@ -289,8 +301,8 @@ function test_unknown_user() {
 }
 
 function test_bad_base() {
-    test_name='test_unknown_user'
-    branch_name="arcyd-review/${test_name}/nonesuch"
+    test_name='test_bad_base'
+    set_branch_name "nonesuch" "${test_name}"
 
     # create a review branch
     cd dev
@@ -319,7 +331,7 @@ function test_bad_base() {
 
 function test_self_review() {
     test_name='test_self_review'
-    branch_name="arcyd-review/${test_name}/master"
+    set_branch_name "master" "${test_name}"
 
     # create a review branch
     cd dev
@@ -347,7 +359,7 @@ function test_self_review() {
 
 function test_merge_conflict() {
     test_name='test_merge_conflict'
-    branch_name="arcyd-review/${test_name}/master"
+    set_branch_name "master" "${test_name}"
 
     # create a review branch
     cd dev
@@ -398,7 +410,7 @@ function test_merge_conflict() {
 
 function test_push_error() {
     test_name='test_push_error'
-    branch_name="arcyd-review/${test_name}/master"
+    set_branch_name "master" "${test_name}"
 
     # create a review branch
     cd dev
@@ -438,7 +450,7 @@ function test_push_error() {
 
 function test_empty_branch() {
     test_name='test_empty_branch'
-    branch_name="arcyd-review/${test_name}/master"
+    set_branch_name "master" "${test_name}"
 
     # create a review branch
     cd dev
