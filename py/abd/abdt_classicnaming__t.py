@@ -1,4 +1,4 @@
-"""Test suite for abdt_naming."""
+"""Test suite for abdt_classicnaming."""
 #==============================================================================
 #                                   TEST PLAN
 #------------------------------------------------------------------------------
@@ -16,7 +16,8 @@ from __future__ import absolute_import
 
 import unittest
 
-# import abdt_naming
+import abdt_classicnaming
+import abdt_naming
 
 
 class Test(unittest.TestCase):
@@ -28,20 +29,39 @@ class Test(unittest.TestCase):
         pass
 
     def test_A_Breathing(self):
-        # Usage example:
-        #     >>> naming = ClassicNaming()
-        #     >>> func = naming.make_tracker_branch_from_name
-        #     >>> _get_branches(['dev/arcyd/ok/mywork/master/99'], func)
-        # ... # doctest: +NORMALIZE_WHITESPACE
-        #     [abdt_naming.TrackerBranch("dev/arcyd/ok/mywork/master/99")]
-        #
-        #     >>> _get_branches([], func)
-        #     []
-        #
-        #     >>> _get_branches(['invalid'], func)
-        #     []
-        #
-        pass
+        naming = abdt_classicnaming.Naming()
+
+        b = "invalidreviewname"
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
+
+        b = "arcyd-review/"
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
+
+        b = naming.make_review_branch_name("mywork", "master")
+        r = naming.make_review_branch_from_name(b)
+        self.assertTrue(r)
+        self.assertEqual(r.branch, b)
+        self.assertEqual(r.description, "mywork")
+        self.assertEqual(r.base, "master")
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
+
+        b = naming.make_tracker_branch_name("ok", "mywork", "master", 1)
+        self.assertRaises(
+            abdt_naming.Error, lambda: naming.make_review_branch_from_name(b))
+        w = naming.make_tracker_branch_from_name(b)
+        self.assertTrue(w)
+        self.assertEqual(w.branch, b)
+        self.assertEqual(w.status, "ok")
+        self.assertEqual(w.description, "mywork")
+        self.assertEqual(w.base, "master")
+        self.assertEqual(w.id, "1")
 
 
 #------------------------------------------------------------------------------

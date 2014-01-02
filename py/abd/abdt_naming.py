@@ -25,12 +25,6 @@
 #    .remote_base
 #    .remote_branch
 #    .make_tracker
-#   ClassicNaming
-#    .make_tracker_branch_from_name
-#    .make_tracker_branch_name
-#    .make_review_branch_from_name
-#    .make_review_branch_name
-#    .make_review_branch_name_from_tracker
 #
 # Public Functions:
 #   isStatusBad
@@ -57,7 +51,6 @@ from __future__ import absolute_import
 import collections
 
 import phlgitu_ref
-import phlsys_string
 
 
 WB_STATUS_OK = "ok"
@@ -271,174 +264,11 @@ BranchPair = collections.namedtuple(
         "tracker"])
 
 
-class ClassicNaming(object):
-
-    def __init__(self):
-        super(ClassicNaming, self).__init__()
-        self._tracking_branch_prefix = 'dev/arcyd/'
-        self._reserve_branch_prefix = 'dev/arcyd/reserve'
-        self._review_branch_prefix = 'arcyd-review/'
-        self._remote = 'origin'
-
-    def make_tracker_branch_from_name(self, branch_name):
-        """Return the WorkingBranch for 'branch_name' or None if invalid.
-
-        Usage example:
-            >>> naming = ClassicNaming()
-            >>> make_branch = naming.make_tracker_branch_from_name
-            >>> make_branch('dev/arcyd/ok/mywork/master/99')
-            ... # doctest: +NORMALIZE_WHITESPACE
-            abdt_naming.TrackerBranch("dev/arcyd/ok/mywork/master/99")
-
-            >>> make_branch('invalid/mywork/master')
-            Traceback (most recent call last):
-                ...
-            Error
-
-        :branch_name: string name of the working branch
-        :returns: WorkingBranch or None if invalid
-
-        """
-        if branch_name == self._reserve_branch_prefix:
-            raise Error()  # ignore the reserved branch
-
-        suffix = phlsys_string.after_prefix(
-            branch_name, self._tracking_branch_prefix)
-
-        if not suffix:
-            raise Error()  # review branches must start with the prefix
-
-        parts = suffix.split("/")
-        if len(parts) < 4:
-            raise Error()  # suffix should be status/description/base(/...)/id
-
-        base = '/'.join(parts[2:-1])
-
-        return TrackerBranch(
-            naming=self,
-            branch=branch_name,
-            status=parts[0],
-            description=parts[1],
-            base=base,
-            rev_id=parts[-1],
-            remote=self._remote)
-
-    def make_tracker_branch_name(self, status, description, base, review_id):
-        """Return the unique string name of the tracker branch for params.
-
-        Working branches are of the form:
-            <working branch prefix>/description/base
-
-        Usage example:
-            >>> naming = ClassicNaming()
-            >>> make_name = naming.make_tracker_branch_name
-            >>> make_name('ok', 'mywork', 'master',  99)
-            'dev/arcyd/ok/mywork/master/99'
-
-        :description: string descriptive name of the branch
-        :base: string name of the branch to diff against and land on
-        :id: identifier for the review, converted to str() for convenience
-        :returns: string name of the working branch
-
-        """
-        tracker_branch = ""
-        tracker_branch += self._tracking_branch_prefix
-        tracker_branch += status
-        tracker_branch += "/" + description
-        tracker_branch += "/" + base
-        tracker_branch += "/" + str(review_id)
-        return tracker_branch
-
-    def make_review_branch_from_name(self, branch_name):
-        """Return the ReviewBranch for 'branch_name' or None if invalid.
-
-        Usage example:
-            >>> naming = ClassicNaming()
-            >>> make_branch = naming.make_review_branch_from_name
-            >>> make_branch('arcyd-review/mywork/master')
-            ... # doctest: +NORMALIZE_WHITESPACE
-            abdt_naming.ReviewBranch("arcyd-review/mywork/master")
-
-            >>> make_branch('invalid/mywork/master')
-            Traceback (most recent call last):
-                ...
-            Error
-
-        :branch_name: string name of the review branch
-        :returns: ReviewBranch or None if invalid
-
-        """
-        suffix = phlsys_string.after_prefix(
-            branch_name, self._review_branch_prefix)
-        if not suffix:
-            raise Error()  # review branches must start with the prefix
-
-        parts = suffix.split("/")
-        if len(parts) < 2:
-            raise Error()  # suffix should be description/base(/...)
-
-        base = '/'.join(parts[1:])
-
-        return ReviewBranch(
-            naming=self,
-            branch=branch_name,
-            description=parts[0],
-            base=base,
-            remote=self._remote)
-
-    def make_review_branch_name(self, description, base):
-        """Return the unique string name of the review branch for these params.
-
-        Review branches are of the form:
-            <review branch prefix>/description/base
-
-        Usage Example:
-            >>> naming = ClassicNaming()
-            >>> make_name = naming.make_review_branch_name
-            >>> make_name('mywork', 'master')
-            'arcyd-review/mywork/master'
-
-        :description: string descriptive name of the branch
-        :base: string name of the branch to diff against and land on
-        :returns: string name of the review branch
-
-        """
-        branch_name = self._review_branch_prefix
-        branch_name += description
-        branch_name += "/" + base
-        return branch_name
-
-    def make_review_branch_name_from_tracker(self, tracker_branch):
-        """Return the string review branch name for 'working_branch'.
-
-        :working_branch: a WorkingBranch
-        :returns: the string review branch name for 'working_branch'
-
-        """
-        branch_name = self._review_branch_prefix
-        branch_name += tracker_branch.description
-        branch_name += "/" + tracker_branch.base
-        return branch_name
-
-
 def _get_branches(branch_list, func):
     """Return a list of branches made by func() from strings in 'branch_list'.
 
     Strings that aren't valid working branch names are ignored, 'func' is
     expected to raise Error in this case.
-
-    Usage example:
-        >>> naming = ClassicNaming()
-        >>> func = naming.make_tracker_branch_from_name
-        >>> _get_branches(['dev/arcyd/ok/mywork/master/99'], func)
-        ... # doctest: +NORMALIZE_WHITESPACE
-        [abdt_naming.TrackerBranch("dev/arcyd/ok/mywork/master/99")]
-
-        >>> _get_branches([], func)
-        []
-
-        >>> _get_branches(['invalid'], func)
-        []
 
     :branch_list: list of branch name strings
     :func: the branch factory funtion to use

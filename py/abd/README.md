@@ -27,6 +27,8 @@ Implement operations for branch-based reviews.
 Implement mocked operations for branch-based reviews.
 * `abdt_branchtester.py` -
 Test suite for abdt_branch-like things.
+* `abdt_classicnaming.py` -
+Branch naming conventions for 'arcyd-review/description/base' style.
 * `abdt_conduit.py` -
 Abstraction for Arcyd's conduit operations.
 * `abdt_conduitgit.py` -

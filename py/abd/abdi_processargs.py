@@ -37,9 +37,9 @@ import phlsys_strtotime
 import phlsys_subprocess
 
 import abdmail_mailer
+import abdt_classicnaming
 import abdt_conduit
 import abdt_git
-import abdt_naming
 import abdt_repoconfig
 import abdt_reporeporter
 import abdt_shareddictoutput
@@ -352,7 +352,7 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
     arcyd_clone = abdt_git.Clone(sys_clone, "origin", config.description)
 
-    branch_naming = abdt_naming.ClassicNaming()
+    branch_naming = abdt_classicnaming.Naming()
     branches = abdt_git.get_managed_branches(
         arcyd_clone, config.description, branch_naming, branch_url_callable)
 

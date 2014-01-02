@@ -57,8 +57,8 @@ import phlsys_git
 
 import abdt_branch
 import abdt_branchtester
+import abdt_classicnaming
 import abdt_git
-import abdt_naming
 
 
 class Test(unittest.TestCase):
@@ -216,7 +216,7 @@ class Test(unittest.TestCase):
         base = 'master'
         description = 'untracked'
 
-        naming = abdt_naming.ClassicNaming()
+        naming = abdt_classicnaming.Naming()
 
         branch_name = naming.make_review_branch_name(description, base)
         self.repo_dev.call('checkout', '-b', branch_name)
