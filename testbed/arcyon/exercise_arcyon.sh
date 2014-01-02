@@ -43,7 +43,6 @@ $arcyon query --format-type ids | grep $id2
 
 $arcyon comment $id2 -m 'hello there!'
 
-$arcyon task-create 'exercise task-create'
 taskid=$($arcyon task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob --format-id)
 $arcyon task-query
 taskid2=$($arcyon task-query --max-results 1 --format-ids)
@@ -52,6 +51,7 @@ if [ "$taskid" != "$taskid2" ]; then
     false
 fi
 
+$arcyon task-create 'exercise task-create again'
 $arcyon task-update $taskid -m 'just a comment'
 $arcyon task-update $taskid -t 'exercise task-update' -d 'new description' -p low -o bob --ccs phab alice -m 'updated loads'
 
