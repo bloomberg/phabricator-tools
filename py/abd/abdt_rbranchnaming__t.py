@@ -1,4 +1,4 @@
-"""Test suite for abdt_compositenaming."""
+"""Test suite for abdt_rbranchnaming."""
 #==============================================================================
 #                                   TEST PLAN
 #------------------------------------------------------------------------------
@@ -27,8 +27,6 @@ from __future__ import absolute_import
 
 import unittest
 
-import abdt_classicnaming
-import abdt_compositenaming
 import abdt_namingtester
 import abdt_rbranchnaming
 
@@ -42,9 +40,7 @@ class Test(unittest.TestCase):
         pass
 
     def make_naming(self):
-        return abdt_compositenaming.Naming(
-            abdt_classicnaming.Naming(),
-            abdt_rbranchnaming.Naming())
+        return abdt_rbranchnaming.Naming()
 
     def test_A_Breathing(self):
         pass
@@ -64,13 +60,6 @@ class Test(unittest.TestCase):
         names_to_properties = {}
 
         for properties in abdt_namingtester.VALID_REVIEW_PROPERTIES:
-
-            name = 'arcyd-review/{description}/{base}'.format(
-                description=properties.description,
-                base=properties.base)
-
-            assert name not in names_to_properties
-            names_to_properties[name] = properties
 
             name = 'r/{base}/{description}'.format(
                 description=properties.description,

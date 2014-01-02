@@ -53,6 +53,8 @@ Log important events appropriately from anywhere in Arcyd.
 Naming conventions for abd.
 * `abdt_namingtester.py` -
 Test suite for abdt naming convention classes.
+* `abdt_rbranchnaming.py` -
+Branch naming conventions for 'r/base/description' style.
 * `abdt_repoconfig.py` -
 Per-repository configuration options.
 * `abdt_reporeporter.py` -
