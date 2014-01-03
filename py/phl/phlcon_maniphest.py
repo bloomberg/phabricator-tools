@@ -231,10 +231,10 @@ def query(
         # number of results returned
         priority_desc_to_val = PRIORITY_DESCRIPTIONS_TO_VALUES
         order_to_key = {
-            None: lambda x: x.dateModified,
+            None: lambda x: -int(x.dateModified),
             ORDERS['title']: lambda x: x.title,
-            ORDERS['created']: lambda x: -x.dateCreated,
-            ORDERS['modified']: lambda x: -x.dateModified,
+            ORDERS['created']: lambda x: -int(x.dateCreated),
+            ORDERS['modified']: lambda x: -int(x.dateModified),
             ORDERS['priority']: lambda x: -priority_desc_to_val[x.priority],
         }
         result.sort(key=order_to_key[order])

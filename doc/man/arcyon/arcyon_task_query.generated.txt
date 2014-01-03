@@ -1,6 +1,6 @@
 usage: arcyon task-query [-h] [--priorities [PRIORITY [PRIORITY ...]]]
-                         [--order PRIORITY] [--ids INT [INT ...]]
-                         [--owners USER [USER ...]]
+                         [--order {priority,title,modified,created}]
+                         [--ids INT [INT ...]] [--owners USER [USER ...]]
                          [--authors USER [USER ...]] [--ccs USER [USER ...]]
                          [--projects PROJECT [PROJECT ...]]
                          [--status {resolved,duplicate,spite,closed,wontfix,open,any,invalid}]
@@ -34,7 +34,8 @@ Output format arguments:
   --format-json         will pretty-print the response in json.
 
 Optional task arguments:
-  --order PRIORITY      the ordering of the returned results
+  --order {priority,title,modified,created}
+                        the ordering of the returned results
   --ids INT [INT ...]   specific task ids to restrict the query to
   --owners USER [USER ...], -o USER [USER ...]
                         specific owners usernames to restrict the query to
@@ -45,7 +46,7 @@ Optional task arguments:
   --projects PROJECT [PROJECT ...]
                         a list of project names to restrict the query
   --status {resolved,duplicate,spite,closed,wontfix,open,any,invalid}
-                        a list of project names to restrict the query
+                        a single status type to restrict items to
   --text STRING         string to search the full text of each task for.
   --max-results INT     limit the number of results returned, if unspecified
                         then the server default limit is used (seems to be

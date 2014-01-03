@@ -95,8 +95,7 @@ def setupParser(parser):
         help="filter by priority of the task")
     opt.add_argument(
         '--order',
-        choices=phlcon_maniphest.ORDERS,
-        metavar="PRIORITY",
+        choices=phlcon_maniphest.ORDERS.keys(),
         default=None,
         type=str,
         help="the ordering of the returned results")
@@ -142,7 +141,7 @@ def setupParser(parser):
         type=str,
         default=None,
         choices=phlcon_maniphest.STATUS_FILTERS.keys(),
-        help='a list of project names to restrict the query')
+        help='a single status type to restrict items to')
     opt.add_argument(
         '--text',
         type=str,
