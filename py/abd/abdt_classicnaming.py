@@ -33,9 +33,12 @@ class Naming(object):
 
     def __init__(self):
         super(Naming, self).__init__()
-        self._tracking_branch_prefix = 'dev/arcyd/'
-        self._new_tracking_branch_prefix = 'dev/arcyd/trackers'
-        self._reserve_branch_prefix = 'dev/arcyd/reserve'
+
+        # unfortunately the 'classic' scheme is too high in the namespace
+        # hierarchy, it creates it's branches alongside other 'top-level' arcyd
+        # branch namespaces
+        self._tracking_branch_prefix = abdt_naming.ARCYD_BRANCH_NAMESPACE
+
         self._review_branch_prefix = 'arcyd-review/'
         self._remote = 'origin'
 
@@ -63,10 +66,10 @@ class Naming(object):
         :returns: WorkingBranch or None if invalid
 
         """
-        if branch_name == self._reserve_branch_prefix:
+        if branch_name == abdt_naming.RESERVED_BRANCH_NAME:
             raise abdt_naming.Error()  # ignore the reserved branch
 
-        if branch_name.startswith(self._new_tracking_branch_prefix):
+        if branch_name.startswith(abdt_naming.TRACKING_BRANCH_PREFIX):
             raise abdt_naming.Error()  # ignore all new tracker branches
 
         suffix = phlsys_string.after_prefix(
