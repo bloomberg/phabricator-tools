@@ -10,7 +10,6 @@
 #    .make_tracker_branch_name
 #    .make_review_branch_from_name
 #    .make_review_branch_name
-#    .make_review_branch_name_from_tracker
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -70,18 +69,26 @@ class Naming(object):
             # review branches must start with the prefix
             raise abdt_naming.Error()
 
+        # suffix should be status/description/base(/...)/id
+        #                    0   /     1     /  2 (/...)/-1
+
         parts = suffix.split("/")
         if len(parts) < 4:
-            # suffix should be status/description/base(/...)/id
             raise abdt_naming.Error()
 
+        description = parts[1]
         base = '/'.join(parts[2:-1])
+
+        review_branch = self._review_branch_prefix
+        review_branch += description
+        review_branch += "/" + base
 
         return abdt_naming.TrackerBranch(
             naming=self,
             branch=branch_name,
+            review_branch=review_branch,
             status=parts[0],
-            description=parts[1],
+            description=description,
             base=base,
             rev_id=parts[-1],
             remote=self._remote)
@@ -171,18 +178,6 @@ class Naming(object):
         branch_name = self._review_branch_prefix
         branch_name += description
         branch_name += "/" + base
-        return branch_name
-
-    def make_review_branch_name_from_tracker(self, tracker_branch):
-        """Return the string review branch name for 'working_branch'.
-
-        :working_branch: a WorkingBranch
-        :returns: the string review branch name for 'working_branch'
-
-        """
-        branch_name = self._review_branch_prefix
-        branch_name += tracker_branch.description
-        branch_name += "/" + tracker_branch.base
         return branch_name
 
 

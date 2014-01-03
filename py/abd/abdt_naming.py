@@ -109,6 +109,7 @@ class TrackerBranch(object):
             self,
             naming,
             branch,
+            review_branch,
             status,
             description,
             base,
@@ -124,8 +125,7 @@ class TrackerBranch(object):
         self._remote = remote
         self._remote_base = None
         self._remote_branch = None
-        self._review_name = self._naming.make_review_branch_name_from_tracker(
-            self)
+        self._review_name = review_branch
         self._update_remotes()
 
     @property
