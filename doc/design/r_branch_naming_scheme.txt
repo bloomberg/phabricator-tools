@@ -1,0 +1,183 @@
+===============================================================================
+= Proposal to change the arcyd branch naming scheme to "r/ branches"
+===============================================================================
+
+The current arcyd branch naming scheme has some usability issues drawbacks,
+here is a proposal which attempts to address all of them.
+
+In brief, in addition to supporting branches like this:
+
+  arcyd-review/renameUtils/master
+
+we'll support equivalent branches like this:
+
+  r/master/renameUtils
+
+a later proposal may add support for these too:
+
+  r/renameUtils
+  review/renameUtils
+  arc/renameUtils
+
+-------------------------------------------------------------------------------
+- Description of the current naming scheme
+-------------------------------------------------------------------------------
+
+Branches are currently composed of 3 sections:
+
+  arcyd-review/somedescription/master
+  |   prefix  |  description  | base|
+
+1. "prefix" - the prefix unique to arcyd reviews, so that arcyd knows which
+   ones to process.  Deliberately long and descriptive to avoid collisions
+   with any pre-existing branches.
+
+2. "description" - a description of the branch by the user.
+
+3. "base" - the branch to diff against and to land on.
+
+Note that the third section may be composed of multiple slashes, otherwise
+users would not be able to target changes to branches like 'releases/master'.
+
+-------------------------------------------------------------------------------
+- Some drawbacks of the current naming scheme
+-------------------------------------------------------------------------------
+
+(A) 'arcyd' is hard to type correctly
+
+(B) 'arcyd-review' is a long prefix to type
+
+(C) Most branches have the same base - 'master'.  It feels wasteful to repeat
+    this and also to risk mis-typing it.
+
+    ('develop' instead of 'master' in some repos, those repos might prefer the
+    protection of devgit's 'master' instead though - non-ff to 'develop' could
+    set the project back some ways)
+
+-------------------------------------------------------------------------------
+- Considered changes
+-------------------------------------------------------------------------------
+
+* Change "prefix" to something much easier to type - the letter 'r' by
+  default.  This will be configurable on a per-repo basis, an initial
+  implementation may not support configurability.
+
+* Choose a default base for "base" - "master", if no base is specified then
+  use this one instead, this behaviour can be enabled on a per-repo basis
+  and would be disabled by default.  An initial implementation may not
+  support enablement.
+
+  With this applied, it's possible for legitimate branches to 'block' eachother
+  due to a limitation of Git. For example:
+
+    r/foo
+
+  would block
+
+    r/foo/fix
+
+  as Git will not allow a branch to exist as a 'subdirectory' of another, i.e.
+
+    $ git branch r/foo
+    $ git branch r/foo/fix
+    error: unable to resolve reference refs/heads/foo/fix: Not a directory
+    fatal: Failed to lock ref for update: Not a directory
+
+  Also with this applied, it's less obvious where a branch is destined to go.
+  Hopefully the default branch would always be the 'active development' branch,
+  whatever it's actual name might be.  The name would also be expected not to
+  change during the lifetime of the repo.
+
+* Swap the positions of "description" and "base" (if present)
+
+* These schemes could co-exist for some time until the deprecated
+  'arcyd-review' branches are all gone in favour of the new 'r' branches.
+
+-------------------------------------------------------------------------------
+- Proposed changes
+-------------------------------------------------------------------------------
+
+(1) Change "prefix" to something much easier to type - the letter 'r'.
+
+(2) Swap the positions of "description" and "base" (if present)
+
+(3) These schemes will co-exist for some time until the deprecated
+    'arcyd-review' branches are all gone in favour of the new 'r' branches.
+
+-------------------------------------------------------------------------------
+- Possible new drawbacks
+-------------------------------------------------------------------------------
+
+With (1) applied, it's less obvious what the branches in the repository are
+used for - the 'r' prefix is rather terse.  Most likely newcomers would only
+need to discover one time what they are for, they would need to discover
+though.  There are other aspects to the naming that would require explanation,
+which might make the additional burden of explaining 'r' relatively smaller.
+
+With (2) applied, there may be a period of adjustment from the old
+'arcyd-review' branches where people will commonly get 'description' and 'base'
+in the now wrong order.  This would probably be a nuisance in the short-term
+but not likely pose any danger.
+
+-------------------------------------------------------------------------------
+- Examples
+-------------------------------------------------------------------------------
+
+With changes (1) and (2) in effect then the above example would change from:
+
+  arcyd-review/somedescription/master
+
+to
+
+  r/master/somedescription
+
+The effect on a list of reviews is quite dramatic, with the current scheme:
+
+  arcyd-review/D123993/master
+  arcyd-review/D124002/feature/redoProxy
+  arcyd-review/broadcast_metakey_updown/master
+  arcyd-review/carbon_event_bindings/master
+  arcyd-review/colors_T122239/master
+  arcyd-review/combobox_listener/master
+  arcyd-review/command_signal/feature/redoProxy
+  arcyd-review/fixStartupCrash/master
+  arcyd-review/fix_radiobutton_when_packed/feature/redoProxy
+  arcyd-review/hide_unsigned_badges/master
+  arcyd-review/hookup_delete_event_to_coordinator/feature/redoProxy
+  arcyd-review/menu_T122242/master
+  arcyd-review/renameUtils/master
+
+with (1) applied:
+
+  r/D123993/master
+  r/D124002/feature/redoProxy
+  r/broadcast_metakey_updown/master
+  r/carbon_event_bindings/master
+  r/colors_T122239/master
+  r/combobox_listener/master
+  r/command_signal/feature/redoProxy
+  r/fixStartupCrash/master
+  r/fix_radiobutton_when_packed/feature/redoProxy
+  r/hide_unsigned_badges/master
+  r/hookup_delete_event_to_coordinator/feature/redoProxy
+  r/menu_T122242/master
+  r/renameUtils/master
+
+with (1) and (2) applied:
+
+  r/feature/redoProxy/D124002
+  r/feature/redoProxy/command_signal
+  r/feature/redoProxy/fix_radiobutton_when_packed
+  r/feature/redoProxy/hookup_delete_event_to_coordinator
+  r/master/D123993
+  r/master/broadcast_metakey_updown
+  r/master/carbon_event_bindings
+  r/master/colors_T122239
+  r/master/combobox_listener
+  r/master/fixStartupCrash
+  r/master/hide_unsigned_badges
+  r/master/menu_T122242
+  r/master/renameUtils
+
+the branches headed for the same destination now sort together and it's easier
+to pick out the bases.
