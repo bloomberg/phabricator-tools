@@ -9,7 +9,9 @@
 #    .make_tracker_branch_from_name
 #    .make_tracker_branch_name
 #    .make_review_branch_from_name
-#    .make_review_branch_name
+#
+# Public Assignments:
+#   EXAMPLE_REVIEW_BRANCH_NAME
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -20,6 +22,11 @@ from __future__ import absolute_import
 import phlsys_string
 
 import abdt_naming
+
+
+EXAMPLE_REVIEW_BRANCH_NAME = "arcyd-review/{description}/{base}".format(
+    description=abdt_naming.EXAMPLE_REVIEW_BRANCH_DESCRIPTION,
+    base=abdt_naming.EXAMPLE_REVIEW_BRANCH_BASE)
 
 
 class Naming(object):
@@ -157,28 +164,6 @@ class Naming(object):
             description=parts[0],
             base=base,
             remote=self._remote)
-
-    def make_review_branch_name(self, description, base):
-        """Return the unique string name of the review branch for these params.
-
-        Review branches are of the form:
-            <review branch prefix>/description/base
-
-        Usage Example:
-            >>> naming = Naming()
-            >>> make_name = naming.make_review_branch_name
-            >>> make_name('mywork', 'master')
-            'arcyd-review/mywork/master'
-
-        :description: string descriptive name of the branch
-        :base: string name of the branch to diff against and land on
-        :returns: string name of the review branch
-
-        """
-        branch_name = self._review_branch_prefix
-        branch_name += description
-        branch_name += "/" + base
-        return branch_name
 
 
 #------------------------------------------------------------------------------

@@ -43,7 +43,7 @@ class Test(unittest.TestCase):
         self.assertRaises(
             abdt_naming.Error, lambda: naming.make_tracker_branch_from_name(b))
 
-        b = naming.make_review_branch_name("mywork", "master")
+        b = abdt_classicnaming.EXAMPLE_REVIEW_BRANCH_NAME
         r = naming.make_review_branch_from_name(b)
         self.assertTrue(r)
         self.assertEqual(r.branch, b)

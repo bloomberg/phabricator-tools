@@ -40,6 +40,8 @@
 #   WB_STATUS_BAD_INREVIEW
 #   WB_STATUS_BAD_LAND
 #   WB_DICT_STATUS_DESC
+#   EXAMPLE_REVIEW_BRANCH_BASE
+#   EXAMPLE_REVIEW_BRANCH_DESCRIPTION
 #   BranchPair
 #
 # -----------------------------------------------------------------------------
@@ -67,6 +69,9 @@ WB_DICT_STATUS_DESC = {
     WB_STATUS_BAD_INREVIEW:  "bad update during review",
     WB_STATUS_BAD_LAND:      "didn't manage to land the change",
 }
+
+EXAMPLE_REVIEW_BRANCH_BASE = "master"
+EXAMPLE_REVIEW_BRANCH_DESCRIPTION = "mywork"
 
 
 class Error(Exception):

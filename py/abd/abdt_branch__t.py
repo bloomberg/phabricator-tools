@@ -59,6 +59,7 @@ import abdt_branch
 import abdt_branchtester
 import abdt_classicnaming
 import abdt_git
+import abdt_naming
 
 
 class Test(unittest.TestCase):
@@ -208,17 +209,16 @@ class Test(unittest.TestCase):
         return base, branch_name, branch
 
     def _setup_for_untracked_branch(self, repo_name='name', branch_url=None):
+        base = abdt_naming.EXAMPLE_REVIEW_BRANCH_BASE
+
         self._create_new_file(self.repo_dev, 'README')
         self.repo_dev.call('add', 'README')
         self.repo_dev.call('commit', '-m', 'initial commit')
-        phlgit_push.push(self.repo_dev, 'master', 'origin')
-
-        base = 'master'
-        description = 'untracked'
+        phlgit_push.push(self.repo_dev, base, 'origin')
 
         naming = abdt_classicnaming.Naming()
 
-        branch_name = naming.make_review_branch_name(description, base)
+        branch_name = abdt_classicnaming.EXAMPLE_REVIEW_BRANCH_NAME
         self.repo_dev.call('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
