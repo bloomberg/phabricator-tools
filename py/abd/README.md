@@ -51,6 +51,8 @@ Operations for maintaining a list of landed branches in upstream repo.
 Log important events appropriately from anywhere in Arcyd.
 * `abdt_naming.py` -
 Naming conventions for abd.
+* `abdt_namingtester.py` -
+Test suite for abdt naming convention classes.
 * `abdt_repoconfig.py` -
 Per-repository configuration options.
 * `abdt_reporeporter.py` -

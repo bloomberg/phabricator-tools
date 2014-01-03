@@ -1,4 +1,4 @@
-"""Test suite for abdt_classicnaming."""
+"""Test suite for abdt_compositenaming."""
 #==============================================================================
 #                                   TEST PLAN
 #------------------------------------------------------------------------------
@@ -28,6 +28,7 @@ from __future__ import absolute_import
 import unittest
 
 import abdt_classicnaming
+import abdt_compositenaming
 import abdt_namingtester
 
 
@@ -40,7 +41,8 @@ class Test(unittest.TestCase):
         pass
 
     def make_naming(self):
-        return abdt_classicnaming.Naming()
+        return abdt_compositenaming.Naming(
+            abdt_classicnaming.Naming())
 
     def test_A_Breathing(self):
         pass
