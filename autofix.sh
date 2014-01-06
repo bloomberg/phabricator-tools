@@ -5,6 +5,7 @@
 # :o autopep8 (linter)                                                        #
 # :o docformatter (linter)                                                    #
 # :o fiximports (linter)                                                      #
+# :o fixlegal (linter)                                                        #
 #                                                                             #
 ###############################################################################
 
@@ -31,6 +32,11 @@ docformatter -i $allscripts
 # sort imports
 ###############################################################################
 python meta/autofix/fiximports.py $libscripts
+
+###############################################################################
+# fix legal notices
+###############################################################################
+python meta/autofix/fixlegal.py . --different-since origin/master
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.

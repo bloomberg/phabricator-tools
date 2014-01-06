@@ -6,7 +6,6 @@
 # :o flake8 (linter)                                                          #
 # :o check dependencies between packages, using snakefood                     #
 # :o check for components which are unused by end products, using snakefood   #
-# :o check for copyright notices at the end of files                          #
 #                                                                             #
 ###############################################################################
 
@@ -58,17 +57,6 @@ diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 # check for unused components
 ###############################################################################
 (cd meta/package_deps; ./check_no_dead_files.sh)
-
-###############################################################################
-# check for copyright notices
-###############################################################################
-set +e
-GIT_PAGER='' git grep -L "Copyright (C) 2012 Bloomberg L.P." $allscripts
-if [ $? -ne 1 ]
-then
-    echo -- above files are missing copyright notice --
-    exit 1
-fi
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
