@@ -56,7 +56,7 @@ ${arcyon} task-update -h > doc/man/arcyon/arcyon_task_update.generated.txt
 ${arcyon} task-query -h > doc/man/arcyon/arcyon_task_query.generated.txt
 
 #------------------------------------------------------------------------------
-# Copyright (C) 2012 Bloomberg L.P.
+# Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to
