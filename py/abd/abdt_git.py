@@ -36,6 +36,8 @@ import phlgit_diff
 import phlgit_log
 import phlgit_merge
 import phlgit_push
+import phlgit_showref
+import phlgitu_ref
 
 import abdt_branch
 import abdt_lander
@@ -203,10 +205,26 @@ class Clone(object):
         return self._clone.working_dir
 
 
+def _get_branch_to_hash(git):
+
+    remote = git.get_remote()
+    hash_ref_list = phlgit_showref.hash_ref_pairs(git)
+
+    def is_remote(ref):
+        return phlgitu_ref.is_under_remote(ref, remote)
+
+    # XXX: can't use dictionary comprehensions until the linters don't complain
+    full_to_short = phlgitu_ref.fq_remote_to_short_local
+    branch_to_hash = dict([
+        (full_to_short(r), h) for h, r in hash_ref_list if is_remote(r)
+    ])
+
+    return branch_to_hash
+
+
 def get_managed_branches(git, repo_desc, naming, branch_link_callable=None):
-    branch_pairs = abdt_naming.get_branch_pairs(
-        git.get_remote_branches(),
-        naming)
+    branch_to_hash = _get_branch_to_hash(git)
+    branch_pairs = abdt_naming.get_branch_pairs(branch_to_hash.keys(), naming)
 
     managed_branches = []
     lander = abdt_lander.squash
