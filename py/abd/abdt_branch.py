@@ -203,8 +203,16 @@ class Branch(object):
     def get_author_names_emails(self):
         """Return a list of (name, email) tuples from the branch."""
         hashes = self._get_commit_hashes()
-        return phlgit_log.get_author_names_emails_from_hashes(
+
+        # names and emails are only mentioned once, in the order that they
+        # appear.  reverse the order so that the the most recent commit is
+        # considered first.
+        hashes.reverse()
+        names_emails = phlgit_log.get_author_names_emails_from_hashes(
             self._clone, hashes)
+        names_emails.reverse()
+
+        return names_emails
 
     def get_any_author_emails(self):
         """Return a list of emails from the branch.
