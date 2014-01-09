@@ -10,6 +10,7 @@
 # [XC] can move between all states without error
 # [XD] can set and retrieve repo name, branch link
 # [ C] can move bad_pre_review -> 'new' states without duplicating branches
+# [ D] unique names and emails are returned in the order of most recent first
 # [  ] can detect if review branch has new commits (after ff, merge, rebase)
 # [  ] can get raw diff from branch
 # [  ] can get author names and emails from branch
@@ -33,10 +34,11 @@
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_RawDiffNewCommits
+# [ C] test_C_BadPreReviewToNew
+# [ D] test_D_AlternatingAuthors
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
 # [XD] check_XD_SetRetrieveRepoNameBranchLink
-# [ C] test_C_BadPreReviewToNew
 #==============================================================================
 
 from __future__ import absolute_import
@@ -189,6 +191,45 @@ class Test(unittest.TestCase):
             branches_cleared = phlgit_branch.get_remote(
                 self.clone_arcyd, 'origin')
             self.assertEqual(len(branches_cleared), len(branches))
+
+    def test_D_AlternatingAuthors(self):
+        base, branch_name, branch = self._setup_for_untracked_branch()
+
+        alice_user = 'Alice'
+        alice_email = 'alice@server.test'
+
+        bob_user = 'Bob'
+        bob_email = 'bob@server.test'
+
+        self._dev_commit_new_empty_file('ALICE1', alice_user, alice_email)
+        self._dev_commit_new_empty_file('BOB1', bob_user, bob_email)
+        self._dev_commit_new_empty_file('ALICE2', alice_user, alice_email)
+
+        phlgit_push.push(self.repo_dev, branch_name, 'origin')
+        self.clone_arcyd.call('fetch', 'origin')
+
+        author_names_emails = branch.get_author_names_emails()
+
+        self.assertTupleEqual(
+            author_names_emails[0],
+            (bob_user, bob_email))
+
+        self.assertTupleEqual(
+            author_names_emails[1],
+            (alice_user, alice_email))
+
+#         any_author_emails = branch.get_any_author_emails()
+#         self.assertEqual(any_author_emails[-1], alice_email)
+#         self.assertEqual(any_author_emails[-2], bob_email)
+
+    def _dev_commit_new_empty_file(self, filename, user, email):
+        self._create_new_file(self.repo_dev, filename)
+        self.repo_dev.call('add', filename)
+        self.repo_dev.call(
+            'commit',
+            '-m',
+            filename,
+            '--author=' + '{} <{}>'.format(user, email))
 
     def test_XB_UntrackedBranch(self):
         abdt_branchtester.check_XB_UntrackedBranch(self)
