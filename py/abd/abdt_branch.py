@@ -177,12 +177,7 @@ class Branch(object):
         if self.is_new():
             return True
         else:
-            expensive = not self._clone.is_identical(
-                self._review_branch.remote_branch,
-                self._tracking_branch.remote_branch)
-            cheap = self._review_hash != self._tracking_hash
-            assert expensive == cheap
-            return cheap
+            return self._review_hash != self._tracking_hash
 
     def base_branch_name(self):
         """Return the string name of the branch the review will land on."""
