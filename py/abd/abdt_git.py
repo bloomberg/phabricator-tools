@@ -235,15 +235,24 @@ def get_managed_branches(git, repo_desc, naming, branch_link_callable=None):
         tracker_branch = b.tracker
         assert review_branch is not None or tracker_branch is not None
 
+        review_hash = None
+        tracker_hash = None
+
         if review_branch is not None:
+            review_hash = branch_to_hash[review_branch.branch]
             if branch_link_callable:
                 branch_url = branch_link_callable(review_branch.branch)
+
+        if tracker_branch is not None:
+            tracker_hash = branch_to_hash[tracker_branch.branch]
 
         managed_branches.append(
             abdt_branch.Branch(
                 git,
                 review_branch,
+                review_hash,
                 tracker_branch,
+                tracker_hash,
                 lander,
                 repo_desc,
                 branch_url))

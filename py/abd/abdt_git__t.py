@@ -26,6 +26,7 @@ import phlgit_fetch
 import phlgit_merge
 import phlgit_push
 import phlgit_rebase
+import phlgit_revparse
 import phlsys_git
 
 import abdt_branch
@@ -188,15 +189,15 @@ class Test(unittest.TestCase):
         self.clone_arcyd.call('fetch', 'origin')
 
         review_branch = naming.make_review_branch_from_name(branch_name)
-        # review_hash = phlgit_revparse.get_sha1_or_none(
-        #     self.clone_arcyd, review_branch.branch)
+        review_hash = phlgit_revparse.get_sha1_or_none(
+            self.clone_arcyd, review_branch.branch)
 
         branch = abdt_branch.Branch(
             self.clone_arcyd,
             review_branch,
-            # review_hash,
+            review_hash,
             None,
-            # None,
+            None,
             None,
             repo_name,
             branch_url)

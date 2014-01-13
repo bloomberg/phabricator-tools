@@ -85,7 +85,9 @@ class Branch(object):
             self,
             clone,
             review_branch,
+            review_hash,
             tracking_branch,
+            tracking_hash,
             lander,
             repo_name,
             browse_url=None):
@@ -93,7 +95,9 @@ class Branch(object):
 
         :clone: a Git clone to delegate to
         :review_branch: the abdt_gittypes.GitReviewBranch
+        :review_hash: the commit hash of the branch or None
         :tracking_branch: the abdt_gittypes.GitWorkingBranch
+        :tracking_hash: the commit hash of the branch or None
         :lander: a lander conformant to abdt_lander
         :repo_name: a short string to identify the repo to humans
         :browse_url: a URL to browse the branch or repo (may be None)
@@ -101,7 +105,9 @@ class Branch(object):
         """
         self._clone = clone
         self._review_branch = review_branch
+        self._review_hash = review_hash
         self._tracking_branch = tracking_branch
+        self._tracking_hash = tracking_hash
         self._lander = lander
         assert self._review_branch_valid_or_none()
         assert self._tracking_branch_valid_or_none()
@@ -171,9 +177,12 @@ class Branch(object):
         if self.is_new():
             return True
         else:
-            return not self._clone.is_identical(
+            expensive = not self._clone.is_identical(
                 self._review_branch.remote_branch,
                 self._tracking_branch.remote_branch)
+            cheap = self._review_hash != self._tracking_hash
+            assert expensive == cheap
+            return cheap
 
     def base_branch_name(self):
         """Return the string name of the branch the review will land on."""
@@ -349,11 +358,13 @@ class Branch(object):
         # TODO: raise if the branch is not actually abandoned by the user
         self._push_delete_tracking_branch()
         self._tracking_branch = None
+        self._tracking_hash = None
 
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
         self._push_delete_tracking_branch()
         self._tracking_branch = None
+        self._tracking_hash = None
 
     def mark_bad_land(self):
         """Mark the current version of the review branch as 'bad land'."""
@@ -429,6 +440,7 @@ class Branch(object):
 
         review_hash = phlgit_revparse.get_sha1(
             self._clone, self._tracking_branch.remote_branch)
+        assert review_hash == self._tracking_hash
 
         self._clone.checkout_forced_new_branch(
             self._tracking_branch.base,
@@ -484,7 +496,9 @@ class Branch(object):
             pass
 
         self._review_branch = None
+        self._review_hash = None
         self._tracking_branch = None
+        self._tracking_hash = None
 
         return result
 
@@ -508,6 +522,8 @@ class Branch(object):
                 phlgitu_ref.make_local(new_branch),
                 self._clone.get_remote())
 
+        self._tracking_hash = self._review_hash
+
     def _push_new(self, status, revision_id):
         tracking_branch = self._review_branch.make_tracker(
             status, revision_id)
@@ -519,6 +535,7 @@ class Branch(object):
             tracking_branch.remote)
 
         self._tracking_branch = tracking_branch
+        self._tracking_hash = self._review_hash
 
     def _tryloop(self, f, identifier):
         return abdt_tryloop.tryloop(f, identifier, self.describe())

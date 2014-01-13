@@ -50,6 +50,7 @@ import unittest
 
 import phlgit_branch
 import phlgit_push
+import phlgit_revparse
 import phlsys_git
 
 import abdt_branch
@@ -191,10 +192,16 @@ class Test(unittest.TestCase):
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
         self.clone_arcyd.call('fetch', 'origin')
+
         review_branch = naming.make_review_branch_from_name(branch_name)
+        review_hash = phlgit_revparse.get_sha1_or_none(
+            self.clone_arcyd, review_branch.branch)
+
         branch = abdt_branch.Branch(
             self.clone_arcyd,
             review_branch,
+            review_hash,
+            None,
             None,
             None,
             repo_name,
