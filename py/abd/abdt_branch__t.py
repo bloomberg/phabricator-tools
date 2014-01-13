@@ -33,7 +33,7 @@
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
-# [ B] test_B_RawDiffNewCommits
+# [ B] test_B_Empty
 # [ C] test_C_BadPreReviewToNew
 # [ D] test_D_AlternatingAuthors
 # [XB] test_XB_UntrackedBranch
@@ -49,12 +49,7 @@ import tempfile
 import unittest
 
 import phlgit_branch
-import phlgit_checkout
-import phlgit_commit
-import phlgit_fetch
-import phlgit_merge
 import phlgit_push
-import phlgit_rebase
 import phlsys_git
 
 import abdt_branch
@@ -91,76 +86,8 @@ class Test(unittest.TestCase):
     def test_A_Breathing(self):
         pass
 
-    def test_B_RawDiffNewCommits(self):
-        base, branch_name, branch = self._setup_for_tracked_branch()
-
-        # push a new commit on branch as dev
-        phlgit_checkout.branch(self.repo_dev, branch_name)
-        filename = 'new_on_branch'
-        self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
-        phlgit_commit.index(self.repo_dev, message=filename)
-        phlgit_push.branch(self.repo_dev, branch_name)
-
-        # check for new stuff as arcyd
-        self.assertIs(branch.has_new_commits(), False)
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), True)
-        branch.describe_new_commits()  # just exercise
-        self.assertIn(filename, branch.make_raw_diff())
-        branch.mark_ok_in_review()
-        self.assertIs(branch.has_new_commits(), False)
-        branch.describe_new_commits()  # just exercise
-
-        # exercise queries a bit
-        self.assertIn(filename, branch.make_raw_diff())
-        self.assertIn(filename, branch.make_message_digest())
-        self.assertEqual(
-            branch.get_commit_message_from_tip().strip(),
-            filename)
-        self.assertTrue(len(branch.get_any_author_emails()) > 0)
-        self.assertTrue(len(branch.get_author_names_emails()) > 0)
-
-        # check for new stuff as arcyd again
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), False)
-
-        # make a new commit on master as dev
-        phlgit_checkout.branch(self.repo_dev, 'master')
-        filename = 'new_on_master'
-        self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
-        phlgit_commit.index(self.repo_dev, message=filename)
-        phlgit_push.branch(self.repo_dev, 'master')
-
-        # check for new stuff as arcyd
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), False)
-
-        # merge master into branch, check for new stuff as arcyd
-        phlgit_checkout.branch(self.repo_dev, branch_name)
-        phlgit_merge.no_ff(self.repo_dev, 'master')
-        phlgit_push.branch(self.repo_dev, branch_name)
-
-        # check for new stuff as arcyd
-        self.assertIs(branch.has_new_commits(), False)
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertNotIn(filename, branch.make_raw_diff())
-        branch.mark_ok_in_review()
-        self.assertIs(branch.has_new_commits(), False)
-
-        # rebase branch onto master
-        phlgit_checkout.branch(self.repo_dev, branch_name)
-        phlgit_rebase.onto_upstream(self.repo_dev, 'master')
-        phlgit_push.force_branch(self.repo_dev, branch_name)
-
-        # check for new stuff as arcyd
-        self.assertIs(branch.has_new_commits(), False)
-        phlgit_fetch.all_prune(self.clone_arcyd)
-        self.assertIs(branch.has_new_commits(), True)
-        branch.describe_new_commits()  # just exercise
-        branch.mark_ok_in_review()
-        self.assertIs(branch.has_new_commits(), False)
+    def test_B_Empty(self):
+        pass
 
     def test_C_BadPreReviewToNew(self):
         # can move bad_pre_review -> 'new' states without duplicating branches

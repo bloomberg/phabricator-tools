@@ -6,10 +6,11 @@
 # cover those concerns.
 #
 # Concerns:
-# [  ]
+# [ B] changes to review branches can be detected when creating 'Branch'-es
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
+# [ B] test_B_RawDiffNewCommits
 #==============================================================================
 
 from __future__ import absolute_import
@@ -19,10 +20,18 @@ import shutil
 import tempfile
 import unittest
 
+import phlgit_checkout
+import phlgit_commit
+import phlgit_fetch
+import phlgit_merge
 import phlgit_push
+import phlgit_rebase
 import phlsys_git
 
+import abdt_branch
+import abdt_classicnaming
 import abdt_git
+import abdt_naming
 import abdt_rbranchnaming
 
 
@@ -83,6 +92,119 @@ class Test(unittest.TestCase):
         actual_branches = [b.review_branch_name() for b in branches]
 
         self.assertSetEqual(set(expected_branches), set(actual_branches))
+
+    def _get_updated_branch(self, branch_name):
+        phlgit_fetch.all_prune(self.clone_arcyd)
+        branch_list = abdt_git.get_managed_branches(
+            self.clone_arcyd, "repo", abdt_classicnaming.Naming())
+        self.assertEqual(len(branch_list), 1)
+        branch = branch_list[0]
+        self.assertEqual(branch.review_branch_name(), branch_name)
+        return branch
+
+    def test_B_RawDiffNewCommits(self):
+        base, branch_name, branch = self._setup_for_tracked_branch()
+
+        self.assertIs(branch.has_new_commits(), False)
+
+        # push a new commit on branch as dev
+        phlgit_checkout.branch(self.repo_dev, branch_name)
+        filename = 'new_on_branch'
+        self._create_new_file(self.repo_dev, filename)
+        self.repo_dev.call('add', filename)
+        phlgit_commit.index(self.repo_dev, message=filename)
+        phlgit_push.branch(self.repo_dev, branch_name)
+
+        branch = self._get_updated_branch(branch_name)
+
+        # check for new stuff as arcyd
+        self.assertIs(branch.has_new_commits(), True)
+        branch.describe_new_commits()  # just exercise
+        self.assertIn(filename, branch.make_raw_diff())
+        branch.mark_ok_in_review()
+        self.assertIs(branch.has_new_commits(), False)
+        branch.describe_new_commits()  # just exercise
+
+        # exercise queries a bit
+        self.assertIn(filename, branch.make_raw_diff())
+        self.assertIn(filename, branch.make_message_digest())
+        self.assertEqual(
+            branch.get_commit_message_from_tip().strip(),
+            filename)
+        self.assertTrue(len(branch.get_any_author_emails()) > 0)
+        self.assertTrue(len(branch.get_author_names_emails()) > 0)
+
+        # make a new commit on master as dev
+        phlgit_checkout.branch(self.repo_dev, 'master')
+        filename = 'new_on_master'
+        self._create_new_file(self.repo_dev, filename)
+        self.repo_dev.call('add', filename)
+        phlgit_commit.index(self.repo_dev, message=filename)
+        phlgit_push.branch(self.repo_dev, 'master')
+
+        # refresh the branch
+        branch = self._get_updated_branch(branch_name)
+        self.assertIs(branch.has_new_commits(), False)
+
+        # merge master into branch, check for new stuff as arcyd
+        phlgit_checkout.branch(self.repo_dev, branch_name)
+        phlgit_merge.no_ff(self.repo_dev, 'master')
+        phlgit_push.branch(self.repo_dev, branch_name)
+
+        # check for new stuff as arcyd
+        self.assertIs(branch.has_new_commits(), False)
+        branch = self._get_updated_branch(branch_name)
+        self.assertNotIn(filename, branch.make_raw_diff())
+        branch.mark_ok_in_review()
+        self.assertIs(branch.has_new_commits(), False)
+
+        # rebase branch onto master
+        phlgit_checkout.branch(self.repo_dev, branch_name)
+        phlgit_rebase.onto_upstream(self.repo_dev, 'master')
+        phlgit_push.force_branch(self.repo_dev, branch_name)
+
+        # check for new stuff as arcyd
+        self.assertIs(branch.has_new_commits(), False)
+        branch = self._get_updated_branch(branch_name)
+        self.assertIs(branch.has_new_commits(), True)
+        branch.describe_new_commits()  # just exercise
+        branch.mark_ok_in_review()
+        self.assertIs(branch.has_new_commits(), False)
+
+    def _setup_for_tracked_branch(self):
+        base, branch_name, branch = self._setup_for_untracked_branch()
+        branch.mark_ok_new_review(101)
+        return base, branch_name, branch
+
+    def _setup_for_untracked_branch(self, repo_name='name', branch_url=None):
+        base = abdt_naming.EXAMPLE_REVIEW_BRANCH_BASE
+
+        naming = abdt_classicnaming.Naming()
+
+        branch_name = abdt_classicnaming.EXAMPLE_REVIEW_BRANCH_NAME
+        self.repo_dev.call('checkout', '-b', branch_name)
+        phlgit_push.push(self.repo_dev, branch_name, 'origin')
+
+        self.clone_arcyd.call('fetch', 'origin')
+
+        review_branch = naming.make_review_branch_from_name(branch_name)
+        # review_hash = phlgit_revparse.get_sha1_or_none(
+        #     self.clone_arcyd, review_branch.branch)
+
+        branch = abdt_branch.Branch(
+            self.clone_arcyd,
+            review_branch,
+            # review_hash,
+            None,
+            # None,
+            None,
+            repo_name,
+            branch_url)
+
+        # should not raise
+        branch.verify_review_branch_base()
+
+        return base, branch_name, branch
 
     def _create_new_file(self, repo, filename):
         self.assertFalse(os.path.isfile(filename))
