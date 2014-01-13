@@ -14,6 +14,7 @@
 #    .is_status_bad
 #    .has_new_commits
 #    .base_branch_name
+#    .review_branch_hash
 #    .review_branch_name
 #    .review_id_or_none
 #    .get_author_names_emails
@@ -184,6 +185,10 @@ class Branch(object):
         if self._review_branch:
             return self._review_branch.base
         return self._tracking_branch.base
+
+    def review_branch_hash(self):
+        """Return the string hash of the review branch or None."""
+        return self._review_hash
 
     def review_branch_name(self):
         """Return the string name of the branch the review is based on."""

@@ -65,13 +65,19 @@ class Commenter(object):
         self.exception(exception)
 
     def createdReview(
-            self, repo_name, branch_name, base_name, branch_url=None):
+            self,
+            repo_name,
+            branch_hash,
+            branch_name,
+            base_name,
+            branch_url=None):
 
         message = """
 created revision from:
 
 **repository**: {repo_name}
 **branch**: {branch_name}
+**commit**: {branch_hash}
 
 if the revision is accepted then i will automatically try to land the
 revision on {base_name}.
@@ -84,6 +90,7 @@ the 'edit revision' link at the top-right of the page.
         """.format(
             repo_name=phlcon_remarkup.monospaced(repo_name),
             branch_name=phlcon_remarkup.monospaced(branch_name),
+            branch_hash=phlcon_remarkup.monospaced(branch_hash),
             base_name=phlcon_remarkup.monospaced(base_name)).strip()
 
         if branch_url is not None:
@@ -94,16 +101,20 @@ the 'edit revision' link at the top-right of the page.
 
         self._createComment(message, silent=True)
 
-    def updatedReview(self, branch_name):
+    def updatedReview(self, branch_hash, branch_name):
         message = "updated revision from branch "
         message += phlcon_remarkup.monospaced(branch_name) + "\n"
+        message += "to commit "
+        message += phlcon_remarkup.monospaced(branch_hash) + "\n"
         self._createComment(message, silent=True)
 
-    def landedReview(self, branch_name, base_name, git_output):
+    def landedReview(self, branch_hash, branch_name, base_name, git_output):
         message = "landed "
         message += phlcon_remarkup.monospaced(branch_name) + " "
         message += " on "
         message += phlcon_remarkup.monospaced(base_name) + "\n"
+        message += "original commit "
+        message += phlcon_remarkup.monospaced(branch_hash) + "\n"
         message += "deleted " + phlcon_remarkup.monospaced(branch_name) + "\n"
         message += "git output:\n"
         message += phlcon_remarkup.code_block(git_output, lang="text")

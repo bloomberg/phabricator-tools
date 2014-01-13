@@ -15,6 +15,7 @@
 #    .is_status_bad
 #    .has_new_commits
 #    .base_branch_name
+#    .review_branch_hash
 #    .review_branch_name
 #    .review_id_or_none
 #    .get_author_names_emails
@@ -233,6 +234,10 @@ class BranchMock(object):
     def base_branch_name(self):
         """Return the string name of the branch the review will land on."""
         return self._data.base_branch
+
+    def review_branch_hash(self):
+        """Return the string hash of the review branch or None."""
+        return "reviewbranchhash"
 
     def review_branch_name(self):
         """Return the string name of the branch the review is based on."""

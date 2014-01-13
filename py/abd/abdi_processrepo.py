@@ -114,6 +114,7 @@ def create_differential_review(conduit, user, parsed, branch, raw_diff):
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
     commenter.createdReview(
         branch.get_repo_name(),
+        branch.review_branch_hash(),
         branch.review_branch_name(),
         branch.base_branch_name(),
         branch.get_browse_url())
@@ -165,7 +166,9 @@ def update_in_review(conduit, branch):
 
     print "- commenting on revision " + review_id_str
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
-    commenter.updatedReview(branch.review_branch_name())
+    commenter.updatedReview(
+        branch.review_branch_hash(),
+        branch.review_branch_name())
 
     abdt_logging.on_review_event(
         'updaterev', '{} updated {}'.format(
@@ -188,6 +191,9 @@ def land(conduit, branch):
 
     review_id = branch.review_id_or_none()
 
+    # store the branch hash now, the branch will be invalid after landing
+    review_branch_hash = branch.review_branch_hash()
+
     # compose the commit message
     message = conduit.get_commit_message(review_id)
 
@@ -196,6 +202,7 @@ def land(conduit, branch):
     print "- commenting on revision " + str(review_id)
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.landedReview(
+        review_branch_hash,
         review_branch_name,
         base_branch_name,
         land_message)
