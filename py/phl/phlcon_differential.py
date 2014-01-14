@@ -8,6 +8,10 @@
 #   ReviewStates
 #   Action
 #   MessageFields
+#   ParseCommitMessageFail
+#   ParseCommitMessageNoTestPlanFail
+#   ParseCommitMessageUnknownReviewerFail
+#   ParseCommitMessageUnknownFail
 #   Error
 #   UpdateClosedRevisionError
 #   WriteDiffError
@@ -16,6 +20,7 @@
 #   create_raw_diff
 #   create_diff
 #   parse_commit_message
+#   parse_commit_message_errors
 #   create_revision
 #   query
 #   get_revision_status
@@ -151,6 +156,31 @@ ParseCommitMessageResponse = phlsys_namedtuple.make_named_tuple(
     ignored=[])
 
 
+class ParseCommitMessageFail(object):
+    pass
+
+
+class ParseCommitMessageNoTestPlanFail(ParseCommitMessageFail):
+    pass
+
+
+class ParseCommitMessageUnknownReviewerFail(ParseCommitMessageFail):
+
+    def __init__(self, user_list):
+        super(ParseCommitMessageUnknownReviewerFail, self).__init__()
+        self.user_list = user_list
+
+
+class ParseCommitMessageUnknownFail(ParseCommitMessageFail):
+
+    def __init__(self, message):
+        super(ParseCommitMessageUnknownFail, self).__init__()
+        self.message = message
+
+    def __repr__(self):
+        return 'ParseCommitMessageUnknownFail({})'.format(repr(self.message))
+
+
 RevisionResponse = phlsys_namedtuple.make_named_tuple(
     'phlcon_differential__RevisionResponse',
     required=['revisionid', 'uri'],
@@ -283,6 +313,32 @@ def parse_commit_message(conduit, corpus, partial=None):
     phlsys_dictutil.ensure_keys_default(
         p.fields, [], ["reviewerPHIDs"])
     return p
+
+
+def parse_commit_message_errors(error_message_list):
+
+    test_plan_error = str(
+        "Invalid or missing field 'Test Plan': "
+        "You must provide a test plan.")
+
+    reviewers_error = str(
+        "Error parsing field 'Reviewers': "
+        "Commit message references nonexistent users: ")
+
+    result = []
+    for error in error_message_list:
+        if error == test_plan_error:
+            result.append(
+                ParseCommitMessageNoTestPlanFail())
+        elif error.startswith(reviewers_error):
+            users = error[len(reviewers_error):-1].split(', ')
+            result.append(
+                ParseCommitMessageUnknownReviewerFail(users))
+        else:
+            result.append(
+                ParseCommitMessageUnknownFail(error))
+
+    return result
 
 
 def create_revision(conduit, diffId, fields):

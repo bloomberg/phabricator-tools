@@ -19,14 +19,26 @@ import phlcon_differential
 # [ B] the 'accepted' status persists when a review is updated with a new diff
 # [ C] the 'closed' status does not allow revisions to be updated
 # [ C] the 'closed' status does allow revisions to be closed again
+# [ D] can detect 'missing testplan', 'invalid reviewer' parse errors
 # [  ] TODO
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_AcceptedPersistsWhenUpdated
 # [ C] test_C_CantUpdateClosedReviews
+# [ D] test_D_DistinguishParseErrors
 # TODO
 #==============================================================================
+
+_COMMIT_MESSAGE_FORMAT = """
+{title}
+
+{summary}
+
+Test Plan: {test_plan}
+
+Reviewers: {reviewers}
+""".strip()
 
 
 class Test(unittest.TestCase):
@@ -109,6 +121,78 @@ class Test(unittest.TestCase):
 
             # expect that we can close a closed revision without errors
             phlcon_differential.close(conduit, revision)
+
+    def _make_commit_message(self, title, summary, test_plan, reviewer_list):
+        return _COMMIT_MESSAGE_FORMAT.format(
+            title=title,
+            summary=summary,
+            test_plan=test_plan,
+            reviewers=" ".join(reviewer_list))
+
+    def test_D_DistinguishParseErrors(self):
+        not_a_username1 = 'NOTAUSER1_test_D_DistinguishParseErrors'
+        not_a_username2 = 'NOTAUSER2_test_D_DistinguishParseErrors'
+
+        title = ""
+        summary = ""
+        test_plan = ""
+        unknown_reviewers = [
+            not_a_username1,
+            not_a_username2,
+            phldef_conduit.NOTAUSER.user]
+        reviewers = [phldef_conduit.ALICE.user]
+
+        message = self._make_commit_message(
+            title, summary, test_plan, reviewers + unknown_reviewers)
+
+        parsed = phlcon_differential.parse_commit_message(
+            self.conduit, message)
+
+        parsed_errors = phlcon_differential.parse_commit_message_errors(
+            parsed.errors)
+
+        self.assertEqual(parsed.fields["title"], title)
+        self.assertEqual(parsed.fields["summary"], summary)
+        self.assertEqual(parsed.fields["testPlan"], test_plan)
+        self.assertListEqual(parsed.fields["reviewerPHIDs"], [])
+
+        def all_are_instance_of(item_list, kind):
+            return all([isinstance(x, kind) for x in item_list])
+
+        def only_one_is_instance_of(item_list, kind):
+            # iterate to the first one and then make sure there are no others
+            i = iter([isinstance(x, kind) for x in item_list])
+            return any(i) and not any(i)
+
+        self.assertTrue(
+            all_are_instance_of(
+                parsed_errors,
+                phlcon_differential.ParseCommitMessageFail))
+
+        self.assertTrue(
+            only_one_is_instance_of(
+                parsed_errors,
+                phlcon_differential.ParseCommitMessageNoTestPlanFail))
+
+        self.assertTrue(
+            only_one_is_instance_of(
+                parsed_errors,
+                phlcon_differential.ParseCommitMessageUnknownReviewerFail))
+
+        self.assertTrue(
+            only_one_is_instance_of(
+                parsed_errors,
+                phlcon_differential.ParseCommitMessageUnknownFail))
+
+        UnkReviewer = phlcon_differential.ParseCommitMessageUnknownReviewerFail
+        did_test = False
+        for error in parsed_errors:
+            if isinstance(error, UnkReviewer):
+                self.assertSetEqual(
+                    set(error.user_list), set(unknown_reviewers))
+                did_test = True
+
+        self.assertTrue(did_test)
 
     def testNullQuery(self):
         phlcon_differential.query(self.conduit)
