@@ -7,6 +7,7 @@
 # Public Classes:
 #   Base
 #   UsedDefaultTestPlan
+#   UnknownReviewers
 #   SelfReviewer
 #
 # -----------------------------------------------------------------------------
@@ -32,6 +33,17 @@ class UsedDefaultTestPlan(Base):
         super(UsedDefaultTestPlan, self).__init__(
             'used default message: {}'.format(default_message))
         self.default_message = default_message
+
+
+class UnknownReviewers(Base):
+
+    def __init__(self, unknown_reviewers, commit_message):
+        super(UnknownReviewers, self).__init__(
+            'some specified reviewers are unknown: {}'.format(
+                unknown_reviewers))
+
+        self.unknown_reviewers = unknown_reviewers
+        self.commit_message = commit_message
 
 
 class SelfReviewer(Base):

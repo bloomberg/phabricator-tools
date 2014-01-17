@@ -63,6 +63,10 @@ def create_review(conduit, branch, plugin_manager):
                 parsed.fields["testPlan"] = _DEFAULT_TEST_PLAN
                 user_warnings.append(
                     abdt_userwarning.UsedDefaultTestPlan(_DEFAULT_TEST_PLAN))
+            elif isinstance(error, d.ParseCommitMessageUnknownReviewerFail):
+                user_warnings.append(
+                    abdt_userwarning.UnknownReviewers(
+                        error.user_list, message))
             else:
                 raise abdt_exception.CommitMessageParseException(
                     errors=parsed.errors,

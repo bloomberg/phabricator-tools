@@ -15,6 +15,7 @@
 #    .abandonedBranch
 #    .usedDefaultTestPlan
 #    .removedSelfReviewer
+#    .unknownReviewers
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -66,6 +67,9 @@ class Commenter(object):
                 self.usedDefaultTestPlan(warning.default_message)
             elif isinstance(warning, abdt_userwarning.SelfReviewer):
                 self.removedSelfReviewer(warning.user, warning.commit_message)
+            elif isinstance(warning, abdt_userwarning.UnknownReviewers):
+                self.unknownReviewers(
+                    warning.unknown_reviewers, warning.commit_message)
             else:
                 message = "unhandled user warning: " + str(warning)
                 self._createComment(message)
@@ -174,6 +178,28 @@ the 'edit revision' link at the top-right of the page.
             "commit message from branch:\n"
             "{commit_message}").format(
             user=user, commit_message=commit_message_markup)
+
+        self._createComment(message)
+
+    def unknownReviewers(self, unknown_reviewers, commit_message):
+        unknown_users_markup = phlcon_remarkup.code_block(
+            ', '.join(unknown_reviewers),
+            lang="text",
+            isBad=True)
+
+        commit_message_markup = phlcon_remarkup.code_block(
+            commit_message, lang="text", isBad=True)
+
+        message = (
+            "some reviewers specified in the commit message are unknown\n"
+            "{unknown_users_block}"
+            "please carefully review the current list of reviewers to make "
+            "sure there are no other errors.\n"
+            "\n"
+            "commit message from branch:\n"
+            "{commit_message}").format(
+            unknown_users_block=unknown_users_markup,
+            commit_message=commit_message_markup)
 
         self._createComment(message)
 
