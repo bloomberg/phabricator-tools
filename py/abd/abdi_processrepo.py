@@ -51,18 +51,22 @@ def create_review(conduit, branch, plugin_manager):
     used_default_test_plan = False
     removed_self_reviewer = False
 
-    # try to get phabricator to parse the commit message and give us fields
-    parsed = abdt_conduitgit.getFieldsFromBranch(conduit, branch)
+    message = branch.get_commit_message_from_tip()
+    parsed = conduit.parse_commit_message(message)
+
+    d = phlcon_differential
     if parsed.errors:
-        used_default_test_plan = True
-        parsed = abdt_conduitgit.getFieldsFromBranch(
-            conduit, branch, _DEFAULT_TEST_PLAN)
-        if parsed.errors:
-            print parsed
-            raise abdt_exception.CommitMessageParseException(
-                errors=parsed.errors,
-                fields=parsed.fields,
-                digest=branch.make_message_digest())
+        error_list = phlcon_differential.parse_commit_message_errors(
+            parsed.errors)
+        for error in error_list:
+            if isinstance(error, d.ParseCommitMessageNoTestPlanFail):
+                parsed.fields["testPlan"] = _DEFAULT_TEST_PLAN
+                used_default_test_plan = True
+            else:
+                raise abdt_exception.CommitMessageParseException(
+                    errors=parsed.errors,
+                    fields=parsed.fields,
+                    digest=branch.make_message_digest())
 
     # remove the author from reviewer list if present
     reviewer_phids_key = phlcon_differential.MessageFields.reviewer_phids

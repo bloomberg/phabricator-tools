@@ -7,7 +7,6 @@
 # Public Functions:
 #   getPrimaryUserDetailsFromBranch
 #   getAnyUserFromBranch
-#   getFieldsFromBranch
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -51,28 +50,6 @@ def getAnyUserFromBranch(conduit, branch):
             return user
     raise abdt_exception.NoUsersOnBranchException(
         branch.review_branch_name(), branch.base_branch_name(), emails)
-
-
-def getFieldsFromBranch(conduit, branch, defaultTestPlan=None):
-    """Return a ParseCommitMessageResponse based on the branch.
-
-    :conduit: supports call()
-    :branch: the branch to get fields from
-    :defaultTestPlan: the test plan to go with if none discovered on branch
-    :returns: a phlcon_differential.ParseCommitMessageResponse
-
-    """
-    message = branch.get_commit_message_from_tip()
-    parsed = conduit.parse_commit_message(message)
-
-    testPlan = "testPlan"
-    if defaultTestPlan is not None:
-        if parsed.fields is not None:
-            if not testPlan in parsed.fields or not parsed.fields[testPlan]:
-                message += "Test Plan:\n" + defaultTestPlan
-                parsed = conduit.parse_commit_message(message)
-
-    return parsed
 
 
 #------------------------------------------------------------------------------
