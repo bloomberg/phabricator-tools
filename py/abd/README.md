@@ -63,6 +63,8 @@ Report the state of a repository.
 Provide equivalent classes that write dictionaries to shared resources.
 * `abdt_tryloop.py` -
 Retry operations that may intermittently fail, log each failure.
+* `abdt_userwarning.py` -
+Hierarchy of warnings to feed back to users.
 * `abdweb_arcydcontent.py` -
 Render html to report the state of a running instance of Arcyd.
 * `abdweb_htmlformatter.py` -

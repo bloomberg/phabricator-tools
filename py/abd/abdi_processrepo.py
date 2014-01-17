@@ -29,6 +29,7 @@ import abdt_branch
 import abdt_conduitgit
 import abdt_exception
 import abdt_logging
+import abdt_userwarning
 
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 
@@ -48,8 +49,7 @@ def create_review(conduit, branch, plugin_manager):
 
     print "- author: " + user
 
-    used_default_test_plan = False
-    removed_self_reviewer = False
+    user_warnings = []
 
     message = branch.get_commit_message_from_tip()
     parsed = conduit.parse_commit_message(message)
@@ -61,7 +61,8 @@ def create_review(conduit, branch, plugin_manager):
         for error in error_list:
             if isinstance(error, d.ParseCommitMessageNoTestPlanFail):
                 parsed.fields["testPlan"] = _DEFAULT_TEST_PLAN
-                used_default_test_plan = True
+                user_warnings.append(
+                    abdt_userwarning.UsedDefaultTestPlan(_DEFAULT_TEST_PLAN))
             else:
                 raise abdt_exception.CommitMessageParseException(
                     errors=parsed.errors,
@@ -74,7 +75,7 @@ def create_review(conduit, branch, plugin_manager):
         reviewer_phids = parsed.fields[reviewer_phids_key]
         if phid in reviewer_phids:
             reviewer_phids.remove(phid)
-            removed_self_reviewer = True
+            user_warnings.append(abdt_userwarning.SelfReviewer(user, message))
 
     rawDiff = branch.make_raw_diff()
 
@@ -86,14 +87,8 @@ def create_review(conduit, branch, plugin_manager):
 
     commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
 
-    if used_default_test_plan:
-        commenter.usedDefaultTestPlan(
-            branch.review_branch_name(), _DEFAULT_TEST_PLAN)
-
-    if removed_self_reviewer:
-        commenter.removedSelfReviewer(
-            branch.review_branch_name(),
-            branch.make_message_digest())
+    if user_warnings:
+        commenter.userWarnings(user_warnings)
 
     plugin_manager.hook(
         "after_create_review",

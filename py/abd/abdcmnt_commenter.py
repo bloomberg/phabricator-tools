@@ -7,6 +7,7 @@
 # Public Classes:
 #   Commenter
 #    .exception
+#    .userWarnings
 #    .failedCreateReview
 #    .createdReview
 #    .updatedReview
@@ -24,6 +25,7 @@ from __future__ import absolute_import
 import phlcon_remarkup
 
 import abdt_exception
+import abdt_userwarning
 
 
 class Commenter(object):
@@ -57,6 +59,16 @@ class Commenter(object):
         else:
             message = "unhandled exception: " + str(e)
             self._createComment(message)
+
+    def userWarnings(self, user_warning_list):
+        for warning in user_warning_list:
+            if isinstance(warning, abdt_userwarning.UsedDefaultTestPlan):
+                self.usedDefaultTestPlan(warning.default_message)
+            elif isinstance(warning, abdt_userwarning.SelfReviewer):
+                self.removedSelfReviewer(warning.user, warning.commit_message)
+            else:
+                message = "unhandled user warning: " + str(warning)
+                self._createComment(message)
 
     def failedCreateReview(self, branch_name, exception):
         message = "failed to create revision from branch "
@@ -132,10 +144,9 @@ the 'edit revision' link at the top-right of the page.
         message += "review will be created.\n"
         self._createComment(message, silent=True)
 
-    def usedDefaultTestPlan(self, branch_name, test_plan):
+    def usedDefaultTestPlan(self, test_plan):
         message = "a test plan could not be determined from the commits on "
-        message += phlcon_remarkup.monospaced(branch_name) + " "
-        message += "so the following message was used:\n"
+        message += "the review branch, so the following message was used:\n"
         message += phlcon_remarkup.code_block(test_plan, lang="text")
         message += "for a test plan to be recognised, please use text like "
         message += "the following in your latest commit message: \n"
@@ -146,14 +157,12 @@ the 'edit revision' link at the top-right of the page.
         message += "this review page."
         self._createComment(message, silent=True)
 
-    def removedSelfReviewer(self, branch_name, digest):
-        digest_markup = phlcon_remarkup.code_block(
-            digest, lang="text", isBad=True)
-
-        branch_markup = phlcon_remarkup.monospaced(branch_name)
+    def removedSelfReviewer(self, user, commit_message):
+        commit_message_markup = phlcon_remarkup.code_block(
+            commit_message, lang="text", isBad=True)
 
         message = (
-            "author, you added yourself to the list of reviewers in your "
+            "{user}, you added yourself to the list of reviewers in your "
             "commit message.\n"
             "\n"
             "phabricator does not permit the author of a review to also be a "
@@ -162,8 +171,9 @@ the 'edit revision' link at the top-right of the page.
             "please carefully review the current list of reviewers to make "
             "sure there are no other errors.\n"
             "\n"
-            "combined message digest from branch {branch}:\n"
-            "{digest}").format(branch=branch_markup, digest=digest_markup)
+            "commit message from branch:\n"
+            "{commit_message}").format(
+            user=user, commit_message=commit_message_markup)
 
         self._createComment(message)
 
