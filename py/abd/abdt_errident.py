@@ -39,17 +39,17 @@ CONDUIT_REFRESH = "conduit-refresh"
 GIT_SNOOP = "git-snoop"
 
 # abdi_processargs
-FETCH_PRUNE = 'fetch/prune'
+FETCH_PRUNE = 'fetch-prune'
 CONDUIT_CONNECT = 'conduit-connect'
 
 # abdt_branch
 PUSH_DELETE_TRACKING = 'push-delete-tracking'
 MARK_BAD_LAND = 'mark-bad-land'
 MARK_BAD_IN_REVIEW = 'mark-bad-in-review'
-MARK_NEW_BAD_IN_REVIEW = 'mark_new_bad_in_review'
+MARK_NEW_BAD_IN_REVIEW = 'mark-new-bad-in-review'
 MARK_BAD_PRE_REVIEW = 'mark-bad-pre-review'
 MARK_OK_IN_REVIEW = 'mark-ok-in-review'
-MARK_OK_NEW_REVIEW = 'mark_ok_new_review'
+MARK_OK_NEW_REVIEW = 'mark-ok-new-review'
 PUSH_DELETE_LANDED = 'push-delete-landed'
 PUSH_LANDINGLOG = 'push-landinglog'
 
