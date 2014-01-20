@@ -10,6 +10,7 @@
 #    .stop
 #    .duration
 #   ArcydReporter
+#    .set_external_system_error_logger
 #    .start_sleep
 #    .update_sleep
 #    .on_tryloop_exception
@@ -80,6 +81,7 @@ import os
 import traceback
 import types
 
+import phlsys_subprocess
 
 ARCYD_STATUS = 'status'
 ARCYD_STATUS_DESCRIPTION = 'status-description'
@@ -243,7 +245,12 @@ class ArcydReporter(object):
         self._log_system_error = list()
         self._log_user_action = list()
 
+        self._external_system_error_logger = None
+
         self._write_status(ARCYD_STATUS_STARTING)
+
+    def set_external_system_error_logger(self, path):
+        self._external_system_error_logger = path
 
     def start_sleep(self, duration):
         _ = duration  # NOQA
@@ -271,6 +278,11 @@ class ArcydReporter(object):
 
     def log_system_error(self, identifier, detail):
         self._add_log_item(self._log_system_error, identifier, detail)
+        if self._external_system_error_logger:
+            phlsys_subprocess.run(
+                self._external_system_error_logger,
+                identifier,
+                detail)
 
     def log_user_action(self, identifier, detail):
         self._add_log_item(self._log_user_action, identifier, detail)

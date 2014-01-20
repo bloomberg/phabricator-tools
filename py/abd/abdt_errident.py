@@ -1,5 +1,4 @@
 """"A global list of error identifiers that may be used.
-from __future__ import absolute_import
 
 The identifiers are gathered here for easy reference, for example when
 writing an external error logger then it may be useful to know what
@@ -30,6 +29,8 @@ kinds of error identifiers to expect.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import absolute_import
+
 #
 # tryloop identifiers
 #
@@ -55,7 +56,7 @@ PUSH_LANDINGLOG = 'push-landinglog'
 
 
 #------------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to

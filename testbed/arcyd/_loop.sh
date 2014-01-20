@@ -36,7 +36,9 @@ olddir=$(pwd)
 cd ${tempdir}
 
 mail="${olddir}/savemail"
+logger="${olddir}/logerror"
 touch savemail.txt
+touch logerror.txt
 
 mkdir origin
 cd origin
@@ -110,6 +112,7 @@ ${arcyd} \
     --sys-admin-emails admin@server.test \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
+    --external-error-logger ${logger} \
     --repo-configs @repo_arcyd.cfg \
     --status-path arcyd_status.json \
     --kill-file killfile \
@@ -152,6 +155,7 @@ function cleanup() {
     # display the sent mails
     pwd
     cat savemail.txt
+    cat logerror.txt
 
     # clean up
     cd ${olddir}

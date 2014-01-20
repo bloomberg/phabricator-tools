@@ -98,6 +98,13 @@ def setupParser(parser):
         '--no-loop',
         action='store_true',
         help="supply this argument to only process each repo once then exit")
+    parser.add_argument(
+        '--external-error-logger',
+        metavar="PATH",
+        type=str,
+        default=None,
+        help="path to an external logger to send errors to, will be called "
+             "like so: $LOGGER '<<identifier>>' '<<full details>>'")
 
 
 class DelayedRetrySleepOperation(object):
@@ -194,6 +201,10 @@ def process(args):
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
     reporter = abdt_arcydreporter.ArcydReporter(
         reporter_data, args.io_log_file)
+
+    if args.external_error_logger:
+        full_path = os.path.abspath(args.external_error_logger)
+        reporter.set_external_system_error_logger(full_path)
 
     on_exception = abdi_processargs.make_exception_message_handler(
         args, reporter, None, "arcyd stopped with exception", "")
