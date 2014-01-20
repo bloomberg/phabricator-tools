@@ -39,6 +39,7 @@ import phlurl_watcher
 
 import abdi_processargs
 import abdt_arcydreporter
+import abdt_errident
 import abdt_logging
 import abdt_shareddictoutput
 import abdt_tryloop
@@ -134,12 +135,12 @@ class RefreshCachesOperation(object):
                 conduit = self._conduits[key]
                 abdt_tryloop.critical_tryloop(
                     conduit.refresh_cache_on_cycle,
-                    "conduit-refresh",
+                    abdt_errident.CONDUIT_REFRESH,
                     conduit.describe())
 
         with self._reporter.tag_timer_context('refresh git watcher'):
             abdt_tryloop.critical_tryloop(
-                self._url_watcher.refresh, 'git-snoop', '')
+                self._url_watcher.refresh, abdt_errident.GIT_SNOOP, '')
 
         self._reporter.finish_cache_refresh()
         return True

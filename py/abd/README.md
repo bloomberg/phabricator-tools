@@ -39,6 +39,8 @@ Operations combining conduit with git.
 Abstraction for Arcyd's conduit operations.
 * `abdt_differ.py` -
 Generate git diffs between branches suitable for Differential reviews.
+* `abdt_errident.py` -
+"A global list of error identifiers that may be used.
 * `abdt_exception.py` -
 Exception hierarchy for abd user and system errors.
 * `abdt_git.py` -

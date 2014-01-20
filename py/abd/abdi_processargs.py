@@ -40,6 +40,7 @@ import abdmail_mailer
 import abdt_classicnaming
 import abdt_compositenaming
 import abdt_conduit
+import abdt_errident
 import abdt_git
 import abdt_rbranchnaming
 import abdt_repoconfig
@@ -394,7 +395,7 @@ def _fetch_if_needed(url_watcher, args, out, arcyd_reporter, repo_desc):
             out.display("fetch (" + repo_desc + "): ")
             with arcyd_reporter.tag_timer_context('git fetch'):
                 abdt_tryloop.tryloop(
-                    prune_and_fetch, 'fetch/prune', repo_desc)
+                    prune_and_fetch, abdt_errident.FETCH_PRUNE, repo_desc)
                 did_fetch = True
 
     return did_fetch
@@ -421,7 +422,7 @@ def _connect(conduits, args, arcyd_reporter):
 
         with arcyd_reporter.tag_timer_context('conduit connect'):
             abdt_tryloop.tryloop(
-                connect, 'conduit-connect', args.instance_uri)
+                connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
         conduit = conduit[0]
         arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')

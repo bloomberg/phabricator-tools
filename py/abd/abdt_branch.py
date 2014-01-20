@@ -54,6 +54,7 @@ import phlgit_revparse
 import phlgitu_ref
 
 import abdt_differ
+import abdt_errident
 import abdt_exception
 import abdt_lander
 import abdt_landinglog
@@ -351,7 +352,7 @@ class Branch(object):
         def action():
             self._clone.push_delete(self._tracking_branch.branch)
 
-        self._tryloop(action, "push-delete-tracking")
+        self._tryloop(action, abdt_errident.PUSH_DELETE_TRACKING)
 
     def abandon(self):
         """Remove information associated with the abandoned review branch."""
@@ -372,7 +373,7 @@ class Branch(object):
 
         self._tryloop(
             lambda: self._push_status(abdt_naming.WB_STATUS_BAD_LAND),
-            "mark-bad-land")
+            abdt_errident.MARK_BAD_LAND)
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""
@@ -380,7 +381,7 @@ class Branch(object):
 
         self._tryloop(
             lambda: self._push_status(abdt_naming.WB_STATUS_BAD_INREVIEW),
-            "mark-bad-in-review")
+            abdt_errident.MARK_BAD_IN_REVIEW)
 
     def mark_new_bad_in_review(self, revision_id):
         """Mark the current version of the review branch as 'bad in review'."""
@@ -394,7 +395,7 @@ class Branch(object):
                 abdt_naming.WB_STATUS_BAD_INREVIEW,
                 revision_id)
 
-        self._tryloop(action, "mark-new-bad-in-review")
+        self._tryloop(action, abdt_errident.MARK_NEW_BAD_IN_REVIEW)
 
     def mark_bad_pre_review(self):
         """Mark this version of the review branch as 'bad pre review'."""
@@ -411,7 +412,7 @@ class Branch(object):
                 None)
 
         self._tryloop(
-            action, "mark-bad-pre-review")
+            action, abdt_errident.MARK_BAD_PRE_REVIEW)
 
     def mark_ok_in_review(self):
         """Mark this version of the review branch as 'ok in review'."""
@@ -419,7 +420,7 @@ class Branch(object):
 
         self._tryloop(
             lambda: self._push_status(abdt_naming.WB_STATUS_OK),
-            "mark-ok-in-review")
+            abdt_errident.MARK_OK_IN_REVIEW)
 
     def mark_ok_new_review(self, revision_id):
         """Mark this version of the review branch as 'ok in review'."""
@@ -433,7 +434,7 @@ class Branch(object):
                 abdt_naming.WB_STATUS_OK,
                 revision_id)
 
-        self._tryloop(action, "mark_ok_new_review")
+        self._tryloop(action, abdt_errident.MARK_OK_NEW_REVIEW)
 
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
@@ -477,7 +478,7 @@ class Branch(object):
             lambda: self._clone.push_delete(
                 self._tracking_branch.branch,
                 self.review_branch_name()),
-            "push-delete-landed")
+            abdt_errident.PUSH_DELETE_LANDED)
 
         abdt_landinglog.prepend(
             self._clone, review_hash, self.review_branch_name(), landing_hash)
@@ -488,7 +489,7 @@ class Branch(object):
                 abdt_landinglog.push_log(
                     self._clone, self._clone.get_remote())
 
-            self._tryloop(push_landinglog, "push-landinglog")
+            self._tryloop(push_landinglog, abdt_errident.PUSH_LANDINGLOG)
         except Exception:
             # XXX: don't worry if we can't push the landinglog, this is most
             #      likely a permissioning issue but not a showstopper.
