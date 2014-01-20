@@ -109,9 +109,9 @@ def render_repo(base_url, repo, formatter):
 def render_stats(stats, formatter):
     current_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
     last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
-    tag_times = stats[abdt_arcydreporter.ARCYD_STAT_TAG_TIMES]
+    tag_samplers = stats[abdt_arcydreporter.ARCYD_STAT_TAG_SAMPLERS]
 
-    if current_duration or last_duration or tag_times:
+    if current_duration or last_duration or tag_samplers:
         formatter.heading('stats')
 
     if current_duration:
@@ -122,14 +122,39 @@ def render_stats(stats, formatter):
         formatter.text(
             'last cycle time: {:.2f} secs'.format(last_duration))
 
-    if tag_times:
-        time_tags = [(time, tag) for tag, time in tag_times.iteritems()]
-        time_tags.sort()
-        time_tags.reverse()
+    if tag_samplers:
+        Sampler = abdt_arcydreporter.Sampler.from_dict
+        samplers_tags = [(Sampler(s), t) for t, s in tag_samplers.iteritems()]
+        stats_tags = [
+            (
+                s.total,
+                t,
+                s.times,
+                s.least,
+                s.mean,
+                s.most,
+                s.last,
+            )
+            for s, t in samplers_tags
+        ]
+
+        heading_format = (
+            ('total time', '{:.2f} secs'),
+            ('tag', '{}'),
+            ('count', '{}'),
+            ('min', '{:.2f} secs'),
+            ('mean', '{:.2f} secs'),
+            ('max', '{:.2f} secs'),
+            ('last', '{:.2f} secs'),
+        )
+
+        stats_tags.sort()
+        stats_tags.reverse()
+
         formatter.table_from_tuple_list(
-            time_tags,
-            ['time', 'tag'],
-            ['{:.2f} secs', '{}'],
+            stats_tags,
+            [i[0] for i in heading_format],
+            [i[1] for i in heading_format],
             'stats')
 
 

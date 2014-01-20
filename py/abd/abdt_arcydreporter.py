@@ -5,6 +5,10 @@
 # abdt_arcydreporter
 #
 # Public Classes:
+#   Sampler
+#    .sample
+#    .to_dict
+#    .from_dict
 #   Timer
 #    .start
 #    .stop
@@ -60,7 +64,7 @@
 #   REPO_STATUSES
 #   ARCYD_STAT_CURRENT_CYCLE_TIME
 #   ARCYD_STAT_LAST_CYCLE_TIME
-#   ARCYD_STAT_TAG_TIMES
+#   ARCYD_STAT_TAG_SAMPLERS
 #   ARCYD_LIST_STATISTICS
 #   ARCYD_LOGITEM_DATETIME
 #   ARCYD_LOGITEM_IDENTIFIER
@@ -144,12 +148,12 @@ REPO_STATUSES = [
 
 ARCYD_STAT_CURRENT_CYCLE_TIME = 'current-cycle-time'
 ARCYD_STAT_LAST_CYCLE_TIME = 'last-cycle-time'
-ARCYD_STAT_TAG_TIMES = 'tag-times'
+ARCYD_STAT_TAG_SAMPLERS = 'tag-samplers'
 
 ARCYD_LIST_STATISTICS = [
     ARCYD_STAT_CURRENT_CYCLE_TIME,
     ARCYD_STAT_LAST_CYCLE_TIME,
-    ARCYD_STAT_TAG_TIMES,
+    ARCYD_STAT_TAG_SAMPLERS,
 ]
 
 ARCYD_LOGITEM_DATETIME = 'logitem-datetime'
@@ -165,6 +169,44 @@ def timer_context():
         yield timer
     finally:
         timer.stop()
+
+
+class Sampler(object):
+
+    def __init__(self):
+        self.last = None
+        self.least = None
+        self.most = None
+        self.times = None
+        self.total = None
+        self.mean = None
+
+    def sample(self, measurement):
+        self.last = measurement
+
+        if self.least is None or measurement < self.least:
+            self.least = measurement
+
+        if self.most is None or measurement > self.most:
+            self.most = measurement
+
+        if self.times is None:
+            self.times = 1
+            self.mean = measurement
+            self.total = measurement
+        else:
+            self.times += 1
+            self.total += measurement
+            self.mean = self.total / self.times
+
+    def to_dict(self):
+        return self.__dict__
+
+    @staticmethod
+    def from_dict(d):
+        sampler = Sampler()
+        sampler.__dict__ = dict(d)
+        return sampler
 
 
 class Timer(object):
@@ -241,7 +283,8 @@ class ArcydReporter(object):
         self._repo = None
 
         self._cycle_timer = _CycleTimer()
-        self._tag_times = collections.defaultdict(float)
+        self._tag_samplers = collections.defaultdict(Sampler)
+        self._tag_times_now = collections.defaultdict(float)
         self._log_system_error = list()
         self._log_user_action = list()
 
@@ -305,6 +348,11 @@ class ArcydReporter(object):
         self._write_status(ARCYD_STATUS_IDLE)
         self._cycle_timer.start_cycle()
 
+        # accumulate tag times from last cycle
+        for k, v in self._tag_times_now.iteritems():
+            self._tag_samplers[k].sample(v)
+        self._tag_times_now = collections.defaultdict(float)
+
     def start_cache_refresh(self):
         self._write_status(ARCYD_STATUS_REFRESHING_CACHE)
 
@@ -323,7 +371,7 @@ class ArcydReporter(object):
     def tag_timer_context(self, tag_name):
         with timer_context() as timer:
             yield
-        self._tag_times[tag_name] += timer.duration
+        self._tag_times_now[tag_name] += timer.duration
 
     def _tag_timer_decorate(self, tag, f):
         @functools.wraps(f)
@@ -368,10 +416,15 @@ class ArcydReporter(object):
     def _write_status(self, status, description=None):
         timer = self._cycle_timer
         assert status in ARCYD_LIST_STATUS
+
+        tag_samplers = dict(self._tag_samplers)
+        for k, v in tag_samplers.iteritems():
+            tag_samplers[k] = v.to_dict()
+
         statistics = {
             ARCYD_STAT_CURRENT_CYCLE_TIME: timer.current_duration(),
             ARCYD_STAT_LAST_CYCLE_TIME: timer.last_duration,
-            ARCYD_STAT_TAG_TIMES: self._tag_times,
+            ARCYD_STAT_TAG_SAMPLERS: tag_samplers,
         }
         assert set(statistics.keys()) == set(ARCYD_LIST_STATISTICS)
         d = {

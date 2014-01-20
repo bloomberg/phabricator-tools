@@ -94,7 +94,10 @@ class HtmlFormatter(object):
                 with self.singletag_context('tr', class_=class_):
                     for i, field in enumerate(item):
                         with self.singletag_context('td', class_=class_):
-                            self.raw(format_list[i].format(field))
+                            if field is not None:
+                                self.raw(format_list[i].format(field))
+                            else:
+                                self.raw('None')
 
     @contextlib.contextmanager
     def tags_context(self, *tags):
