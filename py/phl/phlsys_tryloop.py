@@ -60,16 +60,26 @@ def make_default_endless_retry():
     The delays used gradually increase so that whichever system is being tried
     is not overly stressed.
 
+    The delays are arranged such that if you observe 6 fails in any particular
+    hour then there's a problem starting or ongoing.
+
     :returns: an endless iterable of datetime.timedelta
 
     """
     delays = []
 
-    delays += [datetime.timedelta(seconds=1)] * 5
-    delays += [datetime.timedelta(seconds=10)] * 5
-    delays += [datetime.timedelta(minutes=1)] * 5
+    # the sum of the initial delays is roughly one of the 'forever' delays,
+    # also there are 6 of them, which matches the number of 'forever' delays
+    # per hour.
+    delays += [datetime.timedelta(seconds=3)] * 1
+    delays += [datetime.timedelta(seconds=15)] * 1
+    delays += [datetime.timedelta(minutes=1)] * 2
+    delays += [datetime.timedelta(minutes=3)] * 2
 
-    forever = itertools.repeat(datetime.timedelta(minutes=10))
+    # 6-7 times an hour shouldn't stress the system too much, 9 minutes isn't
+    # too long to wait for an automatic recovery.
+    forever = itertools.repeat(datetime.timedelta(minutes=9))
+
     delays = itertools.chain(delays, forever)
 
     return delays
