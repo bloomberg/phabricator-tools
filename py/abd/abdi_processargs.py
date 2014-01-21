@@ -318,65 +318,71 @@ def _determine_config(args, sys_clone):
 
 def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
-    sys_clone = phlsys_git.GitClone(args.repo_path)
-    config = _determine_config(args, sys_clone)
-
-    did_fetch = _fetch_if_needed(
-        url_watcher, args, out, arcyd_reporter, config.description)
-
-    if did_fetch:
-        # determine the config again now that we've fetched the repo
+    with arcyd_reporter.tag_timer_context('process branches prolog'):
+        sys_clone = phlsys_git.GitClone(args.repo_path)
         config = _determine_config(args, sys_clone)
 
-    arcyd_conduit = _connect(conduits, args, arcyd_reporter)
+        did_fetch = _fetch_if_needed(
+            url_watcher, args, out, arcyd_reporter, config.description)
 
-    reporter.set_config(config)
+        if did_fetch:
+            # determine the config again now that we've fetched the repo
+            config = _determine_config(args, sys_clone)
 
-    sender = phlmail_sender.MailSender(
-        phlsys_sendmail.Sendmail(), args.arcyd_email)
+        arcyd_conduit = _connect(conduits, args, arcyd_reporter)
 
-    mailer = abdmail_mailer.Mailer(
-        sender,
-        config.admin_emails,
-        config.description,
-        args.instance_uri)  # TODO: this should be a URI for users not conduit
+        reporter.set_config(config)
 
-    pluginManager = phlsys_pluginmanager.PluginManager(
-        args.plugins, args.trusted_plugins)
+        sender = phlmail_sender.MailSender(
+            phlsys_sendmail.Sendmail(), args.arcyd_email)
 
-    out.display("process (" + config.description + "): ")
+        # TODO: this should be a URI for users not conduit
+        mailer = abdmail_mailer.Mailer(
+            sender,
+            config.admin_emails,
+            config.description,
+            args.instance_uri)
 
-    branch_url_callable = None
-    if config.branch_url_format:
-        def make_branch_url(branch_name):
-            return config.branch_url_format.format(branch=branch_name)
-        branch_url_callable = make_branch_url
+        pluginManager = phlsys_pluginmanager.PluginManager(
+            args.plugins, args.trusted_plugins)
 
-    arcyd_reporter.tag_timer_decorate_object_methods_individually(
-        sys_clone, 'base_git')
-    arcyd_clone = abdt_git.Clone(sys_clone, "origin", config.description)
+        out.display("process (" + config.description + "): ")
 
-    branch_naming = abdt_compositenaming.Naming(
-        abdt_classicnaming.Naming(),
-        abdt_rbranchnaming.Naming())
+        branch_url_callable = None
+        if config.branch_url_format:
+            def make_branch_url(branch_name):
+                return config.branch_url_format.format(branch=branch_name)
+            branch_url_callable = make_branch_url
 
-    arcyd_reporter.tag_timer_decorate_object_methods_individually(
-        arcyd_clone, 'git')
-
-    branches = abdt_git.get_managed_branches(
-        arcyd_clone, config.description, branch_naming, branch_url_callable)
-
-    for branch in branches:
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            branch, 'branch')
+            sys_clone, 'base_git')
+        arcyd_clone = abdt_git.Clone(sys_clone, "origin", config.description)
+
+        branch_naming = abdt_compositenaming.Naming(
+            abdt_classicnaming.Naming(),
+            abdt_rbranchnaming.Naming())
+
+        arcyd_reporter.tag_timer_decorate_object_methods_individually(
+            arcyd_clone, 'git')
+
+        branches = abdt_git.get_managed_branches(
+            arcyd_clone,
+            config.description,
+            branch_naming,
+            branch_url_callable)
+
+        for branch in branches:
+            arcyd_reporter.tag_timer_decorate_object_methods_individually(
+                branch, 'branch')
 
     try:
-        abdi_processrepo.process_branches(
-            branches,
-            arcyd_conduit,
-            mailer,
-            pluginManager,
-            reporter)
+        with arcyd_reporter.tag_timer_context('process branches'):
+            abdi_processrepo.process_branches(
+                branches,
+                arcyd_conduit,
+                mailer,
+                pluginManager,
+                reporter)
     except Exception:
         reporter.on_traceback(traceback.format_exc())
         raise
