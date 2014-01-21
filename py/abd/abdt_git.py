@@ -180,7 +180,7 @@ class Clone(object):
         phlgit_push.delete(self, self._remote, branch, *args)
 
     def set_name_email(self, name, email):
-        """Return output from Git performing a squash merge.
+        """Set the full name and email of the author.
 
         :name: string name of author
         :email: string email of author
