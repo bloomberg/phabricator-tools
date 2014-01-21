@@ -29,12 +29,10 @@ import traceback
 import phlcon_reviewstatecache
 import phlmail_sender
 import phlsys_conduit
-import phlsys_fs
 import phlsys_git
 import phlsys_pluginmanager
 import phlsys_sendmail
 import phlsys_strtotime
-import phlsys_subprocess
 
 import abdmail_mailer
 import abdt_classicnaming
@@ -323,7 +321,10 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
         config = _determine_config(args, sys_clone)
 
         did_fetch = _fetch_if_needed(
-            url_watcher, args, out, arcyd_reporter, config.description)
+            url_watcher,
+            args.repo_snoop_url,
+            sys_clone,
+            config.description)
 
         if did_fetch:
             # determine the config again now that we've fetched the repo
@@ -390,23 +391,19 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
     reporter.on_completed()
 
 
-def _fetch_if_needed(url_watcher, args, out, arcyd_reporter, repo_desc):
+def _fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
 
     did_fetch = False
 
     def prune_and_fetch():
-        phlsys_subprocess.run_commands("git remote prune origin")
-        phlsys_subprocess.run_commands("git fetch")
+        repo.call('remote', 'prune', 'origin')
+        repo.call('fetch')
 
     # fetch only if we need to
-    snoop_url = args.repo_snoop_url
     if not snoop_url or url_watcher.has_url_recently_changed(snoop_url):
-        with phlsys_fs.chdir_context(args.repo_path):
-            out.display("fetch (" + repo_desc + "): ")
-            with arcyd_reporter.tag_timer_context('git fetch'):
-                abdt_tryloop.tryloop(
-                    prune_and_fetch, abdt_errident.FETCH_PRUNE, repo_desc)
-                did_fetch = True
+            abdt_tryloop.tryloop(
+                prune_and_fetch, abdt_errident.FETCH_PRUNE, repo_desc)
+            did_fetch = True
 
     return did_fetch
 
