@@ -352,12 +352,16 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
             return config.branch_url_format.format(branch=branch_name)
         branch_url_callable = make_branch_url
 
-    arcyd_reporter.tag_timer_decorate_object_methods(sys_clone, 'git')
+    arcyd_reporter.tag_timer_decorate_object_methods_individually(
+        sys_clone, 'base_git')
     arcyd_clone = abdt_git.Clone(sys_clone, "origin", config.description)
 
     branch_naming = abdt_compositenaming.Naming(
         abdt_classicnaming.Naming(),
         abdt_rbranchnaming.Naming())
+
+    arcyd_reporter.tag_timer_decorate_object_methods_individually(
+        arcyd_clone, 'git')
 
     branches = abdt_git.get_managed_branches(
         arcyd_clone, config.description, branch_naming, branch_url_callable)
@@ -425,7 +429,8 @@ def _connect(conduits, args, arcyd_reporter):
                 connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
         conduit = conduit[0]
-        arcyd_reporter.tag_timer_decorate_object_methods(conduit, 'conduit')
+        arcyd_reporter.tag_timer_decorate_object_methods_individually(
+            conduit, 'base_conduit')
         reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
         reviewstate_cache.set_conduit(conduit)
         arcyd_conduit = abdt_conduit.Conduit(conduit, reviewstate_cache)
