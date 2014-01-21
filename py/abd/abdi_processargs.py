@@ -303,11 +303,11 @@ def _make_config_from_args(args):
     return config
 
 
-def _determine_config(args, sys_clone):
+def _determine_config(args, repo):
     # combine all the available configs
     default_config = abdt_repoconfig.make_default_data()
     args_config = _make_config_from_args(args)
-    repo_config = abdt_repoconfig.data_from_repo_or_none(sys_clone)
+    repo_config = abdt_repoconfig.data_from_repo_or_none(repo)
     config = abdt_repoconfig.merge_data_objects(
         default_config, args_config, repo_config)
     abdt_repoconfig.validate_data(config)
@@ -317,18 +317,16 @@ def _determine_config(args, sys_clone):
 def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process branches prolog'):
-        sys_clone = phlsys_git.GitClone(args.repo_path)
-        config = _determine_config(args, sys_clone)
+        repo = abdt_git.Clone(
+            phlsys_git.GitClone(args.repo_path), "origin", args.repo_desc)
 
-        did_fetch = _fetch_if_needed(
+        _fetch_if_needed(
             url_watcher,
             args.repo_snoop_url,
-            sys_clone,
-            config.description)
+            repo,
+            args.repo_desc)
 
-        if did_fetch:
-            # determine the config again now that we've fetched the repo
-            config = _determine_config(args, sys_clone)
+        config = _determine_config(args, repo)
 
         arcyd_conduit = _connect(conduits, args, arcyd_reporter)
 
@@ -355,19 +353,15 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
                 return config.branch_url_format.format(branch=branch_name)
             branch_url_callable = make_branch_url
 
-        arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            sys_clone, 'base_git')
-        arcyd_clone = abdt_git.Clone(sys_clone, "origin", config.description)
-
         branch_naming = abdt_compositenaming.Naming(
             abdt_classicnaming.Naming(),
             abdt_rbranchnaming.Naming())
 
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            arcyd_clone, 'git')
+            repo, 'git')
 
         branches = abdt_git.get_managed_branches(
-            arcyd_clone,
+            repo,
             config.description,
             branch_naming,
             branch_url_callable)
