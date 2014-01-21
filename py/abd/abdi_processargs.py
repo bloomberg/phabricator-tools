@@ -389,14 +389,10 @@ def _fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
 
     did_fetch = False
 
-    def prune_and_fetch():
-        repo.call('remote', 'prune', 'origin')
-        repo.call('fetch')
-
     # fetch only if we need to
     if not snoop_url or url_watcher.has_url_recently_changed(snoop_url):
             abdt_tryloop.tryloop(
-                prune_and_fetch, abdt_errident.FETCH_PRUNE, repo_desc)
+                repo.fetch_prune, abdt_errident.FETCH_PRUNE, repo_desc)
             did_fetch = True
 
     return did_fetch

@@ -6,12 +6,15 @@
 #
 # Public Functions:
 #   all_prune
+#   prune_safe
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 from __future__ import absolute_import
+
+import phlsys_subprocess
 
 
 def all_prune(repo):
@@ -22,6 +25,38 @@ def all_prune(repo):
 
     """
     repo.call('fetch', '--all', '--prune')
+
+
+def prune_safe(repo, remote):
+    """Fetch from the specified remote and prune removed branches.
+
+    This safely works around the case where a branch that would be fetched
+    conflicts with a branch that has already been deleted, this case causes
+    a straight-forward 'git fetch -p' to fail.
+
+    e.g. given this sequence of events:
+
+      alice $ git push origin HEAD:refs/heads/mybranch
+      bob   $ git fetch -p
+      alice $ git push origin :refs/heads/mybranch
+      alice $ git push origin HEAD:refs/heads/mybranch/blah
+      bob   $ git fetch -p
+
+    bob would get an error when fetching the last time and would have to
+    'git remote prune origin' before fetching.
+
+    :repo: supports 'call'
+    :remote: string name of the remote to fetch from
+    :returns: None
+
+    """
+    try:
+        repo.call('fetch', remote, '-p')
+    except phlsys_subprocess.CalledProcessError:
+        # assume this was due to the previously mentioned issue
+        repo.call('remote', 'prune', remote)
+        repo.call('fetch', remote)
+
 
 
 #------------------------------------------------------------------------------

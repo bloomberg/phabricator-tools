@@ -17,6 +17,7 @@
 #    .push
 #    .push_delete
 #    .set_name_email
+#    .fetch_prune
 #    .call
 #    .get_remote
 #    .working_dir
@@ -33,6 +34,7 @@ import phlgit_branch
 import phlgit_checkout
 import phlgit_config
 import phlgit_diff
+import phlgit_fetch
 import phlgit_log
 import phlgit_merge
 import phlgit_push
@@ -188,6 +190,14 @@ class Clone(object):
 
         """
         phlgit_config.set_username_email(self, name, email)
+
+    def fetch_prune(self):
+        """Fetch from the remote and prune branches.
+
+        :returns: None
+
+        """
+        phlgit_fetch.prune_safe(self, self._remote)
 
     def call(self, *args, **kwargs):
         if args and args[0] == 'push':
