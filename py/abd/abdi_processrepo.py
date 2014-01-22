@@ -130,6 +130,9 @@ def update_review(conduit, branch):
         print "changes on branch"
         branch.verify_review_branch_base()
         update_in_review(conduit, branch)
+    elif conduit.is_review_abandoned(branch.review_id_or_none()):
+        print "abandoned - do nothing"
+        return
     elif branch.is_status_bad() and not branch.is_status_bad_land():
         try:
             print "try updating bad branch"

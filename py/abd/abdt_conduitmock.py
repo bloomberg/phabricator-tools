@@ -27,6 +27,7 @@
 #    .query_users_from_emails
 #    .parse_commit_message
 #    .is_review_accepted
+#    .is_review_abandoned
 #    .update_revision
 #    .set_requires_revision
 #    .close_revision
@@ -323,6 +324,16 @@ class ConduitMock(object):
         """
         revision = self._data.get_revision(revisionid)
         return revision.is_accepted()
+
+    def is_review_abandoned(self, revisionid):
+        """Return True if the supplied 'revisionid' is in 'abandoned' status.
+
+        :revisionid: id of the Differential revision to query
+        :returns: True if abandoned
+
+        """
+        revision = self._data.get_revision(revisionid)
+        return revision.is_abandoned()
 
     def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.
