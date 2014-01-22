@@ -320,6 +320,9 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
         repo = abdt_git.Clone(
             phlsys_git.GitClone(args.repo_path), "origin", args.repo_desc)
 
+        arcyd_reporter.tag_timer_decorate_object_methods_individually(
+            repo, 'git')
+
         _fetch_if_needed(
             url_watcher,
             args.repo_snoop_url,
@@ -356,9 +359,6 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
         branch_naming = abdt_compositenaming.Naming(
             abdt_classicnaming.Naming(),
             abdt_rbranchnaming.Naming())
-
-        arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            repo, 'git')
 
         branches = abdt_git.get_managed_branches(
             repo,
