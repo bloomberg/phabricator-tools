@@ -57,7 +57,6 @@ import abdt_differ
 import abdt_errident
 import abdt_exception
 import abdt_lander
-import abdt_landinglog
 import abdt_naming
 import abdt_tryloop
 
@@ -480,18 +479,25 @@ class Branch(object):
                 self.review_branch_name()),
             abdt_errident.PUSH_DELETE_LANDED)
 
-        abdt_landinglog.prepend(
-            self._clone, review_hash, self.review_branch_name(), landing_hash)
+        self._clone.archive_to_landed(
+            review_hash,
+            self.review_branch_name(),
+            self._tracking_branch.base,
+            landing_hash,
+            message)
 
-        # push the landing log, don't care if it fails to push
+        # push the landing archive, don't escalate if it fails to push
         try:
-            def push_landinglog():
-                abdt_landinglog.push_log(
-                    self._clone, self._clone.get_remote())
+            # XXX: oddly pylint complains if we call push_landed() directly:
+            #      "Using method (_tryloop) as an attribute (not invoked)"
+            def push_landed():
+                self._clone.push_landed()
 
-            self._tryloop(push_landinglog, abdt_errident.PUSH_LANDINGLOG)
+            self._tryloop(
+                push_landed,
+                abdt_errident.PUSH_LANDING_ARCHIVE)
         except Exception:
-            # XXX: don't worry if we can't push the landinglog, this is most
+            # XXX: don't worry if we can't push the landed, this is most
             #      likely a permissioning issue but not a showstopper.
             #      we should probably nag on the review instead.
             pass

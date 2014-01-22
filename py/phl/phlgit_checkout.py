@@ -7,6 +7,8 @@
 # Public Functions:
 #   new_branch_force_based_on
 #   branch
+#   orphan
+#   orphan_clean
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -39,6 +41,40 @@ def branch(clone, branch):
 
     """
     clone.call('checkout', branch)
+
+
+def orphan(repo, branch):
+    """Checkout onto a new branch with no history.
+
+    Note that the working tree will not be empty and will contain whatever
+    was at the last commit.
+
+    Note that the specified 'branch' must not exist before.
+
+    :repo: the repository to operate on, supports 'call'
+    :branch: the string name of the branch
+    :returns: None
+
+    """
+    repo.call('checkout', '--orphan', branch)
+
+
+def orphan_clean(repo, branch):
+    """Checkout onto a new branch with no history and an empty working tree.
+
+    This is different from a pure 'orphan checkout' in that the working
+    tree is deliberately emptied.
+
+    Note that the specified 'branch' must not exist before.
+
+    :repo: the repository to operate on, supports 'call'
+    :branch: the string name of the branch
+    :returns: None
+
+    """
+    orphan(repo, branch)
+    repo.call('rm', '--cached', '-rf', '--', '.')
+    repo.call('clean', '-fd')
 
 
 #------------------------------------------------------------------------------

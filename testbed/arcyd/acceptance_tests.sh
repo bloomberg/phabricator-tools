@@ -12,7 +12,6 @@ cd "$(dirname "$0")"
 
 arcyd="$(pwd)/../../proto/arcyd"
 arcyon="$(pwd)/../../bin/arcyon"
-barc="$(pwd)/../../proto/barc"
 mail="$(pwd)/savemail"
 
 phaburi="http://127.0.0.1"
@@ -541,7 +540,8 @@ function test_branch_gc() {
     # gc the review branches
     cd dev
         git checkout master  # we can't remove the current branch, be on master
-        ${barc} gc --force --update
+        git fetch origin refs/arcyd/landed:refs/arcyd/landed
+        git branch --merged refs/arcyd/landed | grep -v '*' | xargs git branch -D
     cd -
 }
 

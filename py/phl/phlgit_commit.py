@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   index
+#   allow_empty
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -23,6 +24,17 @@ def index(repo, message):
 
     """
     repo.call('commit', '-m', message)
+
+
+def allow_empty(repo, message):
+    """Create a new commit from the contents of the index, which may be empty.
+
+    :repo: supports 'call'
+    :message: the string message for the commit
+    :returns: None
+
+    """
+    repo.call('commit', '--allow-empty', '-m', message)
 
 
 #------------------------------------------------------------------------------

@@ -9,6 +9,7 @@
 #   is_identical
 #   get_local
 #   get_local_with_sha1
+#   force_delete
 #   get_remote
 #
 # -----------------------------------------------------------------------------
@@ -94,6 +95,17 @@ def get_local_with_sha1(clone):
     refs = _get_sha1_ref_pairs(clone)
     refs = _filter_sha1_ref_pairs_in_namespace(refs, "refs/heads/")
     return refs
+
+
+def force_delete(repo, branch):
+    """Unconditionally remove an existing branch.
+
+    :repo: the repository to operate on, supports 'call'
+    :branch: the string name of the branch to remove
+    :returns: None
+
+    """
+    repo.call('branch', '-D', branch)
 
 
 def get_remote(clone, remote):

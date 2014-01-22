@@ -9,6 +9,7 @@
 #
 # Public Functions:
 #   squash
+#   ours
 #   no_ff
 #
 # -----------------------------------------------------------------------------
@@ -43,6 +44,24 @@ def squash(clone, source, message, author=None):
             raise MergeException(e.stdout)
 
     return result
+
+
+def ours(repo, branch, message):
+    """Merge the specified 'branch' into HEAD, discarding all changes.
+
+    There can be no merge conflicts with this merge as no integration of
+    changes is actually performed, the resulting tree will be the same
+    as HEAD.
+
+    Behaviour is undefined if the current branch is 'branch'.
+
+    :repo: supports 'call'
+    :branch: the string name of the branch to merge into HEAD
+    :message: the string message to make on the commit
+    :returns: None
+
+    """
+    return repo.call("merge", "--no-edit", "-s", "ours", branch, "-m", message)
 
 
 def no_ff(repo, branch):

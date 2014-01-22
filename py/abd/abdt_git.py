@@ -13,6 +13,8 @@
 #    .get_range_hashes
 #    .make_revisions_from_hashes
 #    .squash_merge
+#    .archive_to_landed
+#    .push_landed
 #    .push_asymmetrical
 #    .push
 #    .push_delete
@@ -32,6 +34,7 @@ from __future__ import absolute_import
 
 import phlgit_branch
 import phlgit_checkout
+import phlgit_commit
 import phlgit_config
 import phlgit_diff
 import phlgit_fetch
@@ -45,6 +48,29 @@ import abdt_branch
 import abdt_lander
 import abdt_logging
 import abdt_naming
+
+_LANDED_ARCHIVE_BRANCH_MESSAGE = """
+Create an archive branch for landed branches
+
+Landed branches will be automatically merged here by Arcyd for your
+reference.
+
+This branch is useful for:
+
+  o: cleaning up branches contained by the landed branch
+     (see 'git branch --merged')
+
+  o: finding the pre-landed version of a commit
+     (see 'git log --grep' - you can search for the landed sha1)
+
+  o: keeping track of Arcyd's landing activity
+     (see 'git log --first-parent')
+
+""".strip()
+
+_ARCYD_LANDED_REF = "refs/arcyd/landed"
+_ARCYD_LANDED_BRANCH = "__private_arcyd/landed"
+_ARCYD_LANDED_BRANCH_FQ = "refs/heads/" + _ARCYD_LANDED_BRANCH
 
 
 class Clone(object):
@@ -63,6 +89,7 @@ class Clone(object):
         self._clone = clone
         self._remote = remote
         self._description = description
+        self._is_landing_archive_enabled = None
 
     def is_identical(self, branch1, branch2):
         """Return True if the branches point to the same commit.
@@ -73,6 +100,16 @@ class Clone(object):
 
         """
         return phlgit_branch.is_identical(self, branch1, branch2)
+
+    def _is_ref(self, ref):
+        """Return True if the specified ref exists, otherwise False.
+
+        :ref: the string name of the ref to look up
+        :return: True if the specified ref exists, otherwise False
+
+        """
+        ref_names = phlgit_showref.names(self)
+        return ref in ref_names
 
     def get_remote_branches(self):
         """Return a list of string names of remote branches.
@@ -150,6 +187,36 @@ class Clone(object):
             branch,
             message,
             author_name + " <" + author_email + ">")
+
+    def archive_to_landed(
+            self, review_hash, review_branch, base_branch, land_hash, message):
+        """Merge the specified review branch to the 'landed' archive branch.
+
+        :review_hash: the string of the commit hash to archive
+        :review_branch: the string name of the branch to archive
+        :land_hash: the string of the commit hash the branch landed with
+        :message: the string commit message the the branch landed with
+        :returns: None
+
+        """
+        # get on the archive branch, create new orphan if necessary
+        if self._is_ref(_ARCYD_LANDED_BRANCH_FQ):
+            phlgit_checkout.branch(self, _ARCYD_LANDED_BRANCH)
+        else:
+            phlgit_checkout.orphan_clean(self, _ARCYD_LANDED_BRANCH)
+            phlgit_commit.allow_empty(self, _LANDED_ARCHIVE_BRANCH_MESSAGE)
+
+        new_message = "landed {} on {} as {}\n\nwith message:\n{}".format(
+            review_branch, base_branch, land_hash, message)
+        phlgit_merge.ours(self, review_hash, new_message)
+
+    def push_landed(self):
+        """Push the 'landed' archive branch to the remote.
+
+        :returns: None
+
+        """
+        self.push_asymmetrical(_ARCYD_LANDED_BRANCH_FQ, _ARCYD_LANDED_REF)
 
     def push_asymmetrical(self, local_branch, remote_branch):
         """Push 'local_branch' as 'remote_branch' to the remote.

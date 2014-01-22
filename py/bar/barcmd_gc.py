@@ -1,6 +1,13 @@
-"""Garbage collect in your local git repository.
+"""DEPRECATED: Garbage collect in your local git repository.
 
 Will safely clean up local branches which have already been landed.
+
+::DEPRECATION NOTICE::
+the 'refs/arcyd/landinglog' ref is no longer being updated, for new
+branches do:
+
+    git fetch origin refs/arcyd/landed:refs/arcyd/landed
+    git branch --merged refs/arcyd/landed | grep -v '*' | xargs git branch -D
 
 """
 # =============================================================================
@@ -77,6 +84,16 @@ def setupParser(parser):
 
 def process(args):
     # XXX: only supports 'origin' remote at present
+
+    print """
+::DEPRECATION NOTICE::
+the 'refs/arcyd/landinglog' ref is no longer being updated, for new
+branches do:
+
+    git fetch origin refs/arcyd/landed:refs/arcyd/landed
+    git branch --merged refs/arcyd/landed | grep -v '*' | xargs git branch -D
+    """.strip()
+    print
 
     clone = phlsys_git.GitClone('.')
 

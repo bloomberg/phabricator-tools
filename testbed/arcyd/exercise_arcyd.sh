@@ -7,7 +7,6 @@ cd "$(dirname "$0")"
 
 arcyd="$(pwd)/../../proto/arcyd"
 arcyon="$(pwd)/../../bin/arcyon"
-barc="$(pwd)/../../proto/barc"
 
 phaburi="http://127.0.0.1"
 arcyduser='phab'
@@ -200,7 +199,8 @@ fi
 # clean up the landed branches
 cd dev
     git checkout master  # we can't remove the current branch, so be on master
-    $barc gc --update --force
+    git fetch origin refs/arcyd/landed:refs/arcyd/landed
+    git branch --merged refs/arcyd/landed | grep -v '*' | xargs git branch -D
 cd -
 
 cat savemail.txt

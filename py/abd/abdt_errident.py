@@ -23,7 +23,7 @@ kinds of error identifiers to expect.
 #   MARK_OK_IN_REVIEW
 #   MARK_OK_NEW_REVIEW
 #   PUSH_DELETE_LANDED
-#   PUSH_LANDINGLOG
+#   PUSH_LANDING_ARCHIVE
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -52,7 +52,7 @@ MARK_BAD_PRE_REVIEW = 'mark-bad-pre-review'
 MARK_OK_IN_REVIEW = 'mark-ok-in-review'
 MARK_OK_NEW_REVIEW = 'mark-ok-new-review'
 PUSH_DELETE_LANDED = 'push-delete-landed'
-PUSH_LANDINGLOG = 'push-landinglog'
+PUSH_LANDING_ARCHIVE = 'push-landing-archive'
 
 
 #------------------------------------------------------------------------------
