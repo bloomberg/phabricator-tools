@@ -15,6 +15,8 @@
 #    .squash_merge
 #    .archive_to_landed
 #    .push_landed
+#    .archive_to_abandoned
+#    .push_abandoned
 #    .push_asymmetrical
 #    .push
 #    .push_delete
@@ -26,6 +28,9 @@
 #
 # Public Functions:
 #   get_managed_branches
+#
+# Public Assignments:
+#   ARCYD_ABANDONED_REF
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -71,6 +76,26 @@ This branch is useful for:
 _ARCYD_LANDED_REF = "refs/arcyd/landed"
 _ARCYD_LANDED_BRANCH = "__private_arcyd/landed"
 _ARCYD_LANDED_BRANCH_FQ = "refs/heads/" + _ARCYD_LANDED_BRANCH
+
+_ABANDONED_ARCHIVE_BRANCH_MESSAGE = """
+Create an archive branch for abandoned branches
+
+Abandoned branches will be automatically merged here by Arcyd for your
+reference.
+
+This branch is useful for:
+
+  o: keeping track of Arcyd's abandoning activity
+     (see 'git log --first-parent')
+
+  o: recovering abandoned branches
+     (use 'git branch <branch name> <commit hash>')
+
+""".strip()
+
+ARCYD_ABANDONED_REF = "refs/arcyd/abandoned"
+_ARCYD_ABANDONED_BRANCH = "__private_arcyd/abandoned"
+_ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 
 
 class Clone(object):
@@ -188,26 +213,35 @@ class Clone(object):
             message,
             author_name + " <" + author_email + ">")
 
+    def _checkout_archive_ref_branch(
+            self, short_branch_name, fq_branch_name, initial_message):
+
+        if self._is_ref(fq_branch_name):
+            phlgit_checkout.branch(self, short_branch_name)
+        else:
+            phlgit_checkout.orphan_clean(self, short_branch_name)
+            phlgit_commit.allow_empty(self, initial_message)
+
     def archive_to_landed(
             self, review_hash, review_branch, base_branch, land_hash, message):
         """Merge the specified review branch to the 'landed' archive branch.
 
         :review_hash: the string of the commit hash to archive
         :review_branch: the string name of the branch to archive
+        :base_branch: the string name of the branch the review is branched off
         :land_hash: the string of the commit hash the branch landed with
         :message: the string commit message the the branch landed with
         :returns: None
 
         """
-        # get on the archive branch, create new orphan if necessary
-        if self._is_ref(_ARCYD_LANDED_BRANCH_FQ):
-            phlgit_checkout.branch(self, _ARCYD_LANDED_BRANCH)
-        else:
-            phlgit_checkout.orphan_clean(self, _ARCYD_LANDED_BRANCH)
-            phlgit_commit.allow_empty(self, _LANDED_ARCHIVE_BRANCH_MESSAGE)
+        self._checkout_archive_ref_branch(
+            _ARCYD_LANDED_BRANCH,
+            _ARCYD_LANDED_BRANCH_FQ,
+            _LANDED_ARCHIVE_BRANCH_MESSAGE)
 
         new_message = "landed {} on {} as {}\n\nwith message:\n{}".format(
             review_branch, base_branch, land_hash, message)
+
         phlgit_merge.ours(self, review_hash, new_message)
 
     def push_landed(self):
@@ -217,6 +251,36 @@ class Clone(object):
 
         """
         self.push_asymmetrical(_ARCYD_LANDED_BRANCH_FQ, _ARCYD_LANDED_REF)
+
+    def archive_to_abandoned(
+            self, review_hash, review_branch, base_branch):
+        """Merge the specified review branch to the 'abandoned' archive branch.
+
+        :review_hash: the string of the commit hash to archive
+        :review_branch: the string name of the branch to archive
+        :base_branch: the string name of the branch the review is branched off
+        :returns: None
+
+        """
+        # get on the archive branch, create new orphan if necessary
+        self._checkout_archive_ref_branch(
+            _ARCYD_ABANDONED_BRANCH,
+            _ARCYD_ABANDONED_BRANCH_FQ,
+            _ABANDONED_ARCHIVE_BRANCH_MESSAGE)
+
+        new_message = "abandoned {}, branched from {}".format(
+            review_branch, base_branch)
+
+        phlgit_merge.ours(self, review_hash, new_message)
+
+    def push_abandoned(self):
+        """Push the 'abandoned' archive branch to the remote.
+
+        :returns: None
+
+        """
+        self.push_asymmetrical(
+            _ARCYD_ABANDONED_BRANCH_FQ, ARCYD_ABANDONED_REF)
 
     def push_asymmetrical(self, local_branch, remote_branch):
         """Push 'local_branch' as 'remote_branch' to the remote.

@@ -16,6 +16,7 @@
 #    .usedDefaultTestPlan
 #    .removedSelfReviewer
 #    .unknownReviewers
+#    .abandonedForUser
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -27,6 +28,28 @@ import phlcon_remarkup
 
 import abdt_exception
 import abdt_userwarning
+
+_ABANDONED_MESSAGE = """
+this review has been abandoned, the review branch will be automatically
+removed soon.
+
+please change the state of the review to something other than 'abandoned' to
+prevent automatic removal.
+""".strip()
+
+_ABANDONED_FOR_USER_MESSAGE = """
+i archived `{review_branch}` for you.
+i am no longer watching this review.
+
+if you want to re-create the review branch then you can follow these steps:
+
+  $ git fetch origin {archive_ref}:{archive_ref}
+  $ git branch {review_branch} {review_hash}
+
+if this review is accepted then nothing will be landed.
+
+if the branch is pushed again then a completely new review will be created.
+""".strip()
 
 
 class Commenter(object):
@@ -55,6 +78,8 @@ class Commenter(object):
                 self._diffException(e)
             elif isinstance(e, abdt_exception.MissingBaseException):
                 self._missingBaseException(e)
+            elif isinstance(e, abdt_exception.ReviewAbandonedException):
+                self._reviewAbandonedException()
             else:
                 self._userException(e)
         else:
@@ -203,6 +228,15 @@ the 'edit revision' link at the top-right of the page.
 
         self._createComment(message)
 
+    def abandonedForUser(self, review_branch, review_hash, archive_ref):
+
+        message = _ABANDONED_FOR_USER_MESSAGE.format(
+            review_branch=review_branch,
+            archive_ref=archive_ref,
+            review_hash=review_hash)
+
+        self._createComment(message)
+
     def _createComment(self, message, silent=False):
         self._conduit.create_comment(self._revision_id, message, silent=silent)
 
@@ -323,6 +357,9 @@ the 'edit revision' link at the top-right of the page.
             remove_instructions=remove_instructions)
 
         self._createComment(message)
+
+    def _reviewAbandonedException(self):
+        self._createComment(_ABANDONED_MESSAGE)
 
     def _userException(self, e):
         message = "errors were encountered, see below.\n"

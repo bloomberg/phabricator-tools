@@ -14,6 +14,7 @@
 #   CommitMessageParseException
 #   LandingException
 #   LandingPushBaseException
+#   ReviewAbandonedException
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -192,6 +193,14 @@ class LandingPushBaseException(AbdUserException):
         super(LandingPushBaseException, self).__init__(new_message)
         self.review_branch_name = review_branch_name
         self.base_name = base_name
+
+
+class ReviewAbandonedException(AbdUserException):
+
+    def __init__(self):
+        """Describe the situation of a review being abandoned by the author."""
+        message = "abdt_exception__ReviewAbandonedException"
+        super(ReviewAbandonedException, self).__init__(message)
 
 
 #------------------------------------------------------------------------------

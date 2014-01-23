@@ -11,6 +11,7 @@
 #    .is_new
 #    .is_status_bad_pre_review
 #    .is_status_bad_land
+#    .is_status_bad_abandoned
 #    .is_status_bad
 #    .has_new_commits
 #    .base_branch_name
@@ -29,8 +30,10 @@
 #    .verify_review_branch_base
 #    .get_commit_message_from_tip
 #    .abandon
+#    .remove
 #    .clear_mark
 #    .mark_bad_land
+#    .mark_bad_abandoned
 #    .mark_bad_in_review
 #    .mark_new_bad_in_review
 #    .mark_bad_pre_review
@@ -163,6 +166,14 @@ class Branch(object):
         """Return True if the author's branch is marked 'bad land'."""
         if self._has_tracking_branch():
             return abdt_naming.isStatusBadLand(self._tracking_branch)
+        else:
+            return False
+
+    def is_status_bad_abandoned(self):
+        """Return True if the author's branch is marked 'bad abandoned'."""
+        if self._has_tracking_branch():
+            branch = self._tracking_branch
+            return branch.status == abdt_naming.WB_STATUS_BAD_ABANDONED
         else:
             return False
 
@@ -347,6 +358,12 @@ class Branch(object):
         message += revision.message + "\n"
         return message
 
+    def _push_delete_review_branch(self):
+        def action():
+            self._clone.push_delete(self._review_branch.branch)
+
+        self._tryloop(action, abdt_errident.PUSH_DELETE_REVIEW)
+
     def _push_delete_tracking_branch(self):
         def action():
             self._clone.push_delete(self._tracking_branch.branch)
@@ -357,6 +374,36 @@ class Branch(object):
         """Remove information associated with the abandoned review branch."""
         # TODO: raise if the branch is not actually abandoned by the user
         self._push_delete_tracking_branch()
+        self._tracking_branch = None
+        self._tracking_hash = None
+
+    def remove(self):
+        """Remove review branch and tracking branch."""
+        self._clone.archive_to_abandoned(
+            self._review_hash,
+            self.review_branch_name(),
+            self._tracking_branch.base)
+
+        # push the abandoned archive, don't escalate if it fails to push
+        try:
+            # XXX: oddly pylint complains if we call push_landed() directly:
+            #      "Using method (_tryloop) as an attribute (not invoked)"
+            def push_abandoned():
+                self._clone.push_abandoned()
+
+            self._tryloop(
+                push_abandoned,
+                abdt_errident.PUSH_ABANDONED_ARCHIVE)
+        except Exception:
+            # XXX: don't worry if we can't push the landed, this is most
+            #      likely a permissioning issue but not a showstopper.
+            #      we should probably nag on the review instead.
+            pass
+
+        self._push_delete_review_branch()
+        self._push_delete_tracking_branch()
+        self._review_branch = None
+        self._review_hash = None
         self._tracking_branch = None
         self._tracking_hash = None
 
@@ -373,6 +420,14 @@ class Branch(object):
         self._tryloop(
             lambda: self._push_status(abdt_naming.WB_STATUS_BAD_LAND),
             abdt_errident.MARK_BAD_LAND)
+
+    def mark_bad_abandoned(self):
+        """Mark the current version of the review branch as 'bad abandoned'."""
+        assert self.review_id_or_none() is not None
+
+        self._tryloop(
+            lambda: self._push_status(abdt_naming.WB_STATUS_BAD_ABANDONED),
+            abdt_errident.MARK_BAD_ABANDONED)
 
     def mark_bad_in_review(self):
         """Mark the current version of the review branch as 'bad in review'."""

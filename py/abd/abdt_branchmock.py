@@ -12,6 +12,7 @@
 #    .is_new
 #    .is_status_bad_pre_review
 #    .is_status_bad_land
+#    .is_status_bad_abandoned
 #    .is_status_bad
 #    .has_new_commits
 #    .base_branch_name
@@ -30,8 +31,10 @@
 #    .verify_review_branch_base
 #    .get_commit_message_from_tip
 #    .abandon
+#    .remove
 #    .clear_mark
 #    .mark_bad_land
+#    .mark_bad_abandoned
 #    .mark_bad_in_review
 #    .mark_new_bad_in_review
 #    .mark_bad_pre_review
@@ -220,6 +223,10 @@ class BranchMock(object):
         """Return True if the author's branch is marked 'bad land'."""
         return self._data.status == abdt_naming.WB_STATUS_BAD_LAND
 
+    def is_status_bad_abandoned(self):
+        """Return True if the author's branch is marked 'bad abandoned'."""
+        return self._data.status == abdt_naming.WB_STATUS_BAD_ABANDONED
+
     def is_status_bad(self):
         """Return True if the author's branch is marked any bad status."""
         if self._data.status:
@@ -333,6 +340,13 @@ class BranchMock(object):
         self._data.is_null = True
         self._data.revision_id = None
 
+    def remove(self):
+        """Remove review branch and tracking branch."""
+        self._data.status = None
+        self._data.has_new_commits = False
+        self._data.is_null = True
+        self._data.revision_id = None
+
     def clear_mark(self):
         """Clear status and last commit associated with the review branch."""
         self._data.status = None
@@ -343,6 +357,12 @@ class BranchMock(object):
         """Mark the current version of the review branch as 'bad land'."""
         assert self.review_id_or_none() is not None
         self._data.status = abdt_naming.WB_STATUS_BAD_LAND
+        self._data.has_new_commits = False
+
+    def mark_bad_abandoned(self):
+        """Mark the current version of the review branch as 'bad abandoned'."""
+        assert self.review_id_or_none() is not None
+        self._data.status = abdt_naming.WB_STATUS_BAD_ABANDONED
         self._data.has_new_commits = False
 
     def mark_bad_in_review(self):

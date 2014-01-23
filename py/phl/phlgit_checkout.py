@@ -73,7 +73,13 @@ def orphan_clean(repo, branch):
 
     """
     orphan(repo, branch)
-    repo.call('rm', '--cached', '-rf', '--', '.')
+
+    # remove any files that have followed us from the previous branch in the
+    # index
+    files = repo.call('ls-files', '--cached')
+    if files:
+        repo.call('rm', '--cached', '-rf', '--', '.')
+
     repo.call('clean', '-fd')
 
 

@@ -28,6 +28,7 @@ import abdcmnt_commenter
 import abdt_branch
 import abdt_conduitgit
 import abdt_exception
+import abdt_git
 import abdt_logging
 import abdt_userwarning
 
@@ -126,13 +127,25 @@ def create_differential_review(conduit, user, parsed, branch, raw_diff):
 
 
 def update_review(conduit, branch):
+    revision_id = branch.review_id_or_none()
+
     if branch.has_new_commits():
         print "changes on branch"
         branch.verify_review_branch_base()
         update_in_review(conduit, branch)
-    elif conduit.is_review_abandoned(branch.review_id_or_none()):
-        print "abandoned - do nothing"
+    elif branch.is_status_bad_abandoned():
+        if not conduit.is_review_recently_updated(revision_id):
+            review_name = branch.review_branch_name()
+            review_hash = branch.review_branch_hash()
+            branch.remove()
+            commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
+            commenter.abandonedForUser(
+                review_name,
+                review_hash,
+                abdt_git.ARCYD_ABANDONED_REF)
         return
+    elif conduit.is_review_abandoned(revision_id):
+        raise abdt_exception.ReviewAbandonedException()
     elif branch.is_status_bad() and not branch.is_status_bad_land():
         try:
             print "try updating bad branch"
@@ -142,7 +155,7 @@ def update_review(conduit, branch):
             print "still bad"
 
     if not branch.is_status_bad():
-        if conduit.is_review_accepted(branch.review_id_or_none()):
+        if conduit.is_review_accepted(revision_id):
             branch.verify_review_branch_base()
             land(conduit, branch)
             # TODO: we probably want to do a better job of cleaning up locally
@@ -276,6 +289,9 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
             print "update review for " + review_branch_name
             try:
                 update_review(conduit, branch)
+            except abdte.ReviewAbandonedException as e:
+                branch.mark_bad_abandoned()
+                commenter.exception(e)
             except abdte.LandingException as e:
                 print "landing exception"
                 branch.mark_bad_land()

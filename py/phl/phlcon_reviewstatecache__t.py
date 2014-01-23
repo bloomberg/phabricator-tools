@@ -40,7 +40,7 @@ import phlcon_reviewstatecache
 
 FakeResult = collections.namedtuple(
     'phlcon_reviewstatecache__t_FakeResult',
-    ['id', 'status'])
+    ['id', 'status', 'dateModified'])
 
 
 class Test(unittest.TestCase):
@@ -183,7 +183,10 @@ class Test(unittest.TestCase):
             #      in Python 3 we can do better with nonlocal
             expected_queries[:] = expected_queries[1:]
 
-            return [FakeResult(r, str(r) + 'r') for r in actual_revision_list]
+            return [
+                FakeResult(r, str(r) + 'r', str(r) + 'd')
+                for r in actual_revision_list
+            ]
 
         cache_impl = phlcon_reviewstatecache._ReviewStateCache()
         cache_impl.set_revision_list_status_callable(fake_callable)

@@ -17,6 +17,7 @@
 #    .parse_commit_message
 #    .is_review_accepted
 #    .is_review_abandoned
+#    .is_review_recently_updated
 #    .update_revision
 #    .set_requires_revision
 #    .close_revision
@@ -29,6 +30,8 @@
 # =============================================================================
 
 from __future__ import absolute_import
+
+import datetime
 
 import phlcon_differential
 import phlcon_user
@@ -200,6 +203,26 @@ class Conduit(object):
         """
         status = self._reviewstate_cache.get_status(revisionid)
         return int(status) == phlcon_differential.ReviewStates.abandoned
+
+    def _get_update_age(self, revisionid):
+        date_modified = self._reviewstate_cache.get_date_modified(revisionid)
+        update_time = datetime.datetime.fromtimestamp(float(date_modified))
+        return datetime.datetime.now() - update_time
+
+    def is_review_recently_updated(self, revisionid):
+        """Return True if the supplied 'revisionid' was updated recently.
+
+        'recently' is a subjective term, in the context of a review it seems
+        reasonable that if it hasn't been updated for at least a day then it
+        could be considered as not recently updated.
+
+        :revisionid: id of the Differential revision to query
+        :returns: True if recently updated
+
+        """
+        update_age = self._get_update_age(revisionid)
+        one_day = datetime.timedelta(days=1)
+        return update_age < one_day
 
     def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.

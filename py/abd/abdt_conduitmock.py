@@ -28,6 +28,7 @@
 #    .parse_commit_message
 #    .is_review_accepted
 #    .is_review_abandoned
+#    .is_review_recently_updated
 #    .update_revision
 #    .set_requires_revision
 #    .close_revision
@@ -334,6 +335,19 @@ class ConduitMock(object):
         """
         revision = self._data.get_revision(revisionid)
         return revision.is_abandoned()
+
+    def is_review_recently_updated(self, revisionid):
+        """Return True if the supplied 'revisionid' was updated recently.
+
+        'recently' is a subjective term, in the context of a review it seems
+        reasonable that if it hasn't been updated for at least a day then it
+        could be considered as not recently updated.
+
+        :revisionid: id of the Differential revision to query
+        :returns: True if recently updated
+
+        """
+        return True
 
     def update_revision(self, revisionid, raw_diff, message):
         """Update an existing Differential revision with a new diff.

@@ -7,6 +7,7 @@
 #
 # Concerns:
 # [ B] changes to review branches can be detected when creating 'Branch'-es
+# [ A] can create archive refs without error
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
@@ -93,6 +94,20 @@ class Test(unittest.TestCase):
         actual_branches = [b.review_branch_name() for b in branches]
 
         self.assertSetEqual(set(expected_branches), set(actual_branches))
+
+        for b in branches:
+
+            self.clone_arcyd.archive_to_abandoned(
+                b.review_branch_hash(),
+                b.review_branch_name(),
+                'master')
+
+            self.clone_arcyd.archive_to_landed(
+                b.review_branch_hash(),
+                b.review_branch_name(),
+                'master',
+                'LANDHASH',
+                'MESSAGE')
 
     def _get_updated_branch(self, branch_name):
         phlgit_fetch.all_prune(self.clone_arcyd)
