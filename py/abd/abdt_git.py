@@ -20,7 +20,6 @@
 #    .push_asymmetrical
 #    .push
 #    .push_delete
-#    .set_name_email
 #    .fetch_prune
 #    .call
 #    .get_remote
@@ -40,7 +39,6 @@ from __future__ import absolute_import
 import phlgit_branch
 import phlgit_checkout
 import phlgit_commit
-import phlgit_config
 import phlgit_diff
 import phlgit_fetch
 import phlgit_log
@@ -311,16 +309,6 @@ class Clone(object):
 
         """
         phlgit_push.delete(self, self._remote, branch, *args)
-
-    def set_name_email(self, name, email):
-        """Set the full name and email of the author.
-
-        :name: string name of author
-        :email: string email of author
-        :returns: None
-
-        """
-        phlgit_config.set_username_email(self, name, email)
 
     def fetch_prune(self):
         """Fetch from the remote and prune branches.

@@ -21,8 +21,6 @@ Wrapper around 'git branch'.
 Wrapper around 'git checkout'.
 * `phlgit_commit.py` -
 Dependable wrapper for invocations of git commit.
-* `phlgit_config.py` -
-Wrapper around 'git config'.
 * `phlgit_diff.py` -
 Wrapper around 'git diff'.
 * `phlgit_fetch.py` -
