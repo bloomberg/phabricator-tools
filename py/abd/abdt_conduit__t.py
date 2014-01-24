@@ -99,25 +99,42 @@ class Test(unittest.TestCase):
             revision, 'silent test comment', silent=True)
         self.conduit.get_commit_message(revision)
         self.assertFalse(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
         self.conduit.set_requires_revision(revision)
         self.assertFalse(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
         self.conduit.accept_revision_as_user(revision, alice)
         self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
         self.conduit.set_requires_revision(revision)
         self._invalidate_cache()
         self.assertFalse(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
         self.conduit.accept_revision_as_user(revision, alice)
 
         # check that the review is still accepted after an update
         self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
         self.conduit.update_revision(revision, self.empty_diff, 'update')
         self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
 
         self.conduit.abandon_revision(revision)
         self.conduit.get_commit_message(revision)
+
+        self._invalidate_cache()
+        self.assertFalse(self.conduit.is_review_accepted(revision))
+        self.assertTrue(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
 
         # un-abandon
         with phlsys_conduit.act_as_user_context(self.sys_conduit, bob):
@@ -125,6 +142,11 @@ class Test(unittest.TestCase):
                 self.sys_conduit,
                 revision,
                 action=phlcon_differential.Action.reclaim)
+
+        self._invalidate_cache()
+        self.assertFalse(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
 
         self.conduit.commandeer_revision_as_user(revision, alice)
         self.conduit.commandeer_revision_as_user(revision, bob)
@@ -139,6 +161,8 @@ class Test(unittest.TestCase):
         self.conduit.accept_revision_as_user(revision, alice)
         self._invalidate_cache()
         self.assertTrue(self.conduit.is_review_accepted(revision))
+        self.assertFalse(self.conduit.is_review_abandoned(revision))
+        self.assertTrue(self.conduit.is_review_recently_updated(revision))
         self.conduit.close_revision(revision)
         self.conduit.get_commit_message(revision)
 
