@@ -98,6 +98,7 @@ def main():
             ['git', 'ls-tree', '-r', '--name-only', 'HEAD']).splitlines()
 
     file_list = filter(should_process_file, file_list)
+    file_list = filter(os.path.isfile, file_list)
 
     for f in file_list:
         # rewrite the file if necessary
