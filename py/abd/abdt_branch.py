@@ -493,10 +493,6 @@ class Branch(object):
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
 
-        review_hash = phlgit_revparse.get_sha1(
-            self._clone, self._tracking_branch.remote_branch)
-        assert review_hash == self._tracking_hash
-
         self._clone.checkout_forced_new_branch(
             self._tracking_branch.base,
             self._tracking_branch.remote_base)
@@ -535,7 +531,7 @@ class Branch(object):
             abdt_errident.PUSH_DELETE_LANDED)
 
         self._clone.archive_to_landed(
-            review_hash,
+            self._tracking_hash,
             self.review_branch_name(),
             self._tracking_branch.base,
             landing_hash,
