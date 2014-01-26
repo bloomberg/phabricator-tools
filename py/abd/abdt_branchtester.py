@@ -12,6 +12,7 @@
 #   assert_branch_bad_pre_review
 #   assert_branch_bad_in_review
 #   assert_branch_bad_land
+#   assert_branch_bad_abandoned
 #   assert_branch_ok_in_review
 #   assert_branch_is_active
 #
@@ -106,6 +107,11 @@ def check_XC_MoveBetweenAllMarkedStates(fixture):
         branch.mark_bad_land()
         assert_branch_bad_land(fixture, branch, branch_name, base, rev_id[0])
 
+    def bad_abandoned():
+        branch.mark_bad_abandoned()
+        assert_branch_bad_abandoned(
+            fixture, branch, branch_name, base, rev_id[0])
+
     # visit all the states reachable from bad_pre_review
     suite = {
         'initial_states': [bad_pre_review],
@@ -124,7 +130,7 @@ def check_XC_MoveBetweenAllMarkedStates(fixture):
     # travel between each of the non-'new' in_review states
     suite = {
         'initial_states': [ok_new_review, bad_new_in_review],
-        'transitions': [bad_in_review, ok_in_review, bad_land]
+        'transitions': [bad_in_review, ok_in_review, bad_land, bad_abandoned]
     }
     for initial in suite['initial_states']:
         for transition1 in suite['transitions']:
@@ -179,6 +185,7 @@ def assert_branch_is_new(fixture, branch, branch_name, base):
     fixture.assertIs(branch.is_null(), False)
     fixture.assertIs(branch.is_new(), True)
     fixture.assertIs(branch.is_status_bad_pre_review(), False)
+    fixture.assertIs(branch.is_status_bad_abandoned(), False)
     fixture.assertIs(branch.is_status_bad_land(), False)
     fixture.assertIs(branch.is_status_bad(), False)
     fixture.assertIs(branch.has_new_commits(), True)
@@ -190,6 +197,7 @@ def assert_branch_is_new(fixture, branch, branch_name, base):
 
 def assert_branch_bad_pre_review(fixture, branch, branch_name, base):
     fixture.assertIs(branch.is_status_bad_pre_review(), True)
+    fixture.assertIs(branch.is_status_bad_abandoned(), False)
     fixture.assertIs(branch.is_status_bad_land(), False)
     fixture.assertIs(branch.is_status_bad(), True)
     assert_branch_is_active(fixture, branch, branch_name, base, None)
@@ -197,6 +205,7 @@ def assert_branch_bad_pre_review(fixture, branch, branch_name, base):
 
 def assert_branch_bad_in_review(fixture, branch, branch_name, base, rev_id):
     fixture.assertIs(branch.is_status_bad_pre_review(), False)
+    fixture.assertIs(branch.is_status_bad_abandoned(), False)
     fixture.assertIs(branch.is_status_bad_land(), False)
     fixture.assertIs(branch.is_status_bad(), True)
     assert_branch_is_active(fixture, branch, branch_name, base, rev_id)
@@ -204,13 +213,23 @@ def assert_branch_bad_in_review(fixture, branch, branch_name, base, rev_id):
 
 def assert_branch_bad_land(fixture, branch, branch_name, base, rev_id):
     fixture.assertIs(branch.is_status_bad_pre_review(), False)
+    fixture.assertIs(branch.is_status_bad_abandoned(), False)
     fixture.assertIs(branch.is_status_bad_land(), True)
+    fixture.assertIs(branch.is_status_bad(), True)
+    assert_branch_is_active(fixture, branch, branch_name, base, rev_id)
+
+
+def assert_branch_bad_abandoned(fixture, branch, branch_name, base, rev_id):
+    fixture.assertIs(branch.is_status_bad_pre_review(), False)
+    fixture.assertIs(branch.is_status_bad_abandoned(), True)
+    fixture.assertIs(branch.is_status_bad_land(), False)
     fixture.assertIs(branch.is_status_bad(), True)
     assert_branch_is_active(fixture, branch, branch_name, base, rev_id)
 
 
 def assert_branch_ok_in_review(fixture, branch, branch_name, base, rev_id):
     fixture.assertIs(branch.is_status_bad_pre_review(), False)
+    fixture.assertIs(branch.is_status_bad_abandoned(), False)
     fixture.assertIs(branch.is_status_bad_land(), False)
     fixture.assertIs(branch.is_status_bad(), False)
     assert_branch_is_active(fixture, branch, branch_name, base, rev_id)
