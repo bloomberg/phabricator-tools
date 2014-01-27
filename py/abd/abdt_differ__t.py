@@ -6,21 +6,25 @@
 # cover those concerns.
 #
 # Concerns:
-# [  ] a diff within the limits passes straight through
-# [  ] a diff outside the limits can be reduced ok with less context
-# [  ] a diff still outside the limits can be reduced ok with no context
-# [  ] raise if a diff cannot be reduced to the limits
+# [ A] a diff within the limits passes straight through
+# [ B] a diff outside the limits can be reduced ok with less context
+# [ B] a diff still outside the limits can be reduced ok with no context
+# [ A] raise if a diff cannot be reduced to the limits
 # [  ] bad unicode chars are replaced
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
+# [ B] test_B_ReduceSmallChangeOnLargeFile
 #==============================================================================
 
 from __future__ import absolute_import
 
 import unittest
 
-# import abdt_differ
+import phlgitu_fixture
+
+import abdt_differ
+import abdt_exception
 
 
 class Test(unittest.TestCase):
@@ -32,7 +36,60 @@ class Test(unittest.TestCase):
         pass
 
     def test_A_Breathing(self):
-        pass
+        with phlgitu_fixture.lone_worker_context() as worker:
+
+            worker.commit_new_file_on_new_branch(
+                "diff_branch", "make a test diff", "newfile", "test content")
+
+            def make_diff(max_bytes):
+                return abdt_differ.make_raw_diff(
+                    worker.repo, "master", "diff_branch", max_bytes)
+
+            # [ A] a diff within the limits passes straight through
+            diff = make_diff(1000)
+            self.assertIn("test content", diff)
+
+            # [ A] raise if a diff cannot be reduced to the limits
+            with self.assertRaises(abdt_exception.LargeDiffException):
+                make_diff(1)
+
+    def test_B_ReduceSmallChangeOnLargeFile(self):
+        with phlgitu_fixture.lone_worker_context() as worker:
+
+            # make a large file to base our changes on
+            large_content = "lorem ipsum\n" * 1000
+            worker.commit_new_file(
+                "add large_file", "large_file", large_content)
+
+            worker.append_to_file_on_new_branch(
+                "diff_branch", "make small diff", "large_file", "test content")
+
+            def make_diff(max_bytes):
+                return abdt_differ.make_raw_diff(
+                    worker.repo, "master", "diff_branch", max_bytes)
+
+            # establish a baseline size for the diff
+            diff = make_diff(100000)
+            self.assertIn("test content", diff)
+            original_diff_size = len(diff)
+
+            # [ B] a diff outside the limits can be reduced ok with less
+            #      context
+            diff = make_diff(2000)
+            self.assertIn("test content", diff)
+            reduced_context_diff_size = len(diff)
+            self.assertLess(
+                reduced_context_diff_size,
+                original_diff_size)
+
+            # [ B] a diff still outside the limits can be reduced ok with no
+            #      context
+            diff = make_diff(500)
+            self.assertIn("test content", diff)
+            no_context_diff_size = len(diff)
+            self.assertLess(
+                no_context_diff_size,
+                reduced_context_diff_size)
 
 
 #------------------------------------------------------------------------------

@@ -43,6 +43,8 @@ Wrapper around 'git rev-parse'.
 Wrapper around 'git show'.
 * `phlgit_showref.py` -
 Wrapper around 'git show-ref'.
+* `phlgitu_fixture.py` -
+Fixtures for exercising scenarios with real Git.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
 * `phlmail_format.py` -
