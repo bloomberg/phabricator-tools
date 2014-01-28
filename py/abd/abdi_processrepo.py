@@ -134,7 +134,11 @@ def update_review(conduit, branch):
         branch.verify_review_branch_base()
         update_in_review(conduit, branch)
     elif branch.is_status_bad_abandoned():
-        if not conduit.is_review_recently_updated(revision_id):
+        if not conduit.is_review_abandoned(revision_id):
+            # update the review as the branch may have been bad previously
+            # and we'll want to re-assess it's status
+            update_in_review(conduit, branch)
+        elif not conduit.is_review_recently_updated(revision_id):
             review_name = branch.review_branch_name()
             review_hash = branch.review_branch_hash()
             branch.remove()
