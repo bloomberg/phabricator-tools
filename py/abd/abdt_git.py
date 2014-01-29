@@ -271,23 +271,14 @@ class Clone(object):
 
         phlgit_merge.ours(self, review_hash, new_message)
 
-    def push_abandoned(self, review_branch, tracking_branch):
-        """Push the 'abandoned' archive branch to the remote, remove others.
+    def push_abandoned(self):
+        """Push the 'abandoned' archive branch to the remote.
 
         :returns: None
 
         """
-
-        # TODO: revert this pushing all 3 changes at once, its' just a
-        #       temporary measure to get through the backlog quickly but is
-        #       more error-prone
-        #
-        self.call(
-            'push',
-            self._remote,
-            _ARCYD_ABANDONED_BRANCH_FQ + ':' + ARCYD_ABANDONED_REF,
-            ':' + review_branch,
-            ':' + tracking_branch)
+        self.push_asymmetrical(
+            _ARCYD_ABANDONED_BRANCH_FQ, ARCYD_ABANDONED_REF)
 
     def push_asymmetrical(self, local_branch, remote_branch):
         """Push 'local_branch' as 'remote_branch' to the remote.

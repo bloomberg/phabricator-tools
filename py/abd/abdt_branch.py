@@ -379,20 +379,29 @@ class Branch(object):
 
     def remove(self):
         """Remove review branch and tracking branch."""
-
         self._clone.archive_to_abandoned(
             self._review_hash,
             self.review_branch_name(),
             self._tracking_branch.base)
 
-        # TODO: revert this pushing all 3 changes at once, its' just a
-        #       temporary measure to get through the backlog quickly but is
-        #       more error-prone
-        #
-        self._clone.push_abandoned(
-            self._review_branch.branch,
-            self._tracking_branch.branch)
+        # push the abandoned archive, don't escalate if it fails to push
+        try:
+            # XXX: oddly pylint complains if we call push_landed() directly:
+            #      "Using method (_tryloop) as an attribute (not invoked)"
+            def push_abandoned():
+                self._clone.push_abandoned()
 
+            self._tryloop(
+                push_abandoned,
+                abdt_errident.PUSH_ABANDONED_ARCHIVE)
+        except Exception:
+            # XXX: don't worry if we can't push the landed, this is most
+            #      likely a permissioning issue but not a showstopper.
+            #      we should probably nag on the review instead.
+            pass
+
+        self._push_delete_review_branch()
+        self._push_delete_tracking_branch()
         self._review_branch = None
         self._review_hash = None
         self._tracking_branch = None
