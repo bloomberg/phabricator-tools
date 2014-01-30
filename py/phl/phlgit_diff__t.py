@@ -34,7 +34,7 @@ class Test(unittest.TestCase):
         # TODO: make this more portable with shutil etc.
         phlsys_subprocess.run_commands("mkdir " + self.path)
         phlsys_subprocess.run("git", "init", workingDir=self.path)
-        self.clone = phlsys_git.GitClone(self.path)
+        self.clone = phlsys_git.Repo(self.path)
 
     def tearDown(self):
         phlsys_subprocess.run_commands("rm -rf " + self.path)

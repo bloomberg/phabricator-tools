@@ -95,7 +95,7 @@ branches do:
     """.strip()
     print
 
-    clone = phlsys_git.GitClone('.')
+    clone = phlsys_git.Repo('.')
 
     _fetch_log(clone, args.update, args.no_update, args.prompt_update)
 

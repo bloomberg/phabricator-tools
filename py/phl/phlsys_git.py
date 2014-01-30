@@ -5,7 +5,7 @@
 # phlsys_git
 #
 # Public Classes:
-#   GitClone
+#   Repo
 #    .call
 #    .working_dir
 #
@@ -27,7 +27,7 @@ import phlsys_subprocess
 
 @contextlib.contextmanager
 def tmprepo_context():
-    """Return a newly created GitClone, remove when expired.
+    """Return a newly created Repo, remove when expired.
 
     Usage examples:
 
@@ -39,13 +39,13 @@ def tmprepo_context():
 
     """
     with phlsys_fs.tmpdir_context() as tmpdir:
-        clone = GitClone(tmpdir)
+        clone = Repo(tmpdir)
         clone.call("init")
         yield clone
 
 
 # TODO: add support for user.name and user.email to git clone
-class GitClone(object):
+class Repo(object):
 
     def __init__(self, workingDir):
         self._workingDir = os.path.abspath(workingDir)

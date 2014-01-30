@@ -60,7 +60,7 @@ class Test(unittest.TestCase):
                 run('git commit README -m myfeature_content')
                 run('git push -u origin myfeature')
 
-            dev = phlsys_git.GitClone('dev')
+            dev = phlsys_git.Repo('dev')
 
             # make sure we can prepend a branch to the landinglog when empty
             abdt_landinglog.prepend(dev, '1234', 'myfeature', '4567')
@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
             run('git clone origin dev2 --config ' + fetch_config)
             with phlsys_fs.chdir_context('dev2'):
                 run('git fetch')
-            dev2 = phlsys_git.GitClone('dev2')
+            dev2 = phlsys_git.Repo('dev2')
             self.assertListEqual(
                 abdt_landinglog.get_log(dev),
                 abdt_landinglog.get_log(dev2))

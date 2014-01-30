@@ -208,7 +208,7 @@ def passes_filters(args, fields):
 
 def get_revision_generator(args):
 
-    clone = phlsys_git.GitClone('.')
+    clone = phlsys_git.Repo('.')
 
     commit_list = []
     commits_to_follow = []
