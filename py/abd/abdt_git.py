@@ -5,7 +5,7 @@
 # abdt_git
 #
 # Public Classes:
-#   Clone
+#   Repo
 #    .is_identical
 #    .get_remote_branches
 #    .checkout_forced_new_branch
@@ -96,11 +96,11 @@ _ARCYD_ABANDONED_BRANCH = "__private_arcyd/abandoned"
 _ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 
 
-class Clone(object):
+class Repo(object):
 
     def __init__(
             self, clone, remote, description):
-        """Initialise a new Clone.
+        """Initialise a new Repo.
 
         :clone: the clone to attach to and delegate calls to
         :remote: name of the remote to use
@@ -108,7 +108,7 @@ class Clone(object):
         :returns: None
 
         """
-        super(Clone, self).__init__()
+        super(Repo, self).__init__()
         self._clone = clone
         self._remote = remote
         self._description = description

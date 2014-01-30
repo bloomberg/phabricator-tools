@@ -72,7 +72,7 @@ class Test(unittest.TestCase):
         self.repo_central = phlsys_git.Repo(tempfile.mkdtemp())
         self.repo_dev = phlsys_git.Repo(tempfile.mkdtemp())
         sys_clone = phlsys_git.Repo(tempfile.mkdtemp())
-        self.clone_arcyd = abdt_git.Clone(sys_clone, 'origin', 'myrepo')
+        self.clone_arcyd = abdt_git.Repo(sys_clone, 'origin', 'myrepo')
 
         self.repo_central.call("init", "--bare")
 

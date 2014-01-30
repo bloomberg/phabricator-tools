@@ -317,7 +317,7 @@ def _determine_config(args, repo):
 def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process branches prolog'):
-        repo = abdt_git.Clone(
+        repo = abdt_git.Repo(
             phlsys_git.Repo(args.repo_path), "origin", args.repo_desc)
 
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
