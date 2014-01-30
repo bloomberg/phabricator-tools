@@ -9,42 +9,17 @@
 #    .call
 #    .working_dir
 #
-# Public Functions:
-#   tmprepo_context
-#
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
 from __future__ import absolute_import
 
-import contextlib
 import os
 
-import phlsys_fs
 import phlsys_subprocess
 
 
-@contextlib.contextmanager
-def tmprepo_context():
-    """Return a newly created Repo, remove when expired.
-
-    Usage examples:
-
-        Create a temporary repo:
-        >>> with tmprepo_context() as clone:
-        ...     status = clone.call("rev-parse", "--is-inside-work-tree")
-        ...     status.strip().lower() == 'true'
-        True
-
-    """
-    with phlsys_fs.tmpdir_context() as tmpdir:
-        clone = Repo(tmpdir)
-        clone.call("init")
-        yield clone
-
-
-# TODO: add support for user.name and user.email to git clone
 class Repo(object):
 
     def __init__(self, workingDir):
