@@ -80,7 +80,10 @@ def orphan_clean(repo, branch):
     if files:
         repo.call('rm', '--cached', '-rf', '--', '.')
 
-    repo.call('clean', '-fd')
+    # any removed files will now be in the working copy, note that some files
+    # may be both previously managed and ignored, so it's important to use
+    # the 'x' too.
+    repo.call('clean', '-fxd')
 
 
 #------------------------------------------------------------------------------
