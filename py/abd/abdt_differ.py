@@ -30,7 +30,7 @@ import phlgit_diff
 
 import abdt_exception
 
-_LOTS_OF_DIFF_CONTEXT_LINES = 10000
+_LOTS_OF_DIFF_CONTEXT_LINES = 100000
 _LESS_DIFF_CONTEXT_LINES = 100
 
 DiffResult = collections.namedtuple(
