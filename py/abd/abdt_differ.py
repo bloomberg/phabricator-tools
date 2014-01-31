@@ -60,6 +60,13 @@ def make_raw_diff(clone, base, branch, max_bytes):
     if len(raw_diff) >= max_bytes:
         raw_diff = phlgit_diff.raw_diff_range(clone, base, branch, None)
 
+    # if the diff is still too big then just use the diff stat with message
+    if len(raw_diff) >= max_bytes:
+        stat = phlgit_diff.stat_range(clone, base, branch)
+        content = "this diff is very large, it has been reduced to a summary:"
+        content = '\n\n'.join([content, stat])
+        raw_diff = phlgit_diff.create_add_file('diffstat', content)
+
     # if the diff is still too big then error
     if len(raw_diff) >= max_bytes:
         raise abdt_exception.LargeDiffException(

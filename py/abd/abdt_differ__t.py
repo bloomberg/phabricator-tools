@@ -9,12 +9,14 @@
 # [ A] a diff within the limits passes straight through
 # [ B] a diff outside the limits can be reduced ok with less context
 # [ B] a diff still outside the limits can be reduced ok with no context
+# [ C] a diff still outside the limits can be reduced to the diffstat
 # [ A] raise if a diff cannot be reduced to the limits
 # [  ] bad unicode chars are replaced
 #------------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_ReduceSmallChangeOnLargeFile
+# [ C] test_C_ReduceAddMassiveFile
 #==============================================================================
 
 from __future__ import absolute_import
@@ -90,6 +92,32 @@ class Test(unittest.TestCase):
             self.assertLess(
                 no_context_diff_size,
                 reduced_context_diff_size)
+
+    def test_C_ReduceAddMassiveFile(self):
+        with phlgitu_fixture.lone_worker_context() as worker:
+
+            # make a large file to base our changes on
+            large_content = "lorem ipsum\n" * 1000
+            worker.commit_new_file_on_new_branch(
+                "diff_branch", "add large_file", "large_file", large_content)
+
+            def make_diff(max_bytes):
+                return abdt_differ.make_raw_diff(
+                    worker.repo, "master", "diff_branch", max_bytes)
+
+            # establish a baseline size for the diff
+            diff = make_diff(100000)
+            self.assertIn("lorem ipsum", diff)
+            original_diff_size = len(diff)
+
+            # [ C] a diff still outside the limits can be reduced
+            #      to the diffstat
+            diff = make_diff(500)
+            self.assertNotIn("lorem ipsum", diff)
+            diffstat_diff_size = len(diff)
+            self.assertLess(
+                diffstat_diff_size,
+                original_diff_size)
 
 
 #------------------------------------------------------------------------------
