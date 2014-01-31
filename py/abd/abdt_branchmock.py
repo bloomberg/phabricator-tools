@@ -60,6 +60,7 @@ from __future__ import absolute_import
 import phldef_conduit
 import phlsys_tracedecorator
 
+import abdt_differ
 import abdt_exception
 import abdt_naming
 
@@ -303,13 +304,19 @@ class BranchMock(object):
         return self._data.message_digest
 
     def make_raw_diff(self):
-        """Return a string raw diff of the changes on the branch.
+        """Return an abdt_differ.DiffResult of the changes on the branch.
 
         If the diff would exceed the pre-specified max diff size then take
         measures to reduce the diff.
 
         """
-        return self._data.raw_diff
+        return abdt_differ.DiffResult(
+            self._data.raw_diff,
+            [],
+            False,
+            len(self._data.raw_diff),
+            len(self._data.raw_diff),
+            1000)
 
     def verify_review_branch_base(self):
         """Raise exception if review branch has invalid base."""

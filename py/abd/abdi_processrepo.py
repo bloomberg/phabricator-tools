@@ -82,13 +82,17 @@ def create_review(conduit, branch, plugin_manager):
             reviewer_phids.remove(phid)
             user_warnings.append(abdt_userwarning.SelfReviewer(user, message))
 
-    rawDiff = branch.make_raw_diff()
+    diff_result = branch.make_raw_diff()
+    raw_diff = diff_result.diff
 
-    if not rawDiff:
+    if not raw_diff:
         raise abdt_exception.AbdUserException("no difference to review")
 
+    if diff_result.reduction_list:
+        user_warnings.append(abdt_userwarning.LargeDiff(diff_result))
+
     revisionid = create_differential_review(
-        conduit, user, parsed, branch, rawDiff)
+        conduit, user, parsed, branch, raw_diff)
 
     commenter = abdcmnt_commenter.Commenter(conduit, revisionid)
 
@@ -98,7 +102,7 @@ def create_review(conduit, branch, plugin_manager):
     plugin_manager.hook(
         "after_create_review",
         {"parsed": parsed, "conduit": conduit, "branch": branch,
-            "rawDiff": rawDiff, "commenter": commenter}
+            "rawDiff": raw_diff, "commenter": commenter}
     )
 
     abdt_logging.on_review_event(
@@ -171,10 +175,14 @@ def update_in_review(conduit, branch):
     print "update_in_review"
 
     print "- creating diff"
-    rawDiff = branch.make_raw_diff()
+    diff_result = branch.make_raw_diff()
 
-    if not rawDiff:
+    if not diff_result.diff:
         raise abdt_exception.AbdUserException("no difference to review")
+
+    user_warnings = []
+    if diff_result.reduction_list:
+        user_warnings.append(abdt_userwarning.LargeDiff(diff_result))
 
     review_id = branch.review_id_or_none()
     review_id_str = str(review_id)
@@ -182,7 +190,7 @@ def update_in_review(conduit, branch):
     print "- updating revision " + review_id_str
     conduit.update_revision(
         review_id,
-        rawDiff,
+        diff_result.diff,
         'update\n\n``` lang=text\n' + branch.describe_new_commits() + '```')
 
     branch.mark_ok_in_review()
@@ -192,6 +200,8 @@ def update_in_review(conduit, branch):
     commenter.updatedReview(
         branch.review_branch_hash(),
         branch.review_branch_name())
+    if user_warnings:
+        commenter.userWarnings(user_warnings)
 
     abdt_logging.on_review_event(
         'updaterev', '{} updated {}'.format(

@@ -48,8 +48,8 @@ class Test(unittest.TestCase):
                     worker.repo, "master", "diff_branch", max_bytes)
 
             # [ A] a diff within the limits passes straight through
-            diff = make_diff(1000)
-            self.assertIn("test content", diff)
+            diff_result = make_diff(1000)
+            self.assertIn("test content", diff_result.diff)
 
             # [ A] raise if a diff cannot be reduced to the limits
             with self.assertRaises(abdt_exception.LargeDiffException):
@@ -71,24 +71,32 @@ class Test(unittest.TestCase):
                     worker.repo, "master", "diff_branch", max_bytes)
 
             # establish a baseline size for the diff
-            diff = make_diff(100000)
-            self.assertIn("test content", diff)
-            original_diff_size = len(diff)
+            diff_result = make_diff(100000)
+            self.assertIn("test content", diff_result.diff)
+            original_diff_size = len(diff_result.diff)
 
             # [ B] a diff outside the limits can be reduced ok with less
             #      context
-            diff = make_diff(2000)
-            self.assertIn("test content", diff)
-            reduced_context_diff_size = len(diff)
+            diff_result = make_diff(2000)
+            self.assertIn("test content", diff_result.diff)
+            reduced_context_diff_size = len(diff_result.diff)
+            self.assertTrue(
+                any(
+                    isinstance(r, abdt_differ.LessContextReduction)
+                    for r in diff_result.reduction_list))
             self.assertLess(
                 reduced_context_diff_size,
                 original_diff_size)
 
             # [ B] a diff still outside the limits can be reduced ok with no
             #      context
-            diff = make_diff(500)
-            self.assertIn("test content", diff)
-            no_context_diff_size = len(diff)
+            diff_result = make_diff(500)
+            self.assertIn("test content", diff_result.diff)
+            no_context_diff_size = len(diff_result.diff)
+            self.assertTrue(
+                any(
+                    isinstance(r, abdt_differ.RemoveContextReduction)
+                    for r in diff_result.reduction_list))
             self.assertLess(
                 no_context_diff_size,
                 reduced_context_diff_size)
@@ -106,15 +114,19 @@ class Test(unittest.TestCase):
                     worker.repo, "master", "diff_branch", max_bytes)
 
             # establish a baseline size for the diff
-            diff = make_diff(100000)
-            self.assertIn("lorem ipsum", diff)
-            original_diff_size = len(diff)
+            diff_result = make_diff(100000)
+            self.assertIn("lorem ipsum", diff_result.diff)
+            original_diff_size = len(diff_result.diff)
 
             # [ C] a diff still outside the limits can be reduced
             #      to the diffstat
-            diff = make_diff(500)
-            self.assertNotIn("lorem ipsum", diff)
-            diffstat_diff_size = len(diff)
+            diff_result = make_diff(500)
+            self.assertNotIn("lorem ipsum", diff_result.diff)
+            diffstat_diff_size = len(diff_result.diff)
+            self.assertTrue(
+                any(
+                    isinstance(r, abdt_differ.DiffStatReduction)
+                    for r in diff_result.reduction_list))
             self.assertLess(
                 diffstat_diff_size,
                 original_diff_size)

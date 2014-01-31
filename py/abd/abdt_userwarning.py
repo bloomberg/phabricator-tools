@@ -9,6 +9,7 @@
 #   UsedDefaultTestPlan
 #   UnknownReviewers
 #   SelfReviewer
+#   LargeDiff
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -55,6 +56,13 @@ class SelfReviewer(Base):
 
         self.user = user
         self.commit_message = commit_message
+
+
+class LargeDiff(Base):
+
+    def __init__(self, diff_result):
+        super(LargeDiff, self).__init__('large diff')
+        self.diff_result = diff_result
 
 
 #------------------------------------------------------------------------------

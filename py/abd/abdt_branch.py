@@ -64,7 +64,7 @@ import abdt_naming
 import abdt_tryloop
 
 # TODO: allow this to be passed in
-_MAX_DIFF_SIZE = 1.5 * 1024 * 1024
+_MAX_DIFF_SIZE = int(1.5 * 1024 * 1024)
 
 
 def calc_is_ok(branch):
@@ -320,7 +320,7 @@ class Branch(object):
         return message
 
     def make_raw_diff(self):
-        """Return a string raw diff of the changes on the branch.
+        """Return an abdt_differ.DiffResult of the changes on the branch.
 
         If the diff would exceed the pre-specified max diff size then take
         measures to reduce the diff.

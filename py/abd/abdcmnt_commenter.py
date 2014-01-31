@@ -16,6 +16,7 @@
 #    .usedDefaultTestPlan
 #    .removedSelfReviewer
 #    .unknownReviewers
+#    .largeDiff
 #    .abandonedForUser
 #
 # -----------------------------------------------------------------------------
@@ -26,6 +27,7 @@ from __future__ import absolute_import
 
 import phlcon_remarkup
 
+import abdt_differ
 import abdt_exception
 import abdt_userwarning
 
@@ -95,6 +97,9 @@ class Commenter(object):
             elif isinstance(warning, abdt_userwarning.UnknownReviewers):
                 self.unknownReviewers(
                     warning.unknown_reviewers, warning.commit_message)
+            elif isinstance(warning, abdt_userwarning.LargeDiff):
+                self.largeDiff(
+                    warning.diff_result)
             else:
                 message = "unhandled user warning: " + str(warning)
                 self._createComment(message)
@@ -227,6 +232,92 @@ the 'edit revision' link at the top-right of the page.
             commit_message=commit_message_markup)
 
         self._createComment(message)
+
+    def largeDiff(self, diff_result):
+        message_list = []
+
+        is_very_large = any(
+            isinstance(r, abdt_differ.DiffStatReduction)
+            for r in diff_result.reduction_list)
+
+        if is_very_large:
+            message_list.append(
+                "**this diff is very large**, attempted a number of "
+                "reduction techniques before managing to upload it.\n")
+
+            message_list.append(
+                "| **full diff size** | `{full_diff:,}` bytes, as UTF-8 |\n"
+                "| **diff size limit** | `{max_diff:,}` bytes, as UTF-8 |\n"
+                "| **end diff size** | `{diff:,}` bytes, as UTF-8 |\n".format(
+                    full_diff=diff_result.full_diff_size_utf8_bytes,
+                    max_diff=diff_result.max_diff_size_utf8_bytes,
+                    diff=diff_result.diff_size_utf8_bytes))
+        else:
+            message_list.append(
+                "**this diff is large**, attempted a number of "
+                "reduction techniques before managing to upload it.\n")
+
+        if diff_result.did_replace_unicode:
+            message_list.append(
+                "also, replaced some characters that could not be converted "
+                "to unicode.\n")
+
+        if is_very_large:
+            message_list.append(
+                "**if approved**, the change will land as normal with the "
+                "full original content.\n")
+
+        message_list.append(
+            "here are the techniques that were attempted:\n")
+
+        technique_list = []
+
+        for r in diff_result.reduction_list:
+            assert isinstance(r, abdt_differ.ReductionTechnique)
+            if isinstance(r, abdt_differ.LessContextReduction):
+                technique_list.append(
+                    "tried to reduce the amount of context to "
+                    "**{context:,} lines**, this reduced the diff size to "
+                    "**{size:,} bytes** as UTF-8.".format(
+                        context=r.context_lines,
+                        size=r.diff_size_utf8_bytes))
+            elif isinstance(r, abdt_differ.RemoveContextReduction):
+                technique_list.append(
+                    "tried to **remove all context**, to, this reduced the "
+                    "diff size to "
+                    "**{size:,} bytes** as UTF-8.".format(
+                        size=r.diff_size_utf8_bytes))
+            elif isinstance(r, abdt_differ.DiffStatReduction):
+                technique_list.append(
+                    "tried to reduce the diff to a **diffstat** instead, "
+                    "this won't be reviewable but will give you an impression "
+                    "of the change and what's biggest.")
+            else:
+                technique_list.append(
+                    "tried an unknown reduction technique.")
+
+        # add the techniques as a bulleted list
+        message_list.append(
+            ''.join(["- {}\n".format(t) for t in technique_list]))
+
+        if is_very_large:
+            message_list.append(
+                "you may be able to reduce the diff size yourself by setting "
+                "the `.gitattributes` of some files as `-diff`, this is often "
+                "appropriate for generated files.\n")
+
+            message_list.append(
+                "e.g. commit a file like this to your project:\n")
+
+            message_list.append(
+                "  name=.gitattributes\n"
+                "  path/to/large_generated_file -diff\n")
+
+            message_list.append(
+                "a fuller explanation Git Attributes may be found here: "
+                "http://git-scm.com/book/ch7-2.html\n")
+
+        self._createComment('\n'.join(message_list))
 
     def abandonedForUser(self, review_branch, review_hash, archive_ref):
 

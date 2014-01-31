@@ -136,13 +136,13 @@ class Test(unittest.TestCase):
         # check for new stuff as arcyd
         self.assertIs(branch.has_new_commits(), True)
         branch.describe_new_commits()  # just exercise
-        self.assertIn(filename, branch.make_raw_diff())
+        self.assertIn(filename, branch.make_raw_diff().diff)
         branch.mark_ok_in_review()
         self.assertIs(branch.has_new_commits(), False)
         branch.describe_new_commits()  # just exercise
 
         # exercise queries a bit
-        self.assertIn(filename, branch.make_raw_diff())
+        self.assertIn(filename, branch.make_raw_diff().diff)
         self.assertIn(filename, branch.make_message_digest())
         self.assertEqual(
             branch.get_commit_message_from_tip().strip(),
@@ -170,7 +170,7 @@ class Test(unittest.TestCase):
         # check for new stuff as arcyd
         self.assertIs(branch.has_new_commits(), False)
         branch = self._get_updated_branch(branch_name)
-        self.assertNotIn(filename, branch.make_raw_diff())
+        self.assertNotIn(filename, branch.make_raw_diff().diff)
         branch.mark_ok_in_review()
         self.assertIs(branch.has_new_commits(), False)
 
