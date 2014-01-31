@@ -297,6 +297,69 @@ function test_large_add() {
     cd -
 }
 
+function test_large_file_small_change() {
+    test_name='test_large_file_small_change'
+    set_branch_name "master" "${test_name}"
+
+    # create a very large new file on master
+    cd dev
+        git checkout master
+        git pull
+        echo hello, this is a large file > ${test_name}
+        for i in {1..16}; do
+            cat ${test_name} ${test_name} > temp && mv temp ${test_name}
+        done
+        ls -lh
+        git add ${test_name}
+        git commit -m "exercise_arcyd: add ${test_name}"
+        git push origin master
+    cd -
+
+    cd dev
+        git checkout -b ${branch_name} origin/master
+        echo first extra line >> ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: small change to ${test_name}"
+        git push origin ${branch_name}
+    cd -
+    run_arcyd
+
+    # update the review branch
+    cd dev
+        echo extra line >> ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: ${test_name} - commit 2"
+        git push origin ${branch_name}
+        git branch -r | grep "origin/${branch_name}"
+    cd -
+    run_arcyd
+
+    # update the review branch
+    cd dev
+        echo another extra line >> ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: ${test_name} - commit 3"
+        echo last extra line >> ${test_name}
+        git add ${test_name}
+        git commit -m "exercise_arcyd: ${test_name} - commit 4"
+        git push origin ${branch_name}
+        git branch -r | grep "origin/${branch_name}"
+    cd -
+    run_arcyd
+
+    # find and accept the review
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+    run_arcyd
+
+    # make sure the revision is closed and landed
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Closed'
+    cd dev
+        deleted_prefix='deleted.*'
+        git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
+    cd -
+}
+
 function test_unknown_user() {
     test_name='test_unknown_user'
     set_branch_name "master" "${test_name}"
@@ -616,6 +679,7 @@ run_arcyd
 # run through the tests
 test_happy_path
 test_large_add
+test_large_file_small_change
 test_unknown_reviewer
 test_unknown_user
 test_bad_base
@@ -659,6 +723,7 @@ arcyd_branch_awk_string="${r_arcyd_branch_awk_string}"
 # run through the tests
 test_happy_path
 test_large_add
+test_large_file_small_change
 test_unknown_reviewer
 test_unknown_user
 test_bad_base
