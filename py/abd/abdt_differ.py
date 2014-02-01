@@ -30,8 +30,9 @@ import phlgit_diff
 
 import abdt_exception
 
-_LOTS_OF_DIFF_CONTEXT_LINES = 100000
-_LESS_DIFF_CONTEXT_LINES = 100
+_FULL_DIFF_CONTEXT_LINES = 100000
+_GOOD_DIFF_CONTEXT_LINES = 1000
+_SOME_DIFF_CONTEXT_LINES = 100
 
 DiffResult = collections.namedtuple(
     'abdt_differ__DiffResult',
@@ -124,7 +125,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
 
     """
     raw_diff = phlgit_diff.raw_diff_range(
-        clone, base, branch, _LOTS_OF_DIFF_CONTEXT_LINES)
+        clone, base, branch, _FULL_DIFF_CONTEXT_LINES)
     new_raw_diff = unicode(raw_diff, errors='replace')
     full_diff_size_utf8_bytes = len(new_raw_diff.encode("utf-8"))
     diff_size_utf8_bytes = full_diff_size_utf8_bytes
@@ -140,15 +141,16 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
     # TODO: detect generated files and try excluding those first
 
     # if the diff is too big then regen with less context
-    if diff_size_utf8_bytes > max_diff_size_utf8_bytes:
-        raw_diff = phlgit_diff.raw_diff_range(
-            clone, base, branch, _LESS_DIFF_CONTEXT_LINES)
-        new_raw_diff = unicode(raw_diff, errors='replace')
-        diff_size_utf8_bytes = len(new_raw_diff.encode("utf-8"))
-        reduction_list.append(
-            LessContextReduction(
-                diff_size_utf8_bytes,
-                _LESS_DIFF_CONTEXT_LINES))
+    for context_lines in [_GOOD_DIFF_CONTEXT_LINES, _SOME_DIFF_CONTEXT_LINES]:
+        if diff_size_utf8_bytes > max_diff_size_utf8_bytes:
+            raw_diff = phlgit_diff.raw_diff_range(
+                clone, base, branch, context_lines)
+            new_raw_diff = unicode(raw_diff, errors='replace')
+            diff_size_utf8_bytes = len(new_raw_diff.encode("utf-8"))
+            reduction_list.append(
+                LessContextReduction(
+                    diff_size_utf8_bytes,
+                    context_lines))
 
     # if the diff is still too big then regen with no context
     if diff_size_utf8_bytes > max_diff_size_utf8_bytes:
