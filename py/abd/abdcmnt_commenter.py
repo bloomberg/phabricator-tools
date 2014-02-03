@@ -39,6 +39,23 @@ please change the state of the review to something other than 'abandoned' to
 prevent automatic removal.
 """.strip()
 
+_NO_HISTORY_MESSAGE = """
+there are no commits on `{review_branch}` that aren't also on `{base_branch}`.
+
+this means that there is no history on the branch that can be reviewed.
+
+it may also mean that the author of this review has been set incorrectly, as
+i guessed and used the author of the latest commit on `{base_branch}`.
+
+most likely `{review_branch}` was pushed before it had any commits on it to
+review.
+
+if the author has been set incorrectly then please either find the real author
+and ask them to commandeer the review, or set the review to 'abandoned' and it
+will automatically be archived.
+
+""".strip()
+
 _ABANDONED_FOR_USER_MESSAGE = """
 i archived `{review_branch}` for you.
 i am no longer watching this review.
@@ -82,6 +99,8 @@ class Commenter(object):
                 self._missingBaseException(e)
             elif isinstance(e, abdt_exception.ReviewAbandonedException):
                 self._reviewAbandonedException()
+            elif isinstance(e, abdt_exception.NoHistoryException):
+                self._noHistoryException(e)
             else:
                 self._userException(e)
         else:
@@ -468,6 +487,11 @@ the 'edit revision' link at the top-right of the page.
 
     def _reviewAbandonedException(self):
         self._createComment(_ABANDONED_MESSAGE)
+
+    def _noHistoryException(self, e):
+        self._createComment(_NO_HISTORY_MESSAGE.format(
+            review_branch=e.review_branch_name,
+            base_branch=e.base_name))
 
     def _userException(self, e):
         message = "errors were encountered, see below.\n"

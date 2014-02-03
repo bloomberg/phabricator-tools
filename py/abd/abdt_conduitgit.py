@@ -30,7 +30,9 @@ def getPrimaryUserDetailsFromBranch(conduit, branch):
     """
     names_emails = branch.get_author_names_emails()
     if not names_emails:
-        raise abdt_exception.AbdUserException("no history to diff")
+        raise abdt_exception.NoHistoryException(
+            branch.review_branch_name(),
+            branch.base_branch_name())
     committer = names_emails[-1]
     name = committer[0]
     email = committer[1]

@@ -15,6 +15,7 @@
 #   LandingException
 #   LandingPushBaseException
 #   ReviewAbandonedException
+#   NoHistoryException
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -202,6 +203,29 @@ class ReviewAbandonedException(AbdUserException):
         message = "abdt_exception__ReviewAbandonedException"
         super(ReviewAbandonedException, self).__init__(message)
 
+
+class NoHistoryException(AbdUserException):
+
+    def __init__(self, review_branch_name, base_name):
+        """Describe a review having no commits beyond base.
+
+        :review_branch_name: the string name of the review branch
+        :base_name: the string name of the branch the review lands on
+
+        """
+        message = "abdt_exception__NoHistoryException"
+        super(NoHistoryException, self).__init__(message)
+        self.review_branch_name = review_branch_name
+        self.base_name = base_name
+
+
+# class NoDiffException(AbdUserException):
+#
+#     def __init__(self):
+#         """Describe a review having no difference against base."""
+#         message = "abdt_exception__NoHistoryException"
+#         super(NoHistoryException, self).__init__(message)
+#
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
