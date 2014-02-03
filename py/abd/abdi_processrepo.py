@@ -251,7 +251,12 @@ def create_failed_review(conduit, branch, exception):
     user = abdt_conduitgit.getAnyUserFromBranch(conduit, branch)
     reviewid = conduit.create_empty_revision_as_user(user)
     commenter = abdcmnt_commenter.Commenter(conduit, reviewid)
-    commenter.failedCreateReview(branch.review_branch_name(), exception)
+    commenter.failedCreateReview(
+        branch.get_repo_name(),
+        branch.review_branch_hash(),
+        branch.review_branch_name(),
+        branch.get_browse_url(),
+        exception)
     branch.mark_new_bad_in_review(reviewid)
 
 

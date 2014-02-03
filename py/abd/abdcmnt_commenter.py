@@ -104,9 +104,26 @@ class Commenter(object):
                 message = "unhandled user warning: " + str(warning)
                 self._createComment(message)
 
-    def failedCreateReview(self, branch_name, exception):
-        message = "failed to create revision from branch "
-        message += phlcon_remarkup.monospaced(branch_name) + "\n"
+    def failedCreateReview(
+            self, repo_name, branch_hash, branch_name, branch_url, exception):
+
+        message = """
+failed to create revision from:
+
+**repository**: {repo_name}
+**branch**: {branch_name}
+**commit**: {branch_hash}
+        """.format(
+            repo_name=phlcon_remarkup.monospaced(repo_name),
+            branch_name=phlcon_remarkup.monospaced(branch_name),
+            branch_hash=phlcon_remarkup.monospaced(branch_hash)).strip()
+
+        if branch_url is not None:
+            message += "\n\n"
+            message += "you can browse {name} here:\n{url}".format(
+                name=phlcon_remarkup.monospaced(branch_name),
+                url=phlcon_remarkup.link(branch_url))
+
         self._createComment(message)
         self.exception(exception)
 
