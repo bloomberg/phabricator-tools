@@ -51,6 +51,7 @@
 
 from __future__ import absolute_import
 
+import phlgit_checkout
 import phlgit_log
 import phlgit_push
 import phlgit_revparse
@@ -326,6 +327,10 @@ class Branch(object):
         measures to reduce the diff.
 
         """
+        # checkout the 'to' branch, otherwise we won't take into account any
+        # changes to .gitattributes files
+        phlgit_checkout.branch(self._clone, self._review_branch.remote_branch)
+
         return abdt_differ.make_raw_diff(
             self._clone,
             self._review_branch.remote_base,
