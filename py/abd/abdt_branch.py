@@ -331,11 +331,17 @@ class Branch(object):
         # changes to .gitattributes files
         phlgit_checkout.branch(self._clone, self._review_branch.remote_branch)
 
-        return abdt_differ.make_raw_diff(
-            self._clone,
-            self._review_branch.remote_base,
-            self._review_branch.remote_branch,
-            _MAX_DIFF_SIZE)
+        try:
+            return abdt_differ.make_raw_diff(
+                self._clone,
+                self._review_branch.remote_base,
+                self._review_branch.remote_branch,
+                _MAX_DIFF_SIZE)
+        except abdt_differ.NoDiffError:
+            raise abdt_exception.NoDiffException(
+                self.base_branch_name(),
+                self.review_branch_name(),
+                self.review_branch_hash())
 
     def _is_based_on(self, name, base):
         # TODO: actually do this

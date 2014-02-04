@@ -56,6 +56,17 @@ will automatically be archived.
 
 """.strip()
 
+_NO_DIFF_MESSAGE = """
+there is no difference from `{base_branch}` to `{review_branch}`,
+this means that there is nothing on the branch that can be reviewed.
+
+`{review_branch}` is currently pointing to commit `{review_hash}`.
+
+**author**, if you push to the branch again with new commits then the review
+will be updated with the new diff.
+
+""".strip()
+
 _ABANDONED_FOR_USER_MESSAGE = """
 i archived `{review_branch}` for you.
 i am no longer watching this review.
@@ -101,6 +112,8 @@ class Commenter(object):
                 self._reviewAbandonedException()
             elif isinstance(e, abdt_exception.NoHistoryException):
                 self._noHistoryException(e)
+            elif isinstance(e, abdt_exception.NoDiffException):
+                self._noDiffException(e)
             else:
                 self._userException(e)
         else:
@@ -490,6 +503,12 @@ the 'edit revision' link at the top-right of the page.
 
     def _noHistoryException(self, e):
         self._createComment(_NO_HISTORY_MESSAGE.format(
+            review_branch=e.review_branch_name,
+            base_branch=e.base_name))
+
+    def _noDiffException(self, e):
+        self._createComment(_NO_DIFF_MESSAGE.format(
+            review_hash=e.review_branch_hash,
             review_branch=e.review_branch_name,
             base_branch=e.base_name))
 

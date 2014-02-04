@@ -5,6 +5,7 @@
 # abdt_differ
 #
 # Public Classes:
+#   NoDiffError
 #   ReductionTechnique
 #    .diff_size_utf8_bytes
 #   LessContextReduction
@@ -44,6 +45,10 @@ DiffResult = collections.namedtuple(
         'full_diff_size_utf8_bytes',
         'max_diff_size_utf8_bytes',
     ])
+
+
+class NoDiffError(Exception):
+    pass
 
 
 class ReductionTechnique(object):
@@ -114,7 +119,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
     If the diff would exceed the _MAX_DIFF_SIZE then take measures
     to reduce the diff size by reducing the amount of context.
 
-    Raise 'abdt_exception.LargeDiffException' if the diff could not be fit into
+    Raise 'NoDiffError' if the diff could not be fit into
     'max_bytes'.
 
     :clone: supports 'call'
@@ -131,8 +136,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
     diff_size_utf8_bytes = full_diff_size_utf8_bytes
 
     if not raw_diff:
-        raise abdt_exception.AbdUserException(
-            str("no difference from " + base + " to " + branch))
+        raise NoDiffError()
 
     reduction_list = []
 

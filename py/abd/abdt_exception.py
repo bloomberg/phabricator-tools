@@ -16,6 +16,7 @@
 #   LandingPushBaseException
 #   ReviewAbandonedException
 #   NoHistoryException
+#   NoDiffException
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -219,13 +220,22 @@ class NoHistoryException(AbdUserException):
         self.base_name = base_name
 
 
-# class NoDiffException(AbdUserException):
-#
-#     def __init__(self):
-#         """Describe a review having no difference against base."""
-#         message = "abdt_exception__NoHistoryException"
-#         super(NoHistoryException, self).__init__(message)
-#
+class NoDiffException(AbdUserException):
+
+    def __init__(self, base_name, review_branch_name, review_branch_hash):
+        """Describe a review having no difference against it's base.
+
+        :base_name: the string name of the branch the review lands on
+        :review_branch_name: the string name of the review branch
+        :review_branch_hash: the string commit hash of the review branch
+
+        """
+        message = "abdt_exception__NoDiffException"
+        super(NoDiffException, self).__init__(message)
+        self.base_name = base_name
+        self.review_branch_name = review_branch_name
+        self.review_branch_hash = review_branch_hash
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
