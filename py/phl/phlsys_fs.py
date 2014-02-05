@@ -12,6 +12,8 @@
 #   tmpdir_context
 #   chtmpdir_context
 #   nostd
+#   ensure_dir
+#   write_text_file
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -213,6 +215,34 @@ def nostd(err=True):
         sys.stdout = Devnull()
         yield sys.stdout
         sys.stdout = savestd
+
+
+def ensure_dir(path):
+    """Ensure that the supplied 'path' is a directory if it is not already.
+
+    Create intermediate folders if necessary
+
+    :path: the string path of the dir to potentially create
+    :returns: None
+
+    """
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+
+def write_text_file(path, text):
+    """Write the 'text' to the file at 'path', create dirs and file if needed.
+
+    :path: the string path of the file to write
+    :text: the string contents of the file
+    :returns: None
+
+    """
+    dir_path = os.path.dirname(path)
+    if dir_path:
+        ensure_dir(dir_path)
+    with open(path, 'w') as f:
+        f.write(text)
 
 
 #------------------------------------------------------------------------------
