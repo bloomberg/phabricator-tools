@@ -41,6 +41,7 @@ import phlsys_subcommand
 
 import abdcmd_arcydstatushtml
 import abdcmd_devstatushtml
+import abdcmd_init
 import abdcmd_instaweb
 import abdcmd_processrepos
 import abdcmd_repostatushtml
@@ -112,6 +113,8 @@ def main():
         "dev-status-html", abdcmd_devstatushtml, subparsers)
     phlsys_subcommand.setup_parser(
         "instaweb", abdcmd_instaweb, subparsers)
+    phlsys_subcommand.setup_parser(
+        "init", abdcmd_init, subparsers)
 
     args = parser.parse_args()
 

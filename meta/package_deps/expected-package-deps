@@ -5,7 +5,7 @@
 ('aoncmd', ['phlcon', 'phlsys'])
 ('abdweb', ['abdt', 'phlurl'])
 ('phlcon', ['phldef', 'phlsys'])
-('abdcmd', ['abdi', 'abdt', 'abdweb', 'phlsys', 'phlurl'])
+('abdcmd', ['abdi', 'abdt', 'abdweb', 'phlgit', 'phlsys', 'phlurl'])
 ('gabcmd', ['phlgit', 'phlsys'])
 ('phlgitu', ['phlsys'])
 ('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phlmail', 'phlsys'])

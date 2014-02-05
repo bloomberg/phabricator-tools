@@ -29,6 +29,7 @@ $arcyd arcyd-status-html -h
 $arcyd repo-status-html -h
 $arcyd dev-status-html -h
 $arcyd instaweb -h
+$arcyd init -h
 
 function setup_repos() {
     mkdir origin
@@ -50,7 +51,9 @@ function setup_repos() {
 }
 
 function configure_arcyd() {
-    mkdir -p touches
+    mkdir arcyd_instance
+    cd arcyd_instance
+    $arcyd init
 
     touch repo_arcyd.cfg
     echo @instance_local.cfg >> repo_arcyd.cfg
@@ -59,11 +62,11 @@ function configure_arcyd() {
     echo --repo-desc >> repo_arcyd.cfg
     echo arcyd test >> repo_arcyd.cfg
     echo --repo-path >> repo_arcyd.cfg
-    echo arcyd >> repo_arcyd.cfg
+    echo ../arcyd >> repo_arcyd.cfg
     echo --try-touch-path >> repo_arcyd.cfg
-    echo touches/repo_origin.try >> repo_arcyd.cfg
+    echo var/status/repo_origin.try >> repo_arcyd.cfg
     echo --ok-touch-path >> repo_arcyd.cfg
-    echo touches/repo_origin.ok >> repo_arcyd.cfg
+    echo var/status/repo_origin.ok >> repo_arcyd.cfg
     echo --review-url-format >> repo_arcyd.cfg
     echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
     echo --branch-url-format >> repo_arcyd.cfg
@@ -87,28 +90,34 @@ vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
     touch email_arcyd.cfg
     echo --admin-email >> email_admin.cfg
     echo admin@server.example >> email_admin.cfg
+
+    cd ..
 }
 
 function run_arcyd() {
+cd arcyd_instance
+
 $arcyd \
     process-repos \
     --sys-admin-emails admin@server.test \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
     --repo-configs @repo_arcyd.cfg \
-    --status-path arcyd_status.json \
+    --status-path var/status/arcyd_status.json \
     --sleep-secs 0 \
     --no-loop
 
 ${arcyd} \
     arcyd-status-html \
-    arcyd_status.json \
+    var/status/arcyd_status.json \
     https://server.test/arcyd
 
 ${arcyd} \
     repo-status-html \
-    touches/repo_origin.try \
-    touches/repo_origin.ok
+    var/status/repo_origin.try \
+    var/status/repo_origin.ok
+
+cd ..
 }
 
 setup_repos
@@ -116,7 +125,8 @@ configure_arcyd
 run_arcyd
 
 # exercise the killfile route
-touch killfile
+cd arcyd_instance
+touch var/command/killfile
 set +e
 $arcyd \
     process-repos \
@@ -124,11 +134,12 @@ $arcyd \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
     --repo-configs @repo_arcyd.cfg \
-    --status-path arcyd_status.json \
+    --status-path var/status/arcyd_status.json \
     --sleep-secs 0 \
-    --kill-file killfile \
+    --kill-file var/command/killfile \
     --no-loop
 set -e
+cd ..
 
 # create a review branch
 cd dev
@@ -203,10 +214,10 @@ cd dev
     git branch --merged refs/arcyd/landed | grep -v '*' | xargs git branch -D
 cd -
 
-cat savemail.txt
+cat arcyd_instance/savemail.txt
 
-cat touches/repo_origin.try
-cat touches/repo_origin.ok
+cat arcyd_instance/var/status/repo_origin.try
+cat arcyd_instance/var/status/repo_origin.ok
 
 cd ${olddir}
 rm -rf ${tempdir}
