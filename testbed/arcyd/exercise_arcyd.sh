@@ -30,6 +30,7 @@ $arcyd repo-status-html -h
 $arcyd dev-status-html -h
 $arcyd instaweb -h
 $arcyd init -h
+$arcyd add-phabricator -h
 
 function setup_repos() {
     mkdir origin
@@ -55,8 +56,18 @@ function configure_arcyd() {
     cd arcyd_instance
     $arcyd init
 
+    $arcyd add-phabricator \
+        --name local \
+        --instance-uri http://127.0.0.1/api/ \
+        --arcyd-user phab \
+        --arcyd-cert \
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
+zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
+s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
+vot7fxrotwpi3ty2b2sa2kvlpf
+
     touch repo_arcyd.cfg
-    echo @instance_local.cfg >> repo_arcyd.cfg
+    echo @phabricator-local.config >> repo_arcyd.cfg
     echo @email_arcyd.cfg >> repo_arcyd.cfg
     echo @email_admin.cfg >> repo_arcyd.cfg
     echo --repo-desc >> repo_arcyd.cfg
@@ -71,17 +82,6 @@ function configure_arcyd() {
     echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
     echo --branch-url-format >> repo_arcyd.cfg
     echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
-
-    touch instance_local.cfg
-    echo --instance-uri >> instance_local.cfg
-    echo http://127.0.0.1/api/ >> instance_local.cfg
-    echo --arcyd-user >> instance_local.cfg
-    echo phab >> instance_local.cfg
-    echo --arcyd-cert >> instance_local.cfg
-    echo xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
-zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
-s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
-vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
 
     touch email_arcyd.cfg
     echo --arcyd-email >> email_arcyd.cfg
