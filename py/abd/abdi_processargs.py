@@ -76,17 +76,18 @@ def setup_repo_arg_parser(parser):
 
     parser.add_argument(
         '--instance-uri',
-        metavar="URI",
         type=str,
+        metavar='ADDRESS',
         required=True,
-        help="instance to connect to, e.g. http://127.0.0.1")
+        help="URI to use to access the conduit API, e.g. "
+             "'http://127.0.0.1/api/'.")
 
     parser.add_argument(
         '--arcyd-user',
-        metavar="USER",
         type=str,
+        metavar='USERNAME',
         required=True,
-        help="username for Arcyd to use")
+        help="username of admin account registered for arcyd to use.")
 
     parser.add_argument(
         '--arcyd-cert',
@@ -110,7 +111,7 @@ def setup_repo_arg_parser(parser):
         metavar="TO",
         type=str,
         required=True,
-        help="email address to send important system events to")
+        help="single email address to send important system events to")
 
     parser.add_argument(
         '--repo-desc',
@@ -155,15 +156,25 @@ def setup_repo_arg_parser(parser):
 
     parser.add_argument(
         '--review-url-format',
-        metavar="STRING",
         type=str,
-        help="e.g. 'http://my.phabricator/D{review}'")
+        metavar='STRING',
+        required=True,
+        help="a format string for generating URLs for viewing reviews, e.g. "
+             "something like this: "
+             "'http://my.phabricator/D{review}' , "
+             "note that the {review} will be substituted for the id of the "
+             "branch.")
 
     parser.add_argument(
         '--branch-url-format',
-        metavar="STRING",
         type=str,
-        help="e.g. 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}'")
+        metavar='STRING',
+        required=True,
+        help="a format string for generating URLs for viewing branches, e.g. "
+             "for a gitweb install: "
+             "'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}', "
+             "note that the {branch} will be substituted for the branch name. "
+             "will be used on the dashboard to link to branches.")
 
     parser.add_argument(
         '--try-touch-path',
