@@ -31,6 +31,7 @@ $arcyd dev-status-html -h
 $arcyd instaweb -h
 $arcyd init -h
 $arcyd add-phabricator -h
+$arcyd add-repo -h
 
 function setup_repos() {
     mkdir origin
@@ -47,13 +48,12 @@ function setup_repos() {
     git config user.name 'Bob User'
     git config user.email 'bob@server.test'
     cd ..
-
-    git clone origin arcyd
 }
 
 function configure_arcyd() {
     mkdir arcyd_instance
     cd arcyd_instance
+
     $arcyd init
 
     $arcyd add-phabricator \
@@ -66,30 +66,15 @@ zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
 s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
-    touch repo_arcyd.cfg
-    echo @phabricator-local.config >> repo_arcyd.cfg
-    echo @email_arcyd.cfg >> repo_arcyd.cfg
-    echo @email_admin.cfg >> repo_arcyd.cfg
-    echo --repo-desc >> repo_arcyd.cfg
-    echo arcyd test >> repo_arcyd.cfg
-    echo --repo-path >> repo_arcyd.cfg
-    echo ../arcyd >> repo_arcyd.cfg
-    echo --try-touch-path >> repo_arcyd.cfg
-    echo var/status/repo_origin.try >> repo_arcyd.cfg
-    echo --ok-touch-path >> repo_arcyd.cfg
-    echo var/status/repo_origin.ok >> repo_arcyd.cfg
-    echo --review-url-format >> repo_arcyd.cfg
-    echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
-    echo --branch-url-format >> repo_arcyd.cfg
-    echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
-
-    touch email_arcyd.cfg
-    echo --arcyd-email >> email_arcyd.cfg
-    echo phab-role-account@server.example >> email_arcyd.cfg
-
-    touch email_arcyd.cfg
-    echo --admin-email >> email_admin.cfg
-    echo admin@server.example >> email_admin.cfg
+    $arcyd add-repo \
+        --name local \
+        --phabricator-name local \
+        --repo-desc local_repo \
+        --repo-url ../origin \
+        --review-url-format 'http://my.phabricator/D{review}' \
+        --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
+        --arcyd-email 'arcyd@localhost' \
+        --admin-email 'local-repo-admin@localhost'
 
     cd ..
 }
@@ -102,7 +87,7 @@ $arcyd \
     --sys-admin-emails admin@server.test \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail \
-    --repo-configs @repo_arcyd.cfg \
+    --repo-configs @repo-local.config \
     --status-path var/status/arcyd_status.json \
     --sleep-secs 0 \
     --no-loop
@@ -114,8 +99,8 @@ ${arcyd} \
 
 ${arcyd} \
     repo-status-html \
-    var/status/repo_origin.try \
-    var/status/repo_origin.ok
+    var/status/local.try \
+    var/status/local.ok
 
 cd ..
 }
@@ -216,8 +201,8 @@ cd -
 
 cat arcyd_instance/savemail.txt
 
-cat arcyd_instance/var/status/repo_origin.try
-cat arcyd_instance/var/status/repo_origin.ok
+cat arcyd_instance/var/status/local.try
+cat arcyd_instance/var/status/local.ok
 
 cd ${olddir}
 rm -rf ${tempdir}

@@ -1,6 +1,8 @@
 # abd
 * `abdcmd_addphabricator.py` -
 Make a new phabricator instance known to the Arcyd instance.
+* `abdcmd_addrepo.py` -
+Add a new repository for the Arcyd instance to manage.
 * `abdcmd_arcyd.py` -
 Arcyd - daemon to watch git repos, create and land reviews automatically.
 * `abdcmd_arcydstatushtml.py` -

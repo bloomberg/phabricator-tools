@@ -1,0 +1,254 @@
+"""Add a new repository for the Arcyd instance to manage."""
+# =============================================================================
+# CONTENTS
+# -----------------------------------------------------------------------------
+# abdcmd_addrepo
+#
+# Public Functions:
+#   getFromfilePrefixChars
+#   setupParser
+#   process
+#
+# -----------------------------------------------------------------------------
+# (this contents block is generated, edits will be lost)
+# =============================================================================
+
+# XXX: commands really shouldn't dep on eachother, need to extract common stuff
+
+from __future__ import absolute_import
+
+import os
+import shutil
+
+import phlgit_commit
+import phlsys_fs
+import phlsys_git
+import phlsys_subprocess
+import phlurl_request
+
+import abdcmd_addphabricator
+
+_CONFIG = """
+@{phabricator_config}
+--repo-desc
+{repo_desc}
+--repo-path
+{repo_path}
+--try-touch-path
+{try_touch_path}
+--ok-touch-path
+{ok_touch_path}
+--arcyd-email
+{arcyd_email}
+--admin-email
+{admin_email}
+""".strip()
+
+_CONFIG_SNOOP_URL = """
+--repo-snoop-url
+{repo_snoop_url}
+""".strip()
+
+_CONFIG_REVIEW_URL = """
+--review-url-format
+{review_url_format}
+""".strip()
+
+_CONFIG_BRANCH_URL = """
+--branch-url-format
+{branch_url_format}
+""".strip()
+
+
+def getFromfilePrefixChars():
+    return None
+
+
+def setupParser(parser):
+    parser.add_argument(
+        '--name',
+        type=str,
+        metavar='STR',
+        required=True,
+        help="string identifier for the repository, '[_a-zA-Z0-9]+'.")
+
+    parser.add_argument(
+        '--phabricator-name',
+        type=str,
+        metavar='STR',
+        required=True,
+        help="name of the Phabricator instance associated with the repo.")
+
+    parser.add_argument(
+        '--repo-desc',
+        type=str,
+        metavar='STR',
+        required=True,
+        help="very short description of the repository, appears on the "
+             "dashboard, in error messages and in logs.")
+
+    parser.add_argument(
+        '--repo-url',
+        type=str,
+        metavar='STR',
+        required=True,
+        help="URL to clone and fetch the repository from.")
+
+    parser.add_argument(
+        '--repo-snoop-url',
+        metavar="URL",
+        type=str,
+        help="URL to use to snoop the latest contents of the repository, this "
+             "is used by Arcyd to more efficiently determine if it needs to "
+             "fetch the repository or not.  The efficiency comes from "
+             "re-using connections to the same host when querying.  The "
+             "contents returned by the URL are expected to change every time "
+             "the git repository changes, a good example of a URL to supply "
+             "is to the 'info/refs' address if you're serving up the repo "
+             "over http or https.  "
+             "e.g. 'http://server.test/git/myrepo/info/refs'.")
+
+    # XXX: we should be generating this for the user
+    parser.add_argument(
+        '--review-url-format',
+        type=str,
+        metavar='STRING',
+        help="a format string for generating URLs for viewing reviews, e.g. "
+             "something like this: "
+             "'http://my.phabricator/D{review}' , "
+             "note that the {review} will be substituted for the id of the "
+             "branch.")
+
+    parser.add_argument(
+        '--branch-url-format',
+        type=str,
+        metavar='STRING',
+        help="a format string for generating URLs for viewing branches, e.g. "
+             "for a gitweb install: "
+             "'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}', "
+             "note that the {branch} will be substituted for the branch name. "
+             "will be used on the dashboard to link to branches.")
+
+    parser.add_argument(
+        '--arcyd-email',
+        metavar="FROM",
+        type=str,
+        required=True,
+        help="email address for Arcyd to send mails from")
+
+    parser.add_argument(
+        '--admin-email',
+        metavar="TO",
+        type=str,
+        required=True,
+        help="single email address to send important system events to")
+
+
+def _make_config_phabricator_path(name):
+    return 'phabricator-{}.config'.format(name)
+
+
+def _make_config_repo_path(name):
+    return 'repo-{}.config'.format(name)
+
+
+def process(args):
+
+    try_touch_path = "var/status/{}.try".format(args.name)
+    ok_touch_path = "var/status/{}.ok".format(args.name)
+    repo_path = "var/repo/{}".format(args.name)
+
+    # make sure the repo doesn't exist already
+    if os.path.exists(repo_path):
+        raise Exception('{} already exists'.format(repo_path))
+
+    # make sure the file doesn't exist already
+    path = _make_config_repo_path(args.name)
+    if os.path.exists(path):
+        raise Exception('{} already exists'.format(path))
+
+    # make sure the phabricator config exists
+    phab_config_path = abdcmd_addphabricator._make_config_phabricator_path(
+        args.phabricator_name)
+    if not os.path.exists(phab_config_path):
+        raise Exception('{} does not exist'.format(phab_config_path))
+
+    # make sure we can use the snoop URL
+    if args.repo_snoop_url:
+        phlurl_request.get(args.repo_snoop_url)
+
+    # generate the config file
+    config = _CONFIG.format(
+        phabricator_config=phab_config_path,
+        repo_desc=args.repo_desc,
+        repo_path=repo_path,
+        try_touch_path=try_touch_path,
+        ok_touch_path=ok_touch_path,
+        arcyd_email=args.arcyd_email,
+        admin_email=args.admin_email)
+
+    if args.repo_snoop_url:
+        config = '\n'.join([
+            config,
+            _CONFIG_SNOOP_URL.format(
+                repo_snoop_url=args.repo_snoop_url)])
+
+    if args.review_url_format:
+        config = '\n'.join([
+            config,
+            _CONFIG_REVIEW_URL.format(
+                review_url_format=args.review_url_format)])
+
+    if args.branch_url_format:
+        config = '\n'.join([
+            config,
+            _CONFIG_BRANCH_URL.format(
+                branch_url_format=args.branch_url_format)])
+
+    # if there's any failure after cloning then we should remove the repo
+    phlsys_subprocess.run(
+        'git', 'clone', args.repo_url, repo_path)
+    try:
+        repo = phlsys_git.Repo(repo_path)
+
+        # test pushing to master
+        repo.call('checkout', 'origin/master')
+        phlgit_commit.allow_empty(repo, 'test commit for pushing')
+        repo.call('push', 'origin', '--dry-run', 'HEAD:refs/heads/master')
+        repo.call('checkout', '-')
+
+        # test push to special refs
+        repo.call(
+            'push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
+        repo.call(
+            'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
+
+        # success, write out the config
+        phlsys_fs.write_text_file(path, config)
+    except Exception:
+        # clean up the git repo
+        shutil.rmtree(repo_path)
+        raise
+
+
+#------------------------------------------------------------------------------
+# Copyright (C) 2014 Bloomberg Finance L.P.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+# IN THE SOFTWARE.
+#------------------------------- END-OF-FILE ----------------------------------
