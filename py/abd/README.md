@@ -17,6 +17,8 @@ Start a local webserver to report the status of an arcyd instance.
 Command to process multiple repos.
 * `abdcmd_repostatushtml.py` -
 Render status files as meaningful html to present to users.
+* `abdcmd_start.py` -
+Start the arcyd instance for the current directory, if not already going.
 * `abdcmnt_commenter.py` -
 Make pre-defined comments on Differential revisions.
 * `abdi_processargs.py` -

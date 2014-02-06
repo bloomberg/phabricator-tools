@@ -32,6 +32,7 @@ $arcyd instaweb -h
 $arcyd init -h
 $arcyd add-phabricator -h
 $arcyd add-repo -h
+$arcyd start -h
 
 function setup_repos() {
     mkdir origin
@@ -54,7 +55,10 @@ function configure_arcyd() {
     mkdir arcyd_instance
     cd arcyd_instance
 
-    $arcyd init
+    $arcyd init \
+        --sleep-secs 0 \
+        --sendmail-binary ${mail} \
+        --sendmail-type catchmail
 
     $arcyd add-phabricator \
         --name local \
@@ -82,15 +86,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 function run_arcyd() {
 cd arcyd_instance
 
-$arcyd \
-    process-repos \
-    --sys-admin-emails admin@server.test \
-    --sendmail-binary ${mail} \
-    --sendmail-type catchmail \
-    --repo-configs @repo-local.config \
-    --status-path var/status/arcyd_status.json \
-    --sleep-secs 0 \
-    --no-loop
+${arcyd} start --no-loop
 
 ${arcyd} \
     arcyd-status-html \
@@ -113,16 +109,7 @@ run_arcyd
 cd arcyd_instance
 touch var/command/killfile
 set +e
-$arcyd \
-    process-repos \
-    --sys-admin-emails admin@server.test \
-    --sendmail-binary ${mail} \
-    --sendmail-type catchmail \
-    --repo-configs @repo_arcyd.cfg \
-    --status-path var/status/arcyd_status.json \
-    --sleep-secs 0 \
-    --kill-file var/command/killfile \
-    --no-loop
+${arcyd} start
 set -e
 cd ..
 

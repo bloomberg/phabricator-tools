@@ -47,6 +47,7 @@ import abdcmd_init
 import abdcmd_instaweb
 import abdcmd_processrepos
 import abdcmd_repostatushtml
+import abdcmd_start
 
 _USAGE_EXAMPLES = """
 usage example:
@@ -120,6 +121,8 @@ def main():
         "add-phabricator", abdcmd_addphabricator, subparsers)
     phlsys_subcommand.setup_parser(
         "add-repo", abdcmd_addrepo, subparsers)
+    phlsys_subcommand.setup_parser(
+        "start", abdcmd_start, subparsers)
 
     args = parser.parse_args()
 
