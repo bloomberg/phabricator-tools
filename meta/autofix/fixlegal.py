@@ -154,8 +154,15 @@ def should_process_file(path):
 
 
 def get_first_year(path):
-    timestamp_str_list = subprocess.check_output(
-        ['git', 'log', '--format=%ct', '--follow', path])
+    timestamp_str_list = subprocess.check_output([
+        'git',
+        'log',
+        '--format=%ct',
+        '--follow',
+        '--find-copies=95',
+        '--find-renames=80',
+        path
+    ])
     timestamp_str = timestamp_str_list.splitlines()[-1]
     return timestamp_str_to_year(timestamp_str)
 
