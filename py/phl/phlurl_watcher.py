@@ -6,6 +6,7 @@
 #
 # Public Classes:
 #   Watcher
+#    .peek_has_url_recently_changed
 #    .has_url_recently_changed
 #    .refresh
 #    .load
@@ -38,7 +39,37 @@ class Watcher(object):
         if self._request_func is None:
             self._request_func = phlurl_request.get
 
+    def _request_and_set_has_changed(self, url, has_changed):
+        content = self._request_func(url)
+        # pylint: disable=E1101
+        self._results[url] = _HashHexdigestHasChanged(
+            hashlib.sha1(content).hexdigest(), has_changed)
+        # pylint: enable=E1101
+        return True
+
+    def peek_has_url_recently_changed(self, url):
+        """Return True if the url has recently changed, otherwise False.
+
+        Note that this call does not consume the 'newness' of the url's
+        content.
+
+        """
+        if url in self._results:
+            return self._results[url].has_changed
+
+        # this is the first query for this url
+        self._request_and_set_has_changed(url, has_changed=True)
+        return True
+
     def has_url_recently_changed(self, url):
+        """Return True if the url has recently changed, otherwise False.
+
+        Note that the next calls to this method will return False, as the
+        'newness' of the url's content will be considered as 'consumed'.
+
+        The 'newness' status will be updated during the next call to 'refresh'.
+
+        """
         if url in self._results:
             old_result = self._results[url].has_changed
             if old_result:
@@ -46,11 +77,9 @@ class Watcher(object):
                 self._results[url] = _HashHexdigestHasChanged(
                     hash_hexdigest, False)
             return old_result
-        content = self._request_func(url)
-        # pylint: disable=E1101
-        self._results[url] = _HashHexdigestHasChanged(
-            hashlib.sha1(content).hexdigest(), False)
-        # pylint: enable=E1101
+
+        # this is the first query for this url
+        self._request_and_set_has_changed(url, has_changed=False)
         return True
 
     def refresh(self):

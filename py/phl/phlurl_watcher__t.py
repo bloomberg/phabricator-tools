@@ -45,14 +45,21 @@ class Test(unittest.TestCase):
             with open('data') as f:
                 watcher.load(f)
 
-            self.assertTrue(watcher.has_url_recently_changed('http://z.com'))
+            url = 'http://z.com'
+
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+            self.assertTrue(watcher.has_url_recently_changed(url))
+            self.assertFalse(watcher.has_url_recently_changed(url))
+            self.assertFalse(watcher.peek_has_url_recently_changed(url))
 
             with open('data', 'w') as f:
                 watcher.dump(f)
             with open('data') as f:
                 watcher.load(f)
 
-            self.assertFalse(watcher.has_url_recently_changed('http://z.com'))
+            self.assertFalse(watcher.has_url_recently_changed(url))
+            self.assertFalse(watcher.peek_has_url_recently_changed(url))
 
 
 #------------------------------------------------------------------------------
