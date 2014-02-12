@@ -48,6 +48,7 @@ import abdcmd_instaweb
 import abdcmd_processrepos
 import abdcmd_repostatushtml
 import abdcmd_start
+import abdcmd_stop
 
 _USAGE_EXAMPLES = """
 usage example:
@@ -123,6 +124,8 @@ def main():
         "add-repo", abdcmd_addrepo, subparsers)
     phlsys_subcommand.setup_parser(
         "start", abdcmd_start, subparsers)
+    phlsys_subcommand.setup_parser(
+        "stop", abdcmd_stop, subparsers)
 
     args = parser.parse_args()
 

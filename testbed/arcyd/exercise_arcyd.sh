@@ -33,6 +33,7 @@ $arcyd init -h
 $arcyd add-phabricator -h
 $arcyd add-repo -h
 $arcyd start -h
+$arcyd stop -h
 
 function setup_repos() {
     mkdir origin
@@ -105,12 +106,10 @@ setup_repos
 configure_arcyd
 run_arcyd
 
-# exercise the killfile route
+# exercise the stop route
 cd arcyd_instance
-touch var/command/killfile
-set +e
-${arcyd} start
-set -e
+${arcyd} start &
+${arcyd} stop
 cd ..
 
 # create a review branch
