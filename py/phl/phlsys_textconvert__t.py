@@ -73,6 +73,26 @@ class Test(unittest.TestCase):
         self._check_unicode_to_ascii(u"\u25b8", ">")
         self._check_unicode_to_ascii(u"\u25e6", "o")
 
+    def test_A_Breathing(self):
+
+        # test we can convert unicode to unicode
+        phlsys_textconvert.to_unicode(unicode('hello'))
+
+        # test we can convert str to unicode
+        self.assertIsInstance(
+            phlsys_textconvert.to_unicode('hello'),
+            unicode)
+
+        # test invalid characters get replaced by the replacement character
+        self.assertEqual(
+            phlsys_textconvert.to_unicode('\xFF'),
+            u'\uFFFD')
+
+        # test 'horizontal ellipses' as UTF8 get replaced
+        self.assertEqual(
+            phlsys_textconvert.to_unicode('\xe2\x80\xa6'),
+            u'\uFFFD\uFFFD\uFFFD')
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.

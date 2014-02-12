@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   lossy_unicode_to_ascii
+#   to_unicode
 #
 # Public Assignments:
 #   UNICODE_REPLACEMENTS
@@ -82,6 +83,30 @@ def lossy_unicode_to_ascii(unicode_str):
     replaced = decomposed.encode('ascii', 'replace')
 
     return replaced
+
+
+def to_unicode(s, errors=None):
+    """Return a unicode string from the supplied string 's'.
+
+    If there are invalid characters in the string 's' then they will be
+    replaced with the unicode replacement character (U+FFFD).
+
+    The error behavior can be overriden by supplying a string value for error
+    of ('strict', 'replace' or 'ignore) which behave identically to the builtin
+    unicode.
+
+    If 's' is already a unicode string then no action will be taken
+
+    """
+    if errors is None:
+        errors = 'replace'
+
+    if isinstance(s, unicode):
+        return s
+    elif isinstance(s, str):
+        return unicode(s, errors=errors)
+    else:
+        raise TypeError('not a str or unicode')
 
 
 #------------------------------------------------------------------------------
