@@ -7,6 +7,7 @@
 # Public Functions:
 #   lossy_unicode_to_ascii
 #   to_unicode
+#   ensure_ascii
 #
 # Public Assignments:
 #   UNICODE_REPLACEMENTS
@@ -107,6 +108,24 @@ def to_unicode(s, errors=None):
         return unicode(s, errors=errors)
     else:
         raise TypeError('not a str or unicode')
+
+
+def ensure_ascii(s):
+    """Return an ascii str from the supplied str 's'.
+
+    If there are invalid characters in the string 's' then they will be
+    replaced with '?'.
+
+    If the supplied 's' is not a str then raise TypeError.
+
+    :s: a str, should be ascii
+    :returns: an ascii str
+
+    """
+    if not isinstance(s, str):
+        raise TypeError('not a str')
+
+    return ''.join([c if ord(c) < 128 else '?' for c in s])
 
 
 #------------------------------------------------------------------------------

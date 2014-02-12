@@ -93,6 +93,24 @@ class Test(unittest.TestCase):
             phlsys_textconvert.to_unicode('\xe2\x80\xa6'),
             u'\uFFFD\uFFFD\uFFFD')
 
+        # test we can convert ascii to ascii
+        phlsys_textconvert.ensure_ascii('hello')
+
+        # test str stays str
+        self.assertIsInstance(
+            phlsys_textconvert.ensure_ascii('hello'),
+            str)
+
+        # test invalid characters get replaced by '?'
+        self.assertEqual(
+            phlsys_textconvert.ensure_ascii('\xFF'),
+            '?')
+
+        # test 'horizontal ellipses' as UTF8 get replaced
+        self.assertEqual(
+            phlsys_textconvert.ensure_ascii('\xe2\x80\xa6'),
+            '???')
+
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
