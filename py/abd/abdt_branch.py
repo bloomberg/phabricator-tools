@@ -56,6 +56,7 @@ import phlgit_log
 import phlgit_push
 import phlgit_revparse
 import phlgitu_ref
+import phlsys_textconvert
 
 import abdt_differ
 import abdt_errident
@@ -303,7 +304,7 @@ class Branch(object):
         message = ""
         for r in revisions:
             message += r.abbrev_hash + " " + r.subject + "\n"
-        return message
+        return phlsys_textconvert.ensure_ascii(message)
 
     def make_message_digest(self):
         """Return a string digest of the commit messages on the branch.
@@ -318,7 +319,7 @@ class Branch(object):
         message = revisions[0].subject + "\n\n"
         for r in revisions:
             message += r.message
-        return message
+        return phlsys_textconvert.ensure_ascii(message)
 
     def make_raw_diff(self):
         """Return an abdt_differ.DiffResult of the changes on the branch.
@@ -367,7 +368,7 @@ class Branch(object):
         message = revision.subject + "\n"
         message += "\n"
         message += revision.message + "\n"
-        return message
+        return phlsys_textconvert.ensure_ascii(message)
 
     def _push_delete_review_branch(self):
         def action():
