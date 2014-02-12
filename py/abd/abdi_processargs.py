@@ -390,10 +390,14 @@ def _fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
     did_fetch = False
 
     # fetch only if we need to
-    if not snoop_url or url_watcher.has_url_recently_changed(snoop_url):
+    if not snoop_url or url_watcher.peek_has_url_recently_changed(snoop_url):
             abdt_tryloop.tryloop(
                 repo.fetch_prune, abdt_errident.FETCH_PRUNE, repo_desc)
             did_fetch = True
+
+    if did_fetch and snoop_url:
+        # consume the 'newness' of this repo, since fetching succeeded
+        url_watcher.has_url_recently_changed(snoop_url)
 
     return did_fetch
 
