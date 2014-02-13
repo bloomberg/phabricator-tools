@@ -6,10 +6,13 @@
 #
 # Public Classes:
 #   Layout
+#    .phabricator_config
 #   Accessor
 #    .set_pid
 #    .get_pid_or_none
 #    .create_root_config
+#    .create_phabricator_config
+#    .get_phabricator_config_rel_path
 #
 # Public Functions:
 #   make_default_accessor
@@ -77,6 +80,16 @@ class Layout(object):
 
     dir_run = 'var/run'
 
+    @staticmethod
+    def phabricator_config(name):
+        """Return the string path to the phabricator config 'name'.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :returns: the string relative path of the new file
+
+        """
+        return 'phabricator-{}.config'.format(name)
+
 
 class Accessor(object):
 
@@ -126,7 +139,7 @@ class Accessor(object):
 
         return pid
 
-    def create_root_config(self, contents):
+    def create_root_config(self, content):
         """Create and commit the root config file.
 
         :returns: None
@@ -138,9 +151,46 @@ class Accessor(object):
         if os.path.exists(path):
             raise Exception("root config already exists")
 
-        phlsys_fs.write_text_file(path, contents)
+        phlsys_fs.write_text_file(path, content)
         self._repo.call('add', rel_path)
         phlgit_commit.index(self._repo, 'Created root config')
+
+    def create_phabricator_config(self, name, content):
+        """Create a new phabricator config file.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :content: string data of the new config
+        :returns: None
+
+        """
+        rel_path = self._layout.phabricator_config(name)
+        path = self._make_abspath(rel_path)
+
+        if os.path.exists(path):
+            raise Exception("config already exists")
+
+        phlsys_fs.write_text_file(path, content)
+        self._repo.call('add', rel_path)
+        phlgit_commit.index(
+            self._repo,
+            'Add phabricator config: {}'.format(name))
+
+    def get_phabricator_config_rel_path(self, name):
+        """Return the string path for the phabricator config 'name'.
+
+        Raise Exception if the config does not exist.
+
+        :name: string name of the config [a-zA-Z0-9_]
+        :returns: None
+
+        """
+        rel_path = self._layout.phabricator_config(name)
+        path = self._make_abspath(rel_path)
+
+        if not os.path.isfile(path):
+            raise Exception('{} has no phabricator config'.format(name))
+
+        return rel_path
 
 
 def make_default_accessor():

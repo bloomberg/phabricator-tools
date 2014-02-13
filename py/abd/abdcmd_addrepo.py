@@ -26,7 +26,8 @@ import phlsys_git
 import phlsys_subprocess
 import phlurl_request
 
-import abdcmd_addphabricator
+import abdt_fs
+
 
 _CONFIG = """
 @{phabricator_config}
@@ -154,6 +155,8 @@ def _make_config_repo_path(name):
 
 def process(args):
 
+    fs = abdt_fs.make_default_accessor()
+
     try_touch_path = "var/status/{}.try".format(args.name)
     ok_touch_path = "var/status/{}.ok".format(args.name)
     repo_path = "var/repo/{}".format(args.name)
@@ -168,10 +171,8 @@ def process(args):
         raise Exception('{} already exists'.format(path))
 
     # make sure the phabricator config exists
-    phab_config_path = abdcmd_addphabricator._make_config_phabricator_path(
+    phab_config_path = fs.get_phabricator_config_rel_path(
         args.phabricator_name)
-    if not os.path.exists(phab_config_path):
-        raise Exception('{} does not exist'.format(phab_config_path))
 
     # make sure we can use the snoop URL
     if args.repo_snoop_url:

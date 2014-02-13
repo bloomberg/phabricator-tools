@@ -15,10 +15,10 @@
 
 from __future__ import absolute_import
 
-import os
-
 import phlsys_conduit
-import phlsys_fs
+
+import abdt_fs
+
 
 _CONFIG = """
 --instance-uri
@@ -81,16 +81,9 @@ def setupParser(parser):
              "conduit to https.")
 
 
-def _make_config_phabricator_path(name):
-    return 'phabricator-{}.config'.format(name)
-
-
 def process(args):
 
-    # make sure the file doesn't exist already
-    path = _make_config_phabricator_path(args.name)
-    if os.path.exists(path):
-        raise Exception('{} already exists'.format(path))
+    fs = abdt_fs.make_default_accessor()
 
     # make sure we can connect with those parameters
     conduit = phlsys_conduit.Conduit(
@@ -111,7 +104,7 @@ def process(args):
             _CONFIG_HTTPS_PROXY.format(
                 https_proxy=args.https_proxy)])
 
-    phlsys_fs.write_text_file(path, content)
+    fs.create_phabricator_config(args.name, content)
 
 
 #------------------------------------------------------------------------------
