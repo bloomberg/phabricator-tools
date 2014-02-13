@@ -58,32 +58,8 @@ echo 'if [ -n "$revisionid" ]; then' >> accept.sh
 echo '${arcyon} comment ${revisionid} --action accept ${arcyoncreds}' >> accept.sh
 echo 'fi' >> accept.sh
 
-echo "arcyd='${arcyd}'" > kill_arcyd.sh
-echo 'cd ..' >> kill_arcyd.sh
-echo 'arcyd_pid=$(cat arcyd.pid)' >> kill_arcyd.sh
-echo 'touch killfile' >> kill_arcyd.sh
-echo 'rm arcyd.pid' >> kill_arcyd.sh
-
-echo "arcyd='${arcyd}'" > start_arcyd.sh
-echo 'cd ..' >> start_arcyd.sh
-echo '${arcyd} \' >> start_arcyd.sh
-    echo 'process-repos \' >> start_arcyd.sh
-    echo '--sys-admin-emails admin@server.test \' >> start_arcyd.sh
-    echo "--sendmail-binary '${mail}' \\" >> start_arcyd.sh
-    echo '--sendmail-type catchmail \' >> start_arcyd.sh
-    echo '--repo-configs @repo_arcyd.cfg \' >> start_arcyd.sh
-    echo '--status-path arcyd_status.json \' >> start_arcyd.sh
-    echo '--kill-file killfile \' >> start_arcyd.sh
-    echo '--sleep-secs 1 \' >> start_arcyd.sh
-    echo '< /dev/null > /dev/null \' >> start_arcyd.sh
-echo '&' >> start_arcyd.sh
-echo 'arcyd_pid=$!' >> start_arcyd.sh
-echo 'echo ${arcyd_pid} > arcyd.pid' >> start_arcyd.sh
-
 chmod +x poke.sh
 chmod +x accept.sh
-chmod +x kill_arcyd.sh
-chmod +x start_arcyd.sh
 
 git add .
 git commit -m 'intial commit'
@@ -102,63 +78,44 @@ git commit -m 'intial commit'
 git push origin master
 cd ..
 
-git clone origin arcyd
-git clone origin2 arcyd2
+mkdir arcyd
+cd arcyd
+    $arcyd init \
+        --sleep-secs 1 \
+        --sendmail-binary ${mail} \
+        --sendmail-type catchmail
 
-mkdir -p touches
-
-touch repo_arcyd.cfg
-echo @instance_local.cfg >> repo_arcyd.cfg
-echo @email_arcyd.cfg >> repo_arcyd.cfg
-echo @email_admin.cfg >> repo_arcyd.cfg
-echo --repo-desc >> repo_arcyd.cfg
-echo arcyd test >> repo_arcyd.cfg
-echo --repo-path >> repo_arcyd.cfg
-echo arcyd >> repo_arcyd.cfg
-echo --try-touch-path >> repo_arcyd.cfg
-echo touches/repo_arcyd.cfg.try >> repo_arcyd.cfg
-echo --ok-touch-path >> repo_arcyd.cfg
-echo touches/repo_arcyd.cfg.ok >> repo_arcyd.cfg
-echo --review-url-format >> repo_arcyd.cfg
-echo 'http://127.0.0.1/D{review}' >> repo_arcyd.cfg
-# echo --branch-url-format >> repo_arcyd.cfg
-# echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
-echo --repo-snoop-url >> repo_arcyd.cfg
-echo 'http://localhost:8000/info/refs' >> repo_arcyd.cfg
-
-touch repo_arcyd2.cfg
-echo @instance_local.cfg >> repo_arcyd2.cfg
-echo @email_arcyd.cfg >> repo_arcyd2.cfg
-echo @email_admin.cfg >> repo_arcyd2.cfg
-echo --repo-desc >> repo_arcyd2.cfg
-echo arcyd2 test >> repo_arcyd2.cfg
-echo --repo-path >> repo_arcyd2.cfg
-echo arcyd2 >> repo_arcyd2.cfg
-echo --try-touch-path >> repo_arcyd2.cfg
-echo touches/repo_arcyd2.cfg.try >> repo_arcyd2.cfg
-echo --ok-touch-path >> repo_arcyd2.cfg
-echo touches/repo_arcyd2.cfg.ok >> repo_arcyd2.cfg
-echo --review-url-format >> repo_arcyd2.cfg
-echo 'http://127.0.0.1/D{review}' >> repo_arcyd2.cfg
-
-touch instance_local.cfg
-echo --instance-uri >> instance_local.cfg
-echo http://127.0.0.1/api/ >> instance_local.cfg
-echo --arcyd-user >> instance_local.cfg
-echo phab >> instance_local.cfg
-echo --arcyd-cert >> instance_local.cfg
-echo xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
+    $arcyd add-phabricator \
+        --name local \
+        --instance-uri http://127.0.0.1/api/ \
+        --arcyd-user phab \
+        --arcyd-cert \
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
 zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
 s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
-vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
+vot7fxrotwpi3ty2b2sa2kvlpf
 
-touch email_arcyd.cfg
-echo --arcyd-email >> email_arcyd.cfg
-echo phab-role-account@server.example >> email_arcyd.cfg
-echo --admin-email >> email_admin.cfg
-echo admin@server.example >> email_admin.cfg
+    $arcyd add-repo \
+        --name local_1 \
+        --phabricator-name local \
+        --repo-desc local_repo_1 \
+        --repo-url ../origin \
+        --review-url-format 'http://my.phabricator/D{review}' \
+        --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
+        --arcyd-email 'arcyd@localhost' \
+        --admin-email 'local-repo-admin@localhost'
 
-echo 'press enter to stop.'
+    $arcyd add-repo \
+        --name local_2 \
+        --phabricator-name local \
+        --repo-desc local_repo_2 \
+        --repo-url ../origin2 \
+        --review-url-format 'http://my.phabricator/D{review}' \
+        --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
+        --arcyd-email 'arcyd@localhost' \
+        --admin-email 'local-repo-admin@localhost'
+
+cd ..
 
 # run an http server for Git in the background, for snooping
 cd origin
@@ -169,29 +126,16 @@ cd -
 # run arcyd instaweb in the background
 ${arcyd} \
     instaweb \
-    --report-file arcyd_status.json \
-    --repo-file-dir touches \
+    --report-file arcyd/var/status/arcyd_status.json \
+    --repo-file-dir arcyd/var/status \
     --port 8001 \
 &
 instaweb_pid=$!
 
 # run arcyd in the background
-${arcyd} \
-    process-repos \
-    --sys-admin-emails admin@server.test \
-    --sendmail-binary ${mail} \
-    --sendmail-type catchmail \
-    --repo-configs @repo_arcyd.cfg \
-    --repo-configs @repo_arcyd2.cfg \
-    --status-path arcyd_status.json \
-    --kill-file killfile \
-    --io-log-file arcyd-io.log \
-    --sleep-secs 1 \
-    < /dev/null > /dev/null \
-&
-arcyd_pid=$!
-
-echo ${arcyd_pid} > arcyd.pid
+cd arcyd
+${arcyd} start < /dev/null > /dev/null &
+cd ..
 
 function cleanup() {
 
@@ -201,11 +145,10 @@ function cleanup() {
     kill $instaweb_pid
     wait $instaweb_pid
 
-    arcyd_pid=$(cat arcyd.pid)
-
-    # kill arycd
-    touch killfile
-    wait $arcyd_pid
+    # kill arcyd
+    cd arcyd
+    ${arcyd} stop -f
+    cd ..
 
     echo $webserver_pid
     kill $webserver_pid
