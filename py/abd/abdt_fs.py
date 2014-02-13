@@ -7,12 +7,18 @@
 # Public Classes:
 #   Layout
 #    .phabricator_config
+#    .repo_config
+#    .repo_try
+#    .repo_ok
+#    .repo
 #   Accessor
 #    .set_pid
 #    .get_pid_or_none
 #    .create_root_config
 #    .create_phabricator_config
 #    .get_phabricator_config_rel_path
+#    .create_repo_config
+#    .layout
 #
 # Public Functions:
 #   make_default_accessor
@@ -89,6 +95,31 @@ class Layout(object):
 
         """
         return 'phabricator-{}.config'.format(name)
+
+    @staticmethod
+    def repo_config(name):
+        """Return the string path to the repo config 'name'.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :returns: the string relative path of the new file
+
+        """
+        return 'repo-{}.config'.format(name)
+
+    @staticmethod
+    def repo_try(name):
+        """Return the string path to the 'try' file for the repo."""
+        return "var/status/{}.try".format(name)
+
+    @staticmethod
+    def repo_ok(name):
+        """Return the string path to the 'ok' file for the repo."""
+        return "var/status/{}.ok".format(name)
+
+    @staticmethod
+    def repo(name):
+        """Return the string path to repo 'name'."""
+        return "var/repo/{}".format(name)
 
 
 class Accessor(object):
@@ -191,6 +222,30 @@ class Accessor(object):
             raise Exception('{} has no phabricator config'.format(name))
 
         return rel_path
+
+    def create_repo_config(self, name, content):
+        """Create a new repo config file.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :content: string data of the new config
+        :returns: None
+
+        """
+        rel_path = self._layout.repo_config(name)
+        path = self._make_abspath(rel_path)
+
+        if os.path.exists(path):
+            raise Exception("config already exists")
+
+        phlsys_fs.write_text_file(path, content)
+        self._repo.call('add', rel_path)
+        phlgit_commit.index(
+            self._repo,
+            'Add repo config: {}'.format(name))
+
+    @property
+    def layout(self):
+        return self._layout
 
 
 def make_default_accessor():

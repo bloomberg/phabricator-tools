@@ -13,15 +13,12 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-# XXX: commands really shouldn't dep on eachother, need to extract common stuff
-
 from __future__ import absolute_import
 
 import os
 import shutil
 
 import phlgit_commit
-import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 import phlurl_request
@@ -145,30 +142,17 @@ def setupParser(parser):
         help="single email address to send important system events to")
 
 
-def _make_config_phabricator_path(name):
-    return 'phabricator-{}.config'.format(name)
-
-
-def _make_config_repo_path(name):
-    return 'repo-{}.config'.format(name)
-
-
 def process(args):
 
     fs = abdt_fs.make_default_accessor()
 
-    try_touch_path = "var/status/{}.try".format(args.name)
-    ok_touch_path = "var/status/{}.ok".format(args.name)
-    repo_path = "var/repo/{}".format(args.name)
+    try_touch_path = fs.layout.repo_try(args.name)
+    ok_touch_path = fs.layout.repo_ok(args.name)
+    repo_path = fs.layout.repo(args.name)
 
     # make sure the repo doesn't exist already
     if os.path.exists(repo_path):
         raise Exception('{} already exists'.format(repo_path))
-
-    # make sure the file doesn't exist already
-    path = _make_config_repo_path(args.name)
-    if os.path.exists(path):
-        raise Exception('{} already exists'.format(path))
 
     # make sure the phabricator config exists
     phab_config_path = fs.get_phabricator_config_rel_path(
@@ -225,7 +209,7 @@ def process(args):
             'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
 
         # success, write out the config
-        phlsys_fs.write_text_file(path, config)
+        fs.create_repo_config(args.name, config)
     except Exception:
         # clean up the git repo
         shutil.rmtree(repo_path)
