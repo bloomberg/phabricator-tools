@@ -146,6 +146,7 @@ function cleanup() {
     wait $instaweb_pid
 
     # kill arcyd
+    cd ${tempdir}
     cd arcyd
     ${arcyd} stop -f
     cd ..

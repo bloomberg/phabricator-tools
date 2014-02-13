@@ -19,6 +19,9 @@ import os
 import time
 
 import phlsys_fs
+import phlsys_pid
+
+import abdt_fs
 
 
 def getFromfilePrefixChars():
@@ -27,26 +30,35 @@ def getFromfilePrefixChars():
 
 def setupParser(parser):
     parser.add_argument(
-        '--force',
+        '--force', '-f',
         action='store_true',
         help="kill the process.")
 
 
 def process(args):
-    # check for the arcydroot file
-    if not os.path.exists('.arcydroot'):
-        raise Exception('did not find .arcydroot in current directory')
+    fs = abdt_fs.make_default_accessor()
+
+    pid = fs.get_pid_or_none()
+    if pid is None or not phlsys_pid.is_running(pid):
+        raise Exception("Arcyd is not running")
 
     if args.force:
-        raise Exception('--force not implemented yet')
+        phlsys_pid.request_terminate(pid)
+    else:
+        killfile = 'var/command/killfile'
+        phlsys_fs.write_text_file(killfile, '')
 
-    killfile = 'var/command/killfile'
-    phlsys_fs.write_text_file(killfile, '')
+        if os.path.isfile(killfile):
+            time.sleep(1)
+            while os.path.isfile(killfile):
+                print 'waiting for arcyd to remove killfile ..'
+                time.sleep(1)
 
-    if os.path.isfile(killfile):
+    # wait for Arcyd to not be running
+    if phlsys_pid.is_running(pid):
         time.sleep(1)
-        while os.path.isfile(killfile):
-            print 'waiting for arcyd to remove killfile ..'
+        while phlsys_pid.is_running(pid):
+            print 'waiting for arcyd to exit'
             time.sleep(1)
 
 

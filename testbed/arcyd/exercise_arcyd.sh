@@ -107,8 +107,10 @@ configure_arcyd
 run_arcyd
 
 # exercise the stop route
+echo exercise the stop route
 cd arcyd_instance
 ${arcyd} start &
+sleep 1
 ${arcyd} stop
 cd ..
 

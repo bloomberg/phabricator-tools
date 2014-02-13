@@ -18,6 +18,10 @@ from __future__ import absolute_import
 import argparse
 import os
 
+import phlsys_pid
+
+import abdt_fs
+
 import abdcmd_processrepos
 
 
@@ -41,9 +45,14 @@ def _list_repo_configs_in_workingdir():
 
 
 def process(args):
-    # check for the arcydroot file
-    if not os.path.exists('.arcydroot'):
-        raise Exception('did not find .arcydroot in current directory')
+    fs = abdt_fs.make_default_accessor()
+
+    pid = fs.get_pid_or_none()
+    if pid is not None and phlsys_pid.is_running(pid):
+        raise Exception("already running")
+
+    pid = phlsys_pid.get()
+    fs.set_pid(pid)
 
     repo_configs = _list_repo_configs_in_workingdir()
 
