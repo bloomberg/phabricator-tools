@@ -15,10 +15,7 @@
 
 from __future__ import absolute_import
 
-import phlgit_commit
-import phlsys_fs
-import phlsys_git
-import phlsys_subprocess
+import abdt_fs
 
 _DEFAULT_CONFIG = """
 --sys-admin-emails
@@ -35,45 +32,6 @@ var/log/git-phab-writes.log
 var/command/killfile
 --sleep-secs
 {sleep_secs}
-""".strip()
-
-_README = """
-This is an Arcyd repository.
-
-Run 'arcyd --help' for options.
-""".strip()
-
-_VAR_README = """
-In this directory all the repositories, logs and other run-time generated data
-is stored.
-
-It is safe to clean this directory when Arcyd is not running, you should save
-any logs that you'd like to keep beforehand of course.
-
-This is really a stand-in for using '/var' on the machine, this makes it
-convenient to run arcyd where it can't be installed as root whilst keeping it
-conceivable to move to a packaged install process later.
-""".strip()
-
-_VAR_REPO_README = """
-This is where Arcyd keeps all the local clones of repositories that it is
-managing.
-""".strip()
-
-_VAR_LOG_README = """
-This is where Arcyd keeps all activity logs.
-""".strip()
-
-_VAR_STATUS_README = """
-This is where Arcyd keeps all status information.
-""".strip()
-
-_VAR_COMMAND_README = """
-This is where Arcyd looks for command files, e.g. to pause or stop.
-""".strip()
-
-_VAR_RUN_README = """
-This is where Arcyd puts it's pidfile.
 """.strip()
 
 
@@ -111,28 +69,15 @@ def setupParser(parser):
 
 
 def process(args):
-    phlsys_subprocess.run('git', 'init')
-    repo = phlsys_git.Repo('.')
+    fs = abdt_fs.initialise_here()
 
-    # create filesystem hierarchy
-    phlsys_fs.write_text_file('.arcydroot', 'this dir is an arcydroot')
-    phlsys_fs.write_text_file('config', _DEFAULT_CONFIG.format(
+    config = _DEFAULT_CONFIG.format(
         sys_admin_emails=' '.join(args.sys_admin_emails),
         sendmail_binary=args.sendmail_binary,
         sendmail_type=args.sendmail_type,
-        sleep_secs=args.sleep_secs))
-    phlsys_fs.write_text_file('README', _README)
-    phlsys_fs.write_text_file('var/README', _VAR_README)
-    phlsys_fs.write_text_file('var/repo/README', _VAR_REPO_README)
-    phlsys_fs.write_text_file('var/log/README', _VAR_LOG_README)
-    phlsys_fs.write_text_file('var/status/README', _VAR_STATUS_README)
-    phlsys_fs.write_text_file('var/command/README', _VAR_COMMAND_README)
-    phlsys_fs.write_text_file('var/run/README', _VAR_RUN_README)
+        sleep_secs=args.sleep_secs)
 
-    repo.call('add', '.')
-    phlsys_fs.write_text_file('.gitignore', 'var\n')
-    repo.call('add', '.')
-    phlgit_commit.index(repo, 'Initialised new Arcyd instance')
+    fs.create_root_config(config)
 
 
 #------------------------------------------------------------------------------

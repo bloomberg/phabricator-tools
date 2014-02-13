@@ -9,9 +9,11 @@
 #   Accessor
 #    .set_pid
 #    .get_pid_or_none
+#    .create_root_config
 #
 # Public Functions:
 #   make_default_accessor
+#   initialise_here
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -21,13 +23,59 @@ from __future__ import absolute_import
 
 import os
 
+import phlgit_commit
 import phlsys_fs
+import phlsys_git
+import phlsys_subprocess
+
+
+_README = """
+This is an Arcyd repository.
+
+Run 'arcyd --help' for options.
+""".strip()
+
+_VAR_README = """
+In this directory all the repositories, logs and other run-time generated data
+is stored.
+
+It is safe to clean this directory when Arcyd is not running, you should save
+any logs that you'd like to keep beforehand of course.
+
+This is really a stand-in for using '/var' on the machine, this makes it
+convenient to run arcyd where it can't be installed as root whilst keeping it
+conceivable to move to a packaged install process later.
+""".strip()
+
+_VAR_REPO_README = """
+This is where Arcyd keeps all the local clones of repositories that it is
+managing.
+""".strip()
+
+_VAR_LOG_README = """
+This is where Arcyd keeps all activity logs.
+""".strip()
+
+_VAR_STATUS_README = """
+This is where Arcyd keeps all status information.
+""".strip()
+
+_VAR_COMMAND_README = """
+This is where Arcyd looks for command files, e.g. to pause or stop.
+""".strip()
+
+_VAR_RUN_README = """
+This is where Arcyd puts it's pidfile.
+""".strip()
 
 
 class Layout(object):
 
     arcydroot = '.arcydroot'
+    root_config = 'config'
     pid = 'var/run/arcyd.pid'
+
+    dir_run = 'var/run'
 
 
 class Accessor(object):
@@ -35,6 +83,7 @@ class Accessor(object):
     def __init__(self, layout, path):
         self._layout = layout
         self._root = os.path.abspath(path)
+        self._repo = phlsys_git.Repo(path)
 
         self._check_arcydroot()
 
@@ -77,6 +126,22 @@ class Accessor(object):
 
         return pid
 
+    def create_root_config(self, contents):
+        """Create and commit the root config file.
+
+        :returns: None
+
+        """
+        rel_path = self._layout.root_config
+        path = self._make_abspath(rel_path)
+
+        if os.path.exists(path):
+            raise Exception("root config already exists")
+
+        phlsys_fs.write_text_file(path, contents)
+        self._repo.call('add', rel_path)
+        phlgit_commit.index(self._repo, 'Created root config')
+
 
 def make_default_accessor():
     """Return an Accessor for the current directory, using Layout.
@@ -84,6 +149,35 @@ def make_default_accessor():
     :returns: a new Accessor
 
     """
+    return Accessor(Layout(), '.')
+
+
+def initialise_here():
+    """Return a new default Accessor after initialising the current directory.
+
+    :returns: a new Accessor, mounted at the current directory
+
+    """
+    layout = Layout()
+
+    phlsys_subprocess.run('git', 'init')
+    repo = phlsys_git.Repo('.')
+
+    # create filesystem hierarchy
+    phlsys_fs.write_text_file(layout.arcydroot, 'this dir is an arcydroot')
+    phlsys_fs.write_text_file('README', _README)
+    phlsys_fs.write_text_file('var/README', _VAR_README)
+    phlsys_fs.write_text_file('var/repo/README', _VAR_REPO_README)
+    phlsys_fs.write_text_file('var/log/README', _VAR_LOG_README)
+    phlsys_fs.write_text_file('var/status/README', _VAR_STATUS_README)
+    phlsys_fs.write_text_file('var/command/README', _VAR_COMMAND_README)
+    phlsys_fs.write_text_file('var/run/README', _VAR_RUN_README)
+
+    repo.call('add', '.')
+    phlsys_fs.write_text_file('.gitignore', 'var\n')
+    repo.call('add', '.')
+    phlgit_commit.index(repo, 'Initialised new Arcyd instance')
+
     return Accessor(Layout(), '.')
 
 
