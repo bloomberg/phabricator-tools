@@ -53,6 +53,8 @@ Generate git diffs between branches suitable for Differential reviews.
 "A global list of error identifiers that may be used.
 * `abdt_exception.py` -
 Exception hierarchy for abd user and system errors.
+* `abdt_fs.py` -
+Arcyd-specific interactions with the filesystem.
 * `abdt_git.py` -
 Abstraction for Arcyd's git operations.
 * `abdt_lander.py` -
