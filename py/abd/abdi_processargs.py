@@ -314,7 +314,7 @@ def _make_config_from_args(args):
     return config
 
 
-def _determine_config(args, repo):
+def _determine_options(args, repo):
     # combine all the available configs
     default_config = abdt_repooptions.make_default_data()
     args_config = _make_config_from_args(args)
@@ -340,11 +340,11 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
             repo,
             args.repo_desc)
 
-        config = _determine_config(args, repo)
+        options = _determine_options(args, repo)
 
         arcyd_conduit = _connect(conduits, args, arcyd_reporter)
 
-        reporter.set_config(config)
+        reporter.set_config(options)
 
         sender = phlmail_sender.MailSender(
             phlsys_sendmail.Sendmail(), args.arcyd_email)
@@ -352,19 +352,19 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
         # TODO: this should be a URI for users not conduit
         mailer = abdmail_mailer.Mailer(
             sender,
-            config.admin_emails,
-            config.description,
+            options.admin_emails,
+            options.description,
             args.instance_uri)
 
         pluginManager = phlsys_pluginmanager.PluginManager(
             args.plugins, args.trusted_plugins)
 
-        out.display("process (" + config.description + "): ")
+        out.display("process (" + options.description + "): ")
 
         branch_url_callable = None
-        if config.branch_url_format:
+        if options.branch_url_format:
             def make_branch_url(branch_name):
-                return config.branch_url_format.format(branch=branch_name)
+                return options.branch_url_format.format(branch=branch_name)
             branch_url_callable = make_branch_url
 
         branch_naming = abdt_compositenaming.Naming(
@@ -373,7 +373,7 @@ def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
         branches = abdt_git.get_managed_branches(
             repo,
-            config.description,
+            options.description,
             branch_naming,
             branch_url_callable)
 
