@@ -170,31 +170,14 @@ class Accessor(object):
 
         return pid
 
-    def create_root_config(self, content):
-        """Create and commit the root config file.
+    def _create_config(self, rel_path, content, message):
+        """Create and commit the a new config file.
 
-        :returns: None
-
-        """
-        rel_path = self._layout.root_config
-        path = self._make_abspath(rel_path)
-
-        if os.path.exists(path):
-            raise Exception("root config already exists")
-
-        phlsys_fs.write_text_file(path, content)
-        self._repo.call('add', rel_path)
-        phlgit_commit.index(self._repo, 'Created root config')
-
-    def create_phabricator_config(self, name, content):
-        """Create a new phabricator config file.
-
-        :name: string name of the new config [a-zA-Z0-9_]
-        :content: string data of the new config
-        :returns: None
+        :rel_path: the string relative path to the config file
+        :content: the string contents of the new config file
+        :message: the string commit message for the file
 
         """
-        rel_path = self._layout.phabricator_config(name)
         path = self._make_abspath(rel_path)
 
         if os.path.exists(path):
@@ -202,9 +185,29 @@ class Accessor(object):
 
         phlsys_fs.write_text_file(path, content)
         self._repo.call('add', rel_path)
-        phlgit_commit.index(
-            self._repo,
-            'Add phabricator config: {}'.format(name))
+        phlgit_commit.index(self._repo, message)
+
+    def create_root_config(self, content):
+        """Create and commit the root config file.
+
+        :content: the string content of the new config file
+        :returns: None
+
+        """
+        rel_path = self._layout.root_config
+        self._create_config(rel_path, content, 'Create root config')
+
+    def create_phabricator_config(self, name, content):
+        """Create a new phabricator config file.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :content: the string content of the new config file
+        :returns: None
+
+        """
+        rel_path = self._layout.phabricator_config(name)
+        self._create_config(
+            rel_path, content, 'Add phabricator config: {}'.format(name))
 
     def get_phabricator_config_rel_path(self, name):
         """Return the string path for the phabricator config 'name'.
@@ -227,21 +230,13 @@ class Accessor(object):
         """Create a new repo config file.
 
         :name: string name of the new config [a-zA-Z0-9_]
-        :content: string data of the new config
+        :content: the string content of the new config file
         :returns: None
 
         """
         rel_path = self._layout.repo_config(name)
-        path = self._make_abspath(rel_path)
-
-        if os.path.exists(path):
-            raise Exception("config already exists")
-
-        phlsys_fs.write_text_file(path, content)
-        self._repo.call('add', rel_path)
-        phlgit_commit.index(
-            self._repo,
-            'Add repo config: {}'.format(name))
+        self._create_config(
+            rel_path, content, 'Add repo config: {}'.format(name))
 
     @property
     def layout(self):
