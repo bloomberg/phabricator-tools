@@ -41,7 +41,7 @@ import abdt_conduit
 import abdt_errident
 import abdt_git
 import abdt_rbranchnaming
-import abdt_repoconfig
+import abdt_repooptions
 import abdt_reporeporter
 import abdt_shareddictoutput
 import abdt_tryloop
@@ -302,7 +302,7 @@ def _set_attrib_if_not_none(config, key, value):
 
 
 def _make_config_from_args(args):
-    config = abdt_repoconfig.Data()
+    config = abdt_repooptions.Data()
     if args.admin_email:
         config.admin_emails = [args.admin_email]
     _set_attrib_if_not_none(
@@ -316,12 +316,12 @@ def _make_config_from_args(args):
 
 def _determine_config(args, repo):
     # combine all the available configs
-    default_config = abdt_repoconfig.make_default_data()
+    default_config = abdt_repooptions.make_default_data()
     args_config = _make_config_from_args(args)
-    repo_config = abdt_repoconfig.data_from_repo_or_none(repo)
-    config = abdt_repoconfig.merge_data_objects(
+    repo_config = abdt_repooptions.data_from_repo_or_none(repo)
+    config = abdt_repooptions.merge_data_objects(
         default_config, args_config, repo_config)
-    abdt_repoconfig.validate_data(config)
+    abdt_repooptions.validate_data(config)
     return config
 
 

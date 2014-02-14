@@ -69,7 +69,7 @@ Naming conventions for abd.
 Test suite for abdt naming convention classes.
 * `abdt_rbranchnaming.py` -
 Branch naming conventions for 'r/base/description' style.
-* `abdt_repoconfig.py` -
+* `abdt_repooptions.py` -
 Per-repository configuration options.
 * `abdt_reporeporter.py` -
 Report the state of a repository.

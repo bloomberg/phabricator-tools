@@ -18,7 +18,7 @@ from __future__ import absolute_import
 import contextlib
 
 import abdt_arcydreporter
-import abdt_repoconfig
+import abdt_repooptions
 import abdt_reporeporter
 import abdt_shareddictoutput
 import abdweb_arcydcontent
@@ -87,7 +87,7 @@ def _exercise_reporeporter():
 
     arcyd_reporter.start_repo('name', 'human-name')
 
-    config = abdt_repoconfig.Data()
+    config = abdt_repooptions.Data()
     config.branch_url_format = (
         'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}')
     config.review_url_format = 'http://my.phabricator/{review}'

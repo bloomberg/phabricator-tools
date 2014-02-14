@@ -1,4 +1,4 @@
-"""Test suite for abdt_repoconfig."""
+"""Test suite for abdt_repooptions."""
 #==============================================================================
 #                                   TEST PLAN
 #------------------------------------------------------------------------------
@@ -6,7 +6,7 @@
 # cover those concerns.
 #
 # Concerns:
-# [ A] can serialize and deserialize a default abdt_repoconfig.Data
+# [ A] can serialize and deserialize a default abdt_repooptions.Data
 # [ B] can override one data with another, only applying non-None attributes
 #------------------------------------------------------------------------------
 # Tests:
@@ -18,7 +18,7 @@ from __future__ import absolute_import
 
 import unittest
 
-import abdt_repoconfig
+import abdt_repooptions
 
 
 class Test(unittest.TestCase):
@@ -30,28 +30,28 @@ class Test(unittest.TestCase):
         pass
 
     def test_A_Breathing(self):
-        data = abdt_repoconfig.Data()
-        data_json = abdt_repoconfig.json_from_data(data)
-        data2 = abdt_repoconfig.data_from_json(data_json)
+        data = abdt_repooptions.Data()
+        data_json = abdt_repooptions.json_from_data(data)
+        data2 = abdt_repooptions.data_from_json(data_json)
         self.assertEqual(data, data2)
 
     def test_B_Combine(self):
         # can override one data with another, only applying non-None attributes
-        data1 = abdt_repoconfig.Data()
+        data1 = abdt_repooptions.Data()
         data1.description = '1'
         data1.branch_url_format = 'format'
         data1.admin_emails = ['data1_admin']
-        data2 = abdt_repoconfig.Data()
+        data2 = abdt_repooptions.Data()
         data2.description = '2'
         data2.admin_emails = ['data2_admin1', 'data2_admin2']
         all_emails_set = set(data1.admin_emails + data2.admin_emails)
 
-        data1_2 = abdt_repoconfig.merge_data_objects(data1, data2)
+        data1_2 = abdt_repooptions.merge_data_objects(data1, data2)
         self.assertEqual(data1_2.description, data2.description)
         self.assertEqual(data1_2.branch_url_format, data1.branch_url_format)
         self.assertSetEqual(set(data1_2.admin_emails), all_emails_set)
 
-        data2_1 = abdt_repoconfig.merge_data_objects(data2, data1)
+        data2_1 = abdt_repooptions.merge_data_objects(data2, data1)
         self.assertEqual(data2_1.description, data1.description)
         self.assertEqual(data2_1.branch_url_format, data1.branch_url_format)
         self.assertSetEqual(set(data1_2.admin_emails), all_emails_set)
