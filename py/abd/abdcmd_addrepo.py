@@ -24,6 +24,7 @@ import phlsys_subprocess
 import phlurl_request
 
 import abdt_fs
+import abdt_git
 
 
 _CONFIG = """
@@ -207,6 +208,16 @@ def process(args):
             'push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
         repo.call(
             'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
+
+        # fetch the 'landed' and 'abandoned' refs if they exist
+        ref_list = set(repo.call('ls-remote').split()[1::2])
+        special_refs = [
+            (abdt_git.ARCYD_ABANDONED_REF, abdt_git.ARCYD_ABANDONED_BRANCH_FQ),
+            (abdt_git.ARCYD_LANDED_REF, abdt_git.ARCYD_LANDED_BRANCH_FQ),
+        ]
+        for ref in special_refs:
+            if ref[0] in ref_list:
+                repo.call('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
 
         # success, write out the config
         fs.create_repo_config(args.name, config)

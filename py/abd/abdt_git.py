@@ -29,7 +29,10 @@
 #   get_managed_branches
 #
 # Public Assignments:
+#   ARCYD_LANDED_REF
+#   ARCYD_LANDED_BRANCH_FQ
 #   ARCYD_ABANDONED_REF
+#   ARCYD_ABANDONED_BRANCH_FQ
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -71,9 +74,9 @@ This branch is useful for:
 
 """.strip()
 
-_ARCYD_LANDED_REF = "refs/arcyd/landed"
+ARCYD_LANDED_REF = "refs/arcyd/landed"
 _ARCYD_LANDED_BRANCH = "__private_arcyd/landed"
-_ARCYD_LANDED_BRANCH_FQ = "refs/heads/" + _ARCYD_LANDED_BRANCH
+ARCYD_LANDED_BRANCH_FQ = "refs/heads/" + _ARCYD_LANDED_BRANCH
 
 _ABANDONED_ARCHIVE_BRANCH_MESSAGE = """
 Create an archive branch for abandoned branches
@@ -93,7 +96,7 @@ This branch is useful for:
 
 ARCYD_ABANDONED_REF = "refs/arcyd/abandoned"
 _ARCYD_ABANDONED_BRANCH = "__private_arcyd/abandoned"
-_ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
+ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 
 
 class Repo(object):
@@ -234,7 +237,7 @@ class Repo(object):
         """
         self._checkout_archive_ref_branch(
             _ARCYD_LANDED_BRANCH,
-            _ARCYD_LANDED_BRANCH_FQ,
+            ARCYD_LANDED_BRANCH_FQ,
             _LANDED_ARCHIVE_BRANCH_MESSAGE)
 
         new_message = "landed {} on {} as {}\n\nwith message:\n{}".format(
@@ -248,7 +251,7 @@ class Repo(object):
         :returns: None
 
         """
-        self.push_asymmetrical(_ARCYD_LANDED_BRANCH_FQ, _ARCYD_LANDED_REF)
+        self.push_asymmetrical(ARCYD_LANDED_BRANCH_FQ, ARCYD_LANDED_REF)
 
     def archive_to_abandoned(
             self, review_hash, review_branch, base_branch):
@@ -263,7 +266,7 @@ class Repo(object):
         # get on the archive branch, create new orphan if necessary
         self._checkout_archive_ref_branch(
             _ARCYD_ABANDONED_BRANCH,
-            _ARCYD_ABANDONED_BRANCH_FQ,
+            ARCYD_ABANDONED_BRANCH_FQ,
             _ABANDONED_ARCHIVE_BRANCH_MESSAGE)
 
         new_message = "abandoned {}, branched from {}".format(
@@ -278,7 +281,7 @@ class Repo(object):
 
         """
         self.push_asymmetrical(
-            _ARCYD_ABANDONED_BRANCH_FQ, ARCYD_ABANDONED_REF)
+            ARCYD_ABANDONED_BRANCH_FQ, ARCYD_ABANDONED_REF)
 
     def push_asymmetrical(self, local_branch, remote_branch):
         """Push 'local_branch' as 'remote_branch' to the remote.
