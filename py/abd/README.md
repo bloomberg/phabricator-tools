@@ -27,6 +27,8 @@ Make pre-defined comments on Differential revisions.
 Process the arguments for a single repository and execute.
 * `abdi_processrepo.py` -
 abd automates the creation and landing of reviews from branches.
+* `abdi_repoargs.py` -
+Define the arguments for a single repository.
 * `abdmail_mailer.py` -
 Send mails to interested parties about pre-specified conditions.
 * `abdt_arcydreporter.py` -

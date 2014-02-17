@@ -38,6 +38,7 @@ import phlsys_statusline
 import phlurl_watcher
 
 import abdi_processargs
+import abdi_repoargs
 import abdt_arcydreporter
 import abdt_errident
 import abdt_logging
@@ -234,7 +235,7 @@ def _process(args, reporter):
     repos = []
     for repo in args.repo_configs:
         parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-        abdi_processargs.setup_repo_arg_parser(parser)
+        abdi_repoargs.setup_parser(parser)
         repo_name = repo[0]  # oddly this comes to us as a list
         repo_name = repo_name[1:]  # strip off the '@' prefix
         repo_args = (repo_name, parser.parse_args(repo))
