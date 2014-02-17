@@ -5,7 +5,6 @@
 # abdi_processargs
 #
 # Public Functions:
-#   configure_sendmail
 #   make_exception_message_handler
 #   make_exception_delay_handler
 #   get_retry_delays
@@ -42,16 +41,6 @@ import abdt_shareddictoutput
 import abdt_tryloop
 
 import abdi_processrepo
-
-
-def configure_sendmail(args):
-    if args.sendmail_binary:
-        phlsys_sendmail.Sendmail.set_default_binary(
-            args.sendmail_binary)
-
-    if args.sendmail_type:
-        phlsys_sendmail.Sendmail.set_default_params_from_type(
-            args.sendmail_type)
 
 
 def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):

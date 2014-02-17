@@ -34,6 +34,7 @@ import sys
 import time
 
 import phlsys_scheduleunreliables
+import phlsys_sendmail
 import phlsys_signal
 import phlsys_statusline
 import phlurl_watcher
@@ -217,7 +218,13 @@ def tryHandleSpecialFiles(f, on_exception_delay):
 def process(args):
 
     phlsys_signal.set_exit_on_sigterm()
-    abdi_processargs.configure_sendmail(args)
+    if args.sendmail_binary:
+        phlsys_sendmail.Sendmail.set_default_binary(
+            args.sendmail_binary)
+
+    if args.sendmail_type:
+        phlsys_sendmail.Sendmail.set_default_params_from_type(
+            args.sendmail_type)
 
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
     reporter = abdt_arcydreporter.ArcydReporter(
