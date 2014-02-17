@@ -34,6 +34,7 @@ import sys
 import time
 
 import phlsys_scheduleunreliables
+import phlsys_signal
 import phlsys_statusline
 import phlurl_watcher
 
@@ -215,7 +216,7 @@ def tryHandleSpecialFiles(f, on_exception_delay):
 
 def process(args):
 
-    abdi_processargs.setup_sigterm_handler()
+    phlsys_signal.set_exit_on_sigterm()
     abdi_processargs.configure_sendmail(args)
 
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)

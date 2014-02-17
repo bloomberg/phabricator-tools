@@ -83,6 +83,8 @@ Handles the loading, hook registration and calling of plugins.
 Conveniently schedule unreliable tasks, retry them after a delay.
 * `phlsys_sendmail.py` -
 A simple wrapper to call sendmail-like binary.
+* `phlsys_signal.py` -
+Helpers for process signals.
 * `phlsys_statusline.py` -
 Print a status line, carriage return to stay on the same line.
 * `phlsys_string.py` -

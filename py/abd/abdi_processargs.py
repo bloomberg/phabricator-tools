@@ -6,7 +6,6 @@
 #
 # Public Functions:
 #   configure_sendmail
-#   setup_sigterm_handler
 #   make_exception_message_handler
 #   make_exception_delay_handler
 #   get_retry_delays
@@ -20,8 +19,6 @@ from __future__ import absolute_import
 
 import contextlib
 import platform
-import signal
-import sys
 import traceback
 
 import phlcon_reviewstatecache
@@ -55,14 +52,6 @@ def configure_sendmail(args):
     if args.sendmail_type:
         phlsys_sendmail.Sendmail.set_default_params_from_type(
             args.sendmail_type)
-
-
-# XXX: belongs in phlsys somewhere
-def setup_sigterm_handler():
-    def HandleSigterm(unused1, unused2):
-        # raises 'SystemExit' exception, which will allow us to clean up
-        sys.exit(1)
-    signal.signal(signal.SIGTERM, HandleSigterm)
 
 
 def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
