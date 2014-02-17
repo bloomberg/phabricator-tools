@@ -51,7 +51,26 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    abdi_processargs.setup_parser(parser)
+    parser.add_argument(
+        '--sys-admin-emails',
+        metavar="EMAIL",
+        nargs="+",
+        type=str,
+        required=True,
+        help="email addresses to send important system events to")
+    parser.add_argument(
+        '--sendmail-binary',
+        metavar="PROGRAM",
+        type=str,
+        default="sendmail",
+        help="program to send the mail with (e.g. sendmail, catchmail)")
+    parser.add_argument(
+        '--sendmail-type',
+        metavar="TYPE",
+        type=str,
+        default="sendmail",
+        help="type of program to send the mail with (sendmail, catchmail), "
+        "this will affect the parameters that Arycd will use.")
     parser.add_argument(
         '--repo-configs',
         metavar="N",

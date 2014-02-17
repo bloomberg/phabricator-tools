@@ -5,7 +5,6 @@
 # abdi_processargs
 #
 # Public Functions:
-#   setup_parser
 #   configure_sendmail
 #   setup_sigterm_handler
 #   make_exception_message_handler
@@ -46,29 +45,6 @@ import abdt_shareddictoutput
 import abdt_tryloop
 
 import abdi_processrepo
-
-
-def setup_parser(parser):
-    parser.add_argument(
-        '--sys-admin-emails',
-        metavar="EMAIL",
-        nargs="+",
-        type=str,
-        required=True,
-        help="email addresses to send important system events to")
-    parser.add_argument(
-        '--sendmail-binary',
-        metavar="PROGRAM",
-        type=str,
-        default="sendmail",
-        help="program to send the mail with (e.g. sendmail, catchmail)")
-    parser.add_argument(
-        '--sendmail-type',
-        metavar="TYPE",
-        type=str,
-        default="sendmail",
-        help="type of program to send the mail with (sendmail, catchmail), "
-        "this will affect the parameters that Arycd will use.")
 
 
 def configure_sendmail(args):
