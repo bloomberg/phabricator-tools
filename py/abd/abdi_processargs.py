@@ -212,28 +212,6 @@ def setup_repo_arg_parser(parser):
         "See /testbed/plugins/README.md for detail about trusted-plugins")
 
 
-class _RepoArgs(object):
-
-    def __init__(self, args):
-        super(_RepoArgs, self).__init__()
-        self.instance_uri = args.instance_uri
-        self.arcyd_user = args.arcyd_user
-        self.arcyd_cert = args.arcyd_cert
-        self.arcyd_email = args.arcyd_email
-        self.admin_email = args.admin_email
-        self.repo_desc = args.repo_desc
-        self.repo_path = args.repo_path
-        self.repo_snoop_url = args.repo_snoop_url
-        self.https_proxy = args.https_proxy
-        self.sleep_secs = args.sleep_secs
-        self.review_url_format = args.review_url_format
-        self.branch_url_format = args.branch_url_format
-        self.try_touch_path = args.try_touch_path
-        self.ok_touch_path = args.ok_touch_path
-        self.plugins = args.plugins
-        self.trusted_plugins = args.trusted_plugins
-
-
 def configure_sendmail(args):
     if args.sendmail_binary:
         phlsys_sendmail.Sendmail.set_default_binary(
@@ -303,8 +281,6 @@ def get_retry_delays():
 
 
 def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
-
-    args = _RepoArgs(args)
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
