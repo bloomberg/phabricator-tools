@@ -2,10 +2,10 @@
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdi_processargs
+# abdi_processrepoargs
 #
 # Public Functions:
-#   run_once
+#   do
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -38,7 +38,7 @@ import abdt_tryloop
 import abdi_processrepo
 
 
-def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
+def do(repo, args, out, arcyd_reporter, conduits, url_watcher):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
@@ -49,7 +49,7 @@ def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
-            _run_once(
+            _do(
                 args, out, reporter, arcyd_reporter, conduits, url_watcher)
 
 
@@ -83,7 +83,7 @@ def _determine_options(args, repo):
     return config
 
 
-def _run_once(args, out, reporter, arcyd_reporter, conduits, url_watcher):
+def _do(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process branches prolog'):
         repo = abdt_git.Repo(

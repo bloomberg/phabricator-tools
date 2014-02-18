@@ -40,7 +40,7 @@ import phlsys_statusline
 import phlsys_strtotime
 import phlurl_watcher
 
-import abdi_processargs
+import abdi_processrepoargs
 import abdi_repoargs
 import abdt_arcydreporter
 import abdt_errident
@@ -361,7 +361,7 @@ def process_single_repo(
         conduits,
         url_watcher,
         urlwatcher_cache_path):
-    abdi_processargs.run_once(
+    abdi_processrepoargs.do(
         repo, repo_args, out, reporter, conduits, url_watcher)
 
     # save the urlwatcher cache

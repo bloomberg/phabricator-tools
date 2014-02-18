@@ -23,10 +23,10 @@ Start the arcyd instance for the current directory, if not already going.
 Stop the arcyd instance for the current directory.
 * `abdcmnt_commenter.py` -
 Make pre-defined comments on Differential revisions.
-* `abdi_processargs.py` -
-Process the arguments for a single repository and execute.
 * `abdi_processrepo.py` -
 abd automates the creation and landing of reviews from branches.
+* `abdi_processrepoargs.py` -
+Process the arguments for a single repository and execute.
 * `abdi_repoargs.py` -
 Define the arguments for a single repository.
 * `abdmail_mailer.py` -
