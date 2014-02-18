@@ -44,6 +44,7 @@ import abdi_processargs
 import abdi_repoargs
 import abdt_arcydreporter
 import abdt_errident
+import abdt_exhandlers
 import abdt_logging
 import abdt_shareddictoutput
 import abdt_tryloop
@@ -235,7 +236,7 @@ def process(args):
         full_path = os.path.abspath(args.external_error_logger)
         reporter.set_external_system_error_logger(full_path)
 
-    on_exception = abdi_processargs.make_exception_message_handler(
+    on_exception = abdt_exhandlers.make_exception_message_handler(
         args, reporter, None, "arcyd stopped with exception", "")
 
     arcyd_reporter_context = abdt_logging.arcyd_reporter_context
@@ -307,7 +308,7 @@ def _process(args, reporter):
             url_watcher,
             urlwatcher_cache_path)
 
-        on_exception_delay = abdi_processargs.make_exception_delay_handler(
+        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
             args, reporter, repo)
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,
@@ -317,7 +318,7 @@ def _process(args, reporter):
         operations.append(operation)
 
     def on_pause():
-        on_exception_delay = abdi_processargs.make_exception_delay_handler(
+        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
             args, reporter, None)
         on_exception_delay("until_file_removed")
 
