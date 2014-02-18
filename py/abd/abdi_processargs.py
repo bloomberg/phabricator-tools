@@ -7,7 +7,6 @@
 # Public Functions:
 #   make_exception_message_handler
 #   make_exception_delay_handler
-#   get_retry_delays
 #   run_once
 #
 # -----------------------------------------------------------------------------
@@ -26,7 +25,6 @@ import phlsys_conduit
 import phlsys_git
 import phlsys_pluginmanager
 import phlsys_sendmail
-import phlsys_strtotime
 
 import abdmail_mailer
 import abdt_classicnaming
@@ -85,12 +83,6 @@ def make_exception_delay_handler(args, arcyd_reporter, repo):
         repo,
         "arcyd paused with exception",
         "will wait: ")
-
-
-def get_retry_delays():
-    strToTime = phlsys_strtotime.duration_string_to_time_delta
-    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
-    return retry_delays
 
 
 def run_once(repo, args, out, arcyd_reporter, conduits, url_watcher):

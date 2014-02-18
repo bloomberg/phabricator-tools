@@ -37,6 +37,7 @@ import phlsys_scheduleunreliables
 import phlsys_sendmail
 import phlsys_signal
 import phlsys_statusline
+import phlsys_strtotime
 import phlurl_watcher
 
 import abdi_processargs
@@ -255,9 +256,15 @@ def process(args):
                 on_exception("Arcyd will now stop")
 
 
+def _get_retry_delays():
+    strToTime = phlsys_strtotime.duration_string_to_time_delta
+    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
+    return retry_delays
+
+
 def _process(args, reporter):
 
-    retry_delays = abdi_processargs.get_retry_delays()
+    retry_delays = _get_retry_delays()
 
     repos = []
     for repo in args.repo_configs:
