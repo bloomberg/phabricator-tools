@@ -100,7 +100,6 @@ def setup_parser(parser):
         '--review-url-format',
         type=str,
         metavar='STRING',
-        required=True,
         help="a format string for generating URLs for viewing reviews, e.g. "
              "something like this: "
              "'http://my.phabricator/D{review}' , "
@@ -111,7 +110,6 @@ def setup_parser(parser):
         '--branch-url-format',
         type=str,
         metavar='STRING',
-        required=True,
         help="a format string for generating URLs for viewing branches, e.g. "
              "for a gitweb install: "
              "'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}', "
