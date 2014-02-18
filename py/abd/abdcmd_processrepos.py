@@ -36,7 +36,6 @@ import time
 import phlsys_scheduleunreliables
 import phlsys_sendmail
 import phlsys_signal
-import phlsys_statusline
 import phlsys_strtotime
 import phlurl_watcher
 
@@ -133,8 +132,7 @@ def setupParser(parser):
 
 class DelayedRetrySleepOperation(object):
 
-    def __init__(self, out, secs, reporter):
-        self._out = out
+    def __init__(self, secs, reporter):
         self._secs = secs
         self._reporter = reporter
 
@@ -142,7 +140,6 @@ class DelayedRetrySleepOperation(object):
         sleep_remaining = self._secs
         self._reporter.start_sleep(sleep_remaining)
         while sleep_remaining > 0:
-            self._out.display("sleep (" + str(sleep_remaining) + " seconds) ")
             self._reporter.update_sleep(sleep_remaining)
             time.sleep(1)
             sleep_remaining -= 1
@@ -276,8 +273,6 @@ def _process(args, reporter):
         repo_args = (repo_name, parser.parse_args(repo))
         repos.append(repo_args)
 
-    out = phlsys_statusline.StatusLine()
-
     # TODO: test write access to repos here
 
     operations = []
@@ -302,7 +297,6 @@ def _process(args, reporter):
             process_single_repo,
             repo,
             repo_args,
-            out,
             reporter,
             conduits,
             url_watcher,
@@ -331,7 +325,7 @@ def _process(args, reporter):
 
     operations.append(
         DelayedRetrySleepOperation(
-            out, args.sleep_secs, reporter))
+            args.sleep_secs, reporter))
 
     operations.append(
         RefreshCachesOperation(
@@ -356,13 +350,12 @@ def _process(args, reporter):
 def process_single_repo(
         repo,
         repo_args,
-        out,
         reporter,
         conduits,
         url_watcher,
         urlwatcher_cache_path):
     abdi_processrepoargs.do(
-        repo, repo_args, out, reporter, conduits, url_watcher)
+        repo, repo_args, reporter, conduits, url_watcher)
 
     # save the urlwatcher cache
     with open(urlwatcher_cache_path, 'w') as f:

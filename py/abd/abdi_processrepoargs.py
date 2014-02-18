@@ -38,7 +38,7 @@ import abdt_tryloop
 import abdi_processrepo
 
 
-def do(repo, args, out, arcyd_reporter, conduits, url_watcher):
+def do(repo, args, arcyd_reporter, conduits, url_watcher):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
@@ -50,7 +50,7 @@ def do(repo, args, out, arcyd_reporter, conduits, url_watcher):
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
             _do(
-                args, out, reporter, arcyd_reporter, conduits, url_watcher)
+                args, reporter, arcyd_reporter, conduits, url_watcher)
 
 
 def _set_attrib_if_not_none(config, key, value):
@@ -83,7 +83,7 @@ def _determine_options(args, repo):
     return config
 
 
-def _do(args, out, reporter, arcyd_reporter, conduits, url_watcher):
+def _do(args, reporter, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process branches prolog'):
         repo = abdt_git.Repo(
@@ -116,8 +116,6 @@ def _do(args, out, reporter, arcyd_reporter, conduits, url_watcher):
 
         pluginManager = phlsys_pluginmanager.PluginManager(
             args.plugins, args.trusted_plugins)
-
-        out.display("process (" + options.description + "): ")
 
         branch_url_callable = None
         if options.branch_url_format:
