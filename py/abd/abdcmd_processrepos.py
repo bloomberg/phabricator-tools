@@ -4,15 +4,6 @@
 # -----------------------------------------------------------------------------
 # abdcmd_processrepos
 #
-# Public Classes:
-#   DelayedRetrySleepOperation
-#    .do
-#   RefreshCachesOperation
-#    .do
-#   ResetFileException
-#   FileCheckOperation
-#    .do
-#
 # Public Functions:
 #   getFromfilePrefixChars
 #   setupParser
@@ -31,7 +22,6 @@ import contextlib
 import functools
 import os
 import sys
-import time
 
 import phlsys_scheduleunreliables
 import phlsys_sendmail
@@ -39,14 +29,13 @@ import phlsys_signal
 import phlsys_strtotime
 import phlurl_watcher
 
+import abdi_operation
 import abdi_processrepoargs
 import abdi_repoargs
 import abdt_arcydreporter
-import abdt_errident
 import abdt_exhandlers
 import abdt_logging
 import abdt_shareddictoutput
-import abdt_tryloop
 
 
 def getFromfilePrefixChars():
@@ -130,83 +119,10 @@ def setupParser(parser):
              "like so: $LOGGER '<<identifier>>' '<<full details>>'")
 
 
-class DelayedRetrySleepOperation(object):
-
-    def __init__(self, secs, reporter):
-        self._secs = secs
-        self._reporter = reporter
-
-    def do(self):
-        sleep_remaining = self._secs
-        self._reporter.start_sleep(sleep_remaining)
-        while sleep_remaining > 0:
-            self._reporter.update_sleep(sleep_remaining)
-            time.sleep(1)
-            sleep_remaining -= 1
-        self._reporter.finish_sleep()
-        return True
-
-
-class RefreshCachesOperation(object):
-
-    def __init__(self, conduits, url_watcher, reporter):
-        super(RefreshCachesOperation, self).__init__()
-        self._conduits = conduits
-        self._url_watcher = url_watcher
-        self._reporter = reporter
-
-    def do(self):
-        self._reporter.start_cache_refresh()
-
-        with self._reporter.tag_timer_context('refresh conduit cache'):
-            for key in self._conduits:
-                conduit = self._conduits[key]
-                abdt_tryloop.critical_tryloop(
-                    conduit.refresh_cache_on_cycle,
-                    abdt_errident.CONDUIT_REFRESH,
-                    conduit.describe())
-
-        with self._reporter.tag_timer_context('refresh git watcher'):
-            abdt_tryloop.critical_tryloop(
-                self._url_watcher.refresh, abdt_errident.GIT_SNOOP, '')
-
-        self._reporter.finish_cache_refresh()
-        return True
-
-
-class ResetFileException(Exception):
-
-    def __init__(self, path):
-        self.path = path
-        super(ResetFileException, self).__init__()
-
-
-class FileCheckOperation(object):
-
-    def __init__(self, kill_file, reset_file, pause_file, on_pause):
-        self._kill_file = kill_file
-        self._reset_file = reset_file
-        self._pause_file = pause_file
-        self._on_pause = on_pause
-
-    def do(self):
-        if self._kill_file and os.path.isfile(self._kill_file):
-            os.remove(self._kill_file)
-            raise Exception("kill file: " + self._kill_file)
-        if self._reset_file and os.path.isfile(self._reset_file):
-            raise ResetFileException(self._reset_file)
-        if self._pause_file and os.path.isfile(self._pause_file):
-            if self._on_pause:
-                self._on_pause()
-            while os.path.isfile(self._pause_file):
-                time.sleep(1)
-        return True
-
-
 def tryHandleSpecialFiles(f, on_exception_delay):
     try:
         return f()
-    except ResetFileException as e:
+    except abdi_operation.ResetFileError as e:
         on_exception_delay(None)
         try:
             os.remove(e.path)
@@ -317,18 +233,18 @@ def _process(args, reporter):
         on_exception_delay("until_file_removed")
 
     operations.append(
-        FileCheckOperation(
+        abdi_operation.CheckSpecialFiles(
             args.kill_file,
             args.reset_file,
             args.pause_file,
             on_pause))
 
     operations.append(
-        DelayedRetrySleepOperation(
+        abdi_operation.Sleep(
             args.sleep_secs, reporter))
 
     operations.append(
-        RefreshCachesOperation(
+        abdi_operation.RefreshCaches(
             conduits, url_watcher, reporter))
 
     if args.no_loop:
