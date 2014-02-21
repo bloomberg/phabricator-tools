@@ -33,9 +33,9 @@ def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
 
 
 def make_exception_message_handler(
-        args, arcyd_reporter, repo, subject, body_prefix):
+        sys_admin_emails, arcyd_reporter, repo, subject, body_prefix):
     uname = str(platform.uname())
-    emails = args.sys_admin_emails
+    emails = sys_admin_emails
 
     mailsender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(),
@@ -56,9 +56,9 @@ def make_exception_message_handler(
     return msg_exception
 
 
-def make_exception_delay_handler(args, arcyd_reporter, repo):
+def make_exception_delay_handler(sys_admin_emails, arcyd_reporter, repo):
     return make_exception_message_handler(
-        args,
+        sys_admin_emails,
         arcyd_reporter,
         repo,
         "arcyd paused with exception",

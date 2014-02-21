@@ -130,7 +130,11 @@ def process(args):
         reporter.set_external_system_error_logger(full_path)
 
     on_exception = abdt_exhandlers.make_exception_message_handler(
-        args, reporter, None, "arcyd stopped with exception", "")
+        args.sys_admin_emails,
+        reporter,
+        None,
+        "arcyd stopped with exception",
+        "")
 
     arcyd_reporter_context = abdt_logging.arcyd_reporter_context
     with contextlib.closing(reporter), arcyd_reporter_context(reporter):

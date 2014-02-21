@@ -72,7 +72,7 @@ def do(args, reporter):
             urlwatcher_cache_path)
 
         on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            args, reporter, repo)
+            args.sys_admin_emails, reporter, repo)
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,
             list(retry_delays),  # make a copy to be sure
@@ -82,7 +82,7 @@ def do(args, reporter):
 
     def on_pause():
         on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            args, reporter, None)
+            args.sys_admin_emails, reporter, None)
         on_exception_delay("until_file_removed")
 
     operations.append(
