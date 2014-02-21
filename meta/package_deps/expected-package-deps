@@ -8,7 +8,7 @@
 ('abdcmd', ['abdi', 'abdt', 'abdweb', 'phlgit', 'phlsys', 'phlurl'])
 ('gabcmd', ['phlgit', 'phlsys'])
 ('phlgitu', ['phlsys'])
-('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phlmail', 'phlsys'])
+('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phlmail', 'phlsys', 'phlurl'])
 ('phlsys', ['phldef'])
 ('abdcmnt', ['abdt', 'phlcon'])
 ('barcmd', ['abdt', 'phlgit', 'phlsys'])

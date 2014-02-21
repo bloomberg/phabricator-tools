@@ -29,6 +29,8 @@ Arcyd operations that can be scheduled with phlsys_scheduleunreliables.
 abd automates the creation and landing of reviews from branches.
 * `abdi_processrepoargs.py` -
 Process the arguments for a single repository and execute.
+* `abdi_processrepolist.py` -
+Process a list of repository arguments.
 * `abdi_repoargs.py` -
 Define the arguments for a single repository.
 * `abdmail_mailer.py` -

@@ -7,9 +7,7 @@
 # Public Functions:
 #   getFromfilePrefixChars
 #   setupParser
-#   tryHandleSpecialFiles
 #   process
-#   process_single_repo
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -17,21 +15,13 @@
 
 from __future__ import absolute_import
 
-import argparse
 import contextlib
-import functools
 import os
-import sys
 
-import phlsys_scheduleunreliables
 import phlsys_sendmail
 import phlsys_signal
-import phlsys_strtotime
-import phlurl_watcher
 
-import abdi_operation
-import abdi_processrepoargs
-import abdi_repoargs
+import abdi_processrepolist
 import abdt_arcydreporter
 import abdt_exhandlers
 import abdt_logging
@@ -119,20 +109,10 @@ def setupParser(parser):
              "like so: $LOGGER '<<identifier>>' '<<full details>>'")
 
 
-def tryHandleSpecialFiles(f, on_exception_delay):
-    try:
-        return f()
-    except abdi_operation.ResetFileError as e:
-        on_exception_delay(None)
-        try:
-            os.remove(e.path)
-        except:
-            on_exception_delay(None)
-
-
 def process(args):
 
     phlsys_signal.set_exit_on_sigterm()
+
     if args.sendmail_binary:
         phlsys_sendmail.Sendmail.set_default_binary(
             args.sendmail_binary)
@@ -156,7 +136,7 @@ def process(args):
     with contextlib.closing(reporter), arcyd_reporter_context(reporter):
 
         try:
-            _process(args, reporter)
+            abdi_processrepolist.do(args, reporter)
         except BaseException:
             on_exception("Arcyd will now stop")
             print "stopping"
@@ -168,114 +148,6 @@ def process(args):
                 raise Exception("Arcyd stopped unexpectedly")
             except Exception:
                 on_exception("Arcyd will now stop")
-
-
-def _get_retry_delays():
-    strToTime = phlsys_strtotime.duration_string_to_time_delta
-    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
-    return retry_delays
-
-
-def _process(args, reporter):
-
-    retry_delays = _get_retry_delays()
-
-    repos = []
-    for repo in args.repo_configs:
-        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-        abdi_repoargs.setup_parser(parser)
-        repo_name = repo[0]  # oddly this comes to us as a list
-        repo_name = repo_name[1:]  # strip off the '@' prefix
-        repo_args = (repo_name, parser.parse_args(repo))
-        repos.append(repo_args)
-
-    # TODO: test write access to repos here
-
-    operations = []
-    conduits = {}
-    url_watcher = phlurl_watcher.Watcher()
-
-    urlwatcher_cache_path = os.path.abspath('.arcyd.urlwatcher.cache')
-
-    # load the url watcher cache (if any)
-    if os.path.isfile(urlwatcher_cache_path):
-        with open(urlwatcher_cache_path) as f:
-            url_watcher.load(f)
-
-    for repo, repo_args in repos:
-
-        # create a function to update this particular repo.
-        #
-        # use partial to ensure we capture the value of the variables,
-        # note that a closure would use the latest value of the variables
-        # rather than the value at declaration time.
-        process_func = functools.partial(
-            process_single_repo,
-            repo,
-            repo_args,
-            reporter,
-            conduits,
-            url_watcher,
-            urlwatcher_cache_path)
-
-        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            args, reporter, repo)
-        operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
-            process_func,
-            list(retry_delays),  # make a copy to be sure
-            on_exception_delay)
-
-        operations.append(operation)
-
-    def on_pause():
-        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            args, reporter, None)
-        on_exception_delay("until_file_removed")
-
-    operations.append(
-        abdi_operation.CheckSpecialFiles(
-            args.kill_file,
-            args.reset_file,
-            args.pause_file,
-            on_pause))
-
-    operations.append(
-        abdi_operation.Sleep(
-            args.sleep_secs, reporter))
-
-    operations.append(
-        abdi_operation.RefreshCaches(
-            conduits, url_watcher, reporter))
-
-    if args.no_loop:
-        def process_once():
-            return phlsys_scheduleunreliables.process_once(list(operations))
-
-        new_ops = tryHandleSpecialFiles(process_once, on_exception_delay)
-        if new_ops != set(operations):
-            print 'ERROR: some operations failed'
-            sys.exit(1)
-    else:
-        def loopForever():
-            phlsys_scheduleunreliables.process_loop_forever(list(operations))
-
-        while True:
-            tryHandleSpecialFiles(loopForever, on_exception_delay)
-
-
-def process_single_repo(
-        repo,
-        repo_args,
-        reporter,
-        conduits,
-        url_watcher,
-        urlwatcher_cache_path):
-    abdi_processrepoargs.do(
-        repo, repo_args, reporter, conduits, url_watcher)
-
-    # save the urlwatcher cache
-    with open(urlwatcher_cache_path, 'w') as f:
-        url_watcher.dump(f)
 
 
 #------------------------------------------------------------------------------
