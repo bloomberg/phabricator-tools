@@ -31,9 +31,8 @@ import abdi_repoargs
 
 def do(args, reporter):
 
-    retry_delays = _get_retry_delays()
-
     repos = []
+
     for repo in args.repo_configs:
         parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
         abdi_repoargs.setup_parser(parser)
@@ -55,30 +54,14 @@ def do(args, reporter):
         with open(urlwatcher_cache_path) as f:
             url_watcher.load(f)
 
-    for repo, repo_args in repos:
-
-        # create a function to update this particular repo.
-        #
-        # use partial to ensure we capture the value of the variables,
-        # note that a closure would use the latest value of the variables
-        # rather than the value at declaration time.
-        process_func = functools.partial(
-            _process_single_repo,
-            repo,
-            repo_args,
-            reporter,
-            conduits,
-            url_watcher,
-            urlwatcher_cache_path)
-
-        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            args.sys_admin_emails, reporter, repo)
-        operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
-            process_func,
-            list(retry_delays),  # make a copy to be sure
-            on_exception_delay)
-
-        operations.append(operation)
+    _append_operations_for_repos(
+        operations,
+        reporter,
+        conduits,
+        url_watcher,
+        urlwatcher_cache_path,
+        args.sys_admin_emails,
+        repos)
 
     _append_interrupt_operations(
         operations,
@@ -92,6 +75,9 @@ def do(args, reporter):
     operations.append(
         abdi_operation.RefreshCaches(
             conduits, url_watcher, reporter))
+
+    on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
+        args.sys_admin_emails, reporter, None)
 
     if args.no_loop:
         def process_once():
@@ -135,6 +121,45 @@ def _append_interrupt_operations(
             sleep_secs, reporter))
 
 
+def _append_operations_for_repos(
+        operations,
+        reporter,
+        conduits,
+        url_watcher,
+        urlwatcher_cache_path,
+        sys_admin_emails,
+        repos):
+
+    strToTime = phlsys_strtotime.duration_string_to_time_delta
+    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
+
+    for repo, repo_args in repos:
+
+        # create a function to update this particular repo.
+        #
+        # use partial to ensure we capture the value of the variables,
+        # note that a closure would use the latest value of the variables
+        # rather than the value at declaration time.
+        process_func = functools.partial(
+            _process_single_repo,
+            repo,
+            repo_args,
+            reporter,
+            conduits,
+            url_watcher,
+            urlwatcher_cache_path)
+
+        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
+            sys_admin_emails, reporter, repo)
+
+        operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
+            process_func,
+            list(retry_delays),  # make a copy to be sure
+            on_exception_delay)
+
+        operations.append(operation)
+
+
 def _try_handle_reset_file(f, on_exception_delay):
     try:
         return f()
@@ -144,12 +169,6 @@ def _try_handle_reset_file(f, on_exception_delay):
             os.remove(e.path)
         except:
             on_exception_delay(None)
-
-
-def _get_retry_delays():
-    strToTime = phlsys_strtotime.duration_string_to_time_delta
-    retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
-    return retry_delays
 
 
 def _process_single_repo(
