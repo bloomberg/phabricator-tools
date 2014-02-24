@@ -31,15 +31,7 @@ import abdi_repoargs
 
 def do(args, reporter):
 
-    repos = []
-
-    for repo in args.repo_configs:
-        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-        abdi_repoargs.setup_parser(parser)
-        repo_name = repo[0]  # oddly this comes to us as a list
-        repo_name = repo_name[1:]  # strip off the '@' prefix
-        repo_args = (repo_name, parser.parse_args(repo))
-        repos.append(repo_args)
+    repos = _repos_from_configs(args.repo_configs)
 
     # TODO: test write access to repos here
 
@@ -93,6 +85,20 @@ def do(args, reporter):
 
         while True:
             _try_handle_reset_file(loopForever, on_exception_delay)
+
+
+def _repos_from_configs(repo_configs):
+    repos = []
+
+    for repo in repo_configs:
+        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+        abdi_repoargs.setup_parser(parser)
+        repo_name = repo[0]  # oddly this comes to us as a list
+        repo_name = repo_name[1:]  # strip off the '@' prefix
+        repo_args = (repo_name, parser.parse_args(repo))
+        repos.append(repo_args)
+
+    return repos
 
 
 def _append_interrupt_operations(
