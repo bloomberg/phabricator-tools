@@ -29,9 +29,17 @@ import abdi_processrepoargs
 import abdi_repoargs
 
 
-def do(args, reporter):
+def do(
+        repo_configs,
+        sys_admin_emails,
+        kill_file,
+        reset_file,
+        pause_file,
+        sleep_secs,
+        is_no_loop,
+        reporter):
 
-    repos = _repos_from_configs(args.repo_configs)
+    repos = _repos_from_configs(repo_configs)
 
     # TODO: test write access to repos here
 
@@ -52,16 +60,16 @@ def do(args, reporter):
         conduits,
         url_watcher,
         urlwatcher_cache_path,
-        args.sys_admin_emails,
+        sys_admin_emails,
         repos)
 
     _append_interrupt_operations(
         operations,
-        args.sys_admin_emails,
-        args.kill_file,
-        args.reset_file,
-        args.pause_file,
-        args.sleep_secs,
+        sys_admin_emails,
+        kill_file,
+        reset_file,
+        pause_file,
+        sleep_secs,
         reporter)
 
     operations.append(
@@ -69,7 +77,7 @@ def do(args, reporter):
             conduits, url_watcher, reporter))
 
     _process_operations(
-        args.no_loop, operations, args.sys_admin_emails, reporter)
+        is_no_loop, operations, sys_admin_emails, reporter)
 
 
 def _process_operations(is_no_loop, operations, sys_admin_emails, reporter):

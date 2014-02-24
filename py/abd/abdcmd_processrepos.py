@@ -140,7 +140,15 @@ def process(args):
     with contextlib.closing(reporter), arcyd_reporter_context(reporter):
 
         try:
-            abdi_processrepolist.do(args, reporter)
+            abdi_processrepolist.do(
+                args.repo_configs,
+                args.sys_admin_emails,
+                args.kill_file,
+                args.reset_file,
+                args.pause_file,
+                args.sleep_secs,
+                args.no_loop,
+                reporter)
         except BaseException:
             on_exception("Arcyd will now stop")
             print "stopping"
