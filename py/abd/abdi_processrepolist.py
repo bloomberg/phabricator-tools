@@ -80,21 +80,14 @@ def do(args, reporter):
 
         operations.append(operation)
 
-    def on_pause():
-        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            args.sys_admin_emails, reporter, None)
-        on_exception_delay("until_file_removed")
-
-    operations.append(
-        abdi_operation.CheckSpecialFiles(
-            args.kill_file,
-            args.reset_file,
-            args.pause_file,
-            on_pause))
-
-    operations.append(
-        abdi_operation.Sleep(
-            args.sleep_secs, reporter))
+    _append_interrupt_operations(
+        operations,
+        args.sys_admin_emails,
+        args.kill_file,
+        args.reset_file,
+        args.pause_file,
+        args.sleep_secs,
+        reporter)
 
     operations.append(
         abdi_operation.RefreshCaches(
@@ -114,6 +107,32 @@ def do(args, reporter):
 
         while True:
             _try_handle_reset_file(loopForever, on_exception_delay)
+
+
+def _append_interrupt_operations(
+        operations,
+        sys_admin_emails,
+        kill_file,
+        reset_file,
+        pause_file,
+        sleep_secs,
+        reporter):
+
+    def on_pause():
+        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
+            sys_admin_emails, reporter, None)
+        on_exception_delay("until_file_removed")
+
+    operations.append(
+        abdi_operation.CheckSpecialFiles(
+            kill_file,
+            reset_file,
+            pause_file,
+            on_pause))
+
+    operations.append(
+        abdi_operation.Sleep(
+            sleep_secs, reporter))
 
 
 def _try_handle_reset_file(f, on_exception_delay):
