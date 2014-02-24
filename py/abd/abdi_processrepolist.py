@@ -68,10 +68,16 @@ def do(args, reporter):
         abdi_operation.RefreshCaches(
             conduits, url_watcher, reporter))
 
-    on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-        args.sys_admin_emails, reporter, None)
+    _process_operations(
+        args.no_loop, operations, args.sys_admin_emails, reporter)
 
-    if args.no_loop:
+
+def _process_operations(is_no_loop, operations, sys_admin_emails, reporter):
+
+    on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
+        sys_admin_emails, reporter, None)
+
+    if is_no_loop:
         def process_once():
             return phlsys_scheduleunreliables.process_once(list(operations))
 
