@@ -31,6 +31,8 @@ abd automates the creation and landing of reviews from branches.
 Process the arguments for a single repository and execute.
 * `abdi_processrepolist.py` -
 Process a list of repository arguments.
+* `abdi_processrepos.py` -
+Setup to process multiple repos.
 * `abdi_repoargs.py` -
 Define the arguments for a single repository.
 * `abdmail_mailer.py` -

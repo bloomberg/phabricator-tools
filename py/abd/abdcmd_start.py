@@ -20,9 +20,8 @@ import os
 
 import phlsys_pid
 
+import abdi_processrepos
 import abdt_fs
-
-import abdcmd_processrepos
 
 
 def getFromfilePrefixChars():
@@ -71,9 +70,9 @@ def process(args):
     for repo in repo_configs:
         params.append('@' + repo)
 
-    abdcmd_processrepos.setupParser(parser)
+    abdi_processrepos.setupParser(parser)
     args = parser.parse_args(params)
-    abdcmd_processrepos.process(args)
+    abdi_processrepos.process(args)
 
 
 #------------------------------------------------------------------------------
