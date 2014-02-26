@@ -76,7 +76,15 @@ def _determine_options(args, repo):
     # combine all the available configs
     default_config = abdt_repooptions.make_default_data()
     args_config = _make_config_from_args(args)
-    repo_config = abdt_repooptions.data_from_repo_or_none(repo)
+
+    # listing the refs of each repo is quite expensive at scale, we're not
+    # making use of this feature at present, so disable it until we have
+    # optimised the ref query
+    #
+    # repo_config = abdt_repooptions.data_from_repo_or_none(repo)
+    _ = repo  # NOQA
+    repo_config = None
+
     config = abdt_repooptions.merge_data_objects(
         default_config, args_config, repo_config)
     abdt_repooptions.validate_data(config)
