@@ -96,8 +96,8 @@ ${arcyd} \
 
 ${arcyd} \
     repo-status-html \
-    var/status/local.try \
-    var/status/local.ok
+    var/status/repo-local.config.try \
+    var/status/repo-local.config.ok
 
 cd ..
 }
@@ -189,8 +189,8 @@ cd -
 
 cat arcyd_instance/savemail.txt
 
-cat arcyd_instance/var/status/local.try
-cat arcyd_instance/var/status/local.ok
+cat arcyd_instance/var/status/repo-local.config.try
+cat arcyd_instance/var/status/repo-local.config.ok
 
 cd ${olddir}
 rm -rf ${tempdir}

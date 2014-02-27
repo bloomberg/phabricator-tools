@@ -109,12 +109,12 @@ class Layout(object):
     @staticmethod
     def repo_try(name):
         """Return the string path to the 'try' file for the repo."""
-        return "var/status/{}.try".format(name)
+        return "var/status/repo-{}.config.try".format(name)
 
     @staticmethod
     def repo_ok(name):
         """Return the string path to the 'ok' file for the repo."""
-        return "var/status/{}.ok".format(name)
+        return "var/status/repo-{}.config.ok".format(name)
 
     @staticmethod
     def repo(name):
