@@ -82,13 +82,6 @@ def setup_parser(parser):
              "something like 'org/repo' if using '--repo-url-format'.")
 
     parser.add_argument(
-        '--sleep-secs',
-        metavar="TIME",
-        type=int,
-        default=60,
-        help="time to wait between fetches")
-
-    parser.add_argument(
         '--try-touch-path',
         metavar="PATH",
         type=str,
