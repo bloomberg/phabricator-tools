@@ -60,7 +60,7 @@ def process(args):
     parser = argparse.ArgumentParser()
     params = []
 
-    for line in open('config'):
+    for line in open(fs.layout.root_config):
         params.append(line.strip())
 
     if args.no_loop:

@@ -81,7 +81,7 @@ This is where Arcyd puts it's pidfile.
 class Layout(object):
 
     arcydroot = '.arcydroot'
-    root_config = 'config'
+    root_config = 'configfile'
     pid = 'var/run/arcyd.pid'
 
     dir_run = 'var/run'
