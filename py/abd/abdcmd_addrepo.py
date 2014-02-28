@@ -42,8 +42,11 @@ _CONFIG = """
 {try_touch_path}
 --ok-touch-path
 {ok_touch_path}
---admin-email
-{admin_email}
+""".strip()
+
+_CONFIG_ADMIN_EMAILS_FORMAT = """
+--admin-emails
+{admin_emails}
 """.strip()
 
 
@@ -90,11 +93,11 @@ def setupParser(parser):
              "something like 'org/repo' if using '--repo-url-format'.")
 
     parser.add_argument(
-        '--admin-email',
+        '--admin-emails',
+        nargs='*',
         metavar="TO",
         type=str,
-        required=True,
-        help="single email address to send important system events to")
+        help="list of email addresses to send important repo events to")
 
 
 def process(args):
@@ -125,14 +128,21 @@ def process(args):
         repo_url=args.repo_url,
         repo_path=repo_path,
         try_touch_path=try_touch_path,
-        ok_touch_path=ok_touch_path,
-        admin_email=args.admin_email)
+        ok_touch_path=ok_touch_path)
+
+    if args.admin_emails:
+        config = '\n'.join([
+            config,
+            _CONFIG_ADMIN_EMAILS_FORMAT.format(
+                admin_emails='\n'.join(args.admin_emails))])
 
     # parse the arguments again, as a real repo
     parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
     abdi_repoargs.setup_parser(parser)
     repo_args = config.splitlines()
     repo_params = parser.parse_args(repo_args)
+
+    abdi_repoargs.validate_args(repo_params)
 
     # make sure we can use the snoop URL
     repo_snoop_url = abdi_repoargs.get_repo_snoop_url(repo_params)

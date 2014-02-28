@@ -5,6 +5,7 @@
 # abdi_repoargs
 #
 # Public Functions:
+#   validate_args
 #   get_repo_url
 #   get_repo_snoop_url
 #   setup_parser
@@ -16,6 +17,18 @@
 # =============================================================================
 
 from __future__ import absolute_import
+
+
+def validate_args(args):
+    """Raise if the supplied args are not valid.
+
+    :args: the namespace returned from the argparse parser
+    :returns: None
+
+    """
+    if not args.admin_emails:
+        raise Exception(
+            "no admin emails specified for {}".format(args.repo_desc))
 
 
 def get_repo_url(args):
@@ -46,11 +59,12 @@ def setup_parser(parser):
     setup_repohost_parser(parser)
 
     parser.add_argument(
-        '--admin-email',
+        '--admin-emails',
+        nargs='+',
         metavar="TO",
+        action='append',
         type=str,
-        required=True,
-        help="single email address to send important system events to")
+        help="list of email addresses to send important repo events to")
 
     parser.add_argument(
         '--repo-desc',

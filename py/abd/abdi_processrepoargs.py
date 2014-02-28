@@ -60,10 +60,20 @@ def _set_attrib_if_not_none(config, key, value):
         setattr(config, key, value)
 
 
+def _flatten_list(hierarchy):
+    for x in hierarchy:
+        # recurse into hierarchy if it's a list
+        if hasattr(x, '__iter__') and not isinstance(x, str):
+            for y in _flatten_list(x):
+                yield y
+        else:
+            yield x
+
+
 def _make_config_from_args(args):
     config = abdt_repooptions.Data()
-    if args.admin_email:
-        config.admin_emails = [args.admin_email]
+    if args.admin_emails:
+        config.admin_emails = set(_flatten_list(args.admin_emails))
     _set_attrib_if_not_none(
         config, 'description', args.repo_desc)
     _set_attrib_if_not_none(

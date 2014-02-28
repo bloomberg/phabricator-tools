@@ -36,6 +36,11 @@ _CONFIG_HTTPS_PROXY = """
 {https_proxy}
 """.strip()
 
+_CONFIG_ADMIN_EMAILS_FORMAT = """
+--admin-emails
+{admin_emails}
+""".strip()
+
 
 def getFromfilePrefixChars():
     return None
@@ -93,6 +98,13 @@ def setupParser(parser):
              "note that the {review} will be substituted for the id of the "
              "branch.")
 
+    parser.add_argument(
+        '--admin-emails',
+        nargs='*',
+        metavar="TO",
+        type=str,
+        help="list of email addresses to send important repo events to")
+
 
 def process(args):
 
@@ -117,6 +129,12 @@ def process(args):
             content,
             _CONFIG_HTTPS_PROXY.format(
                 https_proxy=args.https_proxy)])
+
+    if args.admin_emails:
+        content = '\n'.join([
+            content,
+            _CONFIG_ADMIN_EMAILS_FORMAT.format(
+                admin_emails='\n'.join(args.admin_emails))])
 
     fs.create_phabricator_config(args.name, content)
 

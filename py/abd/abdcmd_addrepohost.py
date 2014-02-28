@@ -33,6 +33,11 @@ _CONFIG_BRANCH_URL_FORMAT = """
 {branch_url_format}
 """.strip()
 
+_CONFIG_ADMIN_EMAILS_FORMAT = """
+--admin-emails
+{admin_emails}
+""".strip()
+
 
 def getFromfilePrefixChars():
     return None
@@ -83,6 +88,13 @@ def setupParser(parser):
              "'--repo-url' argument. "
              "the result will be used on the dashboard to link to branches.")
 
+    parser.add_argument(
+        '--admin-emails',
+        nargs='*',
+        metavar="TO",
+        type=str,
+        help="list of email addresses to send important repo events to")
+
 
 def process(args):
 
@@ -108,6 +120,12 @@ def process(args):
             config,
             _CONFIG_BRANCH_URL_FORMAT.format(
                 branch_url_format=args.branch_url_format)])
+
+    if args.admin_emails:
+        config = '\n'.join([
+            config,
+            _CONFIG_ADMIN_EMAILS_FORMAT.format(
+                admin_emails='\n'.join(args.admin_emails))])
 
     config = config.strip()
 

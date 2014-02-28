@@ -27,7 +27,6 @@ olddir=$(pwd)
 cd ${tempdir}
 
 mail="${olddir}/savemail"
-touch savemail.txt
 
 mkdir origin
 cd origin
@@ -90,6 +89,7 @@ cd arcyd
         --name local \
         --instance-uri http://127.0.0.1/api/ \
         --review-url-format 'http://127.0.0.1/D{review}' \
+        --admin-emails 'local-phab-admin@localhost' \
         --arcyd-user phab \
         --arcyd-cert \
 xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
@@ -101,6 +101,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --name local_git \
         --repo-url-format '../{}' \
         --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
+        --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
 
     $arcyd add-repo \
         --name local_1 \
@@ -108,7 +109,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --repohost-name local_git \
         --repo-desc local_repo_1 \
         --repo-url origin \
-        --admin-email 'local-repo-admin@localhost'
+        --admin-emails 'local-repo1-admin@localhost'
 
     $arcyd add-repo \
         --name local_2 \
@@ -116,7 +117,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --repohost-name local_git \
         --repo-desc local_repo_2 \
         --repo-url origin2 \
-        --admin-email 'local-repo-admin@localhost'
+        --admin-emails 'local-repo2-admin@localhost'
 
 cd ..
 
@@ -160,7 +161,7 @@ function cleanup() {
 
     # display the sent mails
     pwd
-    cat savemail.txt
+    cat arcyd/savemail.txt
 
     # clean up
     cd ${olddir}

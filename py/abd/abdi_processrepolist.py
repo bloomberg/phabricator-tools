@@ -111,6 +111,7 @@ def _repos_from_configs(repo_configs):
         repo_name = repo_name[1:]  # strip off the '@' prefix
         repo_name = repo_name.split('/')[-1]  # strip off the path prefix
         repo_args = (repo_name, parser.parse_args(repo))
+        abdi_repoargs.validate_args(repo_args[1])
         repos.append(repo_args)
 
     return repos
