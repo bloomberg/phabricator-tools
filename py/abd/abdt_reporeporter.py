@@ -108,6 +108,7 @@ class RepoReporter(object):
             arcyd_reporter,
             repo,
             repo_name,
+            repo_url,
             try_output,
             ok_output):
         """Initialise a new reporter to report to the specified outputs.
@@ -115,14 +116,14 @@ class RepoReporter(object):
         :arcyd_reporter: reporter to escalate to
         :repo: machine-readable name to identify the repo
         :repo_name: human-readable name to identify the repo
-        :review_url_format: format string for generating review urls
-        :branch_url_format: format string for generating branch urls
+        :repo_url: url to compose branch urls with
         :try_output: output to use when trying the repo
         :ok_output: output to use when processed the repo
 
         """
         super(RepoReporter, self).__init__()
         self._arcyd_reporter = arcyd_reporter
+        self._repo_url = repo_url
         self._try_output = try_output
         self._ok_output = ok_output
         self._is_updating = True
@@ -224,7 +225,8 @@ class RepoReporter(object):
         branch_fmt = self._config.branch_url_format if self._config else None
         review_fmt = self._config.review_url_format if self._config else None
         if branch_fmt:
-            branch_url = branch_fmt.format(branch=branch_name)
+            branch_url = branch_fmt.format(
+                branch=branch_name, repo_url=self._repo_url)
         if review_id is not None and review_fmt:
             review_url = review_fmt.format(review=int(review_id))
 

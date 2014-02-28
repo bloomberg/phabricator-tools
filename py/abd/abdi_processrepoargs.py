@@ -36,6 +36,7 @@ import abdt_shareddictoutput
 import abdt_tryloop
 
 import abdi_processrepo
+import abdi_repoargs
 
 
 def do(repo, args, arcyd_reporter, conduits, url_watcher):
@@ -44,13 +45,13 @@ def do(repo, args, arcyd_reporter, conduits, url_watcher):
         arcyd_reporter,
         repo,
         args.repo_desc,
+        args.repo_url,
         abdt_shareddictoutput.ToFile(args.try_touch_path),
         abdt_shareddictoutput.ToFile(args.ok_touch_path))
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
-            _do(
-                args, reporter, arcyd_reporter, conduits, url_watcher)
+            _do(args, reporter, arcyd_reporter, conduits, url_watcher)
 
 
 def _set_attrib_if_not_none(config, key, value):
@@ -102,7 +103,7 @@ def _do(args, reporter, arcyd_reporter, conduits, url_watcher):
 
         _fetch_if_needed(
             url_watcher,
-            args.repo_snoop_url,
+            abdi_repoargs.get_repo_snoop_url(args),
             repo,
             args.repo_desc)
 
@@ -128,7 +129,9 @@ def _do(args, reporter, arcyd_reporter, conduits, url_watcher):
         branch_url_callable = None
         if options.branch_url_format:
             def make_branch_url(branch_name):
-                return options.branch_url_format.format(branch=branch_name)
+                return options.branch_url_format.format(
+                    branch=branch_name,
+                    repo_url=args.repo_url)
             branch_url_callable = make_branch_url
 
         branch_naming = abdt_compositenaming.Naming(

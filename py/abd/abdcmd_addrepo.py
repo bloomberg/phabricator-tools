@@ -15,6 +15,7 @@
 
 from __future__ import absolute_import
 
+import argparse
 import os
 import shutil
 
@@ -23,14 +24,18 @@ import phlsys_git
 import phlsys_subprocess
 import phlurl_request
 
+import abdi_repoargs
 import abdt_fs
 import abdt_git
 
 
 _CONFIG = """
 @{phabricator_config}
+@{repohost_config}
 --repo-desc
 {repo_desc}
+--repo-url
+{repo_url}
 --repo-path
 {repo_path}
 --try-touch-path
@@ -41,16 +46,6 @@ _CONFIG = """
 {arcyd_email}
 --admin-email
 {admin_email}
-""".strip()
-
-_CONFIG_SNOOP_URL = """
---repo-snoop-url
-{repo_snoop_url}
-""".strip()
-
-_CONFIG_BRANCH_URL = """
---branch-url-format
-{branch_url_format}
 """.strip()
 
 
@@ -74,6 +69,13 @@ def setupParser(parser):
         help="name of the Phabricator instance associated with the repo.")
 
     parser.add_argument(
+        '--repohost-name',
+        type=str,
+        metavar='STR',
+        required=True,
+        help="name of the repohost associated with the repo.")
+
+    parser.add_argument(
         '--repo-desc',
         type=str,
         metavar='STR',
@@ -83,34 +85,11 @@ def setupParser(parser):
 
     parser.add_argument(
         '--repo-url',
-        type=str,
-        metavar='STR',
-        required=True,
-        help="URL to clone and fetch the repository from.")
-
-    parser.add_argument(
-        '--repo-snoop-url',
         metavar="URL",
         type=str,
-        help="URL to use to snoop the latest contents of the repository, this "
-             "is used by Arcyd to more efficiently determine if it needs to "
-             "fetch the repository or not.  The efficiency comes from "
-             "re-using connections to the same host when querying.  The "
-             "contents returned by the URL are expected to change every time "
-             "the git repository changes, a good example of a URL to supply "
-             "is to the 'info/refs' address if you're serving up the repo "
-             "over http or https.  "
-             "e.g. 'http://server.test/git/myrepo/info/refs'.")
-
-    parser.add_argument(
-        '--branch-url-format',
-        type=str,
-        metavar='STRING',
-        help="a format string for generating URLs for viewing branches, e.g. "
-             "for a gitweb install: "
-             "'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}', "
-             "note that the {branch} will be substituted for the branch name. "
-             "will be used on the dashboard to link to branches.")
+        required=True,
+        help="url to clone the repository, e.g. 'github:org/repo' or maybe "
+             "something like 'org/repo' if using '--repo-url-format'.")
 
     parser.add_argument(
         '--arcyd-email',
@@ -143,35 +122,39 @@ def process(args):
     phab_config_path = fs.get_phabricator_config_rel_path(
         args.phabricator_name)
 
-    # make sure we can use the snoop URL
-    if args.repo_snoop_url:
-        phlurl_request.get(args.repo_snoop_url)
+    # make sure the repohost config exists
+    repohost_config_path = fs.get_repohost_config_rel_path(
+        args.repohost_name)
 
     # generate the config file
     config = _CONFIG.format(
         phabricator_config=phab_config_path,
+        repohost_config=repohost_config_path,
         repo_desc=args.repo_desc,
+        repo_url=args.repo_url,
         repo_path=repo_path,
         try_touch_path=try_touch_path,
         ok_touch_path=ok_touch_path,
         arcyd_email=args.arcyd_email,
         admin_email=args.admin_email)
 
-    if args.repo_snoop_url:
-        config = '\n'.join([
-            config,
-            _CONFIG_SNOOP_URL.format(
-                repo_snoop_url=args.repo_snoop_url)])
+    # parse the arguments again, as a real repo
+    parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+    abdi_repoargs.setup_parser(parser)
+    repo_args = config.splitlines()
+    repo_params = parser.parse_args(repo_args)
 
-    if args.branch_url_format:
-        config = '\n'.join([
-            config,
-            _CONFIG_BRANCH_URL.format(
-                branch_url_format=args.branch_url_format)])
+    # make sure we can use the snoop URL
+    repo_snoop_url = abdi_repoargs.get_repo_snoop_url(repo_params)
+    if repo_snoop_url:
+        phlurl_request.get(repo_snoop_url)
+
+    # determine the repo url from the parsed params
+    repo_url = abdi_repoargs.get_repo_url(repo_params)
 
     # if there's any failure after cloning then we should remove the repo
     phlsys_subprocess.run(
-        'git', 'clone', args.repo_url, repo_path)
+        'git', 'clone', repo_url, repo_path)
     try:
         repo = phlsys_git.Repo(repo_path)
 

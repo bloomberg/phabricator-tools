@@ -5,7 +5,11 @@
 # abdi_repoargs
 #
 # Public Functions:
+#   get_repo_url
+#   get_repo_snoop_url
 #   setup_parser
+#   setup_phab_parser
+#   setup_repohost_parser
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -14,32 +18,32 @@
 from __future__ import absolute_import
 
 
+def get_repo_url(args):
+    """Return the fully expanded url for this repo.
+
+    :args: the namespace returned from the argparse parser
+    :returns: string url to clone the repo
+
+    """
+    return args.repo_url_format.format(args.repo_url)
+
+
+def get_repo_snoop_url(args):
+    """Return the fully expanded url for snooping this repo or None.
+
+    :args: the namespace returned from the argparse parser
+    :returns: string url to snoop the repo, or None
+
+    """
+    url = None
+    if args.repo_snoop_url_format:
+        url = args.repo_snoop_url_format.format(args.repo_url)
+    return url
+
+
 def setup_parser(parser):
-
-    parser.add_argument(
-        '--instance-uri',
-        type=str,
-        metavar='ADDRESS',
-        required=True,
-        help="URI to use to access the conduit API, e.g. "
-             "'http://127.0.0.1/api/'.")
-
-    parser.add_argument(
-        '--arcyd-user',
-        type=str,
-        metavar='USERNAME',
-        required=True,
-        help="username of admin account registered for arcyd to use.")
-
-    parser.add_argument(
-        '--arcyd-cert',
-        metavar="CERT",
-        type=str,
-        required=True,
-        help="Phabricator Conduit API certificate to use, this is the "
-        "value that you will find in your user account in Phabricator "
-        "at: http://your.server.example/settings/panel/conduit/. "
-        "It can also be found in ~/.arcrc.")
+    setup_phab_parser(parser)
+    setup_repohost_parser(parser)
 
     parser.add_argument(
         '--arcyd-email',
@@ -70,24 +74,12 @@ def setup_parser(parser):
         help="path to the repository on disk")
 
     parser.add_argument(
-        '--repo-snoop-url',
+        '--repo-url',
         metavar="URL",
         type=str,
-        help="URL to use to snoop the latest contents of the repository, this "
-             "is used by Arcyd to more efficiently determine if it needs to "
-             "fetch the repository or not.  The efficiency comes from "
-             "re-using connections to the same host when querying.  The "
-             "contents returned by the URL are expected to change every time "
-             "the git repository changes, a good example of a URL to supply "
-             "is to the 'info/refs' address if you're serving up the repo "
-             "over http or https.  "
-             "e.g. 'http://server.test/git/myrepo/info/refs'.")
-
-    parser.add_argument(
-        '--https-proxy',
-        metavar="PROXY",
-        type=str,
-        help="proxy to use, if necessary")
+        required=True,
+        help="url to clone the repository, e.g. 'github:org/repo' or maybe "
+             "something like 'org/repo' if using '--repo-url-format'.")
 
     parser.add_argument(
         '--sleep-secs',
@@ -95,26 +87,6 @@ def setup_parser(parser):
         type=int,
         default=60,
         help="time to wait between fetches")
-
-    parser.add_argument(
-        '--review-url-format',
-        type=str,
-        metavar='STRING',
-        help="a format string for generating URLs for viewing reviews, e.g. "
-             "something like this: "
-             "'http://my.phabricator/D{review}' , "
-             "note that the {review} will be substituted for the id of the "
-             "branch.")
-
-    parser.add_argument(
-        '--branch-url-format',
-        type=str,
-        metavar='STRING',
-        help="a format string for generating URLs for viewing branches, e.g. "
-             "for a gitweb install: "
-             "'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}', "
-             "note that the {branch} will be substituted for the branch name. "
-             "will be used on the dashboard to link to branches.")
 
     parser.add_argument(
         '--try-touch-path',
@@ -150,6 +122,90 @@ def setup_parser(parser):
         help="List the trusted plugins to be loaded. MODULE_NAME must be "
         "present in /testbed/plugins/ directory as this feature is WIP."
         "See /testbed/plugins/README.md for detail about trusted-plugins")
+
+
+def setup_phab_parser(parser):
+
+    parser.add_argument(
+        '--instance-uri',
+        type=str,
+        metavar='ADDRESS',
+        required=True,
+        help="URI to use to access the conduit API, e.g. "
+             "'http://127.0.0.1/api/'.")
+
+    parser.add_argument(
+        '--arcyd-user',
+        type=str,
+        metavar='USERNAME',
+        required=True,
+        help="username of admin account registered for arcyd to use.")
+
+    parser.add_argument(
+        '--arcyd-cert',
+        metavar="CERT",
+        type=str,
+        required=True,
+        help="Phabricator Conduit API certificate to use, this is the "
+        "value that you will find in your user account in Phabricator "
+        "at: http://your.server.example/settings/panel/conduit/. "
+        "It can also be found in ~/.arcrc.")
+
+    parser.add_argument(
+        '--review-url-format',
+        type=str,
+        metavar='STRING',
+        help="a format string for generating URLs for viewing reviews, e.g. "
+             "something like this: "
+             "'http://my.phabricator/D{review}' , "
+             "note that the {review} will be substituted for the id of the "
+             "branch.")
+
+    parser.add_argument(
+        '--https-proxy',
+        metavar="PROXY",
+        type=str,
+        help="proxy to use, if necessary")
+
+
+def setup_repohost_parser(parser):
+
+    parser.add_argument(
+        '--repo-url-format',
+        metavar="STRING",
+        type=str,
+        default="{}",
+        help="a python format() string to apply the '--repo-url' argument to "
+             "produce the final url, e.g. 'http://github.com/{}.git'. the "
+             "default is '{}' so the '--repo-url' is used unchanged.")
+
+    parser.add_argument(
+        '--repo-snoop-url-format',
+        metavar="URL",
+        type=str,
+        help="URL to use to snoop the latest contents of the repository, this "
+             "is used by Arcyd to more efficiently determine if it needs to "
+             "fetch the repository or not.  The efficiency comes from "
+             "re-using connections to the same host when querying.  The "
+             "contents returned by the URL are expected to change every time "
+             "the git repository changes, a good example of a URL to supply "
+             "is to the 'info/refs' address if you're serving up the repo "
+             "over http or https.  "
+             "e.g. 'http://server.test/git/{}/info/refs'. the {} will be "
+             "substituted with the supplied '--repo-url' argument.'")
+
+    parser.add_argument(
+        '--branch-url-format',
+        type=str,
+        metavar='STRING',
+        help="a format string for generating URLs for viewing branches, e.g. "
+             "for a gitweb install: "
+             "'http://my.git/gitweb?p={repo_url}.git"
+             ";a=log;h=refs/heads/{branch}', "
+             "note that the {branch} will be substituted for the branch name. "
+             "note that the {repo_url} will be substituted for the supplied "
+             "'--repo-url' argument. "
+             "the result will be used on the dashboard to link to branches.")
 
 
 #------------------------------------------------------------------------------

@@ -7,6 +7,7 @@
 # Public Classes:
 #   Layout
 #    .phabricator_config
+#    .repohost_config
 #    .repo_config
 #    .repo_try
 #    .repo_ok
@@ -17,6 +18,8 @@
 #    .create_root_config
 #    .create_phabricator_config
 #    .get_phabricator_config_rel_path
+#    .create_repohost_config
+#    .get_repohost_config_rel_path
 #    .create_repo_config
 #    .repo_config_path_list
 #    .layout
@@ -120,6 +123,16 @@ class Layout(object):
 
         """
         return 'config/phabricator/{}'.format(name)
+
+    @staticmethod
+    def repohost_config(name):
+        """Return the string path to the repohost config 'name'.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :returns: the string relative path of the new file
+
+        """
+        return 'config/repohost/{}'.format(name)
 
     @staticmethod
     def repo_config(name):
@@ -248,6 +261,35 @@ class Accessor(object):
 
         if not os.path.isfile(path):
             raise Exception('{} has no phabricator config'.format(name))
+
+        return rel_path
+
+    def create_repohost_config(self, name, content):
+        """Create a new repohost config file.
+
+        :name: string name of the new config [a-zA-Z0-9_]
+        :content: the string content of the new config file
+        :returns: None
+
+        """
+        rel_path = self._layout.repohost_config(name)
+        self._create_config(
+            rel_path, content, 'Add repohost config: {}'.format(name))
+
+    def get_repohost_config_rel_path(self, name):
+        """Return the string path for the repohost config 'name'.
+
+        Raise Exception if the config does not exist.
+
+        :name: string name of the config [a-zA-Z0-9_]
+        :returns: None
+
+        """
+        rel_path = self._layout.repohost_config(name)
+        path = self._make_abspath(rel_path)
+
+        if not os.path.isfile(path):
+            raise Exception('{} has no repohost config'.format(name))
 
         return rel_path
 

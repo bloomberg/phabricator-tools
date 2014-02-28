@@ -182,7 +182,8 @@ def validate_data(data):
 
     if data.branch_url_format is not None:
         branch = 'blahbranch'
-        data.branch_url_format.format(branch=branch)
+        repo_url = 'myorg/myrepo'
+        data.branch_url_format.format(branch=branch, repo_url=repo_url)
 
     if data.review_url_format is not None:
         review = 123

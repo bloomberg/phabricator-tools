@@ -41,6 +41,7 @@ import phlsys_subcommand
 
 import abdcmd_addphabricator
 import abdcmd_addrepo
+import abdcmd_addrepohost
 import abdcmd_arcydstatushtml
 import abdcmd_devstatushtml
 import abdcmd_init
@@ -107,6 +108,8 @@ def main():
         "init", abdcmd_init, subparsers)
     phlsys_subcommand.setup_parser(
         "add-phabricator", abdcmd_addphabricator, subparsers)
+    phlsys_subcommand.setup_parser(
+        "add-repohost", abdcmd_addrepohost, subparsers)
     phlsys_subcommand.setup_parser(
         "add-repo", abdcmd_addrepo, subparsers)
     phlsys_subcommand.setup_parser(

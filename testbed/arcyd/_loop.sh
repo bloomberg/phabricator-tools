@@ -81,14 +81,19 @@ zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
 s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
+$arcyd add-repohost \
+    --name local_git \
+    --repo-url-format '../{}' \
+    --repo-snoop-url 'http://localhost:8000/info/refs'
+
 $arcyd add-repo \
     --name local \
     --phabricator-name local \
+    --repohost-name local_git \
     --repo-desc local_repo \
-    --repo-url ../origin \
+    --repo-url origin \
     --arcyd-email 'arcyd@localhost' \
     --admin-email 'local-repo-admin@localhost' \
-    --repo-snoop-url 'http://localhost:8000/info/refs'
 
 cd ..
 

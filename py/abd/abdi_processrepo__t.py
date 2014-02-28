@@ -107,6 +107,7 @@ class Test(unittest.TestCase):
             self.arcyd_reporter,
             'abdi_processrepo__t:Test repo:machine name',
             'abdi_processrepo__t:Test repo',
+            'org/repo',
             abdt_shareddictoutput.ToDict(self.reporter_try),
             abdt_shareddictoutput.ToDict(self.reporter_ok))
 

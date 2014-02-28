@@ -98,6 +98,7 @@ def _exercise_reporeporter():
         arcyd_reporter,
         "exception repo-machine-name",
         "exception repo",
+        "exception_repo",
         abdt_shareddictoutput.ToDict(repo_report),
         abdt_shareddictoutput.ToDict(branch_report))
 
@@ -118,6 +119,7 @@ def _exercise_reporeporter():
         arcyd_reporter,
         "myrepo-machine-name",
         "myrepo",
+        "myorg/myrepo",
         abdt_shareddictoutput.ToDict(repo_report),
         abdt_shareddictoutput.ToDict(branch_report))
 
