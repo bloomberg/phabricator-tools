@@ -42,62 +42,18 @@ touch logerror.txt
 
 mkdir origin
 cd origin
-git init --bare
+    git init --bare
 cd ..
 
 git clone origin dev
 cd dev
-git config user.name 'Bob User'
-git config user.email 'bob@server.test'
-touch README
-git add README
-git commit -m 'intial commit'
-git push origin master
+    git config user.name 'Bob User'
+    git config user.email 'bob@server.test'
+    touch README
+    git add README
+    git commit -m 'intial commit'
+    git push origin master
 cd ..
-
-git clone origin arcyd
-
-mkdir -p touches
-
-touch repo_arcyd.cfg
-echo @instance_local.cfg >> repo_arcyd.cfg
-echo @email_arcyd.cfg >> repo_arcyd.cfg
-echo @email_admin.cfg >> repo_arcyd.cfg
-echo --repo-desc >> repo_arcyd.cfg
-echo arcyd test >> repo_arcyd.cfg
-echo --repo-path >> repo_arcyd.cfg
-echo arcyd >> repo_arcyd.cfg
-echo --try-touch-path >> repo_arcyd.cfg
-echo touches/repo_arcyd.cfg.try >> repo_arcyd.cfg
-echo --ok-touch-path >> repo_arcyd.cfg
-echo touches/repo_arcyd.cfg.ok >> repo_arcyd.cfg
-echo --review-url-format >> repo_arcyd.cfg
-echo 'http://127.0.0.1/D{review}' >> repo_arcyd.cfg
-# echo --branch-url-format >> repo_arcyd.cfg
-# echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
-echo --repo-snoop-url >> repo_arcyd.cfg
-echo 'http://localhost:8000/info/refs' >> repo_arcyd.cfg
-
-touch instance_local.cfg
-echo --instance-uri >> instance_local.cfg
-echo http://127.0.0.1/api/ >> instance_local.cfg
-echo --arcyd-user >> instance_local.cfg
-echo phab >> instance_local.cfg
-echo --arcyd-cert >> instance_local.cfg
-echo xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
-zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
-s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
-vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
-
-touch email_arcyd.cfg
-echo --arcyd-email >> email_arcyd.cfg
-echo phab-role-account@server.example >> email_arcyd.cfg
-
-touch email_arcyd.cfg
-echo --admin-email >> email_admin.cfg
-echo admin@server.example >> email_admin.cfg
-
-echo 'press enter to stop.'
 
 # run an http server for Git in the background, for snooping
 cd origin
@@ -106,25 +62,49 @@ cd origin
     webserver_pid=$!
 cd -
 
-# run arcyd in the background
-${arcyd} \
-    process-repos \
-    --sys-admin-emails admin@server.test \
-    --sendmail-binary ${mail} \
-    --sendmail-type catchmail \
-    --external-error-logger ${logger} \
-    --repo-configs @repo_arcyd.cfg \
-    --status-path arcyd_status.json \
-    --kill-file killfile \
+mkdir arcyd
+cd arcyd
+
+$arcyd init \
     --sleep-secs 1 \
-&
-arcyd_pid=$!
+    --sendmail-binary ${mail} \
+    --sendmail-type catchmail
+
+$arcyd add-phabricator \
+    --name local \
+    --instance-uri http://127.0.0.1/api/ \
+    --arcyd-user phab \
+    --arcyd-cert \
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
+zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
+s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
+vot7fxrotwpi3ty2b2sa2kvlpf
+
+$arcyd add-repo \
+    --name local \
+    --phabricator-name local \
+    --repo-desc local_repo \
+    --repo-url ../origin \
+    --review-url-format 'http://127.0.0.1/D{review}' \
+    --arcyd-email 'arcyd@localhost' \
+    --admin-email 'local-repo-admin@localhost' \
+    --repo-snoop-url 'http://localhost:8000/info/refs'
+
+cd ..
+
+echo 'press enter to stop.'
+
+cd arcyd
+    # run arcyd in the background
+    ${arcyd} start &
+    arcyd_pid=$!
+cd ..
 
 # run arcyd instaweb in the background
 ${arcyd} \
     instaweb \
-    --report-file arcyd_status.json \
-    --repo-file-dir touches \
+    --report-file arcyd/var/status/arcyd_status.json \
+    --repo-file-dir arcyd/var/status \
     --port 8001 \
 &
 instaweb_pid=$!
@@ -144,9 +124,8 @@ function cleanup() {
     wait $instaweb_pid
 
     # kill arycd and poke_loop
-    touch killfile
     touch dev/__kill_poke__
-    wait $arcyd_pid
+    (cd arcyd; ${arcyd} stop)
     wait $pokeloop_pid
 
     echo $webserver_pid

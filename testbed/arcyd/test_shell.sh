@@ -100,7 +100,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --phabricator-name local \
         --repo-desc local_repo_1 \
         --repo-url ../origin \
-        --review-url-format 'http://my.phabricator/D{review}' \
+        --review-url-format 'http://127.0.0.1/D{review}' \
         --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
         --arcyd-email 'arcyd@localhost' \
         --admin-email 'local-repo-admin@localhost'
@@ -110,7 +110,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --phabricator-name local \
         --repo-desc local_repo_2 \
         --repo-url ../origin2 \
-        --review-url-format 'http://my.phabricator/D{review}' \
+        --review-url-format 'http://127.0.0.1/D{review}' \
         --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
         --arcyd-email 'arcyd@localhost' \
         --admin-email 'local-repo-admin@localhost'

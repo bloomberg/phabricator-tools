@@ -24,7 +24,6 @@ olddir=$(pwd)
 cd ${tempdir}
 
 $arcyd -h
-$arcyd process-repos -h
 $arcyd arcyd-status-html -h
 $arcyd repo-status-html -h
 $arcyd dev-status-html -h

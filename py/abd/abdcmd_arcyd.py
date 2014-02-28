@@ -45,7 +45,6 @@ import abdcmd_arcydstatushtml
 import abdcmd_devstatushtml
 import abdcmd_init
 import abdcmd_instaweb
-import abdcmd_processrepos
 import abdcmd_repostatushtml
 import abdcmd_start
 import abdcmd_stop
@@ -85,16 +84,6 @@ rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
         --repo-path
         /path/to/repo
 
-    to run arcyd:
-    $ arcyd process-repos\\
-    --repo-configs @repo1.cfg \\
-    --system-admin-email systemadmin@server.test \\
-    --sendmail-binary sendmail \\
-    --sendmail-type sendmail \\
-
-    to display help on the 'process-repos' sub-command:
-    $ arcyd process-repos --help
-
     """
 
 
@@ -106,8 +95,6 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setup_parser(
-        "process-repos", abdcmd_processrepos, subparsers)
     phlsys_subcommand.setup_parser(
         "arcyd-status-html", abdcmd_arcydstatushtml, subparsers)
     phlsys_subcommand.setup_parser(

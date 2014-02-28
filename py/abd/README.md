@@ -13,8 +13,6 @@ Help develop status pages by providing simulating various statuses.
 Create a new arcyd instance in working dir, with backing git repository.
 * `abdcmd_instaweb.py` -
 Start a local webserver to report the status of an arcyd instance.
-* `abdcmd_processrepos.py` -
-Command to process multiple repos.
 * `abdcmd_repostatushtml.py` -
 Render status files as meaningful html to present to users.
 * `abdcmd_start.py` -

@@ -44,8 +44,6 @@ def process(args):
     pid = phlsys_pid.get()
     fs.set_pid(pid)
 
-    # XXX: hack this horribly by delegating everything to the 'process-repos'
-    #      command
     parser = argparse.ArgumentParser()
     params = []
 

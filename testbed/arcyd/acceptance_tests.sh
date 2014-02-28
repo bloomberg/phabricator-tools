@@ -54,78 +54,59 @@ function setup_repos() {
     git push origin master
 
     cd ..
-
-    git clone origin arcyd
-
-    cd arcyd
-    git fetch
-    cd ..
 }
 
 function configure_arcyd() {
-    mkdir -p touches
+    mkdir arcyd
+    cd arcyd
 
-    touch repo_arcyd.cfg
-    echo @instance_local.cfg >> repo_arcyd.cfg
-    echo @email_arcyd.cfg >> repo_arcyd.cfg
-    echo @email_admin.cfg >> repo_arcyd.cfg
-    echo --repo-desc >> repo_arcyd.cfg
-    echo arcyd test >> repo_arcyd.cfg
-    echo --repo-path >> repo_arcyd.cfg
-    echo arcyd >> repo_arcyd.cfg
-    echo --try-touch-path >> repo_arcyd.cfg
-    echo touches/repo_origin.try >> repo_arcyd.cfg
-    echo --ok-touch-path >> repo_arcyd.cfg
-    echo touches/repo_origin.ok >> repo_arcyd.cfg
-    echo --review-url-format >> repo_arcyd.cfg
-    echo 'http://my.phabricator/D{review}' >> repo_arcyd.cfg
-    echo --branch-url-format >> repo_arcyd.cfg
-    echo 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' >> repo_arcyd.cfg
+    $arcyd init \
+        --sleep-secs 0 \
+        --sendmail-binary ${mail} \
+        --sendmail-type catchmail
 
-    touch instance_local.cfg
-    echo --instance-uri >> instance_local.cfg
-    echo http://127.0.0.1/api/ >> instance_local.cfg
-    echo --arcyd-user >> instance_local.cfg
-    echo phab >> instance_local.cfg
-    echo --arcyd-cert >> instance_local.cfg
-    echo xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
+    $arcyd add-phabricator \
+        --name local \
+        --instance-uri http://127.0.0.1/api/ \
+        --arcyd-user phab \
+        --arcyd-cert \
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
 zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
 s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
-vot7fxrotwpi3ty2b2sa2kvlpf >> instance_local.cfg
+vot7fxrotwpi3ty2b2sa2kvlpf
 
-    touch email_arcyd.cfg
-    echo --arcyd-email >> email_arcyd.cfg
-    echo phab-role-account@server.example >> email_arcyd.cfg
+    $arcyd add-repo \
+        --name local \
+        --phabricator-name local \
+        --repo-desc local_repo \
+        --repo-url ../origin \
+        --review-url-format 'http://my.phabricator/D{review}' \
+        --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
+        --arcyd-email 'arcyd@localhost' \
+        --admin-email 'local-repo-admin@localhost'
 
-    touch email_arcyd.cfg
-    echo --admin-email >> email_admin.cfg
-    echo admin@server.example >> email_admin.cfg
+    cd ..
 }
 
 function run_arcyd() {
-    ${arcyd} \
-        process-repos \
-        --sys-admin-emails admin@server.test \
-        --sendmail-binary ${mail} \
-        --sendmail-type catchmail \
-        --repo-configs @repo_arcyd.cfg \
-        --status-path arcyd_status.json \
-        --io-log-file arcyd-io.log \
-        --sleep-secs 0 \
-        --no-loop
+    cd arcyd
+
+    ${arcyd} start --no-loop
     echo $?
 
     ${arcyd} \
         arcyd-status-html \
-        arcyd_status.json \
-        https://server.test/arcyd > /dev/null
+        var/status/arcyd_status.json \
+        https://server.test/arcyd
     echo $?
 
     ${arcyd} \
         repo-status-html \
-        touches/repo_origin.try \
-        touches/repo_origin.ok > /dev/null
+        var/status/local.try \
+        var/status/local.ok
     echo $?
+
+    cd ..
 }
 
 function test_happy_path() {
@@ -649,7 +630,7 @@ pwd
 cat savemail.txt
 
 # display the io activity
-cat arcyd-io.log
+cat arcyd/var/log/git-phab-writes.log
 
 # clean up
 cd ${olddir}
