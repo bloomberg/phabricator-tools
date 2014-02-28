@@ -30,6 +30,12 @@ import abdi_processrepolist
 
 def setupParser(parser):
     parser.add_argument(
+        '--arcyd-email',
+        metavar="EMAIL",
+        type=str,
+        required=True,
+        help="email address for arcyd to send messages from")
+    parser.add_argument(
         '--sys-admin-emails',
         metavar="EMAIL",
         nargs="+",
@@ -119,7 +125,7 @@ def process(args):
 
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
     reporter = abdt_arcydreporter.ArcydReporter(
-        reporter_data, args.io_log_file)
+        reporter_data, args.arcyd_email, args.io_log_file)
 
     if args.external_error_logger:
         full_path = os.path.abspath(args.external_error_logger)

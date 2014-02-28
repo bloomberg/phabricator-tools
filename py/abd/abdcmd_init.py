@@ -18,6 +18,8 @@ from __future__ import absolute_import
 import abdt_fs
 
 _DEFAULT_CONFIG = """
+--arcyd-email
+{arcyd_email}
 --sys-admin-emails
 {sys_admin_emails}
 --sendmail-binary
@@ -40,6 +42,12 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
+    parser.add_argument(
+        '--arcyd-email',
+        metavar="EMAIL",
+        type=str,
+        required=True,
+        help="email address for arcyd to send messages from")
     parser.add_argument(
         '--sys-admin-emails',
         type=str,
@@ -72,6 +80,7 @@ def process(args):
     fs = abdt_fs.initialise_here()
 
     config = _DEFAULT_CONFIG.format(
+        arcyd_email=args.arcyd_email,
         sys_admin_emails=' '.join(args.sys_admin_emails),
         sendmail_binary=args.sendmail_binary,
         sendmail_type=args.sendmail_type,

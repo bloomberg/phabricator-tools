@@ -14,6 +14,7 @@
 #    .stop
 #    .duration
 #   ArcydReporter
+#    .arcyd_email
 #    .set_external_system_error_logger
 #    .start_sleep
 #    .update_sleep
@@ -264,7 +265,7 @@ class _CycleTimer(object):
 
 class ArcydReporter(object):
 
-    def __init__(self, output, io_log_path=None):
+    def __init__(self, output, arcyd_email, io_log_path=None):
         """Initialise a new reporter to report to the specified outputs.
 
         :output: output to write status to
@@ -273,6 +274,7 @@ class ArcydReporter(object):
         """
         super(ArcydReporter, self).__init__()
         self._output = output
+        self._arcyd_email = arcyd_email
 
         log_path = io_log_path
         self._io_log_path = os.path.abspath(log_path) if log_path else None
@@ -291,6 +293,10 @@ class ArcydReporter(object):
         self._external_system_error_logger = None
 
         self._write_status(ARCYD_STATUS_STARTING)
+
+    @property
+    def arcyd_email(self):
+        return self._arcyd_email
 
     def set_external_system_error_logger(self, path):
         self._external_system_error_logger = path

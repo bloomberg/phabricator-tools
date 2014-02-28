@@ -67,6 +67,7 @@ cd arcyd
 
 $arcyd init \
     --sleep-secs 1 \
+    --arcyd-email 'arcyd@localhost' \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail
 
@@ -92,7 +93,6 @@ $arcyd add-repo \
     --repohost-name local_git \
     --repo-desc local_repo \
     --repo-url origin \
-    --arcyd-email 'arcyd@localhost' \
     --admin-email 'local-repo-admin@localhost' \
 
 cd ..

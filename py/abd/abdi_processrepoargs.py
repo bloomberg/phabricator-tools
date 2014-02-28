@@ -114,7 +114,7 @@ def _do(args, reporter, arcyd_reporter, conduits, url_watcher):
         reporter.set_config(options)
 
         sender = phlmail_sender.MailSender(
-            phlsys_sendmail.Sendmail(), args.arcyd_email)
+            phlsys_sendmail.Sendmail(), arcyd_reporter.arcyd_email)
 
         # TODO: this should be a URI for users not conduit
         mailer = abdmail_mailer.Mailer(

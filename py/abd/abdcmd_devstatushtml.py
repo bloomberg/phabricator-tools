@@ -83,7 +83,8 @@ def _exercise_reporeporter():
 
     report = {}
     arcyd_reporter = abdt_arcydreporter.ArcydReporter(
-        abdt_shareddictoutput.ToDict(report))
+        abdt_shareddictoutput.ToDict(report),
+        "arcyd@localhost")
 
     arcyd_reporter.start_repo('name', 'human-name')
 
@@ -159,7 +160,8 @@ def _exercise_arcydreporter():
     # simulate unhandled exception during processing repo
 
     reporter = abdt_arcydreporter.ArcydReporter(
-        abdt_shareddictoutput.ToDict(report))
+        abdt_shareddictoutput.ToDict(report),
+        "arcyd@localhost")
 
     with contextlib.closing(reporter):
         _write('arcyd_exception_start')

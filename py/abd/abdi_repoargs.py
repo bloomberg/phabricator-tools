@@ -46,13 +46,6 @@ def setup_parser(parser):
     setup_repohost_parser(parser)
 
     parser.add_argument(
-        '--arcyd-email',
-        metavar="FROM",
-        type=str,
-        required=True,
-        help="email address for Arcyd to send mails from")
-
-    parser.add_argument(
         '--admin-email',
         metavar="TO",
         type=str,

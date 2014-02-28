@@ -42,8 +42,6 @@ _CONFIG = """
 {try_touch_path}
 --ok-touch-path
 {ok_touch_path}
---arcyd-email
-{arcyd_email}
 --admin-email
 {admin_email}
 """.strip()
@@ -92,13 +90,6 @@ def setupParser(parser):
              "something like 'org/repo' if using '--repo-url-format'.")
 
     parser.add_argument(
-        '--arcyd-email',
-        metavar="FROM",
-        type=str,
-        required=True,
-        help="email address for Arcyd to send mails from")
-
-    parser.add_argument(
         '--admin-email',
         metavar="TO",
         type=str,
@@ -135,7 +126,6 @@ def process(args):
         repo_path=repo_path,
         try_touch_path=try_touch_path,
         ok_touch_path=ok_touch_path,
-        arcyd_email=args.arcyd_email,
         admin_email=args.admin_email)
 
     # parse the arguments again, as a real repo

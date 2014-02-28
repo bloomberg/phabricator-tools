@@ -57,6 +57,7 @@ function configure_arcyd() {
     cd arcyd_instance
 
     $arcyd init \
+        --arcyd-email 'arcyd@localhost' \
         --sleep-secs 0 \
         --sendmail-binary ${mail} \
         --sendmail-type catchmail
@@ -83,7 +84,6 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --repohost-name local_git \
         --repo-desc local_repo \
         --repo-url origin \
-        --arcyd-email 'arcyd@localhost' \
         --admin-email 'local-repo-admin@localhost'
 
     cd ..

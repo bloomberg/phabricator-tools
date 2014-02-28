@@ -89,7 +89,8 @@ class Test(unittest.TestCase):
         self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
         self.arcyd_reporter_data = {}
         self.arcyd_reporter = abdt_arcydreporter.ArcydReporter(
-            abdt_shareddictoutput.ToDict(self.arcyd_reporter_data))
+            abdt_shareddictoutput.ToDict(self.arcyd_reporter_data),
+            "arcyd@localhost")
 
     def tearDown(self):
         pass
