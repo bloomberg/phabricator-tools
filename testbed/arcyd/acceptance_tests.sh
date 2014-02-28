@@ -53,77 +53,12 @@ function setup_repos() {
     git commit -m 'intial commit'
     git push origin master
 
-    # write the config
-    git checkout --orphan config
-    git rm --cached -rf -- .
-    git clean -fd
-    echo '{"admin_emails": ["repo.admin@server.test"]}' > repo.json
-    git add repo.json
-    git commit -m 'initial config'
-    git push origin refs/heads/config:refs/config/arcyd
-    git checkout master
-    git branch -D config
-
     cd ..
 
-    git clone origin arcyd \
-        --config remote.origin.fetch=+refs/config/*:refs/config/origin/*
+    git clone origin arcyd
 
     cd arcyd
     git fetch
-    cd ..
-}
-
-function remove_config() {
-    cd arcyd
-    git push origin :refs/config/arcyd
-    git update-ref -d refs/config/origin/arcyd
-    cd ..
-}
-
-function make_empty_config_ref() {
-    cd dev
-
-    # write the empty config
-    git checkout --orphan config
-    git rm --cached -rf -- .
-    git clean -fd
-    touch README
-    git add README
-    git commit -m 'no config'
-    git push origin -f refs/heads/config:refs/config/arcyd
-    git checkout master
-    git branch -D config
-
-    cd ..
-
-    cd arcyd
-    git fetch
-    echo -- make_empty_config_ref --
-    git show refs/config/origin/arcyd:README
-    cd ..
-}
-
-function make_empty_config() {
-    cd dev
-
-    # write the empty config
-    git checkout --orphan config
-    git rm --cached -rf -- .
-    git clean -fd
-    echo '{}' > repo.json
-    git add repo.json
-    git commit -m 'initial config'
-    git push origin -f refs/heads/config:refs/config/arcyd
-    git checkout master
-    git branch -D config
-
-    cd ..
-
-    cd arcyd
-    git fetch
-    echo -- make_empty_config --
-    git show refs/config/origin/arcyd:repo.json
     cd ..
 }
 
@@ -688,30 +623,6 @@ test_merge_conflict
 test_push_error
 test_empty_branch
 test_branch_gc
-
-# delete all local working branches for clean slate, reset master to initial commit
-(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
-(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
-
-# remove the config
-remove_config
-test_happy_path
-
-# delete all local working branches for clean slate, reset master to initial commit
-(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
-(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
-
-# make a config ref with no repo.json
-make_empty_config_ref
-test_happy_path
-
-# delete all local working branches for clean slate, reset master to initial commit
-(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
-(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
-
-# make a config ref with empty repo.json
-make_empty_config
-test_happy_path
 
 # delete all local working branches for clean slate, reset master to initial commit
 (cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
