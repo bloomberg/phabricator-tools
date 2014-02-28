@@ -88,6 +88,7 @@ cd arcyd
     $arcyd add-phabricator \
         --name local \
         --instance-uri http://127.0.0.1/api/ \
+        --review-url-format 'http://127.0.0.1/D{review}' \
         --arcyd-user phab \
         --arcyd-cert \
 xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
@@ -100,7 +101,6 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --phabricator-name local \
         --repo-desc local_repo_1 \
         --repo-url ../origin \
-        --review-url-format 'http://127.0.0.1/D{review}' \
         --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
         --arcyd-email 'arcyd@localhost' \
         --admin-email 'local-repo-admin@localhost'
@@ -110,7 +110,6 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --phabricator-name local \
         --repo-desc local_repo_2 \
         --repo-url ../origin2 \
-        --review-url-format 'http://127.0.0.1/D{review}' \
         --branch-url-format 'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}' \
         --arcyd-email 'arcyd@localhost' \
         --admin-email 'local-repo-admin@localhost'

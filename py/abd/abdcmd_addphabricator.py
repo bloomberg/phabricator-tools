@@ -27,6 +27,8 @@ _CONFIG = """
 {arcyd_user}
 --arcyd-cert
 {arcyd_cert}
+--review-url-format
+{review_url_format}
 """.strip()
 
 _CONFIG_HTTPS_PROXY = """
@@ -80,6 +82,17 @@ def setupParser(parser):
         help="(OPTIONAL) proxy URI for arcyd to use when connecting to "
              "conduit to https.")
 
+    parser.add_argument(
+        '--review-url-format',
+        type=str,
+        metavar='STRING',
+        required=True,
+        help="a format string for generating URLs for viewing reviews, e.g. "
+             "something like this: "
+             "'http://my.phabricator/D{review}' , "
+             "note that the {review} will be substituted for the id of the "
+             "branch.")
+
 
 def process(args):
 
@@ -96,7 +109,8 @@ def process(args):
     content = _CONFIG.format(
         instance_uri=args.instance_uri,
         arcyd_user=args.arcyd_user,
-        arcyd_cert=args.arcyd_cert)
+        arcyd_cert=args.arcyd_cert,
+        review_url_format=args.review_url_format)
 
     if args.https_proxy:
         content = '\n'.join([

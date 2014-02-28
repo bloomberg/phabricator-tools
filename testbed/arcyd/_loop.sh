@@ -73,6 +73,7 @@ $arcyd init \
 $arcyd add-phabricator \
     --name local \
     --instance-uri http://127.0.0.1/api/ \
+    --review-url-format 'http://127.0.0.1/D{review}' \
     --arcyd-user phab \
     --arcyd-cert \
 xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
@@ -85,7 +86,6 @@ $arcyd add-repo \
     --phabricator-name local \
     --repo-desc local_repo \
     --repo-url ../origin \
-    --review-url-format 'http://127.0.0.1/D{review}' \
     --arcyd-email 'arcyd@localhost' \
     --admin-email 'local-repo-admin@localhost' \
     --repo-snoop-url 'http://localhost:8000/info/refs'

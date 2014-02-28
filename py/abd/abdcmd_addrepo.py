@@ -48,11 +48,6 @@ _CONFIG_SNOOP_URL = """
 {repo_snoop_url}
 """.strip()
 
-_CONFIG_REVIEW_URL = """
---review-url-format
-{review_url_format}
-""".strip()
-
 _CONFIG_BRANCH_URL = """
 --branch-url-format
 {branch_url_format}
@@ -106,17 +101,6 @@ def setupParser(parser):
              "is to the 'info/refs' address if you're serving up the repo "
              "over http or https.  "
              "e.g. 'http://server.test/git/myrepo/info/refs'.")
-
-    # XXX: we should be generating this for the user
-    parser.add_argument(
-        '--review-url-format',
-        type=str,
-        metavar='STRING',
-        help="a format string for generating URLs for viewing reviews, e.g. "
-             "something like this: "
-             "'http://my.phabricator/D{review}' , "
-             "note that the {review} will be substituted for the id of the "
-             "branch.")
 
     parser.add_argument(
         '--branch-url-format',
@@ -178,12 +162,6 @@ def process(args):
             config,
             _CONFIG_SNOOP_URL.format(
                 repo_snoop_url=args.repo_snoop_url)])
-
-    if args.review_url_format:
-        config = '\n'.join([
-            config,
-            _CONFIG_REVIEW_URL.format(
-                review_url_format=args.review_url_format)])
 
     if args.branch_url_format:
         config = '\n'.join([
