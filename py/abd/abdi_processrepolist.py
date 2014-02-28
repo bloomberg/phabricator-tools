@@ -109,6 +109,7 @@ def _repos_from_configs(repo_configs):
         abdi_repoargs.setup_parser(parser)
         repo_name = repo[0]  # oddly this comes to us as a list
         repo_name = repo_name[1:]  # strip off the '@' prefix
+        repo_name = repo_name.split('/')[-1]  # strip off the path prefix
         repo_args = (repo_name, parser.parse_args(repo))
         repos.append(repo_args)
 

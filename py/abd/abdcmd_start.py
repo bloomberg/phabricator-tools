@@ -16,7 +16,6 @@
 from __future__ import absolute_import
 
 import argparse
-import os
 
 import phlsys_pid
 
@@ -35,14 +34,6 @@ def setupParser(parser):
         help="supply this argument to only process each repo once then exit")
 
 
-def _is_repo_config_path(x):
-    return x.startswith('repo-') and x.endswith('.config')
-
-
-def _list_repo_configs_in_workingdir():
-    return [x for x in os.listdir('.') if _is_repo_config_path(x)]
-
-
 def process(args):
     fs = abdt_fs.make_default_accessor()
 
@@ -52,8 +43,6 @@ def process(args):
 
     pid = phlsys_pid.get()
     fs.set_pid(pid)
-
-    repo_configs = _list_repo_configs_in_workingdir()
 
     # XXX: hack this horribly by delegating everything to the 'process-repos'
     #      command
@@ -66,7 +55,7 @@ def process(args):
     if args.no_loop:
         params.append('--no-loop')
 
-    for repo in repo_configs:
+    for repo in fs.repo_config_path_list():
         params.append('--repo-configs')
         params.append('@' + repo)
 

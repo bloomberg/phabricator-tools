@@ -18,6 +18,7 @@
 #    .create_phabricator_config
 #    .get_phabricator_config_rel_path
 #    .create_repo_config
+#    .repo_config_path_list
 #    .layout
 #
 # Public Functions:
@@ -42,6 +43,28 @@ _README = """
 This is an Arcyd repository.
 
 Run 'arcyd --help' for options.
+""".strip()
+
+_CONFIG_README = """
+In this directory all the configuration is stored, from which all other
+run-time data may be generated.
+
+It is important that this directory is preserved and versioned so that it's
+possible to see when and why things were changed.
+""".strip()
+
+_CONFIG_PHABRICATOR_README = """
+In this directory all the phabricator instance configuration is stored.
+
+It is important that this directory is preserved and versioned so that it's
+possible to see when and why things were changed.
+""".strip()
+
+_CONFIG_REPOSITORY_README = """
+In this directory all the repository configuration is stored.
+
+It is important that this directory is preserved and versioned so that it's
+possible to see when and why things were changed.
 """.strip()
 
 _VAR_README = """
@@ -83,6 +106,8 @@ class Layout(object):
     arcydroot = '.arcydroot'
     root_config = 'configfile'
     pid = 'var/run/arcyd.pid'
+    phabricator_config_dir = 'config/repository'
+    repository_config_dir = 'config/repository'
 
     dir_run = 'var/run'
 
@@ -94,7 +119,7 @@ class Layout(object):
         :returns: the string relative path of the new file
 
         """
-        return 'phabricator-{}.config'.format(name)
+        return 'config/phabricator/{}'.format(name)
 
     @staticmethod
     def repo_config(name):
@@ -104,17 +129,17 @@ class Layout(object):
         :returns: the string relative path of the new file
 
         """
-        return 'repo-{}.config'.format(name)
+        return 'config/repository/{}'.format(name)
 
     @staticmethod
     def repo_try(name):
         """Return the string path to the 'try' file for the repo."""
-        return "var/status/repo-{}.config.try".format(name)
+        return "var/status/{}.try".format(name)
 
     @staticmethod
     def repo_ok(name):
         """Return the string path to the 'ok' file for the repo."""
-        return "var/status/repo-{}.config.ok".format(name)
+        return "var/status/{}.ok".format(name)
 
     @staticmethod
     def repo(name):
@@ -238,6 +263,15 @@ class Accessor(object):
         self._create_config(
             rel_path, content, 'Add repo config: {}'.format(name))
 
+    def repo_config_path_list(self):
+        """Return a list of string paths to repo configs.
+
+        :returns: list of string
+
+        """
+        p = self.layout.repository_config_dir
+        return [os.path.join(p, r) for r in os.listdir(p) if r != 'README']
+
     @property
     def layout(self):
         return self._layout
@@ -266,6 +300,11 @@ def initialise_here():
     # create filesystem hierarchy
     phlsys_fs.write_text_file(layout.arcydroot, 'this dir is an arcydroot')
     phlsys_fs.write_text_file('README', _README)
+    phlsys_fs.write_text_file('config/README', _CONFIG_README)
+    phlsys_fs.write_text_file(
+        'config/phabricator/README', _CONFIG_PHABRICATOR_README)
+    phlsys_fs.write_text_file(
+        'config/repository/README', _CONFIG_REPOSITORY_README)
     phlsys_fs.write_text_file('var/README', _VAR_README)
     phlsys_fs.write_text_file('var/repo/README', _VAR_REPO_README)
     phlsys_fs.write_text_file('var/log/README', _VAR_LOG_README)
