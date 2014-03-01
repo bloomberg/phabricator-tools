@@ -52,38 +52,41 @@ import abdcmd_stop
 
 _USAGE_EXAMPLES = """
 usage example:
-    Using the example accounts baked into the 'phabricator-tools'
-    vagrant/puppet installation. (see ./README)
+To setup arcyd using the example accounts baked into the 'phabricator-tools'
+vagrant/puppet installation. (see ./README)
 
-    You can also split the configuration across multiple files and combine them
-    on the command-line or have them inherit from eachother.
+    $ mkdir arcyd
+    $ cd arcyd
+    $ arcyd init --arcyd-email arcyd@localhost
+    $ arcyd add-phabricator \\
+        --name local \\
+        --instance-uri http://127.0.0.1/api/ \\
+        --review-url-format 'http://127.0.0.1/D{review}' \\
+        --admin-emails 'local-phab-admin@localhost' \\
+        --arcyd-user phab \\
+        --arcyd-cert \\
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
+zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
+s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
+vot7fxrotwpi3ty2b2sa2kvlpf
 
-    ** TODO: test this config **
+    $ arcyd add-repohost \\
+        --name local_repos \\
+        --repo-url-format '/path/to/repos/{}'
 
-    in localinstance.cfg:
-        --instance-uri
-        https://127.0.0.1/api/
-        --arcyd-user
-        phab
-        --arcyd-cert
-        xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7\
-ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo\
-2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5\
-rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
+    $ arcyd add-repo \\
+        --name local_1 \\
+        --repo-url local_1 \\
+        --repo-desc local_1 \\
+        --phabricator-name local \\
+        --repohost-name local_repos \\
+        --admin-emails 'local-repo1-admin@localhost'
 
-    in email.cfg:
-        --arcyd-email
-        phab-role-account@server.example
-        --admin-email
-        admin@server.example
+    $ arcyd start
 
-    in repo1.cfg:
-        @localinstance.cfg
-        @email.cfg
-        --repo-desc
-        http://server.example/repo.git
-        --repo-path
-        /path/to/repo
+run each command with the '--help' option for more information, e.g.:
+
+    $ arcyd init --help
 
     """
 
