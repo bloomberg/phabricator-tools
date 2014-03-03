@@ -87,7 +87,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 function run_arcyd() {
 cd arcyd_instance
 
-${arcyd} start --no-loop
+${arcyd} start --no-loop --foreground
 
 ${arcyd} \
     arcyd-status-html \
@@ -109,7 +109,7 @@ run_arcyd
 # exercise the stop route
 echo exercise the stop route
 cd arcyd_instance
-${arcyd} start &
+${arcyd} start
 sleep 1
 ${arcyd} stop
 cd ..

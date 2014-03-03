@@ -109,6 +109,8 @@ class Layout(object):
     arcydroot = '.arcydroot'
     root_config = 'configfile'
     pid = 'var/run/arcyd.pid'
+    stdout = 'var/log/stdout'
+    stderr = 'var/log/stderr'
     phabricator_config_dir = 'config/repository'
     repository_config_dir = 'config/repository'
 

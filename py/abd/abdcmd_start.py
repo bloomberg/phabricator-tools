@@ -17,6 +17,7 @@ from __future__ import absolute_import
 
 import argparse
 
+import phlsys_daemonize
 import phlsys_pid
 import phlsys_signal
 
@@ -29,6 +30,12 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
+    parser.add_argument(
+        '--foreground',
+        '-f',
+        action='store_true',
+        help="supply this argument to run arcyd interactively in the "
+             "foreground")
     parser.add_argument(
         '--no-loop',
         action='store_true',
@@ -45,6 +52,12 @@ def process(args):
     if pid is not None and phlsys_pid.is_running(pid):
         raise Exception("already running")
 
+    if not args.foreground:
+        phlsys_daemonize.do(
+            stdout_path=fs.layout.stdout,
+            stderr_path=fs.layout.stderr)
+
+    # important that we do this *after* daemonizing
     pid = phlsys_pid.get()
     fs.set_pid(pid)
 

@@ -125,7 +125,7 @@ instaweb_pid=$!
 
 # run arcyd in the background
 cd arcyd
-${arcyd} start < /dev/null > /dev/null &
+${arcyd} start
 cd ..
 
 function cleanup() {

@@ -65,6 +65,8 @@ Ensure that two or more interfaces match, useful for validating mocks.
 Wrapper to call Phabricator's Conduit API.
 * `phlsys_cppcheck.py` -
 Run the external tool 'cppcheck' and process results.
+* `phlsys_daemonize.py` -
+Daemonize the current process.
 * `phlsys_dictutil.py` -
 Utility for working with dicts.
 * `phlsys_fs.py` -

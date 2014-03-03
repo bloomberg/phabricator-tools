@@ -96,8 +96,7 @@ echo 'press enter to stop.'
 
 cd arcyd
     # run arcyd in the background
-    ${arcyd} start &
-    arcyd_pid=$!
+    ${arcyd} start
 cd ..
 
 # run arcyd instaweb in the background
@@ -123,7 +122,7 @@ function cleanup() {
     kill $instaweb_pid
     wait $instaweb_pid
 
-    # kill arycd and poke_loop
+    # kill arcyd and poke_loop
     touch dev/__kill_poke__
     (cd arcyd; ${arcyd} stop)
     wait $pokeloop_pid

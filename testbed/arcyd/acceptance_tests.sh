@@ -91,7 +91,7 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 function run_arcyd() {
     cd arcyd
 
-    ${arcyd} start --no-loop
+    ${arcyd} start --no-loop --foreground
     echo $?
 
     ${arcyd} \
