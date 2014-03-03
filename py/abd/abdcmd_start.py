@@ -18,6 +18,7 @@ from __future__ import absolute_import
 import argparse
 
 import phlsys_pid
+import phlsys_signal
 
 import abdi_processrepos
 import abdt_fs
@@ -35,6 +36,9 @@ def setupParser(parser):
 
 
 def process(args):
+    # exit gracefully if this process is killed
+    phlsys_signal.set_exit_on_sigterm()
+
     fs = abdt_fs.make_default_accessor()
 
     pid = fs.get_pid_or_none()

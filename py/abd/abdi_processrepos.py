@@ -18,7 +18,6 @@ import contextlib
 import os
 
 import phlsys_sendmail
-import phlsys_signal
 
 import abdt_arcydreporter
 import abdt_exhandlers
@@ -112,8 +111,6 @@ def setupParser(parser):
 
 
 def process(args):
-
-    phlsys_signal.set_exit_on_sigterm()
 
     if args.sendmail_binary:
         phlsys_sendmail.Sendmail.set_default_binary(
