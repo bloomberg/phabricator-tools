@@ -86,7 +86,7 @@ cd arcyd
         --sendmail-type catchmail
 
     $arcyd add-phabricator \
-        --name local \
+        --name localhost \
         --instance-uri http://127.0.0.1/api/ \
         --review-url-format 'http://127.0.0.1/D{review}' \
         --admin-emails 'local-phab-admin@localhost' \
@@ -98,26 +98,13 @@ s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
     $arcyd add-repohost \
-        --name local_git \
+        --name fs \
         --repo-url-format '../{}' \
         --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
         --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
 
-    $arcyd add-repo \
-        --name local_1 \
-        --phabricator-name local \
-        --repohost-name local_git \
-        --repo-desc local_repo_1 \
-        --repo-url origin \
-        --admin-emails 'local-repo1-admin@localhost'
-
-    $arcyd add-repo \
-        --name local_2 \
-        --phabricator-name local \
-        --repohost-name local_git \
-        --repo-desc local_repo_2 \
-        --repo-url origin2 \
-        --admin-emails 'local-repo2-admin@localhost'
+    $arcyd add-repo localhost fs origin
+    $arcyd add-repo localhost fs origin2
 
 cd ..
 

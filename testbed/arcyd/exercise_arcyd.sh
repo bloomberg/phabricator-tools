@@ -63,7 +63,7 @@ function configure_arcyd() {
         --sendmail-type catchmail
 
     $arcyd add-phabricator \
-        --name local \
+        --name localhost \
         --instance-uri http://127.0.0.1/api/ \
         --review-url-format 'http://my.phabricator/D{review}' \
         --arcyd-user phab \
@@ -74,17 +74,12 @@ s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
     $arcyd add-repohost \
-        --name local_git \
+        --name fs \
         --repo-url-format '../{}' \
         --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
-
-    $arcyd add-repo \
-        --name local \
-        --phabricator-name local \
-        --repohost-name local_git \
-        --repo-desc local_repo \
-        --repo-url origin \
         --admin-email 'local-repo-admin@localhost'
+
+    $arcyd add-repo localhost fs origin
 
     cd ..
 }
@@ -101,8 +96,8 @@ ${arcyd} \
 
 ${arcyd} \
     repo-status-html \
-    var/status/local.try \
-    var/status/local.ok
+    var/status/localhost_fs_origin.try \
+    var/status/localhost_fs_origin.ok
 
 cd ..
 }
@@ -194,8 +189,8 @@ cd -
 
 cat arcyd_instance/savemail.txt
 
-cat arcyd_instance/var/status/local.try
-cat arcyd_instance/var/status/local.ok
+cat arcyd_instance/var/status/localhost_fs_origin.try
+cat arcyd_instance/var/status/localhost_fs_origin.ok
 
 cd ${olddir}
 rm -rf ${tempdir}

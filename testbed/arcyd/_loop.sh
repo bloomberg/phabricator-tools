@@ -72,7 +72,7 @@ $arcyd init \
     --sendmail-type catchmail
 
 $arcyd add-phabricator \
-    --name local \
+    --name localhost \
     --instance-uri http://127.0.0.1/api/ \
     --review-url-format 'http://127.0.0.1/D{review}' \
     --arcyd-user phab \
@@ -83,17 +83,12 @@ s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
 $arcyd add-repohost \
-    --name local_git \
+    --name fs \
     --repo-url-format '../{}' \
+    --admin-email 'local-repo-admin@localhost' \
     --repo-snoop-url 'http://localhost:8000/info/refs'
 
-$arcyd add-repo \
-    --name local \
-    --phabricator-name local \
-    --repohost-name local_git \
-    --repo-desc local_repo \
-    --repo-url origin \
-    --admin-email 'local-repo-admin@localhost' \
+$arcyd add-repo localhost fs origin
 
 cd ..
 

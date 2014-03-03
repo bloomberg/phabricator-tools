@@ -56,41 +56,35 @@ def getFromfilePrefixChars():
 
 def setupParser(parser):
     parser.add_argument(
-        '--name',
+        'phabricator_name',
         type=str,
-        metavar='STR',
-        required=True,
-        help="string identifier for the repository, '[_a-zA-Z0-9]+'.")
-
-    parser.add_argument(
-        '--phabricator-name',
-        type=str,
-        metavar='STR',
-        required=True,
         help="name of the Phabricator instance associated with the repo.")
 
     parser.add_argument(
-        '--repohost-name',
+        'repohost_name',
+        type=str,
+        help="name of the repohost associated with the repo.")
+
+    parser.add_argument(
+        'repo_url',
+        type=str,
+        help="url to clone the repository, e.g. 'github:org/repo' or maybe "
+             "something like 'org/repo' if using '--repo-url-format'.")
+
+    parser.add_argument(
+        '--name',
         type=str,
         metavar='STR',
-        required=True,
-        help="name of the repohost associated with the repo.")
+        help="string identifier for the repository, '[_a-zA-Z0-9]+'. "
+             "will guess a name from the mandatory args if none provided.")
 
     parser.add_argument(
         '--repo-desc',
         type=str,
         metavar='STR',
-        required=True,
         help="very short description of the repository, appears on the "
-             "dashboard, in error messages and in logs.")
-
-    parser.add_argument(
-        '--repo-url',
-        metavar="URL",
-        type=str,
-        required=True,
-        help="url to clone the repository, e.g. 'github:org/repo' or maybe "
-             "something like 'org/repo' if using '--repo-url-format'.")
+             "dashboard, in error messages and in logs. "
+             "will guess a name from the mandatory args if none provided.")
 
     parser.add_argument(
         '--admin-emails',
@@ -100,13 +94,38 @@ def setupParser(parser):
         help="list of email addresses to send important repo events to")
 
 
+def _repo_desc_for_params(phab, repohost, url):
+    return "{url}".format(
+        phab=phab, repohost=repohost, url=url)
+
+
+def _repo_name_for_params(phab, repohost, url):
+
+    snakecase_url = url.lower().replace("/", "_")
+
+    name = "{phab}_{repohost}_{url}".format(
+        phab=phab, repohost=repohost, url=snakecase_url)
+
+    return name
+
+
 def process(args):
 
     fs = abdt_fs.make_default_accessor()
 
-    try_touch_path = fs.layout.repo_try(args.name)
-    ok_touch_path = fs.layout.repo_ok(args.name)
-    repo_path = fs.layout.repo(args.name)
+    repo_name = args.name
+    if repo_name is None:
+        repo_name = _repo_name_for_params(
+            args.phabricator_name, args.repohost_name, args.repo_url)
+
+    repo_desc = args.repo_desc
+    if repo_desc is None:
+        repo_desc = _repo_desc_for_params(
+            args.phabricator_name, args.repohost_name, args.repo_url)
+
+    try_touch_path = fs.layout.repo_try(repo_name)
+    ok_touch_path = fs.layout.repo_ok(repo_name)
+    repo_path = fs.layout.repo(repo_name)
 
     # make sure the repo doesn't exist already
     if os.path.exists(repo_path):
@@ -124,7 +143,7 @@ def process(args):
     config = _CONFIG.format(
         phabricator_config=phab_config_path,
         repohost_config=repohost_config_path,
-        repo_desc=args.repo_desc,
+        repo_desc=repo_desc,
         repo_url=args.repo_url,
         repo_path=repo_path,
         try_touch_path=try_touch_path,
@@ -181,7 +200,7 @@ def process(args):
                 repo.call('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
 
         # success, write out the config
-        fs.create_repo_config(args.name, config)
+        fs.create_repo_config(repo_name, config)
     except Exception:
         # clean up the git repo
         shutil.rmtree(repo_path)
