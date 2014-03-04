@@ -5,7 +5,8 @@
 # abdi_repo
 #
 # Public Functions:
-#   setup_context
+#   setup_repo
+#   setup_repo_context
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -23,8 +24,20 @@ import phlsys_subprocess
 import abdt_git
 
 
+def setup_repo(repo_url, repo_path):
+    """Setup a repository, if an exception is raised then remove the repo.
+
+    :repo_url: string url of the repo to clone
+    :repo_path: string paht to clone the repo to
+    :returns: None
+
+    """
+    with setup_repo_context(repo_url, repo_path):
+        pass
+
+
 @contextlib.contextmanager
-def setup_context(repo_url, repo_path):
+def setup_repo_context(repo_url, repo_path):
     """Setup a repository, if an exception is raised then remove the repo.
 
     :repo_url: string url of the repo to clone

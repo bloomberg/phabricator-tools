@@ -44,6 +44,7 @@ import abdcmd_addrepo
 import abdcmd_addrepohost
 import abdcmd_arcydstatushtml
 import abdcmd_devstatushtml
+import abdcmd_fsck
 import abdcmd_init
 import abdcmd_instaweb
 import abdcmd_repostatushtml
@@ -119,10 +120,12 @@ def main():
         "start", abdcmd_start, subparsers)
     phlsys_subcommand.setup_parser(
         "stop", abdcmd_stop, subparsers)
+    phlsys_subcommand.setup_parser(
+        "fsck", abdcmd_fsck, subparsers)
 
     args = parser.parse_args()
 
-    args.func(args)
+    return args.func(args)
 
 
 #------------------------------------------------------------------------------
