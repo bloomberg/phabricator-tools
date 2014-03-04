@@ -17,16 +17,12 @@ from __future__ import absolute_import
 
 import argparse
 import os
-import shutil
 
-import phlgit_commit
-import phlsys_git
-import phlsys_subprocess
 import phlurl_request
 
+import abdi_repo
 import abdi_repoargs
 import abdt_fs
-import abdt_git
 
 
 _CONFIG = """
@@ -171,40 +167,8 @@ def process(args):
     # determine the repo url from the parsed params
     repo_url = abdi_repoargs.get_repo_url(repo_params)
 
-    # if there's any failure after cloning then we should remove the repo
-    phlsys_subprocess.run(
-        'git', 'clone', repo_url, repo_path)
-    try:
-        repo = phlsys_git.Repo(repo_path)
-
-        # test pushing to master
-        repo.call('checkout', 'origin/master')
-        phlgit_commit.allow_empty(repo, 'test commit for pushing')
-        repo.call('push', 'origin', '--dry-run', 'HEAD:refs/heads/master')
-        repo.call('checkout', '-')
-
-        # test push to special refs
-        repo.call(
-            'push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
-        repo.call(
-            'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
-
-        # fetch the 'landed' and 'abandoned' refs if they exist
-        ref_list = set(repo.call('ls-remote').split()[1::2])
-        special_refs = [
-            (abdt_git.ARCYD_ABANDONED_REF, abdt_git.ARCYD_ABANDONED_BRANCH_FQ),
-            (abdt_git.ARCYD_LANDED_REF, abdt_git.ARCYD_LANDED_BRANCH_FQ),
-        ]
-        for ref in special_refs:
-            if ref[0] in ref_list:
-                repo.call('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
-
-        # success, write out the config
+    with abdi_repo.setup_context(repo_url, repo_path):
         fs.create_repo_config(repo_name, config)
-    except Exception:
-        # clean up the git repo
-        shutil.rmtree(repo_path)
-        raise
 
 
 #------------------------------------------------------------------------------

@@ -33,6 +33,8 @@ Process the arguments for a single repository and execute.
 Process a list of repository arguments.
 * `abdi_processrepos.py` -
 Setup to process multiple repos.
+* `abdi_repo.py` -
+Manage git repositories watched by arcyd.
 * `abdi_repoargs.py` -
 Define the arguments for a single repository.
 * `abdmail_mailer.py` -
