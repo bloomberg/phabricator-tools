@@ -7,6 +7,7 @@ $dev_dir       = "${phab_dir}/instances/dev"
 $document_root = "${dev_dir}/phabricator/webroot"
 $std_path      = "/usr/bin:/usr/sbin:/bin"
 $http_proxy    = ""
+$https_proxy    = ""
 
 file { 'apt-proxyconfig' :
   path    => '/etc/apt/apt.conf.d/95proxies',
@@ -51,15 +52,14 @@ class apache2 {
 }
 
 class otherpackages {
-    $packages = ["git-core", "mysql-server", "php5", "dpkg-dev"]
+    $packages = ["git-core", "mysql-server", "php5", "dpkg-dev", "unzip"]
     $php_packages = ["php5-mysql", "php5-gd", "php5-dev", "php5-curl", "php-apc", "php5-cli"]
 
     package { $packages: ensure     => installed, }
     package { $php_packages: ensure => installed, }
 }
 
-class phabricator {
-
+class phabricatordirs {
     # puppet won't create parent directories and will fail if we don't
     # manually specify each of them as separate dependencies
     # it does automatically create them in the correct order though
@@ -72,20 +72,24 @@ class phabricator {
     file { "/phabricator":
         ensure => directory,
     }
+}
 
-    define phabgitclone ($repo = $title) {
-        $proxy_string = "http_proxy=${http_proxy}"
-        $github_string = "http://github.com/facebook"
-        exec { "git clone ${github_string}/${repo} ${dev_dir}/${repo}":
+class phabricator {
+
+    define phabgithubunzip ($repo = $title, $commit) {
+        $proxy_string = "https_proxy=${https_proxy}"
+        $github_string = "https://github.com/facebook"
+        exec { "wget ${github_string}/${repo}/archive/${commit}.zip -O ${dev_dir}/${repo}.zip --no-check-certificate && unzip ${dev_dir}/${repo}.zip -d ${dev_dir} && mv ${dev_dir}/${repo}-${commit} ${dev_dir}/${repo}":
             path        => $std_path,
             creates     => "${dev_dir}/${repo}",
             environment => $proxy_string,
         }
     }
 
-    phabgitclone {'phabricator':}
-    phabgitclone {'libphutil':}
-    phabgitclone {'arcanist':}
+    # set 'commit' to 'master' for the latest version
+    phabgithubunzip {'phabricator': commit => 'df8474d778048a7364b2e332a1e4cae55d93291e'}
+    phabgithubunzip {'libphutil': commit => '0b9f193303dfae4f9204d8f577e2bd45acd4963f'}
+    phabgithubunzip {'arcanist': commit => '42ae7cd92f92e026bdd604e659d2bc23e9352baa'}
 }
 
 class phabricatordb {
@@ -106,6 +110,7 @@ class phabricatordb {
 class {'apache2':}
 class {'otherpackages':}
 apache2::module { "rewrite": }
+class {'phabricatordirs':}
 class {'phabricator':}
 class {'phabricatordb':}
 
@@ -114,4 +119,5 @@ Class['apache2']       <- File['apt-proxyconfig']
 Class['otherpackages'] <- File['apt-proxyconfig']
 Class['phabricator']   <- Class['apache2']
 Class['phabricator']   <- Class['otherpackages']
+Class['phabricator']   <- Class['phabricatordirs']
 Class['phabricatordb'] <- Class['phabricator']
