@@ -1,7 +1,6 @@
 usage: arcyon paste [-h] (--text TEXT | --text-file FILENAME)
-                    [--language LANGUAGE] [--format-id]
-                    [--act-as-user USERNAME] [--uri ADDRESS] [--user NAME]
-                    [--cert HEX]
+                    [--language LANGUAGE] [--format-id] [--uri ADDRESS]
+                    [--user NAME] [--cert HEX] [--act-as-user NAME]
                     title
 
 Create a new paste.
@@ -19,8 +18,6 @@ optional arguments:
                         The language of the paste ie. C++, java etc. default
                         detectsfrom filename in title.
   --format-id, --id     only print the ID of the paste
-  --act-as-user USERNAME
-                        impersonate a user (admin only)
 
 connection arguments:
   use these optional parameters to override settings present in your
@@ -34,6 +31,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 Usage examples:
     Create a paste from an argument:

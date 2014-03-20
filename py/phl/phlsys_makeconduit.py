@@ -71,10 +71,16 @@ def add_argparse_arguments(parser):
              "wouldn't expect to enter this on the command-line and would "
              "make an ~/.arcrc file by using '$ arc install-certificate'.")
 
+    connection.add_argument(
+        '--act-as-user',
+        type=str,
+        metavar="NAME",
+        help="name of the user to impersonate (admin only).\n")
 
-def make_conduit(uri=None, user=None, cert=None):
+
+def make_conduit(uri=None, user=None, cert=None, act_as_user=None):
     uri, user, cert, _ = get_uri_user_cert_explanation(uri, user, cert)
-    return phlsys_conduit.Conduit(uri, user, cert)
+    return phlsys_conduit.Conduit(uri, user, cert, act_as_user)
 
 
 def obscured_cert(cert):

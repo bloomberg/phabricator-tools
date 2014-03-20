@@ -5,6 +5,7 @@ usage: arcyon task-update [-h] [--priority PRIORITY] [--title STRING]
                           [--comment STRING]
                           [--format-summary | --format-id | --format-url]
                           [--uri ADDRESS] [--user NAME] [--cert HEX]
+                          [--act-as-user NAME]
                           INT
 
 Update a task in maniphest.
@@ -57,6 +58,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 you can use the 'task id' output from the 'arcyon task-create' command as input
 to this command.

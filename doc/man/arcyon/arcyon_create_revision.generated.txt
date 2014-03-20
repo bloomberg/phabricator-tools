@@ -4,6 +4,7 @@ usage: arcyon create-revision [-h] (--diff-id INT | --raw-diff-file FILE)
                               [--ccs [USER [USER ...]]]
                               [--format-summary | --format-id | --format-url]
                               [--uri ADDRESS] [--user NAME] [--cert HEX]
+                              [--act-as-user NAME]
 
 Create a new revision in differential.
 
@@ -58,6 +59,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 you can use the 'revision id' output from this command as input to the
 'arcyon update-revision' command.

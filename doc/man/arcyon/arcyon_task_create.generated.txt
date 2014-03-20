@@ -3,6 +3,7 @@ usage: arcyon task-create [-h] [--priority PRIORITY] [--description STRING]
                           [--projects [PROJECT [PROJECT ...]]]
                           [--format-summary | --format-id | --format-url]
                           [--uri ADDRESS] [--user NAME] [--cert HEX]
+                          [--act-as-user NAME]
                           STRING
 
 Create a new task in maniphest.
@@ -51,6 +52,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 you can use the 'task id' output from this command as input to the
 'arcyon task-update' command.

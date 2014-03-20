@@ -1,6 +1,7 @@
 usage: arcyon get-diff [-h] (--revision INT | --diff INT)
                        [--list-files | --format-python | --format-json | --format-unified | --format-files FORMAT_FILES | --format-strings STR STR]
                        [--uri ADDRESS] [--user NAME] [--cert HEX]
+                       [--act-as-user NAME]
 
 Get a diff from differential, along with metadata.
 
@@ -52,6 +53,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 usage examples:
     list the files affected by revision 1

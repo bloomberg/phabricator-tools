@@ -8,6 +8,7 @@ usage: arcyon task-query [-h] [--priorities [PRIORITY [PRIORITY ...]]]
                          [--offset-results INT]
                          [--format-short | --format-ids | --format-string FORMAT_STRING | --format-python | --format-json]
                          [--uri ADDRESS] [--user NAME] [--cert HEX]
+                         [--act-as-user NAME]
 
 display and filter the list of maniphest tasks.
 
@@ -71,6 +72,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 you can use the 'task id' output from this command as input to the
 'arcyon task-update' command.

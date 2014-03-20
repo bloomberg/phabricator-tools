@@ -48,6 +48,9 @@ output formats:
 # -----------------------------------------------------------------------------
 # aoncmd_query
 #
+# Public Classes:
+#   ValidationError
+#
 # Public Functions:
 #   getFromfilePrefixChars
 #   setupParser
@@ -251,6 +254,19 @@ def _set_human_times_since(r, kind, since):
     r[u"monthsSinceDate" + kind] = phlsys_timedeltatostr.in_months(since)
 
 
+class ValidationError(Exception):
+    pass
+
+
+def _validate_args(args):
+    if args.act_as_user and any(
+        [args.author_me, args.reviewer_me, args.cc_me, args.subscriber_me,
+         args.responsible_me]):
+        raise ValidationError(
+            "self filter parameters (*-me/mine) not allowed in conjunction " +
+            "with --act-as-user due to ambiguity")
+
+
 def _process_user_fields(me, conduit, args):
     d = {}
 
@@ -294,7 +310,9 @@ def _set_options(args, d):
 
 
 def process(args):
-    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+    _validate_args(args)
+    conduit = phlsys_makeconduit.make_conduit(
+        args.uri, args.user, args.cert, args.act_as_user)
     me = conduit.get_user()
 
     d = _process_user_fields(me, conduit, args)

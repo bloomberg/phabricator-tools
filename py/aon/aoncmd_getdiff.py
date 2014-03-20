@@ -140,7 +140,8 @@ def setupParser(parser):
 
 
 def process(args):
-    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+    conduit = phlsys_makeconduit.make_conduit(
+        args.uri, args.user, args.cert, args.act_as_user)
 
     if args.revision:
         result = phlcon_differential.get_revision_diff(conduit, args.revision)

@@ -1,7 +1,7 @@
 usage: arcyon comment [-h] [--ids-file FILE] [--message M]
                       [--message-file FILE] [--silent] [--action ACTION]
-                      [--act-as-user NAME] [--uri ADDRESS] [--user NAME]
-                      [--cert HEX]
+                      [--uri ADDRESS] [--user NAME] [--cert HEX]
+                      [--act-as-user NAME]
                       [ids [ids ...]]
 
 create a comment on differential reviews.
@@ -15,7 +15,6 @@ optional arguments:
   --message M, -m M     the body text of the comment
   --message-file FILE   a file to read the message from, use '-' for stdin
   --silent              don't send notification emails for this comment
-  --act-as-user NAME    impersonate a user (admin only)
 
 action arguments:
   use any of ['comment', 'unabandon', 'commandeer', 'request changes', 'accept',
@@ -37,6 +36,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 usage examples:
     comment on revision '1':

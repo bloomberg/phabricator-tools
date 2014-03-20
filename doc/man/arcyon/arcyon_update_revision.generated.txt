@@ -1,6 +1,7 @@
 usage: arcyon update-revision [-h] (--diff-id INT | --raw-diff-file FILE)
                               [--format-summary | --format-id | --format-url]
                               [--uri ADDRESS] [--user NAME] [--cert HEX]
+                              [--act-as-user NAME]
                               revision_id message
 
 Update an existing revision in differential.
@@ -42,6 +43,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 Note:
 

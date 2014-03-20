@@ -135,7 +135,8 @@ def process(args):
         print('you must supply a non-empty title', file=sys.stderr)
         return 1
 
-    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+    conduit = phlsys_makeconduit.make_conduit(
+        args.uri, args.user, args.cert, args.act_as_user)
 
     # create_task expects an integer
     priority = None

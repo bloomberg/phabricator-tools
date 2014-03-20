@@ -12,6 +12,7 @@ usage: arcyon query [-h] [--ids INT [INT ...]] [--ids-stdin] [--translate]
                     [--update-min-age AGE] [--update-max-age AGE]
                     [--format-type {ids,short,python,json} | --format-string FORMAT]
                     [--uri ADDRESS] [--user NAME] [--cert HEX]
+                    [--act-as-user NAME]
 
 display and filter the list of differential revisions.
 
@@ -96,6 +97,7 @@ connection arguments:
                         generally you wouldn't expect to enter this on the
                         command-line and would make an ~/.arcrc file by using
                         '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
 
 usage examples:
     list all revisions:

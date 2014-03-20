@@ -205,7 +205,8 @@ def _combine_lists_if_not_none(*lists):
 
 
 def process(args):
-    conduit = phlsys_makeconduit.make_conduit(args.uri, args.user, args.cert)
+    conduit = phlsys_makeconduit.make_conduit(
+        args.uri, args.user, args.cert, args.act_as_user)
 
     # conduit expects PHIDs not plain usernames
     user_phids = phlcon_user.UserPhidCache(conduit)
