@@ -66,13 +66,13 @@ class Test(unittest.TestCase):
         super(Test, self).__init__(data)
         self.repo_central = None
         self.repo_dev = None
-        self.clone_arcyd = None
+        self.repo_arcyd = None
 
     def setUp(self):
         self.repo_central = phlsys_git.Repo(tempfile.mkdtemp())
         self.repo_dev = phlsys_git.Repo(tempfile.mkdtemp())
-        sys_clone = phlsys_git.Repo(tempfile.mkdtemp())
-        self.clone_arcyd = abdt_git.Repo(sys_clone, 'origin', 'myrepo')
+        sys_repo = phlsys_git.Repo(tempfile.mkdtemp())
+        self.repo_arcyd = abdt_git.Repo(sys_repo, 'origin', 'myrepo')
 
         self.repo_central("init", "--bare")
 
@@ -80,8 +80,8 @@ class Test(unittest.TestCase):
         self.repo_dev(
             "remote", "add", "origin", self.repo_central.working_dir)
 
-        self.clone_arcyd("init")
-        self.clone_arcyd(
+        self.repo_arcyd("init")
+        self.repo_arcyd(
             "remote", "add", "origin", self.repo_central.working_dir)
 
     def test_A_Breathing(self):
@@ -99,12 +99,12 @@ class Test(unittest.TestCase):
         ]
 
         for do_transition in transition_list:
-            branches = phlgit_branch.get_remote(self.clone_arcyd, 'origin')
+            branches = phlgit_branch.get_remote(self.repo_arcyd, 'origin')
             branch.mark_bad_pre_review()
             branches_bad_pre = phlgit_branch.get_remote(
-                self.clone_arcyd, 'origin')
+                self.repo_arcyd, 'origin')
             do_transition(102)
-            branches_new = phlgit_branch.get_remote(self.clone_arcyd, 'origin')
+            branches_new = phlgit_branch.get_remote(self.repo_arcyd, 'origin')
 
             # we expect to have gained one branch when starting to track as
             # 'bad_pre_review'.
@@ -117,7 +117,7 @@ class Test(unittest.TestCase):
             # remove the tracking branch and make sure the count has gone down
             branch.clear_mark()
             branches_cleared = phlgit_branch.get_remote(
-                self.clone_arcyd, 'origin')
+                self.repo_arcyd, 'origin')
             self.assertEqual(len(branches_cleared), len(branches))
 
     def test_D_AlternatingAuthors(self):
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
         self._dev_commit_new_empty_file('ALICE2', alice_user, alice_email)
 
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
-        self.clone_arcyd('fetch', 'origin')
+        self.repo_arcyd('fetch', 'origin')
 
         author_names_emails = branch.get_author_names_emails()
 
@@ -191,14 +191,14 @@ class Test(unittest.TestCase):
         self.repo_dev('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
-        self.clone_arcyd('fetch', 'origin')
+        self.repo_arcyd('fetch', 'origin')
 
         review_branch = naming.make_review_branch_from_name(branch_name)
         review_hash = phlgit_revparse.get_sha1_or_none(
-            self.clone_arcyd, review_branch.branch)
+            self.repo_arcyd, review_branch.branch)
 
         branch = abdt_branch.Branch(
-            self.clone_arcyd,
+            self.repo_arcyd,
             review_branch,
             review_hash,
             None,
@@ -215,7 +215,7 @@ class Test(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.repo_central.working_dir)
         shutil.rmtree(self.repo_dev.working_dir)
-        shutil.rmtree(self.clone_arcyd.working_dir)
+        shutil.rmtree(self.repo_arcyd.working_dir)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
