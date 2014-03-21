@@ -45,7 +45,7 @@ def prepend(repo, review_sha1, name, landed_sha1):
 
     If the list is longer than the global max then truncate it.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :sha1: string of the sha1 to prepend
     :name: string name of the ref to prepend
     :returns: None
@@ -61,7 +61,7 @@ def _get_log_raw(repo):
 
     If there is no landinglog then return an empty string.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: the contents of the landinglog from the supplied 'repo'
 
     """
@@ -74,7 +74,7 @@ def _get_log_raw(repo):
 def _write_log_raw(repo, log):
     """Overwrite the landinglog with the string 'log'.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :log: the new string contents of the landinglog
     :returns: None
 
@@ -88,7 +88,7 @@ def get_log(repo):
 
     Behaviour is undefined if there is no log.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a list of LogItem from the landinglog of 'repo'
 
     """
@@ -102,7 +102,7 @@ def write_log(repo, log):
 
     Will truncate the log to _MAX_LOG_LENGTH entries.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :log: the iterable to write to the landing log, each entry is a LogItem
     :returns: None
 
@@ -115,7 +115,7 @@ def write_log(repo, log):
 def push_log(repo, remote):
     """Push the local landinglog to the specified 'remote'.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :remote: the string name of the remote to push to
     :returns: None
 

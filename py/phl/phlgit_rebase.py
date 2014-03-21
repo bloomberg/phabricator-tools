@@ -17,7 +17,7 @@ from __future__ import absolute_import
 def onto_upstream(repo, upstream):
     """Rebase HEAD onto the supplied 'upstream'.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :upstream: the string name of the branch to rebase onto
     :returns: None
 

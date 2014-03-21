@@ -88,7 +88,7 @@ def get_local(repo):
 def get_local_with_sha1(repo):
     """Return a list of (sha1, branch_name) from all the local branches.
 
-    :repo: supports repo() for interacting with git
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a list of branches paired with their hashes
 
     """
@@ -100,7 +100,7 @@ def get_local_with_sha1(repo):
 def force_delete(repo, branch):
     """Unconditionally remove an existing branch.
 
-    :repo: the repository to operate on, supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the string name of the branch to remove
     :returns: None
 

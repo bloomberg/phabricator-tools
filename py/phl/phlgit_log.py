@@ -57,7 +57,7 @@ def get_range_to_here_hashes(repo, start):
     The list begins with the revision closest to but not including 'start'.
     Raise a ValueError if any of the returned values are not valid hexadecimal.
 
-    :repo: supports 'call("log")' with git log parameters
+    :repo: a callable supporting git commands, e.g. repo("status")
     :start: a reference that log will understand
     :returns: a list of strings corresponding to commits from 'start' to here.
 
@@ -78,7 +78,7 @@ def get_last_n_commit_hashes(repo, n):
     Raise a ValueError if any of the returned values are not valid hexadecimal.
     Raise an Exception if less values than expected are returned.
 
-    :repo: supports 'call("log")' with git log parameters
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
@@ -90,7 +90,7 @@ def get_last_commit_hash(repo):
 
     Raise a ValueError if the returned value is not valid hexadecimal.
 
-    :repo: supports 'call("log")' with git log parameters
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
@@ -104,7 +104,7 @@ def get_last_n_commit_hashes_from_ref(repo, n, ref):
     Raise a ValueError if any of the returned values are not valid hexadecimal.
     Raise an Exception if less values than expected are returned.
 
-    :repo: supports 'call("log")' with git log parameters
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a string corresponding to the last commit ('HEAD')
 
     """
@@ -124,7 +124,7 @@ def get_last_n_commit_hashes_from_ref(repo, n, ref):
 def get_last_commit_hash_from_ref(repo, ref):
     """Return a string corresponding to the commit referred to by 'ref'.
 
-    :repo: supports 'call("log")' with git log parameters
+    :repo: a callable supporting git commands, e.g. repo("status")
     :ref: a reference that log will understand
     :returns: a string corresponding to the commit referred to by 'ref'
 
@@ -138,7 +138,7 @@ def get_range_hashes(repo, start, end):
     The list begins with the revision closest to but not including 'start'.
     Raise a ValueError if any of the returned values are not valid hexadecimal.
 
-    :repo: supports 'call("log")' with git log parameters
+    :repo: a callable supporting git commands, e.g. repo("status")
     :start: a reference that log will understand
     :end: a reference that log will understand
     :returns: a list of strings corresponding to commits from 'start' to 'end'.
@@ -180,7 +180,7 @@ def make_revision_from_hash(repo, commitHash):
     Raise an exception if the repo does not return a valid FullMessage from the
     commitHash.
 
-    :repo: something that supports "call()" with git commands
+    :repo: a callable supporting git commands, e.g. repo("status")
     :commitHash: a string containing the hash to get the message of
     :returns: a 'phlgit_log__Revision' based on the 'commitHash'
 
@@ -197,7 +197,7 @@ def make_revisions_from_hashes(repo, hashes):
     Raise an exception if the repo does not return a valid FullMessage
     from any of 'hashes'.
 
-    :repo: something that supports "call()" with git commands
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a list of 'phlgit_log__Revision'
 
     """
@@ -216,7 +216,7 @@ def get_author_names_emails_from_hashes(repo, hashes):
     Raise an exception if the repo does not return a valid FullMessage from
     the commitHash.
 
-    :repo: something that supports "call()" with git commands
+    :repo: a callable supporting git commands, e.g. repo("status")
     :hashes: a list of strings containing the hashes to get the messages of
     :returns: a list of unique committer emails in commit order from 'start..'
 

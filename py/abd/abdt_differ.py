@@ -122,7 +122,7 @@ def make_raw_diff(repo, base, branch, max_diff_size_utf8_bytes):
     Raise 'NoDiffError' if the diff could not be fit into
     'max_bytes'.
 
-    :repo: supports repo()
+    :repo: a callable supporting git commands, e.g. repo("status")
     :base: string name of the merge-base of 'branch'
     :branch: string name of the branch to diff
     :max_diff_size_utf8_bytes: the maximum allowed size of the diff as utf8

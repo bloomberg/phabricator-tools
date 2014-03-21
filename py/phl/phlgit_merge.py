@@ -55,7 +55,7 @@ def ours(repo, branch, message):
 
     Behaviour is undefined if the current branch is 'branch'.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the string name of the branch to merge into HEAD
     :message: the string message to make on the commit
     :returns: None
@@ -70,7 +70,7 @@ def no_ff(repo, branch):
     Behaviour is undefined if there are merge conflicts.
     Behaviour is undefined if the current branch is 'branch'.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the single branch to merge
     :returns: None
 

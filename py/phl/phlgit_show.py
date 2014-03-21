@@ -18,7 +18,7 @@ from __future__ import absolute_import
 def object_(repo, ref):
     """Return the content of the specified object.
 
-    :repo: the git repo to get the object from
+    :repo: a callable supporting git commands, e.g. repo("status")
     :ref: the ref of the object, e.g. 'origin/master', 'ed3a1', etc.
     :returns: the contents of the object
 
@@ -31,7 +31,7 @@ def file_on_ref(repo, path, ref):
 
     Raise if the file or ref does not exist.
 
-    :repo: the git repo to get the object from, will do repo(...)
+    :repo: a callable supporting git commands, e.g. repo("status")
     :path: the string path to the file on the branch, e.g. 'src/main.cpp'
     :ref: the string ref of the branch, e.g. 'feature/red_button'
     :returns: the string contents of the file

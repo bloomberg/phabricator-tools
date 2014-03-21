@@ -18,7 +18,7 @@ from __future__ import absolute_import
 def index(repo, message):
     """Create a new commit from the contents of the index.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :message: the string message for the commit
     :returns: None
 
@@ -29,7 +29,7 @@ def index(repo, message):
 def allow_empty(repo, message):
     """Create a new commit from the contents of the index, which may be empty.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :message: the string message for the commit
     :returns: None
 

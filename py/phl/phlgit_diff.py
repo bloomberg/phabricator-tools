@@ -37,7 +37,7 @@ def raw_diff_range(repo, base, new, context_lines=None):
 
     Raise if git returns a non-zero exit code.
 
-    :repo: the repo to operate on
+    :repo: a callable supporting git commands, e.g. repo("status")
     :base: the base branch
     :new: the branch with new commits
     :returns: a string of the raw diff
@@ -137,7 +137,7 @@ def stat_range(repo, base, new):
 
     Raise if git returns a non-zero exit code.
 
-    :repo: the git repo to operate on (supports 'call()')
+    :repo: a callable supporting git commands, e.g. repo("status")
     :base: the string name of the base branch
     :new: the string name of the branch with new commits
     :returns: a string of the diff stat

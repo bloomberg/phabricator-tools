@@ -37,7 +37,7 @@ def push(repo, branch, remoteName):
 def force_branch(repo, branch, remote='origin'):
     """Force push 'branch' to the supplied 'origin'.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the string name of the branch to push
     :remote: the string name of the remote to push to
     :returns: None
@@ -53,7 +53,7 @@ def branch(repo, branch, remote='origin'):
 def move_asymmetrical(repo, local_branch, old_remote, new_remote, remote):
     """Delete 'old_remote', push 'local_branch' to 'new_remote' on 'remote'.
 
-    :repo: supports call()
+    :repo: a callable supporting git commands, e.g. repo("status")
     :local_branch: the local reference to push
     :old_remote: the old reference on the remote to delete
     :new_remote: the new reference on the remote to push to
@@ -71,7 +71,7 @@ def move_asymmetrical(repo, local_branch, old_remote, new_remote, remote):
 def delete(repo, remote, branch, *args):
     """Delete 'branch' from the specified remote.
 
-    :repo: supports call()
+    :repo: a callable supporting git commands, e.g. repo("status")
     :remote: string name of the remote
     :branch: string name of the branch
     :*args: (optional) more string names of branches

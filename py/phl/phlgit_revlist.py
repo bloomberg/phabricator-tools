@@ -17,7 +17,7 @@ from __future__ import absolute_import
 def commits(repo, *commits):
     """Return list of strings of commit SHA1s reachable from each in 'commits'.
 
-    :repo: something that supports "call()" with git commands
+    :repo: a callable supporting git commands, e.g. repo("status")
     :*commits: string names of commits to traverse
     :returns: list of string commit SHA1s
 

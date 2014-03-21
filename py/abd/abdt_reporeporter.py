@@ -114,7 +114,7 @@ class RepoReporter(object):
         """Initialise a new reporter to report to the specified outputs.
 
         :arcyd_reporter: reporter to escalate to
-        :repo: machine-readable name to identify the repo
+        :repo: a machine-readable name to identify the repo
         :repo_name: human-readable name to identify the repo
         :repo_url: url to compose branch urls with
         :try_output: output to use when trying the repo

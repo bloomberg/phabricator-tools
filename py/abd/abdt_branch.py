@@ -98,7 +98,7 @@ class Branch(object):
             browse_url=None):
         """Create a new relationship tracker for the supplied branch names.
 
-        :repo: a Git repo to delegate to
+        :repo: a callable supporting git commands, e.g. repo("status")
         :review_branch: the abdt_gittypes.GitReviewBranch
         :review_hash: the commit hash of the branch or None
         :tracking_branch: the abdt_gittypes.GitWorkingBranch

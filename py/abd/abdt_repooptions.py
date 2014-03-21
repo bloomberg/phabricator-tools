@@ -197,7 +197,7 @@ def data_from_repo_or_none(repo):
 
     Will return 'None' if no config file was found.
 
-    :repo: a git repo object that supports call()
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a valid 'Data' or None
 
     """

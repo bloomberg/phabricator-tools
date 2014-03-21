@@ -25,7 +25,7 @@ def write_string(repo, s):
     get the same result if you simply did:
         hashlib.sha1(s)
 
-    :repo: the git repo to store the object in
+    :repo: a callable supporting git commands, e.g. repo("status")
     :s: the string to calculate the SHA1 of and to write to the object store
     :returns: the SHA1 of the object
 

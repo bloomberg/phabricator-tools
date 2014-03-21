@@ -18,7 +18,7 @@ from __future__ import absolute_import
 def names(repo):
     """Return a list of string names of the refs in the supplied repo.
 
-    :repo: supports 'call()'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a list of string names
 
     """
@@ -29,7 +29,7 @@ def names(repo):
 def hash_ref_pairs(repo):
     """Return a list of (sha1, name) tuples from the list of refs in 'repo'.
 
-    :repo: supports 'call()'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: a list of (sha1, name)
 
     """

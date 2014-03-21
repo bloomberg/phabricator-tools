@@ -25,7 +25,7 @@ class Error(Exception):
 def get_sha1_or_none(repo, ref):
     """Return string of the ref's commit hash if valid, else None.
 
-    :repo: supports call()
+    :repo: a callable supporting git commands, e.g. repo("status")
     :ref: string of the reference to parse
     :returns: string of the ref's commit hash if valid, else None.
 
@@ -39,7 +39,7 @@ def get_sha1(repo, ref):
 
     Raise if the ref is invalid.
 
-    :repo: supports call()
+    :repo: a callable supporting git commands, e.g. repo("status")
     :ref: string of the reference to parse
     :returns: string of the ref's commit hash
 

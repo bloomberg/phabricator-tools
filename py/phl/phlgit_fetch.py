@@ -20,7 +20,7 @@ import phlsys_subprocess
 def all_prune(repo):
     """Fetch from all remotes and prune dead branches.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :returns: None
 
     """
@@ -45,7 +45,7 @@ def prune_safe(repo, remote):
     bob would get an error when fetching the last time and would have to
     'git remote prune origin' before fetching.
 
-    :repo: supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :remote: string name of the remote to fetch from
     :returns: None
 

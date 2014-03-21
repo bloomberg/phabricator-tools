@@ -20,7 +20,7 @@ from __future__ import absolute_import
 def new_branch_force_based_on(repo, new_branch, base):
     """Checkout onto a new branch copy of base, overwite existing branch.
 
-    :repo: the repo to operate on
+    :repo: a callable supporting git commands, e.g. repo("status")
     :new_branch: the name for the new branch
     :base: the name of the branch to copy
     :returns: None
@@ -35,7 +35,7 @@ def branch(repo, branch):
     Note that the existing branch may be on a remote, in which case a tracking
     branch will be set up.
 
-    :repo: the repo to operate on
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the string name of the branch
     :returns: None
 
@@ -51,7 +51,7 @@ def orphan(repo, branch):
 
     Note that the specified 'branch' must not exist before.
 
-    :repo: the repository to operate on, supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the string name of the branch
     :returns: None
 
@@ -67,7 +67,7 @@ def orphan_clean(repo, branch):
 
     Note that the specified 'branch' must not exist before.
 
-    :repo: the repository to operate on, supports 'call'
+    :repo: a callable supporting git commands, e.g. repo("status")
     :branch: the string name of the branch
     :returns: None
 

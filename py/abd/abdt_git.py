@@ -104,7 +104,7 @@ class Repo(object):
             self, repo, remote, description):
         """Initialise a new Repo.
 
-        :repo: the repo to attach to and delegate calls to
+        :repo: a callable supporting git commands, e.g. repo("status")
         :remote: name of the remote to use
         :description: short identification of the repo for humans
         :returns: None
