@@ -14,7 +14,7 @@
 from __future__ import absolute_import
 
 
-def write_string(clone, s):
+def write_string(repo, s):
     """Return the hash of the supplied string 's' and write the object.
 
     Note that if an object with the same hash (should be the same content) is
@@ -25,12 +25,12 @@ def write_string(clone, s):
     get the same result if you simply did:
         hashlib.sha1(s)
 
-    :clone: the git clone to store the object in
+    :repo: the git repo to store the object in
     :s: the string to calculate the SHA1 of and to write to the object store
     :returns: the SHA1 of the object
 
     """
-    return clone('hash-object', '-w', '--stdin', stdin=s).strip()
+    return repo('hash-object', '-w', '--stdin', stdin=s).strip()
 
 
 #------------------------------------------------------------------------------
