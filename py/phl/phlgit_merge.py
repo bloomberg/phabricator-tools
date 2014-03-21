@@ -30,16 +30,16 @@ class MergeException(Exception):
         super(MergeException, self).__init__(description)
 
 
-def squash(clone, source, message, author=None):
+def squash(repo, source, message, author=None):
     # TODO: test merging with no effective changes
     with phlsys_fs.nostd():
         try:
-            clone("merge", "--squash", source)
+            repo("merge", "--squash", source)
             if author:
-                result = clone(
+                result = repo(
                     "commit", "-m", message, "--author", author)
             else:
-                result = clone("commit", "-m", message)
+                result = repo("commit", "-m", message)
         except phlsys_subprocess.CalledProcessError as e:
             raise MergeException(e.stdout)
 
