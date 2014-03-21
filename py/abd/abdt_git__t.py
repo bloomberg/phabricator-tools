@@ -43,13 +43,13 @@ class Test(unittest.TestCase):
         super(Test, self).__init__(data)
         self.repo_central = None
         self.repo_dev = None
-        self.clone_arcyd = None
+        self.repo_arcyd = None
 
     def setUp(self):
         self.repo_central = phlsys_git.Repo(tempfile.mkdtemp())
         self.repo_dev = phlsys_git.Repo(tempfile.mkdtemp())
-        sys_clone = phlsys_git.Repo(tempfile.mkdtemp())
-        self.clone_arcyd = abdt_git.Repo(sys_clone, 'origin', 'myrepo')
+        sys_repo = phlsys_git.Repo(tempfile.mkdtemp())
+        self.repo_arcyd = abdt_git.Repo(sys_repo, 'origin', 'myrepo')
 
         self.repo_central("init", "--bare")
 
@@ -63,15 +63,15 @@ class Test(unittest.TestCase):
         self.repo_dev('commit', '-m', 'initial commit')
         phlgit_push.push(self.repo_dev, 'master', 'origin')
 
-        self.clone_arcyd("init")
-        self.clone_arcyd(
+        self.repo_arcyd("init")
+        self.repo_arcyd(
             "remote", "add", "origin", self.repo_central.working_dir)
-        self.clone_arcyd("fetch")
+        self.repo_arcyd("fetch")
 
     def tearDown(self):
         shutil.rmtree(self.repo_central.working_dir)
         shutil.rmtree(self.repo_dev.working_dir)
-        shutil.rmtree(self.clone_arcyd.working_dir)
+        shutil.rmtree(self.repo_arcyd.working_dir)
 
     def test_A_Breathing(self):
         remote = "origin"
@@ -86,10 +86,10 @@ class Test(unittest.TestCase):
             phlgit_push.push_asymmetrical(
                 self.repo_dev, 'master', branch, remote)
 
-        self.clone_arcyd("fetch")
+        self.repo_arcyd("fetch")
 
         branches = abdt_git.get_managed_branches(
-            self.clone_arcyd, "repo", abdt_rbranchnaming.Naming())
+            self.repo_arcyd, "repo", abdt_rbranchnaming.Naming())
 
         actual_branches = [b.review_branch_name() for b in branches]
 
@@ -97,12 +97,12 @@ class Test(unittest.TestCase):
 
         for b in branches:
 
-            self.clone_arcyd.archive_to_abandoned(
+            self.repo_arcyd.archive_to_abandoned(
                 b.review_branch_hash(),
                 b.review_branch_name(),
                 'master')
 
-            self.clone_arcyd.archive_to_landed(
+            self.repo_arcyd.archive_to_landed(
                 b.review_branch_hash(),
                 b.review_branch_name(),
                 'master',
@@ -110,9 +110,9 @@ class Test(unittest.TestCase):
                 'MESSAGE')
 
     def _get_updated_branch(self, branch_name):
-        phlgit_fetch.all_prune(self.clone_arcyd)
+        phlgit_fetch.all_prune(self.repo_arcyd)
         branch_list = abdt_git.get_managed_branches(
-            self.clone_arcyd, "repo", abdt_classicnaming.Naming())
+            self.repo_arcyd, "repo", abdt_classicnaming.Naming())
         self.assertEqual(len(branch_list), 1)
         branch = branch_list[0]
         self.assertEqual(branch.review_branch_name(), branch_name)
@@ -201,14 +201,14 @@ class Test(unittest.TestCase):
         self.repo_dev('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
-        self.clone_arcyd('fetch', 'origin')
+        self.repo_arcyd('fetch', 'origin')
 
         review_branch = naming.make_review_branch_from_name(branch_name)
         review_hash = phlgit_revparse.get_sha1_or_none(
-            self.clone_arcyd, review_branch.branch)
+            self.repo_arcyd, review_branch.branch)
 
         branch = abdt_branch.Branch(
-            self.clone_arcyd,
+            self.repo_arcyd,
             review_branch,
             review_hash,
             None,
