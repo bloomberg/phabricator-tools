@@ -14,15 +14,15 @@
 from __future__ import absolute_import
 
 
-def commits(clone, *commits):
+def commits(repo, *commits):
     """Return list of strings of commit SHA1s reachable from each in 'commits'.
 
-    :clone: something that supports "call()" with git commands
+    :repo: something that supports "call()" with git commands
     :*commits: string names of commits to traverse
     :returns: list of string commit SHA1s
 
     """
-    return clone('rev-list', *commits).splitlines()
+    return repo('rev-list', *commits).splitlines()
 
 
 #------------------------------------------------------------------------------
