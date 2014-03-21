@@ -25,11 +25,11 @@ import phlsys_fs
 import phlsys_subprocess
 
 
-def raw_diff_range_to_here(clone, start):
-    return clone("diff", start + "...", "-M")
+def raw_diff_range_to_here(repo, start):
+    return repo("diff", start + "...", "-M")
 
 
-def raw_diff_range(clone, base, new, context_lines=None):
+def raw_diff_range(repo, base, new, context_lines=None):
     """Return a raw diff from the history on 'new' that is not on 'base'.
 
     Note that commits that are cherry-picked from new to old will still appear
@@ -37,7 +37,7 @@ def raw_diff_range(clone, base, new, context_lines=None):
 
     Raise if git returns a non-zero exit code.
 
-    :clone: the clone to operate on
+    :repo: the repo to operate on
     :base: the base branch
     :new: the branch with new commits
     :returns: a string of the raw diff
@@ -52,7 +52,7 @@ def raw_diff_range(clone, base, new, context_lines=None):
     if context_lines:
         args.append("--unified=" + str(context_lines))
 
-    result = clone(*args)
+    result = repo(*args)
     return result
 
 
