@@ -17,30 +17,30 @@
 from __future__ import absolute_import
 
 
-def new_branch_force_based_on(clone, new_branch, base):
+def new_branch_force_based_on(repo, new_branch, base):
     """Checkout onto a new branch copy of base, overwite existing branch.
 
-    :clone: the clone to operate on
+    :repo: the repo to operate on
     :new_branch: the name for the new branch
     :base: the name of the branch to copy
     :returns: None
 
     """
-    clone('checkout', '-B', new_branch, base)
+    repo('checkout', '-B', new_branch, base)
 
 
-def branch(clone, branch):
+def branch(repo, branch):
     """Checkout onto an existing branch.
 
     Note that the existing branch may be on a remote, in which case a tracking
     branch will be set up.
 
-    :clone: the clone to operate on
+    :repo: the repo to operate on
     :branch: the string name of the branch
     :returns: None
 
     """
-    clone('checkout', branch)
+    repo('checkout', branch)
 
 
 def orphan(repo, branch):
