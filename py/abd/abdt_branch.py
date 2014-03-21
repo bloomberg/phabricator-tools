@@ -88,7 +88,7 @@ class Branch(object):
 
     def __init__(
             self,
-            clone,
+            repo,
             review_branch,
             review_hash,
             tracking_branch,
@@ -98,7 +98,7 @@ class Branch(object):
             browse_url=None):
         """Create a new relationship tracker for the supplied branch names.
 
-        :clone: a Git clone to delegate to
+        :repo: a Git repo to delegate to
         :review_branch: the abdt_gittypes.GitReviewBranch
         :review_hash: the commit hash of the branch or None
         :tracking_branch: the abdt_gittypes.GitWorkingBranch
@@ -108,7 +108,7 @@ class Branch(object):
         :browse_url: a URL to browse the branch or repo (may be None)
 
         """
-        self._clone = clone
+        self._repo = repo
         self._review_branch = review_branch
         self._review_hash = review_hash
         self._tracking_branch = tracking_branch
@@ -230,7 +230,7 @@ class Branch(object):
         # considered first.
         hashes.reverse()
         names_emails = phlgit_log.get_author_names_emails_from_hashes(
-            self._clone, hashes)
+            self._repo, hashes)
         names_emails.reverse()
 
         return names_emails
@@ -245,16 +245,16 @@ class Branch(object):
 
         """
         if phlgit_revparse.get_sha1_or_none(
-                self._clone, self._review_branch.remote_base) is None:
+                self._repo, self._review_branch.remote_base) is None:
             hashes = phlgit_log.get_last_n_commit_hashes_from_ref(
-                self._clone, 1, self._review_branch.remote_branch)
+                self._repo, 1, self._review_branch.remote_branch)
         else:
             hashes = self._get_commit_hashes()
         if not hashes:
             hashes = phlgit_log.get_last_n_commit_hashes_from_ref(
-                self._clone, 1, self._review_branch.remote_branch)
+                self._repo, 1, self._review_branch.remote_branch)
         committers = phlgit_log.get_author_names_emails_from_hashes(
-            self._clone, hashes)
+            self._repo, hashes)
         emails = [committer[1] for committer in committers]
         return emails
 
@@ -267,7 +267,7 @@ class Branch(object):
         return self._browse_url
 
     def _get_commit_hashes(self):
-        hashes = self._clone.get_range_hashes(
+        hashes = self._repo.get_range_hashes(
             self._review_branch.remote_base,
             self._review_branch.remote_branch)
         return hashes
@@ -292,9 +292,9 @@ class Branch(object):
         else:
             previous = self._tracking_branch.remote_branch
 
-        hashes = self._clone.get_range_hashes(previous, latest)
+        hashes = self._repo.get_range_hashes(previous, latest)
         hashes.reverse()
-        revisions = self._clone.make_revisions_from_hashes(hashes)
+        revisions = self._repo.make_revisions_from_hashes(hashes)
 
         message = ""
         for r in revisions:
@@ -310,7 +310,7 @@ class Branch(object):
 
         """
         hashes = self._get_commit_hashes()
-        revisions = self._clone.make_revisions_from_hashes(hashes)
+        revisions = self._repo.make_revisions_from_hashes(hashes)
         message = revisions[0].subject + "\n\n"
         for r in revisions:
             message += r.message
@@ -325,11 +325,11 @@ class Branch(object):
         """
         # checkout the 'to' branch, otherwise we won't take into account any
         # changes to .gitattributes files
-        phlgit_checkout.branch(self._clone, self._review_branch.remote_branch)
+        phlgit_checkout.branch(self._repo, self._review_branch.remote_branch)
 
         try:
             return abdt_differ.make_raw_diff(
-                self._clone,
+                self._repo,
                 self._review_branch.remote_base,
                 self._review_branch.remote_branch,
                 _MAX_DIFF_SIZE)
@@ -345,7 +345,7 @@ class Branch(object):
 
     def verify_review_branch_base(self):
         """Raise exception if review branch has invalid base."""
-        if self._review_branch.base not in self._clone.get_remote_branches():
+        if self._review_branch.base not in self._repo.get_remote_branches():
             raise abdt_exception.MissingBaseException(
                 self._review_branch.branch,
                 self._review_branch.description,
@@ -359,7 +359,7 @@ class Branch(object):
     def get_commit_message_from_tip(self):
         """Return string commit message from latest commit on branch."""
         hashes = self._get_commit_hashes()
-        revision = phlgit_log.make_revision_from_hash(self._clone, hashes[-1])
+        revision = phlgit_log.make_revision_from_hash(self._repo, hashes[-1])
         message = revision.subject + "\n"
         message += "\n"
         message += revision.message + "\n"
@@ -367,13 +367,13 @@ class Branch(object):
 
     def _push_delete_review_branch(self):
         def action():
-            self._clone.push_delete(self._review_branch.branch)
+            self._repo.push_delete(self._review_branch.branch)
 
         self._tryloop(action, abdt_errident.PUSH_DELETE_REVIEW)
 
     def _push_delete_tracking_branch(self):
         def action():
-            self._clone.push_delete(self._tracking_branch.branch)
+            self._repo.push_delete(self._tracking_branch.branch)
 
         self._tryloop(action, abdt_errident.PUSH_DELETE_TRACKING)
 
@@ -386,7 +386,7 @@ class Branch(object):
 
     def remove(self):
         """Remove review branch and tracking branch."""
-        self._clone.archive_to_abandoned(
+        self._repo.archive_to_abandoned(
             self._review_hash,
             self.review_branch_name(),
             self._tracking_branch.base)
@@ -396,7 +396,7 @@ class Branch(object):
             # XXX: oddly pylint complains if we call push_landed() directly:
             #      "Using method (_tryloop) as an attribute (not invoked)"
             def push_abandoned():
-                self._clone.push_abandoned()
+                self._repo.push_abandoned()
 
             self._tryloop(
                 push_abandoned,
@@ -500,31 +500,31 @@ class Branch(object):
     def land(self, author_name, author_email, message):
         """Integrate the branch into the base and remove the review branch."""
 
-        self._clone.checkout_forced_new_branch(
+        self._repo.checkout_forced_new_branch(
             self._tracking_branch.base,
             self._tracking_branch.remote_base)
 
         try:
             result = self._lander(
-                self._clone,
+                self._repo,
                 self._tracking_branch.remote_branch,
                 author_name,
                 author_email,
                 message)
         except abdt_lander.LanderException as e:
-            self._clone("reset", "--hard")  # fix the working copy
+            self._repo("reset", "--hard")  # fix the working copy
             raise abdt_exception.LandingException(
                 str(e),
                 self.review_branch_name(),
                 self._tracking_branch.base)
 
         landing_hash = phlgit_revparse.get_sha1(
-            self._clone, self._tracking_branch.base)
+            self._repo, self._tracking_branch.base)
 
         # don't tryloop here as it's more expected that we can't push the base
         # due to permissioning or some other error
         try:
-            self._clone.push(self._tracking_branch.base)
+            self._repo.push(self._tracking_branch.base)
         except Exception as e:
             raise abdt_exception.LandingPushBaseException(
                 str(e),
@@ -532,12 +532,12 @@ class Branch(object):
                 self._tracking_branch.base)
 
         self._tryloop(
-            lambda: self._clone.push_delete(
+            lambda: self._repo.push_delete(
                 self._tracking_branch.branch,
                 self.review_branch_name()),
             abdt_errident.PUSH_DELETE_LANDED)
 
-        self._clone.archive_to_landed(
+        self._repo.archive_to_landed(
             self._tracking_hash,
             self.review_branch_name(),
             self._tracking_branch.base,
@@ -549,7 +549,7 @@ class Branch(object):
             # XXX: oddly pylint complains if we call push_landed() directly:
             #      "Using method (_tryloop) as an attribute (not invoked)"
             def push_landed():
-                self._clone.push_landed()
+                self._repo.push_landed()
 
             self._tryloop(
                 push_landed,
@@ -575,17 +575,17 @@ class Branch(object):
         new_branch = self._tracking_branch.branch
         if old_branch == new_branch:
             phlgit_push.push_asymmetrical_force(
-                self._clone,
+                self._repo,
                 self._review_branch.remote_branch,
                 phlgitu_ref.make_local(new_branch),
                 self._tracking_branch.remote)
         else:
             phlgit_push.move_asymmetrical(
-                self._clone,
+                self._repo,
                 self._review_branch.remote_branch,
                 phlgitu_ref.make_local(old_branch),
                 phlgitu_ref.make_local(new_branch),
-                self._clone.get_remote())
+                self._repo.get_remote())
 
         self._tracking_hash = self._review_hash
 
@@ -594,7 +594,7 @@ class Branch(object):
             status, revision_id)
 
         phlgit_push.push_asymmetrical_force(
-            self._clone,
+            self._repo,
             self._review_branch.remote_branch,
             phlgitu_ref.make_local(tracking_branch.branch),
             tracking_branch.remote)
