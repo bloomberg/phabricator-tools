@@ -22,29 +22,29 @@ class Error(Exception):
     pass
 
 
-def get_sha1_or_none(clone, ref):
+def get_sha1_or_none(repo, ref):
     """Return string of the ref's commit hash if valid, else None.
 
-    :clone: supports call()
+    :repo: supports call()
     :ref: string of the reference to parse
     :returns: string of the ref's commit hash if valid, else None.
 
     """
-    commit = clone("rev-parse", "--revs-only", ref).strip()
+    commit = repo("rev-parse", "--revs-only", ref).strip()
     return commit if commit else None
 
 
-def get_sha1(clone, ref):
+def get_sha1(repo, ref):
     """Return string of the ref's commit hash.
 
     Raise if the ref is invalid.
 
-    :clone: supports call()
+    :repo: supports call()
     :ref: string of the reference to parse
     :returns: string of the ref's commit hash
 
     """
-    commit = get_sha1_or_none(clone, ref)
+    commit = get_sha1_or_none(repo, ref)
     if commit is None:
         raise Error("ref '{}' is invalid.".format(ref))
     return commit
