@@ -6,7 +6,7 @@ feature branch back into the current branch, which is assumed to be upstream.
 In other words, the 'landers' land a supplied branch on the current branch.
 
 Landers have the interface:
-    def lander(clone, feature, author_name, author_email, message)
+    def lander(repo, feature, author_name, author_email, message)
 
 On success the lander will return a string summary of the landing operation
 for a human to review.
@@ -41,10 +41,10 @@ class LanderException(Exception):
         super(LanderException, self).__init__(description)
 
 
-def squash(clone, source, author_name, author_email, message):
+def squash(repo, source, author_name, author_email, message):
     """Return the string output of squashing 'source' into current branch."""
     try:
-        result = clone.squash_merge(
+        result = repo.squash_merge(
             source,
             message,
             author_name,
