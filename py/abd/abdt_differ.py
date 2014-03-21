@@ -113,7 +113,7 @@ class DiffStatReduction(ReductionTechnique):
         ReductionTechnique.__init__(self, diff_size_utf8_bytes)
 
 
-def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
+def make_raw_diff(repo, base, branch, max_diff_size_utf8_bytes):
     """Return a string raw diff of the changes on 'branch'.
 
     If the diff would exceed the _MAX_DIFF_SIZE then take measures
@@ -122,7 +122,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
     Raise 'NoDiffError' if the diff could not be fit into
     'max_bytes'.
 
-    :clone: supports 'call'
+    :repo: supports repo()
     :base: string name of the merge-base of 'branch'
     :branch: string name of the branch to diff
     :max_diff_size_utf8_bytes: the maximum allowed size of the diff as utf8
@@ -130,7 +130,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
 
     """
     raw_diff = phlgit_diff.raw_diff_range(
-        clone, base, branch, _FULL_DIFF_CONTEXT_LINES)
+        repo, base, branch, _FULL_DIFF_CONTEXT_LINES)
     new_raw_diff = unicode(raw_diff, errors='replace')
     full_diff_size_utf8_bytes = len(new_raw_diff.encode("utf-8"))
     diff_size_utf8_bytes = full_diff_size_utf8_bytes
@@ -148,7 +148,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
     for context_lines in [_GOOD_DIFF_CONTEXT_LINES, _SOME_DIFF_CONTEXT_LINES]:
         if diff_size_utf8_bytes > max_diff_size_utf8_bytes:
             raw_diff = phlgit_diff.raw_diff_range(
-                clone, base, branch, context_lines)
+                repo, base, branch, context_lines)
             new_raw_diff = unicode(raw_diff, errors='replace')
             diff_size_utf8_bytes = len(new_raw_diff.encode("utf-8"))
             reduction_list.append(
@@ -158,7 +158,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
 
     # if the diff is still too big then regen with no context
     if diff_size_utf8_bytes > max_diff_size_utf8_bytes:
-        raw_diff = phlgit_diff.raw_diff_range(clone, base, branch, None)
+        raw_diff = phlgit_diff.raw_diff_range(repo, base, branch, None)
         new_raw_diff = unicode(raw_diff, errors='replace')
         diff_size_utf8_bytes = len(new_raw_diff.encode("utf-8"))
         reduction_list.append(
@@ -167,7 +167,7 @@ def make_raw_diff(clone, base, branch, max_diff_size_utf8_bytes):
 
     # if the diff is still too big then just use the diff stat with message
     if diff_size_utf8_bytes > max_diff_size_utf8_bytes:
-        stat = phlgit_diff.stat_range(clone, base, branch)
+        stat = phlgit_diff.stat_range(repo, base, branch)
         content = "this diff is very large, it has been reduced to a summary:"
         content = '\n\n'.join([content, stat])
         raw_diff = phlgit_diff.create_add_file('diffstat', content)
