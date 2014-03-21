@@ -517,7 +517,7 @@ class Branch(object):
                 author_email,
                 message)
         except abdt_lander.LanderException as e:
-            self._clone.call("reset", "--hard")  # fix the working copy
+            self._clone("reset", "--hard")  # fix the working copy
             raise abdt_exception.LandingException(
                 str(e),
                 self.review_branch_name(),

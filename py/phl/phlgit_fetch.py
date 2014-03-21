@@ -24,7 +24,7 @@ def all_prune(repo):
     :returns: None
 
     """
-    repo.call('fetch', '--all', '--prune')
+    repo('fetch', '--all', '--prune')
 
 
 def prune_safe(repo, remote):
@@ -51,11 +51,11 @@ def prune_safe(repo, remote):
 
     """
     try:
-        repo.call('fetch', remote, '-p')
+        repo('fetch', remote, '-p')
     except phlsys_subprocess.CalledProcessError:
         # assume this was due to the previously mentioned issue
-        repo.call('remote', 'prune', remote)
-        repo.call('fetch', remote)
+        repo('remote', 'prune', remote)
+        repo('fetch', remote)
 
 
 

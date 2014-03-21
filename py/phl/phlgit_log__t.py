@@ -45,20 +45,20 @@ class Test(unittest.TestCase):
     def _createCommitNewFile(self, filename, subject=None, message=None):
         phlsys_subprocess.run_commands(
             "touch " + os.path.join(self.path, filename))
-        self.clone.call("add", filename)
+        self.clone("add", filename)
         if not subject:
             if message:
                 raise Exception("didn't expect message with empty subject")
-            self.clone.call(
+            self.clone(
                 "commit", "-a", "-m", filename,
                 "--author", self.author)
         elif not message:
-            self.clone.call(
+            self.clone(
                 "commit", "-a", "-m", subject,
                 "--author", self.author)
         else:
             message = subject + "\n\n" + message
-            self.clone.call(
+            self.clone(
                 "commit", "-a", "-m", message,
                 "--author", self.author)
 
@@ -101,9 +101,9 @@ class Test(unittest.TestCase):
 
     def testSimpleFork(self):
         self._createCommitNewFile("README")
-        self.clone.call("branch", "fork")
+        self.clone("branch", "fork")
         self._createCommitNewFile("ONLY_MASTER")
-        self.clone.call("checkout", "fork")
+        self.clone("checkout", "fork")
         self._createCommitNewFile("ONLY_FORK", "ONLY_FORK", "BODY\nBODY")
         self._createCommitNewFile("ONLY_FORK2")
 

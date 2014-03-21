@@ -22,7 +22,7 @@ def onto_upstream(repo, upstream):
     :returns: None
 
     """
-    repo.call('rebase', upstream)
+    repo('rebase', upstream)
 
 
 #------------------------------------------------------------------------------

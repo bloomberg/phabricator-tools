@@ -21,7 +21,6 @@
 #    .push
 #    .push_delete
 #    .fetch_prune
-#    .call
 #    .get_remote
 #    .working_dir
 #
@@ -321,13 +320,13 @@ class Repo(object):
         """
         phlgit_fetch.prune_safe(self, self._remote)
 
-    def call(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):
         if args and args[0] == 'push':
             abdt_logging.on_io_event(
                 'git-push',
                 '{}: {} {}'.format(
                     self._description, ' '.join(args), kwargs))
-        return self._clone.call(*args, **kwargs)
+        return self._clone(*args, **kwargs)
 
     def get_remote(self):
         return self._remote

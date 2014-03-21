@@ -39,7 +39,7 @@ def create_paste(conduit, content, title="", language=""):
     :returns: pasteResponse named tuple
 
     """
-    response = conduit.call(
+    response = conduit(
         "paste.create",
         {"content": content, "title": title, "language": language})
     return CreatePasteResponse(**response)

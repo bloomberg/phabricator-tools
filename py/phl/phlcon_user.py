@@ -100,7 +100,7 @@ def query_user_from_email(conduit, email):
     d = {"emails": [email], "limit": 1}
     response = None
     try:
-        response = conduit.call("user.query", d)
+        response = conduit("user.query", d)
     except phlsys_conduit.ConduitException as e:
         if not is_no_such_error(e):
             raise
@@ -149,7 +149,7 @@ def query_users_from_phids(conduit, phids):
     d = {"phids": phids, "limit": len(phids)}
 
     try:
-        response = conduit.call("user.query", d)
+        response = conduit("user.query", d)
     except phlsys_conduit.ConduitException as e:
         if not is_no_such_error(e):
             raise
@@ -176,7 +176,7 @@ def query_users_from_usernames(conduit, usernames):
 
     response = None
     try:
-        response = conduit.call("user.query", d)
+        response = conduit("user.query", d)
     except phlsys_conduit.ConduitException as e:
         if not is_no_such_error(e):
             raise

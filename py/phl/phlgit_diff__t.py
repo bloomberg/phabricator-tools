@@ -30,9 +30,9 @@ class Test(unittest.TestCase):
 
     def testSimpleFork(self):
         with phlgitu_fixture.lone_worker_context() as worker:
-            worker.repo.call("branch", "fork")
+            worker.repo("branch", "fork")
             worker.commit_new_file("add ONLY_MASTER", "ONLY_MASTER")
-            worker.repo.call("checkout", "fork")
+            worker.repo("checkout", "fork")
             worker.commit_new_file("add ONLY_FORK", "ONLY_FORK")
             worker.commit_new_file("add ONLY_FORK2", "ONLY_FORK2")
             rawDiff = phlgit_diff.raw_diff_range_to_here(

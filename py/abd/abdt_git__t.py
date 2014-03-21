@@ -51,22 +51,22 @@ class Test(unittest.TestCase):
         sys_clone = phlsys_git.Repo(tempfile.mkdtemp())
         self.clone_arcyd = abdt_git.Repo(sys_clone, 'origin', 'myrepo')
 
-        self.repo_central.call("init", "--bare")
+        self.repo_central("init", "--bare")
 
-        self.repo_dev.call("init")
-        self.repo_dev.call(
+        self.repo_dev("init")
+        self.repo_dev(
             "remote", "add", "origin", self.repo_central.working_dir)
-        self.repo_dev.call("fetch")
+        self.repo_dev("fetch")
 
         self._create_new_file(self.repo_dev, 'README')
-        self.repo_dev.call('add', 'README')
-        self.repo_dev.call('commit', '-m', 'initial commit')
+        self.repo_dev('add', 'README')
+        self.repo_dev('commit', '-m', 'initial commit')
         phlgit_push.push(self.repo_dev, 'master', 'origin')
 
-        self.clone_arcyd.call("init")
-        self.clone_arcyd.call(
+        self.clone_arcyd("init")
+        self.clone_arcyd(
             "remote", "add", "origin", self.repo_central.working_dir)
-        self.clone_arcyd.call("fetch")
+        self.clone_arcyd("fetch")
 
     def tearDown(self):
         shutil.rmtree(self.repo_central.working_dir)
@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
             phlgit_push.push_asymmetrical(
                 self.repo_dev, 'master', branch, remote)
 
-        self.clone_arcyd.call("fetch")
+        self.clone_arcyd("fetch")
 
         branches = abdt_git.get_managed_branches(
             self.clone_arcyd, "repo", abdt_rbranchnaming.Naming())
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
         phlgit_checkout.branch(self.repo_dev, branch_name)
         filename = 'new_on_branch'
         self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
+        self.repo_dev('add', filename)
         phlgit_commit.index(self.repo_dev, message=filename)
         phlgit_push.branch(self.repo_dev, branch_name)
 
@@ -154,7 +154,7 @@ class Test(unittest.TestCase):
         phlgit_checkout.branch(self.repo_dev, 'master')
         filename = 'new_on_master'
         self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
+        self.repo_dev('add', filename)
         phlgit_commit.index(self.repo_dev, message=filename)
         phlgit_push.branch(self.repo_dev, 'master')
 
@@ -198,10 +198,10 @@ class Test(unittest.TestCase):
         naming = abdt_classicnaming.Naming()
 
         branch_name = abdt_classicnaming.EXAMPLE_REVIEW_BRANCH_NAME
-        self.repo_dev.call('checkout', '-b', branch_name)
+        self.repo_dev('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
-        self.clone_arcyd.call('fetch', 'origin')
+        self.clone_arcyd('fetch', 'origin')
 
         review_branch = naming.make_review_branch_from_name(branch_name)
         review_hash = phlgit_revparse.get_sha1_or_none(

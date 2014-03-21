@@ -23,7 +23,7 @@ def object_(clone, ref):
     :returns: the contents of the object
 
     """
-    return clone.call('show', ref)
+    return clone('show', ref)
 
 
 def file_on_ref(clone, path, ref):
@@ -31,13 +31,13 @@ def file_on_ref(clone, path, ref):
 
     Raise if the file or ref does not exist.
 
-    :clone: the git clone to get the object from, will do clone.call(...)
+    :clone: the git clone to get the object from, will do clone(...)
     :path: the string path to the file on the branch, e.g. 'src/main.cpp'
     :ref: the string ref of the branch, e.g. 'feature/red_button'
     :returns: the string contents of the file
 
     """
-    return clone.call('show', '{}:{}'.format(ref, path))
+    return clone('show', '{}:{}'.format(ref, path))
 
 
 #------------------------------------------------------------------------------

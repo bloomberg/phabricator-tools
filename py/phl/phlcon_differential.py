@@ -224,7 +224,7 @@ class WriteDiffError(Error):
 
 
 def create_raw_diff(conduit, diff):
-    response = conduit.call("differential.createrawdiff", {"diff": diff})
+    response = conduit("differential.createrawdiff", {"diff": diff})
     return CreateRawDiffResponse(**response)
 
 
@@ -288,7 +288,7 @@ def create_diff(
         "repositoryUUID": repository_uuid,
     }
     d = phlsys_dictutil.copy_dict_no_nones(d)
-    response = conduit.call("differential.creatediff", d)
+    response = conduit("differential.creatediff", d)
     return response
 
 
@@ -298,7 +298,7 @@ def create_diff(
 def _get_diff(conduit, revision_id=None, diff_id=None):
     d = {"revision_id": revision_id, "diff_id": diff_id}
     d = phlsys_dictutil.copy_dict_no_nones(d)
-    response = conduit.call("differential.getdiff", d)
+    response = conduit("differential.getdiff", d)
     response["id"] = int(response["id"])
     return GetDiffIdResponse(**response)
 
@@ -307,7 +307,7 @@ def parse_commit_message(conduit, corpus, partial=None):
     d = {"corpus": corpus, "partial": partial}
     d = phlsys_dictutil.copy_dict_no_nones(d)
     p = ParseCommitMessageResponse(
-        **conduit.call("differential.parsecommitmessage", d))
+        **conduit("differential.parsecommitmessage", d))
     phlsys_dictutil.ensure_keys_default(
         p.fields, "", ["summary", "testPlan", "title"])
     phlsys_dictutil.ensure_keys_default(
@@ -344,7 +344,7 @@ def parse_commit_message_errors(error_message_list):
 def create_revision(conduit, diffId, fields):
     d = {"diffid": diffId, "fields": fields}
     return RevisionResponse(
-        **conduit.call("differential.createrevision", d))
+        **conduit("differential.createrevision", d))
 
 
 def query(
@@ -352,7 +352,7 @@ def query(
         ids=None):  # list(uint)
     # TODO: typechecking
     d = phlsys_dictutil.copy_dict_no_nones({'ids': ids})
-    response = conduit.call("differential.query", d)
+    response = conduit("differential.query", d)
     query_response_list = []
     for r in response:
         phlsys_dictutil.ensure_keys(r, ["sourcePath", "auxiliary"])
@@ -373,7 +373,7 @@ def update_revision(conduit, id, diffid, fields, message):
     }
 
     try:
-        response = conduit.call('differential.updaterevision', d)
+        response = conduit('differential.updaterevision', d)
     except phlsys_conduit.ConduitException as e:
         if e.error == 'ERR_CLOSED':
             raise UpdateClosedRevisionError()
@@ -399,7 +399,7 @@ def create_comment(
     if attach_inlines:
         d['attach_inlines'] = attach_inlines
     d = phlsys_dictutil.copy_dict_no_nones(d)
-    response = conduit.call('differential.createcomment', d)
+    response = conduit('differential.createcomment', d)
     response['revisionid'] = int(response['revisionid'])
     return RevisionResponse(**response)
 
@@ -423,16 +423,16 @@ def create_inline_comment(
 
     d = phlsys_dictutil.copy_dict_no_nones(d)
 
-    conduit.call('differential.createinline', d)
+    conduit('differential.createinline', d)
 
 
 def get_commit_message(conduit, revision_id):
     d = {"revision_id": revision_id}
-    return conduit.call('differential.getcommitmessage', d)
+    return conduit('differential.getcommitmessage', d)
 
 
 def close(conduit, revisionId):
-    conduit.call('differential.close', {"revisionID": revisionId})
+    conduit('differential.close', {"revisionID": revisionId})
 
 
 def create_empty_revision(conduit):
@@ -478,12 +478,12 @@ def update_revision_empty(conduit, revision_id):
 
 
 def get_revision_diff(conduit, revision_id):
-    result = conduit.call('differential.getdiff', {'revision_id': revision_id})
+    result = conduit('differential.getdiff', {'revision_id': revision_id})
     return GetDiffResponse(**result)
 
 
 def get_diff(conduit, diff_id):
-    result = conduit.call('differential.getdiff', {'diff_id': diff_id})
+    result = conduit('differential.getdiff', {'diff_id': diff_id})
     return GetDiffResponse(**result)
 
 

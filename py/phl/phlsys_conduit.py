@@ -12,7 +12,6 @@
 #    .get_act_as_user
 #    .get_user
 #    .conduit_uri
-#    .call
 #    .ping
 #
 # Public Functions:
@@ -58,19 +57,19 @@ def act_as_user_context(conduit, user):
         impersonate alice
         >>> conduit = make_phab_test_conduit()
         >>> with act_as_user_context(conduit, 'alice'):\
-                conduit.call("user.whoami")["userName"]
+                conduit("user.whoami")["userName"]
         u'alice'
 
         impersonate bob
         >>> conduit = make_phab_test_conduit()
         >>> with act_as_user_context(conduit, 'bob'):\
-                conduit.call("user.whoami")["userName"]
+                conduit("user.whoami")["userName"]
         u'bob'
 
         impersonate bob, revert to phab when context expires
         >>> conduit = make_phab_test_conduit()
         >>> with act_as_user_context(conduit, 'bob'): pass
-        >>> conduit.call("user.whoami")["userName"]
+        >>> conduit("user.whoami")["userName"]
         u'phab'
 
     """
@@ -271,7 +270,7 @@ class Conduit(object):
 
         return json.loads(data)
 
-    def call(self, method, param_dict_in=None):
+    def __call__(self, method, param_dict_in=None):
         attempts = 3
         for x in range(attempts):
             param_dict = dict(param_dict_in) if param_dict_in else {}
@@ -312,7 +311,7 @@ class Conduit(object):
         return result
 
     def ping(self):
-        return self.call("conduit.ping")
+        return self("conduit.ping")
 
 
 #------------------------------------------------------------------------------

@@ -6,7 +6,6 @@
 #
 # Public Classes:
 #   Repo
-#    .call
 #    .working_dir
 #
 # -----------------------------------------------------------------------------
@@ -25,8 +24,8 @@ class Repo(object):
     def __init__(self, workingDir):
         self._workingDir = os.path.abspath(workingDir)
 
-    # def call(*args, stdin=None): <-- supported in Python 3
-    def call(self, *args, **kwargs):
+    # def __call__(*args, stdin=None): <-- supported in Python 3
+    def __call__(self, *args, **kwargs):
         stdin = kwargs.pop("stdin", None)
         assert(not kwargs)
         result = phlsys_subprocess.run(

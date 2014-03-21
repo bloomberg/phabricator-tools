@@ -34,12 +34,12 @@ def squash(clone, source, message, author=None):
     # TODO: test merging with no effective changes
     with phlsys_fs.nostd():
         try:
-            clone.call("merge", "--squash", source)
+            clone("merge", "--squash", source)
             if author:
-                result = clone.call(
+                result = clone(
                     "commit", "-m", message, "--author", author)
             else:
-                result = clone.call("commit", "-m", message)
+                result = clone("commit", "-m", message)
         except phlsys_subprocess.CalledProcessError as e:
             raise MergeException(e.stdout)
 
@@ -61,7 +61,7 @@ def ours(repo, branch, message):
     :returns: None
 
     """
-    return repo.call("merge", "--no-edit", "-s", "ours", branch, "-m", message)
+    return repo("merge", "--no-edit", "-s", "ours", branch, "-m", message)
 
 
 def no_ff(repo, branch):
@@ -75,7 +75,7 @@ def no_ff(repo, branch):
     :returns: None
 
     """
-    repo.call('merge', '--no-edit', branch)
+    repo('merge', '--no-edit', branch)
 
 
 #------------------------------------------------------------------------------

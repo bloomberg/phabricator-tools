@@ -23,15 +23,15 @@ import itertools
 
 
 def push_asymmetrical_force(clone, localBranch, remoteBranch, remoteName):
-    clone.call('push', remoteName, localBranch + ":" + remoteBranch, "--force")
+    clone('push', remoteName, localBranch + ":" + remoteBranch, "--force")
 
 
 def push_asymmetrical(clone, localBranch, remoteBranch, remoteName):
-    clone.call('push', remoteName, localBranch + ":" + remoteBranch)
+    clone('push', remoteName, localBranch + ":" + remoteBranch)
 
 
 def push(clone, branch, remoteName):
-    clone.call('push', remoteName, branch)
+    clone('push', remoteName, branch)
 
 
 def force_branch(repo, branch, remote='origin'):
@@ -43,11 +43,11 @@ def force_branch(repo, branch, remote='origin'):
     :returns: None
 
     """
-    repo.call('push', '--force', remote, branch)
+    repo('push', '--force', remote, branch)
 
 
 def branch(clone, branch, remote='origin'):
-    clone.call('push', remote, branch)
+    clone('push', remote, branch)
 
 
 def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):
@@ -61,7 +61,7 @@ def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):
     :returns: None
 
     """
-    clone.call(
+    clone(
         'push',
         remote,
         local_branch + ":" + new_remote,
@@ -79,7 +79,7 @@ def delete(clone, remote, branch, *args):
 
     """
     removals = [':' + b for b in itertools.chain([branch], args)]
-    clone.call('push', remote, *removals)
+    clone('push', remote, *removals)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.

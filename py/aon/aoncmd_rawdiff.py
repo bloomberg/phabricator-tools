@@ -61,7 +61,7 @@ def process(args):
 
     d = {'diff': args.infile.read()}
 
-    result = conduit.call("differential.createrawdiff", d)
+    result = conduit("differential.createrawdiff", d)
     print result["id"]
 
 

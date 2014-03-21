@@ -30,7 +30,7 @@ def get_sha1_or_none(clone, ref):
     :returns: string of the ref's commit hash if valid, else None.
 
     """
-    commit = clone.call("rev-parse", "--revs-only", ref).strip()
+    commit = clone("rev-parse", "--revs-only", ref).strip()
     return commit if commit else None
 
 

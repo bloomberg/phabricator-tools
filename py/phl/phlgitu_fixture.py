@@ -46,7 +46,7 @@ def lone_worker_context():
 
         Create a temporary repo and attached worker:
         >>> with lone_worker_context() as worker:
-        ...     content = worker.repo.call("show", "HEAD:README")
+        ...     content = worker.repo("show", "HEAD:README")
         ...     content is not None
         True
 
@@ -65,7 +65,7 @@ def temprepo_context():
 
         Create a temporary repo:
         >>> with temprepo_context() as clone:
-        ...     status = clone.call("rev-parse", "--is-inside-work-tree")
+        ...     status = clone("rev-parse", "--is-inside-work-tree")
         ...     status.strip().lower() == 'true'
         True
 
@@ -82,7 +82,7 @@ class TempRepo(object):
 
         Create a temporary repo:
         >>> with temprepo_context() as repo:
-        ...     status = repo.call("rev-parse", "--is-inside-work-tree")
+        ...     status = repo("rev-parse", "--is-inside-work-tree")
         ...     status.strip().lower() == 'true'
         True
 
@@ -92,7 +92,7 @@ class TempRepo(object):
         super(TempRepo, self).__init__()
         self._tmp_dir = tempfile.mkdtemp()
         self._repo = phlsys_git.Repo(self._tmp_dir)
-        self._repo.call("init")
+        self._repo("init")
 
     def close(self):
         """Free up any resources used by this instance.
@@ -143,7 +143,7 @@ class Worker(object):
 
         """
         self.create_new_file(relative_path, contents)
-        self._repo.call('add', relative_path)
+        self._repo('add', relative_path)
 
     def commit_new_file(self, message, relative_path, contents=None):
         """Create and commit a new file.
@@ -155,7 +155,7 @@ class Worker(object):
 
         """
         self.add_new_file(relative_path, contents)
-        self._repo.call('commit', '-m', message, '--', relative_path)
+        self._repo('commit', '-m', message, '--', relative_path)
 
     def commit_new_file_on_new_branch(
             self, branch, message, relative_path, contents=None, base=None):
@@ -170,7 +170,7 @@ class Worker(object):
 
         """
         base_ref = base if base is not None else 'HEAD'
-        self._repo.call('checkout', '-b', branch, base_ref)
+        self._repo('checkout', '-b', branch, base_ref)
         self.commit_new_file(message, relative_path, contents)
 
     def append_to_file(self, relative_path, to_append):
@@ -197,7 +197,7 @@ class Worker(object):
 
         """
         self.append_to_file(relative_path, to_append)
-        self._repo.call('add', relative_path)
+        self._repo('add', relative_path)
 
     def commit_append_to_file(self, message, relative_path, to_append):
         """Create and commit a new file.
@@ -209,7 +209,7 @@ class Worker(object):
 
         """
         self.add_append_to_file(relative_path, to_append)
-        self._repo.call('commit', '-m', message, '--', relative_path)
+        self._repo('commit', '-m', message, '--', relative_path)
 
     def append_to_file_on_new_branch(
             self, branch, message, relative_path, to_append, base=None):
@@ -224,12 +224,12 @@ class Worker(object):
 
         """
         base_ref = base if base is not None else 'HEAD'
-        self._repo.call('checkout', '-b', branch, base_ref)
+        self._repo('checkout', '-b', branch, base_ref)
         self.commit_append_to_file(message, relative_path, to_append)
 
     def checkout_master(self):
         """Checkout the 'master' branch."""
-        self._repo.call('checkout', 'master')
+        self._repo('checkout', 'master')
 
     @property
     def repo(self):

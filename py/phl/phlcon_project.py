@@ -41,7 +41,7 @@ def query_some(conduit, max_items, offset):
         'limit': max_items,
         'offset': offset,
     }
-    response = conduit.call("project.query", d)
+    response = conduit("project.query", d)
     results = [QueryResponse(**r) for phid, r in response.iteritems()]
     return results
 

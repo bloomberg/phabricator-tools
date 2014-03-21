@@ -30,7 +30,7 @@ def write_string(clone, s):
     :returns: the SHA1 of the object
 
     """
-    return clone.call('hash-object', '-w', '--stdin', stdin=s).strip()
+    return clone('hash-object', '-w', '--stdin', stdin=s).strip()
 
 
 #------------------------------------------------------------------------------

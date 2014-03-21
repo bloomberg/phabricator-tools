@@ -22,7 +22,7 @@ def commits(clone, *commits):
     :returns: list of string commit SHA1s
 
     """
-    return clone.call('rev-list', *commits).splitlines()
+    return clone('rev-list', *commits).splitlines()
 
 
 #------------------------------------------------------------------------------

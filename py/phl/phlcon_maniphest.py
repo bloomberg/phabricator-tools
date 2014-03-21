@@ -127,7 +127,7 @@ def create_task(
         d['ccPHIDs'] = ccs
     if projects is not None:
         d['projectPHIDs'] = projects
-    response = conduit.call("maniphest.createtask", d)
+    response = conduit("maniphest.createtask", d)
     return CreateTaskResponse(**response)
 
 
@@ -172,7 +172,7 @@ def update_task(
         d['projectPHIDs'] = projects
     if comment is not None:
         d['comments'] = comment
-    response = conduit.call("maniphest.update", d)
+    response = conduit("maniphest.update", d)
     return CreateTaskResponse(**response)
 
 
@@ -217,7 +217,7 @@ def query(
         'fullText': text,
     }
 
-    response = conduit.call("maniphest.query", d)
+    response = conduit("maniphest.query", d)
     result = []
 
     if response:

@@ -45,7 +45,7 @@ def prepend(clone, review_sha1, name, landed_sha1):
 
     If the list is longer than the global max then truncate it.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :sha1: string of the sha1 to prepend
     :name: string name of the ref to prepend
     :returns: None
@@ -61,7 +61,7 @@ def _get_log_raw(clone):
 
     If there is no landinglog then return an empty string.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :returns: the contents of the landinglog from the supplied 'clone'
 
     """
@@ -74,13 +74,13 @@ def _get_log_raw(clone):
 def _write_log_raw(clone, log):
     """Overwrite the landinglog with the string 'log'.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :log: the new string contents of the landinglog
     :returns: None
 
     """
     sha1 = phlgit_hashobject.write_string(clone, log)
-    clone.call('update-ref', _LOCAL_LANDINGLOG_REF, sha1)
+    clone('update-ref', _LOCAL_LANDINGLOG_REF, sha1)
 
 
 def get_log(clone):
@@ -88,7 +88,7 @@ def get_log(clone):
 
     Behaviour is undefined if there is no log.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :returns: a list of LogItem from the landinglog of 'clone'
 
     """
@@ -102,7 +102,7 @@ def write_log(clone, log):
 
     Will truncate the log to _MAX_LOG_LENGTH entries.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :log: the iterable to write to the landing log, each entry is a LogItem
     :returns: None
 
@@ -115,7 +115,7 @@ def write_log(clone, log):
 def push_log(clone, remote):
     """Push the local landinglog to the specified 'remote'.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :remote: the string name of the remote to push to
     :returns: None
 

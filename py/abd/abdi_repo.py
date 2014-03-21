@@ -52,26 +52,26 @@ def setup_repo_context(repo_url, repo_path):
         repo = phlsys_git.Repo(repo_path)
 
         # test pushing to master
-        repo.call('checkout', 'origin/master')
+        repo('checkout', 'origin/master')
         phlgit_commit.allow_empty(repo, 'test commit for pushing')
-        repo.call('push', 'origin', '--dry-run', 'HEAD:refs/heads/master')
-        repo.call('checkout', '-')
+        repo('push', 'origin', '--dry-run', 'HEAD:refs/heads/master')
+        repo('checkout', '-')
 
         # test push to special refs
-        repo.call(
+        repo(
             'push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
-        repo.call(
+        repo(
             'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
 
         # fetch the 'landed' and 'abandoned' refs if they exist
-        ref_list = set(repo.call('ls-remote').split()[1::2])
+        ref_list = set(repo('ls-remote').split()[1::2])
         special_refs = [
             (abdt_git.ARCYD_ABANDONED_REF, abdt_git.ARCYD_ABANDONED_BRANCH_FQ),
             (abdt_git.ARCYD_LANDED_REF, abdt_git.ARCYD_LANDED_BRANCH_FQ),
         ]
         for ref in special_refs:
             if ref[0] in ref_list:
-                repo.call('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
+                repo('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
 
         # success, allow the caller to do work
         yield

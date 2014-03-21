@@ -74,14 +74,14 @@ class Test(unittest.TestCase):
         sys_clone = phlsys_git.Repo(tempfile.mkdtemp())
         self.clone_arcyd = abdt_git.Repo(sys_clone, 'origin', 'myrepo')
 
-        self.repo_central.call("init", "--bare")
+        self.repo_central("init", "--bare")
 
-        self.repo_dev.call("init")
-        self.repo_dev.call(
+        self.repo_dev("init")
+        self.repo_dev(
             "remote", "add", "origin", self.repo_central.working_dir)
 
-        self.clone_arcyd.call("init")
-        self.clone_arcyd.call(
+        self.clone_arcyd("init")
+        self.clone_arcyd(
             "remote", "add", "origin", self.repo_central.working_dir)
 
     def test_A_Breathing(self):
@@ -134,7 +134,7 @@ class Test(unittest.TestCase):
         self._dev_commit_new_empty_file('ALICE2', alice_user, alice_email)
 
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
-        self.clone_arcyd.call('fetch', 'origin')
+        self.clone_arcyd('fetch', 'origin')
 
         author_names_emails = branch.get_author_names_emails()
 
@@ -152,8 +152,8 @@ class Test(unittest.TestCase):
 
     def _dev_commit_new_empty_file(self, filename, user, email):
         self._create_new_file(self.repo_dev, filename)
-        self.repo_dev.call('add', filename)
-        self.repo_dev.call(
+        self.repo_dev('add', filename)
+        self.repo_dev(
             'commit',
             '-m',
             filename,
@@ -181,17 +181,17 @@ class Test(unittest.TestCase):
         base = abdt_naming.EXAMPLE_REVIEW_BRANCH_BASE
 
         self._create_new_file(self.repo_dev, 'README')
-        self.repo_dev.call('add', 'README')
-        self.repo_dev.call('commit', '-m', 'initial commit')
+        self.repo_dev('add', 'README')
+        self.repo_dev('commit', '-m', 'initial commit')
         phlgit_push.push(self.repo_dev, base, 'origin')
 
         naming = abdt_classicnaming.Naming()
 
         branch_name = abdt_classicnaming.EXAMPLE_REVIEW_BRANCH_NAME
-        self.repo_dev.call('checkout', '-b', branch_name)
+        self.repo_dev('checkout', '-b', branch_name)
         phlgit_push.push(self.repo_dev, branch_name, 'origin')
 
-        self.clone_arcyd.call('fetch', 'origin')
+        self.clone_arcyd('fetch', 'origin')
 
         review_branch = naming.make_review_branch_from_name(branch_name)
         review_hash = phlgit_revparse.get_sha1_or_none(

@@ -37,8 +37,8 @@ class Test(unittest.TestCase):
         run("git", "init", workingDir=path)
         clone = phlsys_git.Repo(path)
         runCommands("touch " + path + "/README")
-        clone.call("add", "README")
-        clone.call("commit", "-m", "initial commit")
+        clone("add", "README")
+        clone("commit", "-m", "initial commit")
         runCommands("rm -rf " + path)
 
 

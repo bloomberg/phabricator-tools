@@ -23,7 +23,7 @@ def index(repo, message):
     :returns: None
 
     """
-    repo.call('commit', '-m', message)
+    repo('commit', '-m', message)
 
 
 def allow_empty(repo, message):
@@ -34,7 +34,7 @@ def allow_empty(repo, message):
     :returns: None
 
     """
-    repo.call('commit', '--allow-empty', '-m', message)
+    repo('commit', '--allow-empty', '-m', message)
 
 
 #------------------------------------------------------------------------------

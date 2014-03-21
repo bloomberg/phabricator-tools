@@ -33,7 +33,7 @@ def hash_ref_pairs(clone):
     :returns: a list of (sha1, name)
 
     """
-    result = [line.split() for line in clone.call('show-ref').splitlines()]
+    result = [line.split() for line in clone('show-ref').splitlines()]
     return result
 
 

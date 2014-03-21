@@ -26,7 +26,7 @@ import phlsys_subprocess
 
 
 def raw_diff_range_to_here(clone, start):
-    return clone.call("diff", start + "...", "-M")
+    return clone("diff", start + "...", "-M")
 
 
 def raw_diff_range(clone, base, new, context_lines=None):
@@ -52,7 +52,7 @@ def raw_diff_range(clone, base, new, context_lines=None):
     if context_lines:
         args.append("--unified=" + str(context_lines))
 
-    result = clone.call(*args)
+    result = clone(*args)
     return result
 
 
@@ -143,7 +143,7 @@ def stat_range(repo, base, new):
     :returns: a string of the diff stat
 
     """
-    return repo.call(
+    return repo(
         "diff",
         "--stat",
         base + "..." + new,

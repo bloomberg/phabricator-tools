@@ -62,7 +62,7 @@ def get_range_to_here_hashes(clone, start):
     :returns: a list of strings corresponding to commits from 'start' to here.
 
     """
-    hashes = clone.call("log", start + "..", "--format=%H").split()
+    hashes = clone("log", start + "..", "--format=%H").split()
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
             "phlgit_log__getRangeToHereHashes() invalid hashes\n"
@@ -109,7 +109,7 @@ def get_last_n_commit_hashes_from_ref(clone, n, ref):
 
     """
     assert n >= 0
-    hashes = clone.call("log", ref, "-n", str(n), "--format=%H").split()
+    hashes = clone("log", ref, "-n", str(n), "--format=%H").split()
     if len(hashes) < n:
         raise ValueError(
             "less hashes than expected\n" + str(hashes))
@@ -144,9 +144,9 @@ def get_range_hashes(clone, start, end):
     :returns: a list of strings corresponding to commits from 'start' to 'end'.
 
     """
-    assert clone.call("rev-parse", "--revs-only", start)
-    assert clone.call("rev-parse", "--revs-only", end)
-    hashes = clone.call("log", start + ".." + end, "--format=%H").split()
+    assert clone("rev-parse", "--revs-only", start)
+    assert clone("rev-parse", "--revs-only", end)
+    hashes = clone("log", start + ".." + end, "--format=%H").split()
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
             "phlgit_log__getRangeHashes() invalid hashes\n" + str(hashes))
@@ -186,7 +186,7 @@ def make_revision_from_hash(clone, commitHash):
 
     """
     fmt = "%H%n%h%n%ae%n%an%n%ce%n%cn%n%s%n%b"
-    fullMessage = clone.call("log", commitHash + "^!", "--format=" + fmt)
+    fullMessage = clone("log", commitHash + "^!", "--format=" + fmt)
     revision = make_revision_from_full_message(fullMessage)
     return revision
 
@@ -236,7 +236,7 @@ def get_author_names_emails_from_hashes(clone, hashes):
 def get_range_to_here_raw_body(clone, start):
     # TODO: we actually want something that can return an list of bodies
     # TODO: '-n ' '1' is a hack until we return a list
-    return clone.call("log", start + "..", "--format=format:%B", "-n", "1")
+    return clone("log", start + "..", "--format=format:%B", "-n", "1")
 
 
 #------------------------------------------------------------------------------

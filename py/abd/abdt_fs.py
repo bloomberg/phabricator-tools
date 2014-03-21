@@ -224,7 +224,7 @@ class Accessor(object):
             raise Exception("config already exists")
 
         phlsys_fs.write_text_file(path, content)
-        self._repo.call('add', rel_path)
+        self._repo('add', rel_path)
         phlgit_commit.index(self._repo, message)
 
     def create_root_config(self, content):
@@ -356,9 +356,9 @@ def initialise_here():
     phlsys_fs.write_text_file('var/command/README', _VAR_COMMAND_README)
     phlsys_fs.write_text_file('var/run/README', _VAR_RUN_README)
 
-    repo.call('add', '.')
+    repo('add', '.')
     phlsys_fs.write_text_file('.gitignore', 'var\n')
-    repo.call('add', '.')
+    repo('add', '.')
     phlgit_commit.index(repo, 'Initialised new Arcyd instance')
 
     return Accessor(Layout(), '.')

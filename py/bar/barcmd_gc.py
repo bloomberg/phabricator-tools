@@ -137,7 +137,7 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
     local_landinglog_ref = 'refs/arcyd/origin/landinglog'
     landinglog_fetch = '+{}:{}'.format(landinglog_ref, local_landinglog_ref)
 
-    local_refs = clone.call('show-ref').split()[1::2]
+    local_refs = clone('show-ref').split()[1::2]
     has_landinglog = local_landinglog_ref in local_refs
 
     if not has_landinglog and never_update:
@@ -148,7 +148,7 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
 
     if not has_landinglog:
         # see if the remote has a landing log
-        remote_refs = clone.call('ls-remote').split()[1::2]
+        remote_refs = clone('ls-remote').split()[1::2]
         if landinglog_ref not in remote_refs:
             print >> sys.stderr, str(
                 "FATAL: origin doesn't seem to have a landing log yet "
@@ -158,12 +158,12 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
 
     if not has_landinglog:
         print "fetching landing log from origin for the first time.."
-        clone.call('fetch', 'origin', landinglog_fetch)
+        clone('fetch', 'origin', landinglog_fetch)
         print
     else:
         if always_update:
             print "fetching landing log from origin .."
-            clone.call('fetch', 'origin', landinglog_fetch)
+            clone('fetch', 'origin', landinglog_fetch)
             print
         elif never_update:
             # nothing to do
@@ -177,7 +177,7 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
                 sys.exit(1)
             elif choice:
                 print "fetching landing log from origin .."
-                clone.call('fetch', 'origin', landinglog_fetch)
+                clone('fetch', 'origin', landinglog_fetch)
                 print
             else:
                 # they chose 'no', continue without fetching
@@ -215,7 +215,7 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
 
 
 def get_current_branch(clone):
-    head = clone.call('symbolic-ref', 'HEAD')
+    head = clone('symbolic-ref', 'HEAD')
     branch_prefix = 'refs/heads/'
     current_branch = None
     if head.startswith(branch_prefix):
@@ -225,7 +225,7 @@ def get_current_branch(clone):
 
 def prune_force(clone, local_name, original_name, sha1, landed_sha1):
     print_branch("pruning", local_name, original_name, sha1, landed_sha1)
-    clone.call('branch', '-D', local_name)
+    clone('branch', '-D', local_name)
 
 
 def prune_dryrun(clone, local_name, original_name, sha1, landed_sha1):

@@ -118,7 +118,7 @@ def process(args):
         diff_id = args.diff_id
     else:
         d = {'diff': args.raw_diff_file.read()}
-        diff_id = conduit.call("differential.createrawdiff", d)["id"]
+        diff_id = conduit("differential.createrawdiff", d)["id"]
 
     fields = {}
 
@@ -129,7 +129,7 @@ def process(args):
         'message': args.message
     }
 
-    result = conduit.call("differential.updaterevision", d)
+    result = conduit("differential.updaterevision", d)
 
     if args.format_id:
         print result["revisionid"]

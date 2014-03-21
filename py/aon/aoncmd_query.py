@@ -321,7 +321,7 @@ def process(args):
     d["order"] = 'order-' + args.order
 
     # perform the query
-    results = conduit.call("differential.query", d)
+    results = conduit("differential.query", d)
 
     if args.statuses:
         results = [r for r in results if r["statusName"] in args.statuses]

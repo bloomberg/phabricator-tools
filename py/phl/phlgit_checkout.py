@@ -26,7 +26,7 @@ def new_branch_force_based_on(clone, new_branch, base):
     :returns: None
 
     """
-    clone.call('checkout', '-B', new_branch, base)
+    clone('checkout', '-B', new_branch, base)
 
 
 def branch(clone, branch):
@@ -40,7 +40,7 @@ def branch(clone, branch):
     :returns: None
 
     """
-    clone.call('checkout', branch)
+    clone('checkout', branch)
 
 
 def orphan(repo, branch):
@@ -56,7 +56,7 @@ def orphan(repo, branch):
     :returns: None
 
     """
-    repo.call('checkout', '--orphan', branch)
+    repo('checkout', '--orphan', branch)
 
 
 def orphan_clean(repo, branch):
@@ -76,14 +76,14 @@ def orphan_clean(repo, branch):
 
     # remove any files that have followed us from the previous branch in the
     # index
-    files = repo.call('ls-files', '--cached')
+    files = repo('ls-files', '--cached')
     if files:
-        repo.call('rm', '--cached', '-rf', '--', '.')
+        repo('rm', '--cached', '-rf', '--', '.')
 
     # any removed files will now be in the working copy, note that some files
     # may be both previously managed and ignored, so it's important to use
     # the 'x' too.
-    repo.call('clean', '-fxd')
+    repo('clean', '-fxd')
 
 
 #------------------------------------------------------------------------------

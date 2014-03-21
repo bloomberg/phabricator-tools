@@ -20,7 +20,7 @@ from __future__ import absolute_import
 
 
 def _cat_file_pretty(clone, objectHash):
-    return clone.call('cat-file', '-p', objectHash)
+    return clone('cat-file', '-p', objectHash)
 
 
 def _get_tree(clone, commit):
@@ -36,7 +36,7 @@ def is_tree_same(clone, branch, targetBranch):
 
 
 def _git_rev_parse(clone, rev):
-    return clone.call('rev-parse', rev)
+    return clone('rev-parse', rev)
 
 
 def is_identical(clone, branch, targetBranch):
@@ -50,7 +50,7 @@ def _get_refs(clone):
     #     SHA1      Refname
     #     SHA1      Refname
     #     SHA1      Refname
-    out = clone.call('show-ref')
+    out = clone('show-ref')
     flat = out.split()  # convert to ['SHA1', 'Refname', 'SHA1', 'Refname']
 
     # convert to [Refname, Refname, Refname]
@@ -63,7 +63,7 @@ def _get_sha1_ref_pairs(clone):
     #     SHA1      Refname
     #     SHA1      Refname
     #     SHA1      Refname
-    out = clone.call('show-ref')
+    out = clone('show-ref')
     flat = out.split()  # convert to ['SHA1', 'Refname', 'SHA1', 'Refname']
 
     # convert to [('SHA1', 'Refname'), ('SHA1', 'Refname')]
@@ -88,7 +88,7 @@ def get_local(clone):
 def get_local_with_sha1(clone):
     """Return a list of (sha1, branch_name) from all the local branches.
 
-    :clone: supports clone.call() for interacting with git
+    :clone: supports clone() for interacting with git
     :returns: a list of branches paired with their hashes
 
     """
@@ -105,7 +105,7 @@ def force_delete(repo, branch):
     :returns: None
 
     """
-    repo.call('branch', '-D', branch)
+    repo('branch', '-D', branch)
 
 
 def get_remote(clone, remote):
