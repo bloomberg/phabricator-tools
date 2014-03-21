@@ -208,7 +208,7 @@ def passes_filters(args, fields):
 
 def get_revision_generator(args):
 
-    clone = phlsys_git.Repo('.')
+    repo = phlsys_git.Repo('.')
 
     commit_list = []
     commits_to_follow = []
@@ -226,10 +226,10 @@ def get_revision_generator(args):
         commits_to_follow = ['HEAD']
 
     if commits_to_follow:
-        commit_list += phlgit_revlist.commits(clone, *commits_to_follow)
+        commit_list += phlgit_revlist.commits(repo, *commits_to_follow)
 
     make_rev = phlgit_log.make_revision_from_hash
-    revision_generator = (make_rev(clone, commit) for commit in commit_list)
+    revision_generator = (make_rev(repo, commit) for commit in commit_list)
 
     return revision_generator
 
