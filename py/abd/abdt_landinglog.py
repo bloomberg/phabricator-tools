@@ -40,88 +40,88 @@ LogItem = collections.namedtuple(
     ['review_sha1', 'name', 'landed_sha1'])
 
 
-def prepend(clone, review_sha1, name, landed_sha1):
+def prepend(repo, review_sha1, name, landed_sha1):
     """Prepend the specified 'sha1' and 'name' to the landinglog.
 
     If the list is longer than the global max then truncate it.
 
-    :clone: supports clone() for interacting with git
+    :repo: supports repo() for interacting with git
     :sha1: string of the sha1 to prepend
     :name: string name of the ref to prepend
     :returns: None
 
     """
-    log = get_log(clone)
+    log = get_log(repo)
     log.insert(0, LogItem(review_sha1, name, landed_sha1))
-    write_log(clone, log)
+    write_log(repo, log)
 
 
-def _get_log_raw(clone):
-    """Return the raw contents of the landinglog from the supplied 'clone'.
+def _get_log_raw(repo):
+    """Return the raw contents of the landinglog from the supplied 'repo'.
 
     If there is no landinglog then return an empty string.
 
-    :clone: supports clone() for interacting with git
-    :returns: the contents of the landinglog from the supplied 'clone'
+    :repo: supports repo() for interacting with git
+    :returns: the contents of the landinglog from the supplied 'repo'
 
     """
     result = ""
-    if phlgit_revparse.get_sha1_or_none(clone, _LOCAL_LANDINGLOG_REF):
-        result = phlgit_show.object_(clone, _LOCAL_LANDINGLOG_REF)
+    if phlgit_revparse.get_sha1_or_none(repo, _LOCAL_LANDINGLOG_REF):
+        result = phlgit_show.object_(repo, _LOCAL_LANDINGLOG_REF)
     return result
 
 
-def _write_log_raw(clone, log):
+def _write_log_raw(repo, log):
     """Overwrite the landinglog with the string 'log'.
 
-    :clone: supports clone() for interacting with git
+    :repo: supports repo() for interacting with git
     :log: the new string contents of the landinglog
     :returns: None
 
     """
-    sha1 = phlgit_hashobject.write_string(clone, log)
-    clone('update-ref', _LOCAL_LANDINGLOG_REF, sha1)
+    sha1 = phlgit_hashobject.write_string(repo, log)
+    repo('update-ref', _LOCAL_LANDINGLOG_REF, sha1)
 
 
-def get_log(clone):
-    """Return a list of LogItem from the landinglog of 'clone'.
+def get_log(repo):
+    """Return a list of LogItem from the landinglog of 'repo'.
 
     Behaviour is undefined if there is no log.
 
-    :clone: supports clone() for interacting with git
-    :returns: a list of LogItem from the landinglog of 'clone'
+    :repo: supports repo() for interacting with git
+    :returns: a list of LogItem from the landinglog of 'repo'
 
     """
     # restrict reading to the first 3 fields in case we later add more fields.
-    log = [LogItem(*l.split()[:3]) for l in _get_log_raw(clone).splitlines()]
+    log = [LogItem(*l.split()[:3]) for l in _get_log_raw(repo).splitlines()]
     return log
 
 
-def write_log(clone, log):
+def write_log(repo, log):
     """Overwrite the landinglog with the supplied iterable of LogItem.
 
     Will truncate the log to _MAX_LOG_LENGTH entries.
 
-    :clone: supports clone() for interacting with git
+    :repo: supports repo() for interacting with git
     :log: the iterable to write to the landing log, each entry is a LogItem
     :returns: None
 
     """
     log = log[:_MAX_LOG_LENGTH]
     _write_log_raw(
-        clone, '\n'.join((' '.join(i) for i in log)))
+        repo, '\n'.join((' '.join(i) for i in log)))
 
 
-def push_log(clone, remote):
+def push_log(repo, remote):
     """Push the local landinglog to the specified 'remote'.
 
-    :clone: supports clone() for interacting with git
+    :repo: supports repo() for interacting with git
     :remote: the string name of the remote to push to
     :returns: None
 
     """
     phlgit_push.push_asymmetrical_force(
-        clone, _LOCAL_LANDINGLOG_REF, _LANDINGLOG_REF, remote)
+        repo, _LOCAL_LANDINGLOG_REF, _LANDINGLOG_REF, remote)
 
 
 #------------------------------------------------------------------------------
