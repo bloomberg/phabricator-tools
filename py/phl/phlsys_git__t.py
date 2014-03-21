@@ -35,10 +35,10 @@ class Test(unittest.TestCase):
         path = "phlsys_git_TestGitContext"
         runCommands("mkdir " + path)
         run("git", "init", workingDir=path)
-        clone = phlsys_git.Repo(path)
+        repo = phlsys_git.Repo(path)
         runCommands("touch " + path + "/README")
-        clone("add", "README")
-        clone("commit", "-m", "initial commit")
+        repo("add", "README")
+        repo("commit", "-m", "initial commit")
         runCommands("rm -rf " + path)
 
 
