@@ -236,19 +236,6 @@ class Worker(object):
         return self._repo
 
 
-# class CentralisedWithContributors(object):
-#
-#     def __init__(self, contributor_count=2):
-#         super(CentralisedTwoContributors, self).__init__()
-#
-#         self.central = phlsys_git.GitClone(tempfile.mkdtemp())
-#         self.contributors = []
-#         for
-#         self.alpha = phlsys_git.GitClone(tempfile.mkdtemp())
-#         self.beta = phlsys_git.GitClone(tempfile.mkdtemp())
-#         sys_clone = phlsys_git.GitClone(tempfile.mkdtemp())
-
-
 #------------------------------------------------------------------------------
 # Copyright (C) 2014 Bloomberg Finance L.P.
 #

@@ -157,10 +157,6 @@ class ConduitMockData(object):
         index = revisionid - self._firstid
         return self._revisions[index]
 
-    # def get_the_only_revision(self):
-    #     assert len(self._revisions) == 1
-    #     return self._revisions[0]
-
     def is_unchanged(self):
         """Return true if this conduit has not been written to."""
         return self._no_write_attempts
