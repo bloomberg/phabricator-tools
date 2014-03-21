@@ -22,16 +22,16 @@ from __future__ import absolute_import
 import itertools
 
 
-def push_asymmetrical_force(clone, localBranch, remoteBranch, remoteName):
-    clone('push', remoteName, localBranch + ":" + remoteBranch, "--force")
+def push_asymmetrical_force(repo, localBranch, remoteBranch, remoteName):
+    repo('push', remoteName, localBranch + ":" + remoteBranch, "--force")
 
 
-def push_asymmetrical(clone, localBranch, remoteBranch, remoteName):
-    clone('push', remoteName, localBranch + ":" + remoteBranch)
+def push_asymmetrical(repo, localBranch, remoteBranch, remoteName):
+    repo('push', remoteName, localBranch + ":" + remoteBranch)
 
 
-def push(clone, branch, remoteName):
-    clone('push', remoteName, branch)
+def push(repo, branch, remoteName):
+    repo('push', remoteName, branch)
 
 
 def force_branch(repo, branch, remote='origin'):
@@ -46,14 +46,14 @@ def force_branch(repo, branch, remote='origin'):
     repo('push', '--force', remote, branch)
 
 
-def branch(clone, branch, remote='origin'):
-    clone('push', remote, branch)
+def branch(repo, branch, remote='origin'):
+    repo('push', remote, branch)
 
 
-def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):
+def move_asymmetrical(repo, local_branch, old_remote, new_remote, remote):
     """Delete 'old_remote', push 'local_branch' to 'new_remote' on 'remote'.
 
-    :clone: supports call()
+    :repo: supports call()
     :local_branch: the local reference to push
     :old_remote: the old reference on the remote to delete
     :new_remote: the new reference on the remote to push to
@@ -61,17 +61,17 @@ def move_asymmetrical(clone, local_branch, old_remote, new_remote, remote):
     :returns: None
 
     """
-    clone(
+    repo(
         'push',
         remote,
         local_branch + ":" + new_remote,
         ":" + old_remote)
 
 
-def delete(clone, remote, branch, *args):
+def delete(repo, remote, branch, *args):
     """Delete 'branch' from the specified remote.
 
-    :clone: supports call()
+    :repo: supports call()
     :remote: string name of the remote
     :branch: string name of the branch
     :*args: (optional) more string names of branches
@@ -79,7 +79,7 @@ def delete(clone, remote, branch, *args):
 
     """
     removals = [':' + b for b in itertools.chain([branch], args)]
-    clone('push', remote, *removals)
+    repo('push', remote, *removals)
 
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
