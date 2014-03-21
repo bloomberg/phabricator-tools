@@ -101,17 +101,17 @@ ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 class Repo(object):
 
     def __init__(
-            self, clone, remote, description):
+            self, repo, remote, description):
         """Initialise a new Repo.
 
-        :clone: the clone to attach to and delegate calls to
+        :repo: the repo to attach to and delegate calls to
         :remote: name of the remote to use
         :description: short identification of the repo for humans
         :returns: None
 
         """
         super(Repo, self).__init__()
-        self._clone = clone
+        self._repo = repo
         self._remote = remote
         self._description = description
         self._is_landing_archive_enabled = None
@@ -187,7 +187,7 @@ class Repo(object):
     def make_revisions_from_hashes(self, hashes):
         """Return a list of 'phlgit_log__Revision' from 'hashes'.
 
-        Raise an exception if the clone does not return a valid FullMessage
+        Raise an exception if the repo does not return a valid FullMessage
         from any of 'hashes'.
 
         :hashes: a list of commit hash strings
@@ -326,14 +326,14 @@ class Repo(object):
                 'git-push',
                 '{}: {} {}'.format(
                     self._description, ' '.join(args), kwargs))
-        return self._clone(*args, **kwargs)
+        return self._repo(*args, **kwargs)
 
     def get_remote(self):
         return self._remote
 
     @property
     def working_dir(self):
-        return self._clone.working_dir
+        return self._repo.working_dir
 
 
 def _get_branch_to_hash(git):
