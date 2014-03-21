@@ -64,8 +64,8 @@ def temprepo_context():
     Usage examples:
 
         Create a temporary repo:
-        >>> with temprepo_context() as clone:
-        ...     status = clone("rev-parse", "--is-inside-work-tree")
+        >>> with temprepo_context() as repo:
+        ...     status = repo("rev-parse", "--is-inside-work-tree")
         ...     status.strip().lower() == 'true'
         True
 
