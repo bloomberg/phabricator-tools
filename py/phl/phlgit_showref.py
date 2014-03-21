@@ -15,25 +15,25 @@
 from __future__ import absolute_import
 
 
-def names(clone):
-    """Return a list of string names of the refs in the supplied clone.
+def names(repo):
+    """Return a list of string names of the refs in the supplied repo.
 
-    :clone: supports 'call()'
+    :repo: supports 'call()'
     :returns: a list of string names
 
     """
-    result = [name for sha1, name in hash_ref_pairs(clone)]
+    result = [name for sha1, name in hash_ref_pairs(repo)]
     return result
 
 
-def hash_ref_pairs(clone):
-    """Return a list of (sha1, name) tuples from the list of refs in 'clone'.
+def hash_ref_pairs(repo):
+    """Return a list of (sha1, name) tuples from the list of refs in 'repo'.
 
-    :clone: supports 'call()'
+    :repo: supports 'call()'
     :returns: a list of (sha1, name)
 
     """
-    result = [line.split() for line in clone('show-ref').splitlines()]
+    result = [line.split() for line in repo('show-ref').splitlines()]
     return result
 
 
