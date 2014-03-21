@@ -19,38 +19,38 @@
 from __future__ import absolute_import
 
 
-def _cat_file_pretty(clone, objectHash):
-    return clone('cat-file', '-p', objectHash)
+def _cat_file_pretty(repo, objectHash):
+    return repo('cat-file', '-p', objectHash)
 
 
-def _get_tree(clone, commit):
-    content = _cat_file_pretty(clone, commit).splitlines()
+def _get_tree(repo, commit):
+    content = _cat_file_pretty(repo, commit).splitlines()
     tree = content[0].split("tree ")[1].strip()
     return tree
 
 
-def is_tree_same(clone, branch, targetBranch):
-    branchTree = _get_tree(clone, branch)
-    targetTree = _get_tree(clone, targetBranch)
+def is_tree_same(repo, branch, targetBranch):
+    branchTree = _get_tree(repo, branch)
+    targetTree = _get_tree(repo, targetBranch)
     return branchTree == targetTree
 
 
-def _git_rev_parse(clone, rev):
-    return clone('rev-parse', rev)
+def _git_rev_parse(repo, rev):
+    return repo('rev-parse', rev)
 
 
-def is_identical(clone, branch, targetBranch):
-    branchRev = _git_rev_parse(clone, branch)
-    targetRev = _git_rev_parse(clone, targetBranch)
+def is_identical(repo, branch, targetBranch):
+    branchRev = _git_rev_parse(repo, branch)
+    targetRev = _git_rev_parse(repo, targetBranch)
     return branchRev == targetRev
 
 
-def _get_refs(clone):
+def _get_refs(repo):
     # the output list is like:
     #     SHA1      Refname
     #     SHA1      Refname
     #     SHA1      Refname
-    out = clone('show-ref')
+    out = repo('show-ref')
     flat = out.split()  # convert to ['SHA1', 'Refname', 'SHA1', 'Refname']
 
     # convert to [Refname, Refname, Refname]
@@ -58,12 +58,12 @@ def _get_refs(clone):
     return refs
 
 
-def _get_sha1_ref_pairs(clone):
+def _get_sha1_ref_pairs(repo):
     # the output list is like:
     #     SHA1      Refname
     #     SHA1      Refname
     #     SHA1      Refname
-    out = clone('show-ref')
+    out = repo('show-ref')
     flat = out.split()  # convert to ['SHA1', 'Refname', 'SHA1', 'Refname']
 
     # convert to [('SHA1', 'Refname'), ('SHA1', 'Refname')]
@@ -80,19 +80,19 @@ def _filter_sha1_ref_pairs_in_namespace(refs, namespace):
     return [(i[0], i[1][len(ns):]) for i in refs if i[1].startswith(ns)]
 
 
-def get_local(clone):
-    refs = _get_refs(clone)
+def get_local(repo):
+    refs = _get_refs(repo)
     return _filter_refs_in_namespace(refs, "refs/heads/")
 
 
-def get_local_with_sha1(clone):
+def get_local_with_sha1(repo):
     """Return a list of (sha1, branch_name) from all the local branches.
 
-    :clone: supports clone() for interacting with git
+    :repo: supports repo() for interacting with git
     :returns: a list of branches paired with their hashes
 
     """
-    refs = _get_sha1_ref_pairs(clone)
+    refs = _get_sha1_ref_pairs(repo)
     refs = _filter_sha1_ref_pairs_in_namespace(refs, "refs/heads/")
     return refs
 
@@ -108,8 +108,8 @@ def force_delete(repo, branch):
     repo('branch', '-D', branch)
 
 
-def get_remote(clone, remote):
-    refs = _get_refs(clone)
+def get_remote(repo, remote):
+    refs = _get_refs(repo)
     remote_head = "refs/remotes/" + remote + "/head"
     refs = [r for r in refs if r != remote_head]
     return _filter_refs_in_namespace(refs, "refs/remotes/" + remote + "/")
