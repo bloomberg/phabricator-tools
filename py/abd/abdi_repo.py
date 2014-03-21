@@ -28,7 +28,7 @@ def setup_repo(repo_url, repo_path):
     """Setup a repository, if an exception is raised then remove the repo.
 
     :repo_url: string url of the repo to clone
-    :repo_path: string paht to clone the repo to
+    :repo_path: string path to clone the repo to
     :returns: None
 
     """
@@ -41,7 +41,7 @@ def setup_repo_context(repo_url, repo_path):
     """Setup a repository, if an exception is raised then remove the repo.
 
     :repo_url: string url of the repo to clone
-    :repo_path: string paht to clone the repo to
+    :repo_path: string path to clone the repo to
     :returns: None
 
     """
