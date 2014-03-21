@@ -22,7 +22,6 @@
 #    .get_any_author_emails
 #    .get_repo_name
 #    .get_browse_url
-#    .get_clone
 #    .describe
 #    .describe_new_commits
 #    .make_message_digest
@@ -266,10 +265,6 @@ class Branch(object):
     def get_browse_url(self):
         """Return the url to browse this branch, may be None."""
         return self._browse_url
-
-    def get_clone(self):
-        """Return the abdt_clone for this branch."""
-        return self._clone
 
     def _get_commit_hashes(self):
         hashes = self._clone.get_range_hashes(

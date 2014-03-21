@@ -23,7 +23,6 @@
 #    .get_any_author_emails
 #    .get_repo_name
 #    .get_browse_url
-#    .get_clone
 #    .describe
 #    .describe_new_commits
 #    .make_message_digest
@@ -280,10 +279,6 @@ class BranchMock(object):
     def get_browse_url(self):
         """Return the url to browse this branch, may be None."""
         return self._data.branch_url
-
-    def get_clone(self):
-        """Return the abdt_clone for this branch."""
-        assert False
 
     def describe(self):
         """Return a string description of this branch for a human to read."""
