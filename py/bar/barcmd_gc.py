@@ -95,18 +95,18 @@ branches do:
     """.strip()
     print
 
-    clone = phlsys_git.Repo('.')
+    repo = phlsys_git.Repo('.')
 
-    _fetch_log(clone, args.update, args.no_update, args.prompt_update)
+    _fetch_log(repo, args.update, args.no_update, args.prompt_update)
 
-    log = abdt_landinglog.get_log(clone)
+    log = abdt_landinglog.get_log(repo)
     log_dict = {i.review_sha1: (i.name, i.landed_sha1) for i in log}
 
-    local_branches = phlgit_branch.get_local_with_sha1(clone)
+    local_branches = phlgit_branch.get_local_with_sha1(repo)
 
     if args.force:
         did_something = _prune_branches(
-            clone, args, prune_force, log_dict, local_branches)
+            repo, args, prune_force, log_dict, local_branches)
         if not did_something:
             print "nothing to do."
         else:
@@ -114,7 +114,7 @@ branches do:
     else:
         assert args.interactive
         would_do_something = _prune_branches(
-            clone, args, prune_dryrun, log_dict, local_branches)
+            repo, args, prune_dryrun, log_dict, local_branches)
         if not would_do_something:
             print "nothing to do."
         else:
@@ -122,13 +122,13 @@ branches do:
             print
             if choice:
                 _prune_branches(
-                    clone, args, prune_force, log_dict, local_branches)
+                    repo, args, prune_force, log_dict, local_branches)
                 print "done."
             else:
                 print "stopped."
 
 
-def _fetch_log(clone, always_update, never_update, prompt_update):
+def _fetch_log(repo, always_update, never_update, prompt_update):
     # default to always_update
     if not never_update and not prompt_update:
         always_update = True
@@ -137,7 +137,7 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
     local_landinglog_ref = 'refs/arcyd/origin/landinglog'
     landinglog_fetch = '+{}:{}'.format(landinglog_ref, local_landinglog_ref)
 
-    local_refs = clone('show-ref').split()[1::2]
+    local_refs = repo('show-ref').split()[1::2]
     has_landinglog = local_landinglog_ref in local_refs
 
     if not has_landinglog and never_update:
@@ -148,7 +148,7 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
 
     if not has_landinglog:
         # see if the remote has a landing log
-        remote_refs = clone('ls-remote').split()[1::2]
+        remote_refs = repo('ls-remote').split()[1::2]
         if landinglog_ref not in remote_refs:
             print >> sys.stderr, str(
                 "FATAL: origin doesn't seem to have a landing log yet "
@@ -158,12 +158,12 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
 
     if not has_landinglog:
         print "fetching landing log from origin for the first time.."
-        clone('fetch', 'origin', landinglog_fetch)
+        repo('fetch', 'origin', landinglog_fetch)
         print
     else:
         if always_update:
             print "fetching landing log from origin .."
-            clone('fetch', 'origin', landinglog_fetch)
+            repo('fetch', 'origin', landinglog_fetch)
             print
         elif never_update:
             # nothing to do
@@ -177,15 +177,15 @@ def _fetch_log(clone, always_update, never_update, prompt_update):
                 sys.exit(1)
             elif choice:
                 print "fetching landing log from origin .."
-                clone('fetch', 'origin', landinglog_fetch)
+                repo('fetch', 'origin', landinglog_fetch)
                 print
             else:
                 # they chose 'no', continue without fetching
                 print
 
 
-def _prune_branches(clone, args, prune_func, log_dict, local_branches):
-    current_branch = get_current_branch(clone)
+def _prune_branches(repo, args, prune_func, log_dict, local_branches):
+    current_branch = get_current_branch(repo)
     did_something = False
     for branch in local_branches:
         sha1 = branch[0]
@@ -202,7 +202,7 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
                     print
                 else:
                     prune_func(
-                        clone, local_name, original_name, sha1, landed_sha1)
+                        repo, local_name, original_name, sha1, landed_sha1)
                     did_something = True
             else:
                 print_branch(
@@ -214,8 +214,8 @@ def _prune_branches(clone, args, prune_func, log_dict, local_branches):
     return did_something
 
 
-def get_current_branch(clone):
-    head = clone('symbolic-ref', 'HEAD')
+def get_current_branch(repo):
+    head = repo('symbolic-ref', 'HEAD')
     branch_prefix = 'refs/heads/'
     current_branch = None
     if head.startswith(branch_prefix):
@@ -223,13 +223,13 @@ def get_current_branch(clone):
     return current_branch
 
 
-def prune_force(clone, local_name, original_name, sha1, landed_sha1):
+def prune_force(repo, local_name, original_name, sha1, landed_sha1):
     print_branch("pruning", local_name, original_name, sha1, landed_sha1)
-    clone('branch', '-D', local_name)
+    repo('branch', '-D', local_name)
 
 
-def prune_dryrun(clone, local_name, original_name, sha1, landed_sha1):
-    _ = clone  # NOQA
+def prune_dryrun(repo, local_name, original_name, sha1, landed_sha1):
+    _ = repo  # NOQA
     print_branch("would prune", local_name, original_name, sha1, landed_sha1)
 
 
