@@ -19,7 +19,6 @@ import traceback
 import phlcon_reviewstatecache
 import phlmail_sender
 import phlsys_conduit
-import phlsys_git
 import phlsys_pluginmanager
 import phlsys_sendmail
 
@@ -39,7 +38,7 @@ import abdi_processrepo
 import abdi_repoargs
 
 
-def do(repo_name, args, arcyd_reporter, conduits, url_watcher):
+def do(repo, repo_name, args, arcyd_reporter, conduits, url_watcher):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
@@ -51,7 +50,7 @@ def do(repo_name, args, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
-            _do(args, reporter, arcyd_reporter, conduits, url_watcher)
+            _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher)
 
 
 def _set_attrib_if_not_none(config, key, value):
@@ -102,11 +101,9 @@ def _determine_options(args, repo):
     return config
 
 
-def _do(args, reporter, arcyd_reporter, conduits, url_watcher):
+def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process branches prolog'):
-        repo = abdt_git.Repo(
-            phlsys_git.Repo(args.repo_path), "origin", args.repo_desc)
 
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
             repo, 'git')

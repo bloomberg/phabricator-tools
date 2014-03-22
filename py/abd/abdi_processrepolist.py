@@ -18,11 +18,13 @@ import functools
 import os
 import sys
 
+import phlsys_git
 import phlsys_scheduleunreliables
 import phlsys_strtotime
 import phlurl_watcher
 
 import abdt_exhandlers
+import abdt_git
 
 import abdi_operation
 import abdi_processrepoargs
@@ -162,8 +164,13 @@ def _append_operations_for_repos(
         # use partial to ensure we capture the value of the variables,
         # note that a closure would use the latest value of the variables
         # rather than the value at declaration time.
+        abd_repo = abdt_git.Repo(
+            phlsys_git.Repo(repo_args.repo_path),
+            "origin",
+            repo_args.repo_desc)
         process_func = functools.partial(
             _process_single_repo,
+            abd_repo,
             repo_name,
             repo_args,
             reporter,
@@ -194,6 +201,7 @@ def _try_handle_reset_file(f, on_exception_delay):
 
 
 def _process_single_repo(
+        abd_repo,
         repo_name,
         repo_args,
         reporter,
@@ -201,7 +209,7 @@ def _process_single_repo(
         url_watcher,
         urlwatcher_cache_path):
     abdi_processrepoargs.do(
-        repo_name, repo_args, reporter, conduits, url_watcher)
+        abd_repo, repo_name, repo_args, reporter, conduits, url_watcher)
 
     # save the urlwatcher cache
     with open(urlwatcher_cache_path, 'w') as f:
