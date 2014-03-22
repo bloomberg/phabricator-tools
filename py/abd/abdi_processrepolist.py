@@ -155,7 +155,7 @@ def _append_operations_for_repos(
     strToTime = phlsys_strtotime.duration_string_to_time_delta
     retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
 
-    for repo, repo_args in repos:
+    for repo_name, repo_args in repos:
 
         # create a function to update this particular repo.
         #
@@ -164,7 +164,7 @@ def _append_operations_for_repos(
         # rather than the value at declaration time.
         process_func = functools.partial(
             _process_single_repo,
-            repo,
+            repo_name,
             repo_args,
             reporter,
             conduits,
@@ -172,7 +172,7 @@ def _append_operations_for_repos(
             urlwatcher_cache_path)
 
         on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            sys_admin_emails, reporter, repo)
+            sys_admin_emails, reporter, repo_name)
 
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,
@@ -194,14 +194,14 @@ def _try_handle_reset_file(f, on_exception_delay):
 
 
 def _process_single_repo(
-        repo,
+        repo_name,
         repo_args,
         reporter,
         conduits,
         url_watcher,
         urlwatcher_cache_path):
     abdi_processrepoargs.do(
-        repo, repo_args, reporter, conduits, url_watcher)
+        repo_name, repo_args, reporter, conduits, url_watcher)
 
     # save the urlwatcher cache
     with open(urlwatcher_cache_path, 'w') as f:

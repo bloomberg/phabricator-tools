@@ -39,11 +39,11 @@ import abdi_processrepo
 import abdi_repoargs
 
 
-def do(repo, args, arcyd_reporter, conduits, url_watcher):
+def do(repo_name, args, arcyd_reporter, conduits, url_watcher):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
-        repo,
+        repo_name,
         args.repo_desc,
         args.repo_url,
         abdt_shareddictoutput.ToFile(args.try_touch_path),
