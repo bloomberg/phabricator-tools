@@ -6,8 +6,14 @@
 #
 # Public Classes:
 #   Error
+#   Name
+#    .short
+#    .fq
+#    .is_remote
 #
 # Public Functions:
+#   is_remote
+#   is_fq
 #   guess_fq_name
 #   make_remote
 #   make_local
@@ -26,6 +32,79 @@ class Error(Exception):
     pass
 
 
+class Name(object):
+
+    """Vocabulary type for git ref names to remove ambiguity in passing.
+
+    Usage examples:
+        >>> a = Name('refs/heads/master')
+        >>> a.short
+        'master'
+        >>> a.fq
+        'refs/heads/master'
+        >>> a.is_remote
+        False
+
+        >>> b = Name('refs/heads/master')
+        >>> c = Name('refs/remotes/origin/master')
+        >>> a == b
+        True
+        >>> a == c
+        False
+        >>> c.is_remote
+        True
+
+        >>> s = set([a, b, c])
+        >>> len(s)
+        2
+
+    """
+
+    def __init__(self, fq_name):
+        super(Name, self).__init__()
+        if not is_fq(fq_name):
+            raise Error("'{}' is not fully qualified")
+        self._fq = fq_name
+
+    @property
+    def short(self):
+        return fq_to_short(self._fq)
+
+    @property
+    def fq(self):
+        return self._fq
+
+    @property
+    def is_remote(self):
+        return is_remote(self._fq)
+
+    def __eq__(self, right):
+        return self._fq.__eq__(right._fq)
+
+    def __hash__(self):
+        return self._fq.__hash__()
+
+
+def is_remote(fq_name):
+    """Return True if 'fq_name' is a remote branch, False otherwise.
+
+    Usage examples:
+        >>> is_remote('refs/heads/master')
+        False
+
+        >>> is_remote('refs/remotes/origin/master')
+        True
+
+    :name: string fully-qualified name of the ref to test
+    :returns: bool
+
+    """
+    if not is_fq(fq_name):
+        raise Error("'{}' is not fully qualified")
+
+    return fq_name.startswith('refs/remotes/')
+
+
 def is_fq(name):
     """Return True if the supplied 'name' is fully-qualified, False otherwise.
 
@@ -40,7 +119,7 @@ def is_fq(name):
     :returns: bool
 
     """
-    return name.startwith('refs/')
+    return name.startswith('refs/')
 
 
 def guess_fq_name(name_to_guess_from, remote_list=None):
