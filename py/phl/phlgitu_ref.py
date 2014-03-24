@@ -8,6 +8,7 @@
 #   Error
 #
 # Public Functions:
+#   guess_fq_name
 #   make_remote
 #   make_local
 #   fq_remote_to_short_local
@@ -23,6 +24,41 @@ from __future__ import absolute_import
 
 class Error(Exception):
     pass
+
+
+def guess_fq_name(name_to_guess_from, remote_list=None):
+    """Return a best-guess of the fq name of a ref, given a list of remotes.
+
+    The list of remotes defaults to ['origin'] if None is supplied.
+
+    Usage examples:
+        >>> guess_fq_name('master')
+        'refs/heads/master'
+
+        >>> guess_fq_name('origin/master')
+        'refs/remotes/origin/master'
+
+        >>> guess_fq_name('refs/notes')
+        'refs/notes'
+
+    :name_to_guess_from: string name of the ref
+    :remote_list: list of string names of remotes
+
+    """
+    if not name_to_guess_from:
+        raise Error("empty name to guess from")
+
+    if name_to_guess_from.startswith('refs/'):
+        return name_to_guess_from
+
+    if remote_list is None:
+        remote_list = ['origin']
+
+    for r in remote_list:
+        if name_to_guess_from.startswith(r + '/'):
+            return "refs/remotes/{}".format(name_to_guess_from)
+
+    return "refs/heads/{}".format(name_to_guess_from)
 
 
 def make_remote(ref, remote):
