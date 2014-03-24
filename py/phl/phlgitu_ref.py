@@ -26,6 +26,23 @@ class Error(Exception):
     pass
 
 
+def is_fq(name):
+    """Return True if the supplied 'name' is fully-qualified, False otherwise.
+
+    Usage examples:
+        >>> is_fq('master')
+        False
+
+        >>> is_fq('refs/heads/master')
+        True
+
+    :name: string name of the ref to test
+    :returns: bool
+
+    """
+    return name.startwith('refs/')
+
+
 def guess_fq_name(name_to_guess_from, remote_list=None):
     """Return a best-guess of the fq name of a ref, given a list of remotes.
 
@@ -48,7 +65,7 @@ def guess_fq_name(name_to_guess_from, remote_list=None):
     if not name_to_guess_from:
         raise Error("empty name to guess from")
 
-    if name_to_guess_from.startswith('refs/'):
+    if is_fq(name_to_guess_from):
         return name_to_guess_from
 
     if remote_list is None:
