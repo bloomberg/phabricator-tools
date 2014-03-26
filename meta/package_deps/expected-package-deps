@@ -1,5 +1,6 @@
 ('phlurl', ['phlsys'])
-('abdt', ['phlcon', 'phldef', 'phlgit', 'phlgitu', 'phlmail', 'phlsys'])
+('phlgitx', ['phlgit'])
+('abdt', ['phlcon', 'phldef', 'phlgit', 'phlgitu', 'phlgitx', 'phlmail', 'phlsys'])
 ('phlgit', ['phlgitu', 'phlsys'])
 ('lorcmd', ['phlcon', 'phlsys'])
 ('aoncmd', ['phlcon', 'phlsys'])

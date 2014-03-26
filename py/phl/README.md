@@ -47,6 +47,8 @@ Wrapper around 'git show-ref'.
 Fixtures for exercising scenarios with real Git.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
+* `phlgitx_refcache.py` -
+Git callable that maintains a cache of refs for efficient querying.
 * `phlmail_format.py` -
 Format valid mime-text suitable for piping into sendmail.
 * `phlmail_mocksender.py` -

@@ -21,8 +21,8 @@
 #    .push
 #    .push_delete
 #    .fetch_prune
+#    .hash_ref_pairs
 #    .get_remote
-#    .working_dir
 #
 # Public Functions:
 #   get_managed_branches
@@ -48,6 +48,7 @@ import phlgit_merge
 import phlgit_push
 import phlgit_showref
 import phlgitu_ref
+import phlgitx_refcache
 
 import abdt_branch
 import abdt_lander
@@ -111,7 +112,7 @@ class Repo(object):
 
         """
         super(Repo, self).__init__()
-        self._repo = repo
+        self._repo = phlgitx_refcache.Repo(repo)
         self._remote = remote
         self._description = description
         self._is_landing_archive_enabled = None
@@ -320,6 +321,16 @@ class Repo(object):
         """
         phlgit_fetch.prune_safe(self, self._remote)
 
+    @property
+    def hash_ref_pairs(self):
+        """Return a list of (sha1, name) tuples from the repo's list of refs.
+
+        :repo: a callable supporting git commands, e.g. repo("status")
+        :returns: a list of (sha1, name)
+
+        """
+        return self._repo.hash_ref_pairs
+
     def __call__(self, *args, **kwargs):
         if args and args[0] == 'push':
             abdt_logging.on_io_event(
@@ -331,15 +342,11 @@ class Repo(object):
     def get_remote(self):
         return self._remote
 
-    @property
-    def working_dir(self):
-        return self._repo.working_dir
-
 
 def _get_branch_to_hash(git):
 
     remote = git.get_remote()
-    hash_ref_list = phlgit_showref.hash_ref_pairs(git)
+    hash_ref_list = git.hash_ref_pairs
 
     def is_remote(ref):
         return phlgitu_ref.is_under_remote(ref, remote)
