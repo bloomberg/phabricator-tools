@@ -343,10 +343,10 @@ class Repo(object):
         return self._remote
 
 
-def _get_branch_to_hash(git):
+def _get_branch_to_hash(repo):
 
-    remote = git.get_remote()
-    hash_ref_list = git.hash_ref_pairs
+    remote = repo.get_remote()
+    hash_ref_list = repo.hash_ref_pairs
 
     def is_remote(ref):
         return phlgitu_ref.is_under_remote(ref, remote)
@@ -360,8 +360,8 @@ def _get_branch_to_hash(git):
     return branch_to_hash
 
 
-def get_managed_branches(git, repo_desc, naming, branch_link_callable=None):
-    branch_to_hash = _get_branch_to_hash(git)
+def get_managed_branches(repo, repo_desc, naming, branch_link_callable=None):
+    branch_to_hash = _get_branch_to_hash(repo)
     branch_pairs = abdt_naming.get_branch_pairs(branch_to_hash.keys(), naming)
 
     managed_branches = []
@@ -386,7 +386,7 @@ def get_managed_branches(git, repo_desc, naming, branch_link_callable=None):
 
         managed_branches.append(
             abdt_branch.Branch(
-                git,
+                repo,
                 review_branch,
                 review_hash,
                 tracker_branch,
