@@ -17,8 +17,6 @@
 from __future__ import absolute_import
 
 import os
-import shutil
-import tempfile
 import unittest
 
 import phlgit_checkout
@@ -28,7 +26,7 @@ import phlgit_merge
 import phlgit_push
 import phlgit_rebase
 import phlgit_revparse
-import phlsys_git
+import phlgitu_fixture
 
 import abdt_branch
 import abdt_classicnaming
@@ -41,37 +39,20 @@ class Test(unittest.TestCase):
 
     def __init__(self, data):
         super(Test, self).__init__(data)
+        self.repos = None
         self.repo_central = None
         self.repo_dev = None
         self.repo_arcyd = None
 
     def setUp(self):
-        self.repo_central = phlsys_git.Repo(tempfile.mkdtemp())
-        self.repo_dev = phlsys_git.Repo(tempfile.mkdtemp())
-        sys_repo = phlsys_git.Repo(tempfile.mkdtemp())
+        self.repos = phlgitu_fixture.CentralisedWithTwoWorkers()
+        self.repo_central = self.repos.central_repo
+        self.repo_dev = self.repos.w0.repo
+        sys_repo = self.repos.w1.repo
         self.repo_arcyd = abdt_git.Repo(sys_repo, 'origin', 'myrepo')
 
-        self.repo_central("init", "--bare")
-
-        self.repo_dev("init")
-        self.repo_dev(
-            "remote", "add", "origin", self.repo_central.working_dir)
-        self.repo_dev("fetch")
-
-        self._create_new_file(self.repo_dev, 'README')
-        self.repo_dev('add', 'README')
-        self.repo_dev('commit', '-m', 'initial commit')
-        phlgit_push.push(self.repo_dev, 'master', 'origin')
-
-        self.repo_arcyd("init")
-        self.repo_arcyd(
-            "remote", "add", "origin", self.repo_central.working_dir)
-        self.repo_arcyd("fetch")
-
     def tearDown(self):
-        shutil.rmtree(self.repo_central.working_dir)
-        shutil.rmtree(self.repo_dev.working_dir)
-        shutil.rmtree(self.repo_arcyd.working_dir)
+        self.repos.close()
 
     def test_A_Breathing(self):
         remote = "origin"

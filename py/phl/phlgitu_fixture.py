@@ -19,6 +19,13 @@
 #    .append_to_file_on_new_branch
 #    .checkout_master
 #    .repo
+#   CentralisedWithWorkers
+#    .close
+#    .central_repo
+#    .workers
+#   CentralisedWithTwoWorkers
+#    .w0
+#    .w1
 #
 # Public Functions:
 #   lone_worker_context
@@ -35,6 +42,7 @@ import os
 import shutil
 import tempfile
 
+import phlgit_push
 import phlsys_git
 
 
@@ -234,6 +242,75 @@ class Worker(object):
     @property
     def repo(self):
         return self._repo
+
+
+class CentralisedWithWorkers(object):
+
+    """Create temporary linked git repos - one central, the rest workers.
+
+    The worker repos are set up with the central repo as origin, the first
+    worker pushes an initial commit to the central repo during __init__.
+
+    Call 'close' when done to prevent leaks.
+
+    """
+
+    def __init__(self, contributor_count):
+        super(CentralisedWithWorkers, self).__init__()
+        if contributor_count < 1:
+            raise(
+                Exception("contributor_count must be 1 or more, got {}".format(
+                    contributor_count)))
+
+        self._central_repo = phlsys_git.Repo(tempfile.mkdtemp())
+        self._central_repo("init", "--bare")
+
+        self._workers = []
+        for i in xrange(contributor_count):
+            self._workers.append(
+                Worker(phlsys_git.Repo(tempfile.mkdtemp())))
+            self.workers[-1].repo("init")
+            self.workers[-1].repo(
+                "remote", "add", "origin", self._central_repo.working_dir)
+            self.workers[-1].repo("fetch")
+
+            if i == 0:
+                self.workers[0].commit_new_file('initial commit', 'README')
+                phlgit_push.push(self.workers[0].repo, 'master', 'origin')
+
+    def close(self):
+        shutil.rmtree(self._central_repo.working_dir)
+        for worker in self._workers:
+            shutil.rmtree(worker.repo.working_dir)
+
+    @property
+    def central_repo(self):
+        return self._central_repo
+
+    @property
+    def workers(self):
+        return self._workers
+
+
+class CentralisedWithTwoWorkers(CentralisedWithWorkers):
+
+    """Create temporary linked git repos - one central, two workers.
+
+    The worker repos are set up with the central repo as origin.
+    Call 'close' when done to prevent leaks.
+
+    """
+
+    def __init__(self):
+        super(CentralisedWithTwoWorkers, self).__init__(2)
+
+    @property
+    def w0(self):
+        return self.workers[0]
+
+    @property
+    def w1(self):
+        return self.workers[1]
 
 
 #------------------------------------------------------------------------------
