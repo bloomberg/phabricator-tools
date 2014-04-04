@@ -23,6 +23,8 @@ Wrapper around 'git checkout'.
 Dependable wrapper for invocations of git commit.
 * `phlgit_diff.py` -
 Wrapper around 'git diff'.
+* `phlgit_diffindex.py` -
+Wrapper around 'git diff-index'.
 * `phlgit_fetch.py` -
 Dependable wrapper for invocations of git fetch.
 * `phlgit_hashobject.py` -

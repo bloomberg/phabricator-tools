@@ -5,6 +5,7 @@
 # abdt_fs
 #
 # Public Classes:
+#   Error
 #   Layout
 #    .phabricator_config
 #    .repohost_config
@@ -37,6 +38,7 @@ from __future__ import absolute_import
 import os
 
 import phlgit_commit
+import phlgit_diffindex
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
@@ -102,6 +104,10 @@ This is where Arcyd looks for command files, e.g. to pause or stop.
 _VAR_RUN_README = """
 This is where Arcyd puts it's pidfile.
 """.strip()
+
+
+class Error(Exception):
+    pass
 
 
 class Layout(object):
@@ -218,10 +224,13 @@ class Accessor(object):
         :message: the string commit message for the file
 
         """
+        if phlgit_diffindex.is_index_dirty(self._repo):
+            print Error("git index has staged changes")
+
         path = self._make_abspath(rel_path)
 
         if os.path.exists(path):
-            raise Exception("config already exists")
+            raise Error("config already exists")
 
         phlsys_fs.write_text_file(path, content)
         self._repo('add', rel_path)
