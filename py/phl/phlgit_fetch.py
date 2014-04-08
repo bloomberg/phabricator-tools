@@ -58,7 +58,6 @@ def prune_safe(repo, remote):
         repo('fetch', remote)
 
 
-
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #

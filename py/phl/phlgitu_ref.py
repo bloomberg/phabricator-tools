@@ -254,7 +254,6 @@ def is_under_remote(ref, remote):
     return ref.startswith('refs/remotes/' + remote + '/')
 
 
-
 #------------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
