@@ -1,7 +1,7 @@
 """Test suite for abdt_differ."""
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -12,12 +12,12 @@
 # [ C] a diff still outside the limits can be reduced to the diffstat
 # [ A] raise if a diff cannot be reduced to the limits
 # [  ] bad unicode chars are replaced
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_ReduceSmallChangeOnLargeFile
 # [ C] test_C_ReduceAddMassiveFile
-#==============================================================================
+# =============================================================================
 
 from __future__ import absolute_import
 
@@ -132,7 +132,7 @@ class Test(unittest.TestCase):
                 original_diff_size)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -152,4 +152,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

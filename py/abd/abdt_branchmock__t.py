@@ -10,9 +10,9 @@ import abdt_branch
 import abdt_branchmock
 import abdt_branchtester
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -21,14 +21,14 @@ import abdt_branchtester
 # [XB] can test is_abandoned, is_null, is_new
 # [XC] can move between all states without error
 # [XD] can set and retrieve repo name, branch link
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_InterfaceMatchesRealBranch
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
 # [XD] check_XD_SetRetrieveRepoNameBranchLink
-#==============================================================================
+# =============================================================================
 
 
 class Test(unittest.TestCase):
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
         return data.base_branch, data.review_branch, branch
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -83,4 +83,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

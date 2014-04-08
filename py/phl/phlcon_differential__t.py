@@ -9,9 +9,9 @@ import phlsys_conduit
 
 import phlcon_differential
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -21,14 +21,14 @@ import phlcon_differential
 # [ C] the 'closed' status does allow revisions to be closed again
 # [ D] can detect 'missing testplan', 'invalid reviewer' parse errors
 # [  ] TODO
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_AcceptedPersistsWhenUpdated
 # [ C] test_C_CantUpdateClosedReviews
 # [ D] test_D_DistinguishParseErrors
 # TODO
-#==============================================================================
+# =============================================================================
 
 _COMMIT_MESSAGE_FORMAT = """
 {title}
@@ -488,7 +488,7 @@ index d4711bb..ee5b241 100644
     #     self.assertEqual(len(revision_list), 1)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -508,4 +508,4 @@ index d4711bb..ee5b241 100644
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

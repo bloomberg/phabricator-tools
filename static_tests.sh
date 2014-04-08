@@ -58,7 +58,7 @@ diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 ###############################################################################
 (cd meta/package_deps; ./check_no_dead_files.sh)
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -78,4 +78,4 @@ diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

@@ -9,7 +9,7 @@ cd "$(git rev-parse --show-toplevel)"
 package=`echo $1 | awk '{print substr($0,0,4)}'`
 testsuffix="__t.py"
 PYTHONPATH=py/phl:testbed/plugins nosetests --nocapture py/$package/$1$testsuffix:$2.$3
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,4 +29,4 @@ PYTHONPATH=py/phl:testbed/plugins nosetests --nocapture py/$package/$1$testsuffi
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

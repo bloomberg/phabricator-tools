@@ -3,7 +3,7 @@ set -e # exit immediately on error
 #PYTHONPATH=../../py sfood ../../py/*.py --internal | sfood-graph | dot -Tsvg -o deps.svg
 sfood ../../py/*.py --internal > deps
 ./process.py deps file-deps package-deps
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,4 +23,4 @@ sfood ../../py/*.py --internal > deps
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

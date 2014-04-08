@@ -43,7 +43,7 @@ FileData = collections.namedtuple(
     ['path', 'last_year'])
 
 DIVIDER = """
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 """.strip()
 
 COPYRIGHT_FORMAT = "# Copyright (C) {date_range} Bloomberg Finance L.P."
@@ -71,7 +71,7 @@ MIT_LICENSE = """
 """.strip()
 
 END_OF_FILE = """
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------
 """.strip()
 
 
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     sys.exit(main())
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -261,4 +261,4 @@ if __name__ == "__main__":
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

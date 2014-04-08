@@ -7,9 +7,9 @@ import unittest
 
 import phlsys_dictutil
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -22,13 +22,13 @@ import phlsys_dictutil
 # [ D] ensure_keys_default() adds missing keys mapping to supplied 'default'
 # [ D] ensure_keys_default() does not modify existing keys
 # [ D] ensure_keys_default() makes a deep copy of 'default'
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_CopyDictNoNones
 # [ C] test_C_EnsureKeys
 # [ D] test_D_EnsureKeysDefault
-#==============================================================================
+# =============================================================================
 
 
 class Test(unittest.TestCase):
@@ -77,7 +77,7 @@ class Test(unittest.TestCase):
         self.assertDictEqual(d1, d2)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -97,4 +97,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

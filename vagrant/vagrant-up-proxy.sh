@@ -1,7 +1,7 @@
 # note that if you have problems downloading the base box then you may
 # need to supply a proxy server, e.g. inside Bloomberg you want:
 HTTP_PROXY="https://proxy.bloomberg.com:80" vagrant up
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,4 +21,4 @@ HTTP_PROXY="https://proxy.bloomberg.com:80" vagrant up
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

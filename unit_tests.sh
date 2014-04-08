@@ -31,7 +31,7 @@ PYTHONPATH=py/phl:py/abd:testbed/plugins nosetests $libscripts --with-doctest --
 #python -m unittest discover -p "*.py"
 # N.B. can easily run individual tests with nose like so:
 # nosetests abdcmd_default:TestAbd.test_abandonedWorkflow
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -51,4 +51,4 @@ PYTHONPATH=py/phl:py/abd:testbed/plugins nosetests $libscripts --with-doctest --
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

@@ -22,9 +22,9 @@
 
 from __future__ import absolute_import
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -50,7 +50,7 @@ from __future__ import absolute_import
 # [  ] XXX: empty repository, no history
 # [  ] XXX: landing when origin has been updated underneath us
 # [  ] XXX: moving tracker branches when there's something in the way
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [XA] XXX: check_A_Breathing
 # [XB] check_XB_UntrackedBranch
@@ -59,7 +59,7 @@ from __future__ import absolute_import
 #
 # N.B. the functions begin with 'check' not 'test' so that the 'nose' test
 #      runner won't try to run them for itself and fail
-#==============================================================================
+# =============================================================================
 
 
 def check_XB_UntrackedBranch(fixture):
@@ -248,7 +248,7 @@ def assert_branch_is_active(fixture, branch, branch_name, base, rev_id):
     branch.describe()  # exercise 'describe'
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -268,4 +268,4 @@ def assert_branch_is_active(fixture, branch, branch_name, base, rev_id):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

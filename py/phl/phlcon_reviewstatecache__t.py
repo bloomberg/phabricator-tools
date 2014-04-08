@@ -1,7 +1,7 @@
 """Test suite for phlcon_reviewstatecache."""
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -18,13 +18,13 @@
 # [ D] _ReviewStateCache retrieves statuses for reviews not queried before
 # [ D] _ReviewStateCache does not callable when queried for cached query
 # [ D] _ReviewStateCache returns correct value when retrieving cached
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_AssertIfNoQueryableSupplied
 # [ C] test_C_RefreshBeforeGet
 # [ D] test_D_InvalidationRules
-#==============================================================================
+# =============================================================================
 
 from __future__ import absolute_import
 
@@ -211,7 +211,7 @@ class Test(unittest.TestCase):
             self.assertEqual(result, str(revision) + 'r')
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -231,4 +231,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

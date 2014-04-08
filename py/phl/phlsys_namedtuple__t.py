@@ -7,9 +7,9 @@ import warnings
 
 import phlsys_namedtuple
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -28,7 +28,7 @@ import phlsys_namedtuple
 #      and 'ignored', a warnings.warn is emitted if any encountered.
 # [ E] make() asserts if 'required', 'default' and 'ignored' are not disjoint
 # [ F] subsequent calls to make() don't affect previously created factories
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_RaiseMissing
@@ -36,7 +36,7 @@ import phlsys_namedtuple
 # [ D] test_D_ignoreIgnored
 # [ E] test_E_AssertDisjoint
 # [ F] test_F_IndependentFactory
-#==============================================================================
+# =============================================================================
 
 
 class Test(unittest.TestCase):
@@ -141,7 +141,7 @@ class Test(unittest.TestCase):
         self.assertFalse(hasattr(factory1(), 'd1'))
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -161,4 +161,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

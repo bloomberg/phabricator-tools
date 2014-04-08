@@ -1,7 +1,7 @@
 """Test suite for abdt_branch."""
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -30,7 +30,7 @@
 # [  ] XXX: empty repository, no history
 # [  ] XXX: landing when origin has been updated underneath us
 # [  ] XXX: moving tracker branches when there's something in the way
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_Empty
@@ -39,7 +39,7 @@
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
 # [XD] check_XD_SetRetrieveRepoNameBranchLink
-#==============================================================================
+# =============================================================================
 
 from __future__ import absolute_import
 
@@ -200,7 +200,7 @@ class Test(unittest.TestCase):
 
         return base, branch_name, branch
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -220,4 +220,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

@@ -21,9 +21,9 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -36,13 +36,13 @@
 # [XD] ReviewBranches created by the scheme can create expected TrackerBranches
 # [XD] TrackerBranches created by the scheme have the expected attributes
 # [XD] there is a 1-1 relationship between tracker params and tracker names
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [XA] XXX: check_XA_Breathing
 # [XB] check_XB_globally_invalid_review_tracker_names
 # [XC] check_XC_potentially_valid_review_tracker_names
 # [XD] check_XD_valid_reviews
-#==============================================================================
+# =============================================================================
 
 from __future__ import absolute_import
 
@@ -211,7 +211,7 @@ def check_XD_valid_reviews(fixture, naming, names_to_properties):
         len(set(tracker_names)))
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -231,4 +231,4 @@ def check_XD_valid_reviews(fixture, naming, names_to_properties):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

@@ -1,7 +1,7 @@
 # Vagrant on Windows won't happily ssh in, if you have MSysGit installed then
 # you can use this script (an ssh binary seems to come with MSysGit)
 ssh vagrant@127.0.0.1 -p 2222 -i $USERPROFILE/.vagrant.d/insecure_private_key
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,4 +21,4 @@ ssh vagrant@127.0.0.1 -p 2222 -i $USERPROFILE/.vagrant.d/insecure_private_key
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

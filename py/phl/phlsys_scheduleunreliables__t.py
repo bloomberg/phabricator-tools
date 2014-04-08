@@ -8,9 +8,9 @@ import unittest
 
 import phlsys_scheduleunreliables
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -19,14 +19,14 @@ import phlsys_scheduleunreliables
 # [ C] loopOnce moves bad operations into paused_operations
 # [ D] loopOnce moves expired bad operations into operations
 # [ E] loopOnce drops bad operations which return 'None' from getDelay()
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_AllOperations
 # [ C] test_C_MakeBadOperations
 # [ D] test_D_ExpireBadOperations
 # [ E] test_E_DropBadOperations
-#==============================================================================
+# =============================================================================
 
 
 class Test(unittest.TestCase):
@@ -154,7 +154,7 @@ class Test(unittest.TestCase):
         self.assertEqual(0, len(bad_operations.pop_expired()))
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -174,4 +174,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

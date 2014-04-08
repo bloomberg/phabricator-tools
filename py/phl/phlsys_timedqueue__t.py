@@ -8,9 +8,9 @@ import unittest
 
 import phlsys_timedqueue
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -22,14 +22,14 @@ import phlsys_timedqueue
 # [ C] items expire at or after their delay
 # [ C] items are only popped once
 # [ E] items are not referred to after they are popped
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_DefaultConstructor
 # [ C] test_C_PopOrderForward
 # [ D] test_D_PopOrderBackward
 # [ E] test_E_RefCountIncreaseDecrease
-#==============================================================================
+# =============================================================================
 
 
 class Test(unittest.TestCase):
@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
         self.assertGreater(during_count, before_count)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -108,4 +108,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

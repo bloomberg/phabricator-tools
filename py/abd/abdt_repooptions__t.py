@@ -1,18 +1,18 @@
 """Test suite for abdt_repooptions."""
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
 # Concerns:
 # [ A] can serialize and deserialize a default abdt_repooptions.Data
 # [ B] can override one data with another, only applying non-None attributes
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_Combine
-#==============================================================================
+# =============================================================================
 
 from __future__ import absolute_import
 
@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
         self.assertSetEqual(set(data1_2.admin_emails), all_emails_set)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -77,4 +77,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

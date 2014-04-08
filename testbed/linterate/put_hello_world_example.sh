@@ -20,7 +20,7 @@ arcyoncreds="--uri ${phaburi} --user ${aliceuser} --cert ${alicecert}"
 git diff -U1000 --no-index -- hello_world.cpp hello_world_bad.cpp | ${arcyon} create-revision -f - -t 'hello world cpp test' -p 'UNTESTED' ${arcyoncreds}
 
 trap - EXIT
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -40,4 +40,4 @@ trap - EXIT
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

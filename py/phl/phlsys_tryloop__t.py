@@ -8,9 +8,9 @@ import unittest
 
 import phlsys_tryloop
 
-#==============================================================================
+# =============================================================================
 #                                   TEST PLAN
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Here we detail the things we are concerned to test and specify which tests
 # cover those concerns.
 #
@@ -24,7 +24,7 @@ import phlsys_tryloop
 # [  ] tryLoopDelay waits 'delay' seconds between attempts
 # [ F] endless_retry makes many valid increasing delays
 # [ G] short_retry makes a finite amount of valid delays
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_ReturnsValue
@@ -33,7 +33,7 @@ import phlsys_tryloop
 # [ E] test_E_CallsOnException
 # [ F] test_F_ValidLongIncreasingEndlessRetry
 # [ G] test_G_ValidFiniteShortRetry
-#==============================================================================
+# =============================================================================
 
 
 class Test(unittest.TestCase):
@@ -153,7 +153,7 @@ class Test(unittest.TestCase):
         self.assertFalse(is_empty)
 
 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -173,4 +173,4 @@ class Test(unittest.TestCase):
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------

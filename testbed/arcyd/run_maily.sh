@@ -2,7 +2,7 @@ set -e # exit immediately on error
 ./maily --sender me@server.test --to you@server.test --subject hello --message body --sendmail-binary catchmail --sendmail-type catchmail
 ./maily --sender me@server.test --to you@server.test you2@server.test --subject hello --message body --sendmail-binary catchmail --sendmail-type catchmail 
 ./maily --sender me@server.test --to you@server.test you2@server.test --cc cc@server.test --subject hello --message body --sendmail-binary catchmail --sendmail-type catchmail 
-#------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,4 +22,4 @@ set -e # exit immediately on error
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 # IN THE SOFTWARE.
-#------------------------------- END-OF-FILE ----------------------------------
+# ------------------------------ END-OF-FILE ----------------------------------
