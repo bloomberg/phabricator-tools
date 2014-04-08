@@ -142,7 +142,7 @@ def group_imports(imports, module_name):
     push_current_future_group(groups, current_group, imports)
 
     # grab standard library imports
-    current_group = [i for i in imports if not '_' in i]
+    current_group = [i for i in imports if '_' not in i]
     push_current_group(groups, current_group, imports)
 
     # grab external deps
