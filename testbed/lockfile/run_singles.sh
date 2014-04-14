@@ -1,16 +1,22 @@
-trap 'kill $(jobs -p)' EXIT
-
 # remove any remnants from a previous run
 rm testfile
 rm lockfile
 
-python writer.py &
-python writer.py &
-python writer.py &
-python writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
+python single_writer.py &
 
-jobs
 wait
+cat testfile
+echo
+
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #

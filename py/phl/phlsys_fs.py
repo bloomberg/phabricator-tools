@@ -10,6 +10,7 @@
 # Public Functions:
 #   read_file_lock_context
 #   write_file_lock_context
+#   lockfile_retry_context
 #   lockfile_context
 #   chdir_context
 #   tmpfile
@@ -31,6 +32,7 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 
 
 class LockfileExistsError(Exception):
@@ -94,6 +96,31 @@ def write_file_lock_context(filename):
             file_object.flush()
             os.fsync(file_object.fileno())
             fcntl.flock(file_object, fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
+def lockfile_retry_context(filename, attempts, wait_secs):
+    """Create 'filename' exclusively during context if poss. Fail otherwise.
+
+    This differs from 'lockfile_context' in that it will retry the
+    lockfile 'attempts' times before finally failing.  Sleep for
+    'wait_secs' seconds between attempts.
+
+    """
+    attempt_count = 0
+    done = False
+    while done is False and attempt_count < attempts:
+        try:
+            with lockfile_context(filename):
+                # if yield raises LockfileExistsError, then we'll still exit
+                # the context, as expected
+                done = True
+                yield
+        except LockfileExistsError:
+            attempt_count += 1
+            time.sleep(wait_secs)
+    if not done:
+        raise LockfileExistsError()
 
 
 @contextlib.contextmanager
