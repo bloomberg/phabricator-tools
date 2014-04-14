@@ -167,8 +167,9 @@ def process(args):
     # determine the repo url from the parsed params
     repo_url = abdi_repoargs.get_repo_url(repo_params)
 
-    with abdi_repo.setup_repo_context(repo_url, repo_path):
-        fs.create_repo_config(repo_name, config)
+    with fs.lockfile_context():
+        with abdi_repo.setup_repo_context(repo_url, repo_path):
+            fs.create_repo_config(repo_name, config)
 
 
 # -----------------------------------------------------------------------------

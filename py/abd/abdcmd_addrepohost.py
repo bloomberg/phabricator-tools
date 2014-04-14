@@ -130,7 +130,8 @@ def process(args):
     config = config.strip()
 
     # write out the config
-    fs.create_repohost_config(args.name, config)
+    with fs.lockfile_context():
+        fs.create_repohost_config(args.name, config)
 
 
 # -----------------------------------------------------------------------------

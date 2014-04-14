@@ -136,7 +136,8 @@ def process(args):
             _CONFIG_ADMIN_EMAILS_FORMAT.format(
                 admin_emails='\n'.join(args.admin_emails))])
 
-    fs.create_phabricator_config(args.name, content)
+    with fs.lockfile_context():
+        fs.create_phabricator_config(args.name, content)
 
 
 # -----------------------------------------------------------------------------
