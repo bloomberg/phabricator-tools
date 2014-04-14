@@ -4,9 +4,13 @@
 # -----------------------------------------------------------------------------
 # phlsys_fs
 #
+# Public Classes:
+#   LockfileExistsError
+#
 # Public Functions:
 #   read_file_lock_context
 #   write_file_lock_context
+#   lockfile_context
 #   chdir_context
 #   tmpfile
 #   tmpdir_context
@@ -27,6 +31,10 @@ import os
 import shutil
 import sys
 import tempfile
+
+
+class LockfileExistsError(Exception):
+    pass
 
 
 @contextlib.contextmanager
@@ -86,6 +94,50 @@ def write_file_lock_context(filename):
             file_object.flush()
             os.fsync(file_object.fileno())
             fcntl.flock(file_object, fcntl.LOCK_UN)
+
+
+@contextlib.contextmanager
+def lockfile_context(filename):
+    """Create 'filename' exclusively during context if poss. Fail otherwise.
+
+    A lockfile is a file used as a mutex on the file system, to guarantee
+    exclusive access to another resource.
+
+    Manage lockfiles easily with this contextmanager.  It will exclusively
+    create the lockfile on entering the context and destroy it when the context
+    is left.  If the lockfile cannot be exclusively created then raise
+    LockfileExistsError.
+
+    Creating files may be done atomically on a POSIX file system if the correct
+    flags are used (O_CREAT | O_EXCL).
+    http://pubs.opengroup.org/onlinepubs/9699919799/functions/open.html
+
+    Note that if an unexpected exception is raised while the context is being
+    entered then it's possible the lock will be acquired and 'leaked'. e.g. if
+    the program is terminated whilst entering the context.
+
+    """
+    try:
+        handle = os.open(filename, os.O_CREAT | os.O_EXCL)
+    except OSError as e:
+        if e.errno == 17:
+            raise LockfileExistsError()
+        else:
+            raise
+
+    # XXX: note that if we are interrupted here (e.g. by program termination)
+    #      then the file will still exist and the lock will be erroneously
+    #      still acquired after program exit.
+    #
+    #      there doesn't seem to be a good way to completely exclude this
+    #      possibility - there's always the space between os.open() and
+    #      assignment to 'handle'.
+
+    try:
+        yield
+    finally:
+        os.close(handle)
+        os.remove(filename)
 
 
 @contextlib.contextmanager
