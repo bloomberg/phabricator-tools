@@ -49,33 +49,34 @@ def process(args):
 
     fs = abdt_fs.make_default_accessor()
 
-    pid = fs.get_pid_or_none()
-    if pid is not None and phlsys_pid.is_running(pid):
-        raise Exception("already running")
+    with fs.lockfile_context():
+        pid = fs.get_pid_or_none()
+        if pid is not None and phlsys_pid.is_running(pid):
+            raise Exception("already running")
 
-    if not args.foreground:
-        phlsys_daemonize.do(
-            stdout_path=fs.layout.stdout,
-            stderr_path=fs.layout.stderr)
+        if not args.foreground:
+            phlsys_daemonize.do(
+                stdout_path=fs.layout.stdout,
+                stderr_path=fs.layout.stderr)
 
-    # important that we do this *after* daemonizing
-    pid = phlsys_pid.get()
-    fs.set_pid(pid)
+        # important that we do this *after* daemonizing
+        pid = phlsys_pid.get()
+        fs.set_pid(pid)
 
-    parser = argparse.ArgumentParser()
-    params = []
+        parser = argparse.ArgumentParser()
+        params = []
 
-    for line in open(fs.layout.root_config):
-        params.append(line.strip())
+        for line in open(fs.layout.root_config):
+            params.append(line.strip())
 
-    if args.no_loop:
-        params.append('--no-loop')
+        if args.no_loop:
+            params.append('--no-loop')
 
-    repo_configs = abdi_repoargs.parse_config_file_list(
-        fs.repo_config_path_list())
+        repo_configs = abdi_repoargs.parse_config_file_list(
+            fs.repo_config_path_list())
 
-    abdi_processrepos.setupParser(parser)
-    args = parser.parse_args(params)
+        abdi_processrepos.setupParser(parser)
+        args = parser.parse_args(params)
 
     abdi_processrepos.process(args, repo_configs)
 

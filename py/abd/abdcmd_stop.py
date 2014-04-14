@@ -38,28 +38,29 @@ def setupParser(parser):
 def process(args):
     fs = abdt_fs.make_default_accessor()
 
-    pid = fs.get_pid_or_none()
-    if pid is None or not phlsys_pid.is_running(pid):
-        raise Exception("Arcyd is not running")
+    with fs.lockfile_context():
+        pid = fs.get_pid_or_none()
+        if pid is None or not phlsys_pid.is_running(pid):
+            raise Exception("Arcyd is not running")
 
-    if args.force:
-        phlsys_pid.request_terminate(pid)
-    else:
-        killfile = 'var/command/killfile'
-        phlsys_fs.write_text_file(killfile, '')
+        if args.force:
+            phlsys_pid.request_terminate(pid)
+        else:
+            killfile = 'var/command/killfile'
+            phlsys_fs.write_text_file(killfile, '')
 
-        if os.path.isfile(killfile):
-            time.sleep(1)
-            while os.path.isfile(killfile):
-                print 'waiting for arcyd to remove killfile ..'
+            if os.path.isfile(killfile):
                 time.sleep(1)
+                while os.path.isfile(killfile):
+                    print 'waiting for arcyd to remove killfile ..'
+                    time.sleep(1)
 
-    # wait for Arcyd to not be running
-    if phlsys_pid.is_running(pid):
-        time.sleep(1)
-        while phlsys_pid.is_running(pid):
-            print 'waiting for arcyd to exit'
+        # wait for Arcyd to not be running
+        if phlsys_pid.is_running(pid):
             time.sleep(1)
+            while phlsys_pid.is_running(pid):
+                print 'waiting for arcyd to exit'
+                time.sleep(1)
 
 
 # -----------------------------------------------------------------------------
