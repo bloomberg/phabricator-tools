@@ -34,6 +34,7 @@ $arcyd add-repohost -h
 $arcyd add-repo -h
 $arcyd start -h
 $arcyd stop -h
+$arcyd list-repos -h
 
 function setup_repos() {
     mkdir origin
