@@ -49,6 +49,7 @@ import abdcmd_init
 import abdcmd_instaweb
 import abdcmd_listrepos
 import abdcmd_repostatushtml
+import abdcmd_rmrepo
 import abdcmd_start
 import abdcmd_stop
 
@@ -119,6 +120,8 @@ def main():
         "add-repohost", abdcmd_addrepohost, subparsers)
     phlsys_subcommand.setup_parser(
         "add-repo", abdcmd_addrepo, subparsers)
+    phlsys_subcommand.setup_parser(
+        "rm-repo", abdcmd_rmrepo, subparsers)
     phlsys_subcommand.setup_parser(
         "start", abdcmd_start, subparsers)
     phlsys_subcommand.setup_parser(
