@@ -22,6 +22,7 @@
 #    .create_repohost_config
 #    .get_repohost_config_rel_path
 #    .create_repo_config
+#    .repo_name_list
 #    .repo_config_path_list
 #    .layout
 #
@@ -315,6 +316,15 @@ class Accessor(object):
         rel_path = self._layout.repo_config(name)
         self._create_config(
             rel_path, content, 'Add repo config: {}'.format(name))
+
+    def repo_name_list(self):
+        """Return a list of string names of managed repositories.
+
+        :returns: list of string
+
+        """
+        p = self.layout.repository_config_dir
+        return [r for r in os.listdir(p) if r != 'README']
 
     def repo_config_path_list(self):
         """Return a list of string paths to repo configs.
