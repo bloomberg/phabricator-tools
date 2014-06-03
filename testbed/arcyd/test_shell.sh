@@ -108,6 +108,38 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 
 cd ..
 
+# add a second arcyd instance
+mkdir arcyd2
+cd arcyd2
+    $arcyd init \
+        --sleep-secs 1 \
+        --arcyd-email 'arcyd@localhost' \
+        --sendmail-binary ${mail} \
+        --sendmail-type catchmail
+
+    $arcyd add-phabricator \
+        --name localhost \
+        --instance-uri http://127.0.0.1/api/ \
+        --review-url-format 'http://127.0.0.1/D{review}' \
+        --admin-emails 'local-phab-admin@localhost' \
+        --arcyd-user phab \
+        --arcyd-cert \
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzqu\
+zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
+s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
+vot7fxrotwpi3ty2b2sa2kvlpf
+
+    $arcyd add-repohost \
+        --name fs \
+        --repo-url-format '../{}' \
+        --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
+        --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
+
+    $arcyd add-repo localhost fs origin
+    $arcyd add-repo localhost fs origin2
+
+cd ..
+
 # run an http server for Git in the background, for snooping
 cd origin
     python -m SimpleHTTPServer 8000 < /dev/null > webserver.log 2>&1 &
