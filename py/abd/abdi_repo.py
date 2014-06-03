@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   setup_repo
+#   fetch_special_refs
 #   setup_repo_context
 #
 # -----------------------------------------------------------------------------
@@ -36,6 +37,18 @@ def setup_repo(repo_url, repo_path):
         pass
 
 
+def fetch_special_refs(repo):
+    # fetch the 'landed' and 'abandoned' refs, if they exist
+    ref_list = set(repo('ls-remote').split()[1::2])
+    special_refs = [
+        (abdt_git.ARCYD_ABANDONED_REF, abdt_git.ARCYD_ABANDONED_BRANCH_FQ),
+        (abdt_git.ARCYD_LANDED_REF, abdt_git.ARCYD_LANDED_BRANCH_FQ),
+    ]
+    for ref in special_refs:
+        if ref[0] in ref_list:
+            repo('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
+
+
 @contextlib.contextmanager
 def setup_repo_context(repo_url, repo_path):
     """Setup a repository, if an exception is raised then remove the repo.
@@ -64,14 +77,7 @@ def setup_repo_context(repo_url, repo_path):
             'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
 
         # fetch the 'landed' and 'abandoned' refs if they exist
-        ref_list = set(repo('ls-remote').split()[1::2])
-        special_refs = [
-            (abdt_git.ARCYD_ABANDONED_REF, abdt_git.ARCYD_ABANDONED_BRANCH_FQ),
-            (abdt_git.ARCYD_LANDED_REF, abdt_git.ARCYD_LANDED_BRANCH_FQ),
-        ]
-        for ref in special_refs:
-            if ref[0] in ref_list:
-                repo('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
+        fetch_special_refs(repo)
 
         # success, allow the caller to do work
         yield
