@@ -26,9 +26,8 @@ afgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w\
 arcyoncreds="--uri ${phaburi} --user ${arcyduser} --cert ${arcydcert}"
 
 # here $1 is 'base' and $2 is 'description
-classic_arcyd_branch_awk_string='{ printf "arcyd-review/%s/%s", $2, $1 }'
 r_arcyd_branch_awk_string='{ printf "r/%s/%s", $1, $2 }'
-arcyd_branch_awk_string="${classic_arcyd_branch_awk_string}"
+arcyd_branch_awk_string="${r_arcyd_branch_awk_string}"
 
 function set_branch_name() {
     base=$1
@@ -605,26 +604,6 @@ configure_arcyd
 configure_arcyd2
 run_arcyd
 run_arcyd2
-
-# run through the tests
-test_happy_path
-test_large_add
-test_large_file_small_change
-test_unknown_reviewer
-test_unknown_user
-test_bad_base
-test_self_review
-test_merge_conflict
-test_push_error
-test_empty_branch
-test_branch_gc
-
-# delete all local working branches for clean slate, reset master to initial commit
-(cd dev; git checkout master; git branch | grep -v '\*' | xargs git branch -D)
-(cd dev; git checkout master; git rev-list HEAD | tail -n 1 | xargs git reset --hard; git push -f origin master)
-
-# use the r-branch naming scheme
-arcyd_branch_awk_string="${r_arcyd_branch_awk_string}"
 
 # run through the tests
 test_happy_path
