@@ -26,7 +26,7 @@
 #
 # Public Functions:
 #   get_managed_branches
-#   fetch_special_refs
+#   checkout_master_fetch_special_refs
 #
 # Public Assignments:
 #   ARCYD_LANDED_REF
@@ -400,8 +400,14 @@ def get_managed_branches(repo, repo_desc, naming, branch_link_callable=None):
     return managed_branches
 
 
-def fetch_special_refs(repo):
+def checkout_master_fetch_special_refs(repo, remote):
     # fetch the 'landed' and 'abandoned' refs, if they exist
+
+    # We must checkout master before fetching the special refs to the
+    # local branches. Otherwise we might be attempting to overwrite the
+    # current branch with fetch, which would fail.
+    phlgit_checkout.branch(repo, 'master')
+
     ref_list = set(repo('ls-remote').split()[1::2])
     special_refs = [
         (ARCYD_ABANDONED_REF, ARCYD_ABANDONED_BRANCH_FQ),
@@ -409,7 +415,7 @@ def fetch_special_refs(repo):
     ]
     for ref in special_refs:
         if ref[0] in ref_list:
-            repo('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
+            repo('fetch', remote, '{}:{}'.format(ref[0], ref[1]))
 
 
 # -----------------------------------------------------------------------------

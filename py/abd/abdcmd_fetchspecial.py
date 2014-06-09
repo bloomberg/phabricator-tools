@@ -59,7 +59,7 @@ def process(args):
         print repo_name
         repo_path = fs.layout.repo(repo_name)
         repo = phlsys_git.Repo(repo_path)
-        abdt_git.fetch_special_refs(repo)
+        abdt_git.checkout_master_fetch_special_refs(repo, 'origin')
 
 
 # -----------------------------------------------------------------------------

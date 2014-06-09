@@ -63,7 +63,7 @@ def setup_repo_context(repo_url, repo_path):
             'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
 
         # fetch the 'landed' and 'abandoned' refs if they exist
-        abdt_git.fetch_special_refs(repo)
+        abdt_git.checkout_master_fetch_special_refs(repo, 'origin')
 
         # success, allow the caller to do work
         yield
