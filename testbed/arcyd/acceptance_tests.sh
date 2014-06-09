@@ -111,18 +111,26 @@ function run_arcyd() {
     cd ..
 }
 
+
+function create_review_branch() {
+    local branch_name=$1
+    local file_name=$2
+    cd dev
+        git checkout -b ${branch_name} origin/master
+        echo hello > ${file_name}
+        git add ${file_name}
+        git commit -m "acceptance_tests: ${file_name}"
+        git push origin ${branch_name}
+    cd -
+}
+
 function test_happy_path() {
     test_name='test_happy_path'
     set_branch_name "master" "${test_name}"
 
     # create a review branch
-    cd dev
-        git checkout -b ${branch_name} origin/master
-        echo hello > ${test_name}
-        git add ${test_name}
-        git commit -m "exercise_arcyd: ${test_name}"
-        git push origin ${branch_name}
-    cd -
+    create_review_branch "${branch_name}" "${test_name}"
+
     run_arcyd
 
     # update the review branch
@@ -392,13 +400,8 @@ function test_bad_base() {
     set_branch_name "nonesuch" "${test_name}"
 
     # create a review branch
-    cd dev
-        git checkout -b ${branch_name} origin/master
-        echo hello > ${test_name}
-        git add ${test_name}
-        git commit -m "exercise_arcyd: ${test_name}"
-        git push origin ${branch_name}
-    cd -
+    create_review_branch "${branch_name}" "${test_name}"
+
     run_arcyd
 
     # find and accept the review
@@ -449,13 +452,8 @@ function test_merge_conflict() {
     set_branch_name "master" "${test_name}"
 
     # create a review branch
-    cd dev
-        git checkout -b ${branch_name} origin/master
-        echo hello > ${test_name}
-        git add ${test_name}
-        git commit -m "exercise_arcyd: ${test_name}"
-        git push origin ${branch_name}
-    cd -
+    create_review_branch "${branch_name}" "${test_name}"
+
     run_arcyd
 
     # create a conflicting change on master
@@ -500,13 +498,8 @@ function test_push_error() {
     set_branch_name "master" "${test_name}"
 
     # create a review branch
-    cd dev
-        git checkout -b ${branch_name} origin/master
-        echo hello > ${test_name}
-        git add ${test_name}
-        git commit -m "exercise_arcyd: ${test_name}"
-        git push origin ${branch_name}
-    cd -
+    create_review_branch "${branch_name}" "${test_name}"
+
     run_arcyd
 
     # prevent writes to origin
