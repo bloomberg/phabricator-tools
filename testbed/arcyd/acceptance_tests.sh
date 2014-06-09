@@ -671,6 +671,79 @@ function test_in_progress_cutover_path() {
     cd -
 }
 
+function test_prune_landed_path() {
+    test_name='test_prune_landed_path'
+    set_branch_name "master" "${test_name}"
+
+    # create a review branch
+    create_review_branch "${branch_name}" "${test_name}"
+
+    # let arcyd create a new review from the branch
+    run_arcyd
+
+    # find and accept the review
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+
+    # let arcyd land the review
+    run_arcyd
+
+    # make sure the revision is closed and landed
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Closed'
+    cd dev
+        deleted_prefix='deleted.*'
+        git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
+    cd -
+
+    # dev check that landed history includes the review
+    cd dev
+        git fetch origin refs/arcyd/landed:refs/arcyd/landed
+        git --no-pager log --oneline --decorate --first-parent refs/arcyd/landed | grep "\\b${branch_name}\\b"
+    cd -
+
+    # wipe the last review from landed history
+    cd dev
+        git push origin refs/arcyd/landed~:refs/arcyd/landed -f
+        git fetch origin '+refs/arcyd/landed:refs/arcyd/landed'
+    cd -
+
+    # create another review branch
+    create_review_branch "${branch_name}2" "${test_name}2"
+
+    # let arcyd create a new review from the branch
+    run_arcyd
+
+    # find and accept the review
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+
+    # let arcyd land the review
+    run_arcyd
+
+    # make sure the revision is closed and landed
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Closed'
+    cd dev
+        deleted_prefix='deleted.*'
+        git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}2\\b"
+    cd -
+
+    # dev check that landed history includes new review but not original
+    cd dev
+        git fetch origin refs/arcyd/landed:refs/arcyd/landed
+        git --no-pager log --oneline --decorate --first-parent refs/arcyd/landed
+
+        git --no-pager log --oneline --decorate --first-parent refs/arcyd/landed | grep "\\b${branch_name}2\\b"
+
+        set +e
+        git --no-pager log --oneline --decorate --first-parent refs/arcyd/landed | grep "\\b${branch_name}\\b"
+        if [ "$?" -ne 1 ]; then
+            set -e
+            false
+        fi
+        set -e
+    cd -
+}
+
 ###############################################################################
 # run the actual tests
 ###############################################################################
@@ -702,6 +775,7 @@ test_empty_branch
 test_branch_gc
 test_clean_cutover_path
 test_in_progress_cutover_path
+test_prune_landed_path
 
 # display the sent mails
 pwd
