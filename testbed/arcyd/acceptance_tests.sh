@@ -645,6 +645,42 @@ function test_clean_cutover_path() {
     cd -
 }
 
+function test_in_progress_cutover_path() {
+    test_name='test_in_progress_cutover_path'
+    set_branch_name "master" "${test_name}"
+
+    # create a review branch
+    create_review_branch "${branch_name}" "${test_name}"
+
+    # let arcyd create a new review from the branch
+    run_arcyd
+
+    # find and accept the review
+    revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
+    ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
+
+    # cut over to second arcyd
+    cd arcyd2
+        arcyd fetch-special --all
+    cd -
+
+    # let second arcyd land the review
+    run_arcyd2
+
+    # make sure the revision is closed and landed
+    ${arcyon} query --ids ${revisionid} ${arcyoncreds} | grep 'Closed'
+    cd dev
+        deleted_prefix='deleted.*'
+        git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
+    cd -
+
+    # dev check that landed history includes the review
+    cd dev
+        git fetch origin refs/arcyd/landed:refs/arcyd/landed
+        git --no-pager log --oneline --decorate --first-parent refs/arcyd/landed | grep "\\b${branch_name}\\b"
+    cd -
+}
+
 ###############################################################################
 # run the actual tests
 ###############################################################################
@@ -675,6 +711,7 @@ test_push_error
 test_empty_branch
 test_branch_gc
 test_clean_cutover_path
+test_in_progress_cutover_path
 
 # display the sent mails
 pwd
