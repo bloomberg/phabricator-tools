@@ -415,7 +415,9 @@ def checkout_master_fetch_special_refs(repo, remote):
     ]
     for ref in special_refs:
         if ref[0] in ref_list:
-            repo('fetch', remote, '{}:{}'.format(ref[0], ref[1]))
+            # Allow non-ff fetches so that we enable users to prune the special
+            # refs if they're getting too large.
+            repo('fetch', remote, '+{}:{}'.format(ref[0], ref[1]))
 
 
 # -----------------------------------------------------------------------------
