@@ -17,13 +17,12 @@ another, as arcyd will clobber the special refs each time it pushes.
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-
 from __future__ import absolute_import
 
 import phlsys_git
 
-import abdi_repo
 import abdt_fs
+import abdt_git
 
 
 def getFromfilePrefixChars():
@@ -60,7 +59,7 @@ def process(args):
         print repo_name
         repo_path = fs.layout.repo(repo_name)
         repo = phlsys_git.Repo(repo_path)
-        abdi_repo.fetch_special_refs(repo)
+        abdt_git.fetch_special_refs(repo)
 
 
 # -----------------------------------------------------------------------------

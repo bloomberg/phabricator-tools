@@ -26,6 +26,7 @@
 #
 # Public Functions:
 #   get_managed_branches
+#   fetch_special_refs
 #
 # Public Assignments:
 #   ARCYD_LANDED_REF
@@ -54,6 +55,7 @@ import abdt_branch
 import abdt_lander
 import abdt_logging
 import abdt_naming
+
 
 _LANDED_ARCHIVE_BRANCH_MESSAGE = """
 Create an archive branch for landed branches
@@ -396,6 +398,18 @@ def get_managed_branches(repo, repo_desc, naming, branch_link_callable=None):
                 branch_url))
 
     return managed_branches
+
+
+def fetch_special_refs(repo):
+    # fetch the 'landed' and 'abandoned' refs, if they exist
+    ref_list = set(repo('ls-remote').split()[1::2])
+    special_refs = [
+        (ARCYD_ABANDONED_REF, ARCYD_ABANDONED_BRANCH_FQ),
+        (ARCYD_LANDED_REF, ARCYD_LANDED_BRANCH_FQ),
+    ]
+    for ref in special_refs:
+        if ref[0] in ref_list:
+            repo('fetch', 'origin', '{}:{}'.format(ref[0], ref[1]))
 
 
 # -----------------------------------------------------------------------------
