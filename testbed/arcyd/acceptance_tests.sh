@@ -58,10 +58,7 @@ function setup_repos() {
     cd ..
 }
 
-function configure_arcyd() {
-    mkdir arcyd
-    cd arcyd
-
+function configure_current_dir_as_arcyd() {
     $arcyd init \
         --sleep-secs 0 \
         --arcyd-email 'arcyd@localhost' \
@@ -86,13 +83,23 @@ vot7fxrotwpi3ty2b2sa2kvlpf
         --admin-email 'local-repo-admin@localhost'
 
     $arcyd add-repo localhost fs origin
+}
 
+function configure_arcyd() {
+    mkdir arcyd
+    cd arcyd
+    configure_current_dir_as_arcyd
     cd ..
 }
 
-function run_arcyd() {
-    cd arcyd
+function configure_arcyd2() {
+    mkdir arcyd2
+    cd arcyd2
+    configure_current_dir_as_arcyd
+    cd ..
+}
 
+function run_current_dir_as_arcyd() {
     ${arcyd} start --no-loop --foreground
     echo $?
 
@@ -107,10 +114,19 @@ function run_arcyd() {
         var/status/localhost_fs_origin.try \
         var/status/localhost_fs_origin.ok
     echo $?
+}
 
+function run_arcyd() {
+    cd arcyd
+    run_current_dir_as_arcyd
     cd ..
 }
 
+function run_arcyd2() {
+    cd arcyd2
+    run_current_dir_as_arcyd
+    cd ..
+}
 
 function create_review_branch() {
     local branch_name=$1
@@ -582,10 +598,13 @@ tempdir=$(mktemp -d)
 cd ${tempdir}
 touch savemail.txt
 
-# set up an install of arcyd
+# set up two instances of arcyd to manage the same repos, this allows
+# us to test cutting over from one instance to another
 setup_repos
 configure_arcyd
+configure_arcyd2
 run_arcyd
+run_arcyd2
 
 # run through the tests
 test_happy_path
@@ -626,6 +645,7 @@ cat savemail.txt
 
 # display the io activity
 cat arcyd/var/log/git-phab-writes.log
+#cat arcyd2/var/log/git-phab-writes.log  # no activity to display yet
 
 # clean up
 cd ${olddir}
