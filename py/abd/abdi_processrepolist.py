@@ -32,7 +32,7 @@ import abdi_repoargs
 
 
 def do(
-        repo_configs,
+        repo_config_paths,
         sys_admin_emails,
         kill_file,
         reset_file,
@@ -41,7 +41,7 @@ def do(
         is_no_loop,
         reporter):
 
-    repos = _repos_from_configs(repo_configs)
+    repo_configs = _load_repo_configs(repo_config_paths)
 
     # TODO: test write access to repos here
 
@@ -69,7 +69,7 @@ def do(
         url_watcher,
         urlwatcher_cache_path,
         sys_admin_emails,
-        repos)
+        repo_configs)
 
     _append_interrupt_operations(
         operations,
@@ -109,10 +109,10 @@ def _process_operations(is_no_loop, operations, sys_admin_emails, reporter):
             _try_handle_reset_file(loopForever, on_exception_delay)
 
 
-def _repos_from_configs(repo_configs):
-    repos = []
+def _load_repo_configs(repo_config_paths):
+    configs = []
 
-    for repo in repo_configs:
+    for repo in repo_config_paths:
         parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
         abdi_repoargs.setup_parser(parser)
         repo_name = repo[0]  # oddly this comes to us as a list
@@ -120,9 +120,9 @@ def _repos_from_configs(repo_configs):
         repo_name = repo_name.split('/')[-1]  # strip off the path prefix
         repo_args = (repo_name, parser.parse_args(repo))
         abdi_repoargs.validate_args(repo_args[1])
-        repos.append(repo_args)
+        configs.append(repo_args)
 
-    return repos
+    return configs
 
 
 def _append_interrupt_operations(
@@ -158,12 +158,12 @@ def _append_operations_for_repos(
         url_watcher,
         urlwatcher_cache_path,
         sys_admin_emails,
-        repos):
+        repo_configs):
 
     strToTime = phlsys_strtotime.duration_string_to_time_delta
     retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
 
-    for repo_name, repo_args in repos:
+    for repo_name, repo_args in repo_configs:
 
         # create a function to update this particular repo.
         #
