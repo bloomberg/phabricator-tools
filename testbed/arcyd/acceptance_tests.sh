@@ -182,6 +182,11 @@ function test_happy_path() {
         deleted_prefix='deleted.*'
         git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
     cd -
+
+    # make sure that 'arcyd fetch' can run without errors on the second arcyd
+    cd arcyd2
+        arcyd fetch
+    cd -
 }
 
 function test_large_add() {
@@ -741,6 +746,11 @@ function test_prune_landed_path() {
             false
         fi
         set -e
+    cd -
+
+    # make sure that 'arcyd fetch' can run without errors on the second arcyd
+    cd arcyd2
+        arcyd fetch
     cd -
 }
 
