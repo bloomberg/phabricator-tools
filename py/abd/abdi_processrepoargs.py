@@ -177,7 +177,9 @@ def _fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
     # fetch only if we need to
     if not snoop_url or url_watcher.peek_has_url_recently_changed(snoop_url):
             abdt_tryloop.tryloop(
-                repo.fetch_prune, abdt_errident.FETCH_PRUNE, repo_desc)
+                repo.checkout_master_fetch_prune,
+                abdt_errident.FETCH_PRUNE,
+                repo_desc)
             did_fetch = True
 
     if did_fetch and snoop_url:

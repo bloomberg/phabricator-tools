@@ -612,11 +612,6 @@ function test_clean_cutover_path() {
         git fetch -p 2>&1 | grep "${deleted_prefix}${branch_name}"
     cd -
 
-    # cut over to second arcyd
-    cd arcyd2
-        arcyd fetch-special --all
-    cd -
-
     # create a review branch
     create_review_branch "${branch_name}2" "${test_name}2"
 
@@ -658,11 +653,6 @@ function test_in_progress_cutover_path() {
     # find and accept the review
     revisionid=$(${arcyon} query --max-results 1 --format-type ids ${arcyoncreds})
     ${arcyon} comment ${revisionid} --action accept --act-as-user alice ${arcyoncreds}
-
-    # cut over to second arcyd
-    cd arcyd2
-        arcyd fetch-special --all
-    cd -
 
     # let second arcyd land the review
     run_arcyd2
