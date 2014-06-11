@@ -15,7 +15,6 @@
 
 from __future__ import absolute_import
 
-import random
 import unittest
 
 import phlsys_fs
@@ -33,8 +32,15 @@ class Test(unittest.TestCase):
 
     def test_A_Breathing(self):
 
+        # N.B. We have to assign to an array as we're in a nested func
+        #      and otherwise we won't be referring to the same data.
+        #      In Python 3 we can do better with 'nonlocal'
+        request_count = [0]
+
         def request_func(url):
-            return str(random.randint(0, 8 * 8 * 8 * 8)) + url
+            # make sure the result is different each time
+            request_count[0] += 1
+            return str(request_count[0]) + url
 
         watcher = phlurl_watcher.Watcher(request_func)
 
