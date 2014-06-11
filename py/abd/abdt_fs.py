@@ -120,6 +120,7 @@ class Layout(object):
     stderr = 'var/log/stderr'
     phabricator_config_dir = 'config/repository'
     repository_config_dir = 'config/repository'
+    urlwatcher_cache_path = '.arcyd.urlwatcher.cache'
 
     dir_run = 'var/run'
 
