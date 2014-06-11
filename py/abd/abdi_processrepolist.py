@@ -32,7 +32,7 @@ import abdi_repoargs
 
 
 def do(
-        repo_config_paths,
+        repo_config_path_list,
         sys_admin_emails,
         kill_file,
         reset_file,
@@ -41,7 +41,7 @@ def do(
         is_no_loop,
         reporter):
 
-    repo_configs = _load_repo_configs(repo_config_paths)
+    repo_configs = _load_repo_configs(repo_config_path_list)
 
     # TODO: test write access to repos here
 
@@ -109,16 +109,15 @@ def _process_operations(is_no_loop, operations, sys_admin_emails, reporter):
             _try_handle_reset_file(loopForever, on_exception_delay)
 
 
-def _load_repo_configs(repo_config_paths):
+def _load_repo_configs(repo_config_path_list):
     configs = []
 
-    for repo in repo_config_paths:
+    for repo_config_path in repo_config_path_list:
         parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
         abdi_repoargs.setup_parser(parser)
-        repo_name = repo[0]  # oddly this comes to us as a list
-        repo_name = repo_name[1:]  # strip off the '@' prefix
-        repo_name = repo_name.split('/')[-1]  # strip off the path prefix
-        repo_args = (repo_name, parser.parse_args(repo))
+        repo_config = parser.parse_args(['@' + repo_config_path])
+        repo_name = repo_config_path.split('/')[-1]  # strip the path prefix
+        repo_args = (repo_name, repo_config)
         abdi_repoargs.validate_args(repo_args[1])
         configs.append(repo_args)
 

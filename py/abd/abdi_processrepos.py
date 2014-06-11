@@ -55,13 +55,6 @@ def setupParser(parser):
         help="type of program to send the mail with (sendmail, catchmail), "
         "this will affect the parameters that Arycd will use.")
     parser.add_argument(
-        '--repo-configs',
-        metavar="N",
-        action='append',
-        nargs='+',
-        type=str,
-        help="files to load configuration from, prefix with @")
-    parser.add_argument(
         '--status-path',
         metavar="PATH",
         type=str,
@@ -110,7 +103,7 @@ def setupParser(parser):
              "like so: $LOGGER '<<identifier>>' '<<full details>>'")
 
 
-def process(args):
+def process(args, repo_config_path_list):
 
     if args.sendmail_binary:
         phlsys_sendmail.Sendmail.set_default_binary(
@@ -137,13 +130,13 @@ def process(args):
 
     arcyd_reporter_context = abdt_logging.arcyd_reporter_context
     with contextlib.closing(reporter), arcyd_reporter_context(reporter):
-        _processrepolist(args, reporter, on_exception)
+        _processrepolist(args, repo_config_path_list, reporter, on_exception)
 
 
-def _processrepolist(args, reporter, on_exception):
+def _processrepolist(args, repo_config_path_list, reporter, on_exception):
     try:
         abdi_processrepolist.do(
-            args.repo_configs,
+            repo_config_path_list,
             args.sys_admin_emails,
             args.kill_file,
             args.reset_file,

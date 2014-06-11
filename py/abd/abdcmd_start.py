@@ -70,13 +70,9 @@ def process(args):
     if args.no_loop:
         params.append('--no-loop')
 
-    for repo in fs.repo_config_path_list():
-        params.append('--repo-configs')
-        params.append('@' + repo)
-
     abdi_processrepos.setupParser(parser)
     args = parser.parse_args(params)
-    abdi_processrepos.process(args)
+    abdi_processrepos.process(args, fs.repo_config_path_list())
 
 
 # -----------------------------------------------------------------------------
