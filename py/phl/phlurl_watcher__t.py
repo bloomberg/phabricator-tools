@@ -22,6 +22,23 @@ import phlsys_fs
 import phlurl_watcher
 
 
+class _MockRequesterObject(object):
+
+    def __init__(self):
+        self._request_count = 0
+
+    def get(self, url):
+        # make sure the result is different each time
+        self._request_count += 1
+        return str(self._request_count) + url
+
+    def get_many(self, url_list):
+        result = {}
+        for url in url_list:
+            result[url] = self.get(url)
+        return result
+
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -32,17 +49,8 @@ class Test(unittest.TestCase):
 
     def test_A_Breathing(self):
 
-        # N.B. We have to assign to an array as we're in a nested func
-        #      and otherwise we won't be referring to the same data.
-        #      In Python 3 we can do better with 'nonlocal'
-        request_count = [0]
-
-        def request_func(url):
-            # make sure the result is different each time
-            request_count[0] += 1
-            return str(request_count[0]) + url
-
-        watcher = phlurl_watcher.Watcher(request_func)
+        requester = _MockRequesterObject()
+        watcher = phlurl_watcher.Watcher(requester)
 
         with phlsys_fs.chtmpdir_context():
 
@@ -64,6 +72,15 @@ class Test(unittest.TestCase):
             with open('data') as f:
                 watcher.load(f)
 
+            self.assertFalse(watcher.has_url_recently_changed(url))
+            self.assertFalse(watcher.peek_has_url_recently_changed(url))
+
+            watcher.refresh()
+
+            # check that refreshing resets the changed flags
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+            self.assertTrue(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.peek_has_url_recently_changed(url))
 

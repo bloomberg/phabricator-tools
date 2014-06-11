@@ -32,15 +32,15 @@ _HashHexdigestHasChanged = collections.namedtuple(
 
 class Watcher(object):
 
-    def __init__(self, request_func=None):
+    def __init__(self, requester_object=None):
         super(Watcher, self).__init__()
         self._results = {}
-        self._request_func = request_func
-        if self._request_func is None:
-            self._request_func = phlurl_request.get
+        self._requester_object = requester_object
+        if self._requester_object is None:
+            self._requester_object = phlurl_request
 
     def _request_and_set_has_changed(self, url, has_changed):
-        content = self._request_func(url)
+        content = self._requester_object.get(url)
         # pylint: disable=E1101
         self._results[url] = _HashHexdigestHasChanged(
             hashlib.sha1(content).hexdigest(), has_changed)
@@ -85,7 +85,7 @@ class Watcher(object):
     def refresh(self):
         # XXX: it's safe to refresh multiple times - the 'has changed' flag
         #      is only consumed on 'has_url_recently_changed'
-        url_contents = phlurl_request.get_many(self._results.keys())
+        url_contents = self._requester_object.get_many(self._results.keys())
         for url, contents in url_contents.iteritems():
             old_result = self._results[url]
 
