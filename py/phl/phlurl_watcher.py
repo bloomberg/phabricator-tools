@@ -11,6 +11,9 @@
 #    .refresh
 #    .load
 #    .dump
+#   FileCacheWatcherWrapper
+#    .watcher
+#    .save
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -21,6 +24,7 @@ from __future__ import absolute_import
 import collections
 import hashlib
 import json
+import os
 
 import phlurl_request
 
@@ -124,6 +128,29 @@ class Watcher(object):
 
         """
         json.dump(self._results, f)
+
+
+class FileCacheWatcherWrapper(object):
+
+    def __init__(self, filename, requester_object=None):
+        self._filename = os.path.abspath(filename)
+        self._watcher = Watcher(requester_object)
+
+        # load the url watcher cache (if any)
+        if os.path.isfile(self._filename):
+            with open(self._filename) as f:
+                self._watcher.load(f)
+        else:
+            # try to fail early by creating a cache if it doesn't exist already
+            self.save()
+
+    @property
+    def watcher(self):
+        return self._watcher
+
+    def save(self):
+        with open(self._filename, 'w') as f:
+            self._watcher.dump(f)
 
 
 # -----------------------------------------------------------------------------

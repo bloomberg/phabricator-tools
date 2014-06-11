@@ -49,35 +49,54 @@ class Test(unittest.TestCase):
 
     def test_A_Breathing(self):
 
-        requester = _MockRequesterObject()
-        watcher = phlurl_watcher.Watcher(requester)
-
         with phlsys_fs.chtmpdir_context():
 
-            with open('data', 'w') as f:
-                watcher.dump(f)
-            with open('data') as f:
-                watcher.load(f)
+            requester = _MockRequesterObject()
+            url = 'http://host.test'
+            cache_path = 'phlurl_watcher_cache.json'
 
-            url = 'http://z.com'
+            # initialise without existing cache
+            watcher_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher = watcher_cache_wrapper.watcher
 
+            # check that we can test and consume the content change
             self.assertTrue(watcher.peek_has_url_recently_changed(url))
             self.assertTrue(watcher.peek_has_url_recently_changed(url))
             self.assertTrue(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.peek_has_url_recently_changed(url))
 
-            with open('data', 'w') as f:
-                watcher.dump(f)
-            with open('data') as f:
-                watcher.load(f)
+            # save and reload from the cache
+            watcher_cache_wrapper.save()
+            watcher_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher = watcher_cache_wrapper.watcher
 
+            # check that the content is still considered unchanged
             self.assertFalse(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.peek_has_url_recently_changed(url))
 
+            # check that refreshing resets the changed flags
             watcher.refresh()
 
-            # check that refreshing resets the changed flags
+            # check that we can test and consume the content change
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+            self.assertTrue(watcher.has_url_recently_changed(url))
+            self.assertFalse(watcher.has_url_recently_changed(url))
+            self.assertFalse(watcher.peek_has_url_recently_changed(url))
+
+            # update the content
+            watcher.refresh()
+
+            # save and reload from the cache
+            watcher_cache_wrapper.save()
+            watcher_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher = watcher_cache_wrapper.watcher
+
+            # check that we can consume the change
             self.assertTrue(watcher.peek_has_url_recently_changed(url))
             self.assertTrue(watcher.peek_has_url_recently_changed(url))
             self.assertTrue(watcher.has_url_recently_changed(url))
