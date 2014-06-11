@@ -13,7 +13,6 @@
 
 from __future__ import absolute_import
 
-import argparse
 import functools
 import os
 import sys
@@ -41,7 +40,7 @@ def do(
         is_no_loop,
         reporter):
 
-    repo_configs = _load_repo_configs(repo_config_path_list)
+    repo_configs = abdi_repoargs.parse_config_file_list(repo_config_path_list)
 
     # TODO: test write access to repos here
 
@@ -107,21 +106,6 @@ def _process_operations(is_no_loop, operations, sys_admin_emails, reporter):
 
         while True:
             _try_handle_reset_file(loopForever, on_exception_delay)
-
-
-def _load_repo_configs(repo_config_path_list):
-    configs = []
-
-    for repo_config_path in repo_config_path_list:
-        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-        abdi_repoargs.setup_parser(parser)
-        repo_config = parser.parse_args(['@' + repo_config_path])
-        repo_name = repo_config_path.split('/')[-1]  # strip the path prefix
-        repo_args = (repo_name, repo_config)
-        abdi_repoargs.validate_args(repo_args[1])
-        configs.append(repo_args)
-
-    return configs
 
 
 def _append_interrupt_operations(

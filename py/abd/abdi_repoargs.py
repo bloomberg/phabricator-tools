@@ -5,6 +5,7 @@
 # abdi_repoargs
 #
 # Public Functions:
+#   parse_config_file_list
 #   validate_args
 #   get_repo_url
 #   get_repo_snoop_url
@@ -17,6 +18,29 @@
 # =============================================================================
 
 from __future__ import absolute_import
+
+import argparse
+
+
+def parse_config_file_list(repo_config_path_list):
+    """Return a list of parsed configs fom supplied 'repo_config_path_list'.
+
+    :repo_config_path_list: list of string paths to config files
+    :returns: list of argparse namespaces resulting from parsing files
+
+    """
+    configs = []
+
+    for repo_config_path in repo_config_path_list:
+        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+        setup_parser(parser)
+        repo_config = parser.parse_args(['@' + repo_config_path])
+        repo_name = repo_config_path.split('/')[-1]  # strip the path prefix
+        repo_args = (repo_name, repo_config)
+        validate_args(repo_args[1])
+        configs.append(repo_args)
+
+    return configs
 
 
 def validate_args(args):
