@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   do
+#   fetch_if_needed
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -108,7 +109,7 @@ def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
             repo, 'git')
 
-        _fetch_if_needed(
+        fetch_if_needed(
             url_watcher,
             abdi_repoargs.get_repo_snoop_url(args),
             repo,
@@ -170,7 +171,7 @@ def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
     reporter.on_completed()
 
 
-def _fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
+def fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
 
     did_fetch = False
 
