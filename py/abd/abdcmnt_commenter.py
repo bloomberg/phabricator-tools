@@ -332,7 +332,7 @@ the 'edit revision' link at the top-right of the page.
                         size=r.diff_size_utf8_bytes))
             elif isinstance(r, abdt_differ.RemoveContextReduction):
                 technique_list.append(
-                    "tried to **remove all context**, to, this reduced the "
+                    "tried to **remove all context**, this reduced the "
                     "diff size to "
                     "**{size:,} bytes** as UTF-8.".format(
                         size=r.diff_size_utf8_bytes))
