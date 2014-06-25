@@ -56,6 +56,12 @@ def do(
         with open(urlwatcher_cache_path) as f:
             url_watcher.load(f)
 
+    # refresh cache after loading and before any repos are processed, otherwise
+    # we may not pull when we need to on the first run around the loop.
+    # TODO: wrap in usual retry handlers so that we can start up in unstable
+    #       environments
+    url_watcher.refresh()
+
     _append_operations_for_repos(
         operations,
         reporter,
