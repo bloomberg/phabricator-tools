@@ -30,8 +30,12 @@ mail="${olddir}/savemail"
 
 mkdir origin
 cd origin
-git init --bare
-mv hooks/post-update.sample hooks/post-update
+    git init --bare
+    mv hooks/post-update.sample hooks/post-update
+
+    # run an http server for Git in the background, for snooping
+    python -m SimpleHTTPServer 8000 < /dev/null > webserver.log 2>&1 &
+    webserver_pid=$!
 cd ..
 
 git init --bare origin2
@@ -98,13 +102,20 @@ s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
     $arcyd add-repohost \
-        --name fs \
+        --name fs1 \
+        --repo-url-format '../{}' \
+        --repo-snoop-url-format 'http://localhost:8000/info/refs' \
+        --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
+        --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
+
+    $arcyd add-repohost \
+        --name fs2 \
         --repo-url-format '../{}' \
         --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
         --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
 
-    $arcyd add-repo localhost fs origin
-    $arcyd add-repo localhost fs origin2
+    $arcyd add-repo localhost fs1 origin
+    $arcyd add-repo localhost fs2 origin2
 
 cd ..
 
@@ -130,21 +141,22 @@ s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
     $arcyd add-repohost \
-        --name fs \
+        --name fs1 \
+        --repo-url-format '../{}' \
+        --repo-snoop-url-format 'http://localhost:8000/info/refs' \
+        --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
+        --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
+
+    $arcyd add-repohost \
+        --name fs2 \
         --repo-url-format '../{}' \
         --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
         --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
 
-    $arcyd add-repo localhost fs origin
-    $arcyd add-repo localhost fs origin2
+    $arcyd add-repo localhost fs1 origin
+    $arcyd add-repo localhost fs2 origin2
 
 cd ..
-
-# run an http server for Git in the background, for snooping
-cd origin
-    python -m SimpleHTTPServer 8000 < /dev/null > webserver.log 2>&1 &
-    webserver_pid=$!
-cd -
 
 # run arcyd instaweb in the background
 ${arcyd} \
