@@ -41,23 +41,24 @@ def process(args):
 
     exit_code = 0
 
-    for repo in fs.repo_config_path_list():
-        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-        abdi_repoargs.setup_parser(parser)
+    with fs.lockfile_context():
+        for repo in fs.repo_config_path_list():
+            parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
+            abdi_repoargs.setup_parser(parser)
 
-        with open(repo) as f:
-            repo_params = parser.parse_args(
-                line.strip() for line in f)
+            with open(repo) as f:
+                repo_params = parser.parse_args(
+                    line.strip() for line in f)
 
-        if not os.path.isdir(repo_params.repo_path):
-            print "'{}' is missing repo '{}'".format(
-                repo, repo_params.repo_path)
-            if args.fix:
-                repo_url = abdi_repoargs.get_repo_url(repo_params)
-                print "cloning '{}' ..".format(repo_url)
-                abdi_repo.setup_repo(repo_url, repo_params.repo_path)
-            else:
-                exit_code = 1
+            if not os.path.isdir(repo_params.repo_path):
+                print "'{}' is missing repo '{}'".format(
+                    repo, repo_params.repo_path)
+                if args.fix:
+                    repo_url = abdi_repoargs.get_repo_url(repo_params)
+                    print "cloning '{}' ..".format(repo_url)
+                    abdi_repo.setup_repo(repo_url, repo_params.repo_path)
+                else:
+                    exit_code = 1
 
     if exit_code != 0 and not args.fix:
         print "use '--fix' to attempt to fix the issues"
