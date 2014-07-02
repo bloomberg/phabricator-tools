@@ -39,16 +39,17 @@ def process(args):
 
     fs = abdt_fs.make_default_accessor()
 
-    pid = fs.get_pid_or_none()
-    if pid is not None and phlsys_pid.is_running(pid):
-        raise Exception("cannot remove repo whilst arcyd is running.")
+    with fs.lockfile_context():
+        pid = fs.get_pid_or_none()
+        if pid is not None and phlsys_pid.is_running(pid):
+            raise Exception("cannot remove repo whilst arcyd is running.")
 
-    repo_name = args.name
+        repo_name = args.name
 
-    os.remove(fs.layout.repo_config(repo_name))
-    os.remove(fs.layout.repo_try(repo_name))
-    os.remove(fs.layout.repo_ok(repo_name))
-    shutil.rmtree(fs.layout.repo(repo_name))
+        os.remove(fs.layout.repo_config(repo_name))
+        os.remove(fs.layout.repo_try(repo_name))
+        os.remove(fs.layout.repo_ok(repo_name))
+        shutil.rmtree(fs.layout.repo(repo_name))
 
 
 # -----------------------------------------------------------------------------
