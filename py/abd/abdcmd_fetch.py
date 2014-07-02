@@ -22,6 +22,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import phlsys_git
+import phlsys_pid
 import phlurl_watcher
 
 import abdi_processrepoargs
@@ -43,36 +44,41 @@ def process(args):
     _ = args  # NOQA
     fs = abdt_fs.make_default_accessor()
 
-    repo_config_path_list = fs.repo_config_path_list()
-    repo_name_config_list = abdi_repoargs.parse_config_file_list(
-        repo_config_path_list)
+    with fs.lockfile_context():
+        pid = fs.get_pid_or_none()
+        if pid is not None and phlsys_pid.is_running(pid):
+            raise Exception("cannot fetch whilst arcyd is running.")
 
-    url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
-        fs.layout.urlwatcher_cache_path)
+        repo_config_path_list = fs.repo_config_path_list()
+        repo_name_config_list = abdi_repoargs.parse_config_file_list(
+            repo_config_path_list)
 
-    url_watcher_wrapper.watcher.refresh()
+        url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+            fs.layout.urlwatcher_cache_path)
 
-    for repo_name, repo_config in repo_name_config_list:
-        print(repo_name + '..', end=' ')
-        snoop_url = abdi_repoargs.get_repo_snoop_url(repo_config)
+        url_watcher_wrapper.watcher.refresh()
 
-        abd_repo = abdt_git.Repo(
-            phlsys_git.Repo(repo_config.repo_path),
-            "origin",
-            repo_config.repo_desc)
+        for repo_name, repo_config in repo_name_config_list:
+            print(repo_name + '..', end=' ')
+            snoop_url = abdi_repoargs.get_repo_snoop_url(repo_config)
 
-        did_fetch = abdi_processrepoargs.fetch_if_needed(
-            url_watcher_wrapper.watcher,
-            snoop_url,
-            abd_repo,
-            repo_config.repo_desc)
+            abd_repo = abdt_git.Repo(
+                phlsys_git.Repo(repo_config.repo_path),
+                "origin",
+                repo_config.repo_desc)
 
-        if did_fetch:
-            print('fetched')
-        else:
-            print('skipped')
+            did_fetch = abdi_processrepoargs.fetch_if_needed(
+                url_watcher_wrapper.watcher,
+                snoop_url,
+                abd_repo,
+                repo_config.repo_desc)
 
-        url_watcher_wrapper.save()
+            if did_fetch:
+                print('fetched')
+            else:
+                print('skipped')
+
+            url_watcher_wrapper.save()
 
 
 # -----------------------------------------------------------------------------
