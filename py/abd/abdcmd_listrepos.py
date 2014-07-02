@@ -42,11 +42,12 @@ def _iter_repo_args(abdt_accessor):
 def process(args):
     fs = abdt_fs.make_default_accessor()
 
-    for repo_args in _iter_repo_args(fs):
-        if args.only_formatted_repo_urls:
-            print abdi_repoargs.get_repo_url(repo_args)
-        else:
-            print repo_args
+    with fs.lockfile_context():
+        for repo_args in _iter_repo_args(fs):
+            if args.only_formatted_repo_urls:
+                print abdi_repoargs.get_repo_url(repo_args)
+            else:
+                print repo_args
 
 
 # -----------------------------------------------------------------------------
