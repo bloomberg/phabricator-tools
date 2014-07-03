@@ -103,7 +103,7 @@ def setupParser(parser):
              "like so: $LOGGER '<<identifier>>' '<<full details>>'")
 
 
-def process(args, repo_config_path_list):
+def process(args, repo_configs):
 
     if args.sendmail_binary:
         phlsys_sendmail.Sendmail.set_default_binary(
@@ -130,13 +130,13 @@ def process(args, repo_config_path_list):
 
     arcyd_reporter_context = abdt_logging.arcyd_reporter_context
     with contextlib.closing(reporter), arcyd_reporter_context(reporter):
-        _processrepolist(args, repo_config_path_list, reporter, on_exception)
+        _processrepolist(args, repo_configs, reporter, on_exception)
 
 
-def _processrepolist(args, repo_config_path_list, reporter, on_exception):
+def _processrepolist(args, repo_configs, reporter, on_exception):
     try:
         abdi_processrepolist.do(
-            repo_config_path_list,
+            repo_configs,
             args.sys_admin_emails,
             args.kill_file,
             args.reset_file,

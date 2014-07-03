@@ -28,11 +28,10 @@ import abdt_git
 
 import abdi_operation
 import abdi_processrepoargs
-import abdi_repoargs
 
 
 def do(
-        repo_config_path_list,
+        repo_configs,
         sys_admin_emails,
         kill_file,
         reset_file,
@@ -40,8 +39,6 @@ def do(
         sleep_secs,
         is_no_loop,
         reporter):
-
-    repo_configs = abdi_repoargs.parse_config_file_list(repo_config_path_list)
 
     # TODO: test write access to repos here
 
