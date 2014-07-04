@@ -1,0 +1,25 @@
+usage: arcyd add-repo [-h] [--name STR] [--repo-desc STR]
+                      [--admin-emails [TO [TO ...]]]
+                      phabricator_name repohost_name repo_url
+
+Add a new repository for the Arcyd instance to manage.
+
+positional arguments:
+  phabricator_name      name of the Phabricator instance associated with the
+                        repo.
+  repohost_name         name of the repohost associated with the repo.
+  repo_url              url to clone the repository, e.g. 'github:org/repo' or
+                        maybe something like 'org/repo' if using '--repo-url-
+                        format'.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --name STR            string identifier for the repository, '[_a-zA-Z0-9]+'.
+                        will guess a name from the mandatory args if none
+                        provided.
+  --repo-desc STR       very short description of the repository, appears on
+                        the dashboard, in error messages and in logs. will
+                        guess a name from the mandatory args if none provided.
+  --admin-emails [TO [TO ...]]
+                        list of email addresses to send important repo events
+                        to

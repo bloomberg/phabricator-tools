@@ -1,0 +1,91 @@
+usage: arcyd [-h]
+             
+             {arcyd-status-html,repo-status-html,dev-status-html,instaweb,init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
+             ...
+
+Arcyd - daemon to watch git repos, create and land reviews automatically.
+
+Intended to make it easy for large teams to start using Differential without
+individual contributors needing to install and configure Arcanist.
+
+Individual contributors are still free to use Arcanist if they wish, Arcyd
+provides a zero-config layer over Git to get them started.
+
+Arcyd does the following:
+- watches for specially named branches and automatically creates revisions
+- automatically updates revisions when the branch changes
+- automatically lands revisions when they are approved
+
+minimal user workflow:
+    $ git checkout feature/mywork
+    ~ commit some work on the branch ~
+    $ git push origin feature/mywork:arcyd-review/mywork/master
+
+    .. Arcyd see's the 'arcyd-review' branch and creates a review ..
+    .. Reviewer accepts the change ..
+    .. Arcyd squashes the 'arcyd-review' branch onto master and deletes it ..
+
+positional arguments:
+  {arcyd-status-html,repo-status-html,dev-status-html,instaweb,init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
+    arcyd-status-html   Render arcyd status file as meaningful html to present
+                        to users.
+    repo-status-html    Render status files as meaningful html to present to
+                        users.
+    dev-status-html     Help develop status pages by providing simulating
+                        various statuses.
+    instaweb            Start a local webserver to report the status of an
+                        arcyd instance.
+    init                Create a new arcyd instance in working dir, with
+                        backing git repository.
+    list-repos          List the repositories managed by this arcyd instance.
+    add-phabricator     Make a new phabricator instance known to the Arcyd
+                        instance.
+    add-repohost        Add a new repository host for the Arcyd instance to
+                        refer to.
+    add-repo            Add a new repository for the Arcyd instance to manage.
+    rm-repo             Remove a repository from the Arcyd instance.
+    start               Start the arcyd instance for the current directory, if
+                        not already going.
+    stop                Stop the arcyd instance for the current directory.
+    fsck                Check the Arcyd files for consistency and fix any
+                        issues.
+    fetch               Fetch managed repos.
+
+optional arguments:
+  -h, --help            show this help message and exit
+
+usage example:
+To setup arcyd using the example accounts baked into the 'phabricator-tools'
+vagrant/puppet installation. (see ./README)
+
+    $ mkdir arcyd
+    $ cd arcyd
+    $ arcyd init --arcyd-email arcyd@localhost
+    $ arcyd add-phabricator \
+        --name local \
+        --instance-uri http://127.0.0.1/api/ \
+        --review-url-format 'http://127.0.0.1/D{review}' \
+        --admin-emails 'local-phab-admin@localhost' \
+        --arcyd-user phab \
+        --arcyd-cert \
+xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrvafgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
+
+    $ arcyd add-repohost \
+        --name local_repos \
+        --repo-url-format '/path/to/repos/{}'
+
+    $ arcyd add-repo \
+        --name local_1 \
+        --repo-url local_1 \
+        --repo-desc local_1 \
+        --phabricator-name local \
+        --repohost-name local_repos \
+        --admin-emails 'local-repo1-admin@localhost'
+
+    $ arcyd start
+
+run each command with the '--help' option for more information, e.g.:
+
+    $ arcyd init --help
+
+    

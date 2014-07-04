@@ -1,0 +1,31 @@
+usage: arcyd add-phabricator [-h] --name STR --instance-uri ADDRESS
+                             --arcyd-user USERNAME --arcyd-cert CERT
+                             [--https-proxy ADDRESS] --review-url-format
+                             STRING [--admin-emails [TO [TO ...]]]
+
+Make a new phabricator instance known to the Arcyd instance.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --name STR            string name of the phabricator instance, [_a-zA-Z0-9]+
+  --instance-uri ADDRESS
+                        URI to use to access the conduit API, e.g.
+                        'http://127.0.0.1/api/'.
+  --arcyd-user USERNAME
+                        username of admin account registered for arcyd to use.
+  --arcyd-cert CERT     Phabricator Conduit API certificate to use, this is
+                        the value that you will find in your user account in
+                        Phabricator at:
+                        http://your.server.example/settings/panel/conduit/. It
+                        can also be found in ~/.arcrc.
+  --https-proxy ADDRESS
+                        (OPTIONAL) proxy URI for arcyd to use when connecting
+                        to conduit to https.
+  --review-url-format STRING
+                        a format string for generating URLs for viewing
+                        reviews, e.g. something like this:
+                        'http://my.phabricator/D{review}' , note that the
+                        {review} will be substituted for the id of the branch.
+  --admin-emails [TO [TO ...]]
+                        list of email addresses to send important repo events
+                        to

@@ -1,0 +1,7 @@
+usage: arcyd fsck [-h] [--fix]
+
+Check the Arcyd files for consistency and fix any issues.
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --fix       resolve issues that are detected, where possible.

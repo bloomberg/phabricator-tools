@@ -41,6 +41,17 @@ done
 # update 'man page' documentation in doc/man
 ###############################################################################
 
+arcyd='proto/arcyd'
+arcyd_commands='
+        arcyd-status-html repo-status-html dev-status-html instaweb init
+        list-repos add-phabricator add-repohost add-repo rm-repo start stop
+        fsck fetch'
+
+${arcyd} -h > doc/man/arcyd/arcyd.generated.txt
+for command in ${arcyd_commands}; do
+    ${arcyd} ${command} -h > doc/man/arcyd/arcyd_${command}.generated.txt
+done
+
 arcyon='bin/arcyon'
 arcyon_commands='
     show-config query comment raw-diff create-revision update-revision
@@ -50,6 +61,7 @@ ${arcyon} -h > doc/man/arcyon/arcyon.generated.txt
 for command in ${arcyon_commands}; do
     ${arcyon} ${command} -h > doc/man/arcyon/arcyon_${command}.generated.txt
 done
+
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.

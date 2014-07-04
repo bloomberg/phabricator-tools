@@ -1,0 +1,7 @@
+usage: arcyd stop [-h] [--force]
+
+Stop the arcyd instance for the current directory.
+
+optional arguments:
+  -h, --help   show this help message and exit
+  --force, -f  kill the process.

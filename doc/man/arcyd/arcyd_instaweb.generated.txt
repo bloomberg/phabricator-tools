@@ -1,0 +1,17 @@
+usage: arcyd instaweb [-h] [--port PORT] --report-file REPORTFILE
+                      [--reset-file NAME] [--pause-file NAME] --repo-file-dir
+                      REPOFILEDIR
+
+Start a local webserver to report the status of an arcyd instance.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --port PORT           port to serve pages on
+  --report-file REPORTFILE
+                        path to the arcyd report file to render
+  --reset-file NAME     filename to watch for, will reset operations if the
+                        file is detected and remove the file.
+  --pause-file NAME     filename to watch for, will pause operations while the
+                        file is detected.
+  --repo-file-dir REPOFILEDIR
+                        path to the repo files to render

@@ -1,0 +1,10 @@
+usage: arcyd start [-h] [--foreground] [--no-loop]
+
+Start the arcyd instance for the current directory, if not already going.
+
+optional arguments:
+  -h, --help        show this help message and exit
+  --foreground, -f  supply this argument to run arcyd interactively in the
+                    foreground
+  --no-loop         supply this argument to only process each repo once then
+                    exit

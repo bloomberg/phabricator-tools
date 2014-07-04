@@ -1,0 +1,9 @@
+usage: arcyd rm-repo [-h] STR
+
+Remove a repository from the Arcyd instance.
+
+positional arguments:
+  STR         name of the Phabricator instance associated with the repo.
+
+optional arguments:
+  -h, --help  show this help message and exit

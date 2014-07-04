@@ -1,0 +1,9 @@
+usage: arcyd fetch [-h]
+
+Fetch managed repos.
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+This can be useful if you are switching from one arcyd instance to
+another, to 'pre-fetch' before actually moving over.

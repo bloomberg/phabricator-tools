@@ -1,0 +1,18 @@
+usage: arcyd init [-h] --arcyd-email EMAIL
+                  [--sys-admin-emails ADDR [ADDR ...]] [--sleep-secs TIME]
+                  [--sendmail-binary PROGRAM] [--sendmail-type TYPE]
+
+Create a new arcyd instance in working dir, with backing git repository.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --arcyd-email EMAIL   email address for arcyd to send messages from
+  --sys-admin-emails ADDR [ADDR ...]
+                        list of email address to send mail to on system error.
+  --sleep-secs TIME     override time to wait between runs through the list
+  --sendmail-binary PROGRAM
+                        program to send the mail with (e.g. sendmail,
+                        catchmail)
+  --sendmail-type TYPE  type of program to send the mail with (sendmail,
+                        catchmail), this will affect the parameters that Arcyd
+                        will use.

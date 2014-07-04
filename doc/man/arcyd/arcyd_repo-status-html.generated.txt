@@ -1,0 +1,10 @@
+usage: arcyd repo-status-html [-h] REPOREPORTFILE BRANCHESREPORTFILE
+
+Render status files as meaningful html to present to users.
+
+positional arguments:
+  REPOREPORTFILE      path to the try file to render
+  BRANCHESREPORTFILE  path to the try file to render
+
+optional arguments:
+  -h, --help          show this help message and exit
