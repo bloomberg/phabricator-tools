@@ -1,0 +1,57 @@
+usage: barc list [-h]
+                 [--format-summary | --format-json | --format-python | --format-string STR]
+
+List the reviews and corresponding branches in the current repository.
+
+optional arguments:
+  -h, --help           show this help message and exit
+
+Output format parameters:
+  Choose one only, default is "--format-summary"
+
+  --format-summary     list the review ids, statuses and review names.
+  --format-json        print json representation of managed review branches
+  --format-python      print python representation of managed review branches
+  --format-string STR  specify a custom format strings for displaying the
+                       items. the string will be applied using Python's
+                       str.format(), so you can use curly brackets to
+                       substitute for field names, e.g. "{review_id}". you can
+                       use "--format-python" to discover the field names.
+
+Usage examples:
+
+    Summarise all the tracked review branches:
+        $ barc list
+        ID     status         tracked name
+        10596  ok             r/master/linkUtil
+        10594  ok             r/master/notification-spew
+
+    List just the review ids and the trackers:
+        $ barc list --format-string "{review_id} {remote_branch}"
+        10596 refs/remotes/origin/dev/arcyd/trackers/rbranch/--/-/ok/r/maste...
+        10594 refs/remotes/origin/dev/arcyd/trackers/rbranch/--/-/ok/r/maste...
+
+Output format examples:
+
+    --format-summary
+        ID     status         tracked name
+        10596  ok             r/master/linkUtil
+        10594  ok             r/master/notification-spew
+
+    --format-json
+        [
+          {
+            "remote_base": "refs/remotes/origin/master",
+            "review_id": "10596",
+            ...
+          }
+          ...
+        ]
+
+    --format-python
+        [
+          {"remote_base": "refs/remotes/origin/master",
+           ...
+           "review_id": "10596"},
+          ...
+        ]

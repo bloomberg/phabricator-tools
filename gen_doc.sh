@@ -41,6 +41,14 @@ done
 # update 'man page' documentation in doc/man
 ###############################################################################
 
+barc='proto/barc'
+barc_commands='list'
+
+${barc} -h > doc/man/barc/barc.generated.txt
+for command in ${barc_commands}; do
+    ${barc} ${command} -h > doc/man/barc/barc_${command}.generated.txt
+done
+
 arcyd='proto/arcyd'
 arcyd_commands='
         arcyd-status-html repo-status-html dev-status-html instaweb init

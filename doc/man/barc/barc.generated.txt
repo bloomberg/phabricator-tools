@@ -1,0 +1,26 @@
+usage: barc [-h] {gc,list} ...
+
+Barc - a command-line client to complement 'arcyd'.
+
+Essentially a prescriptive tool for supporting arcyd's branch-based workflow.
+
+positional arguments:
+  {gc,list}
+    gc        DEPRECATED: Garbage collect in your local git repository.
+    list      List the reviews and corresponding branches in the current
+              repository.
+
+optional arguments:
+  -h, --help  show this help message and exit
+
+usage example:
+    Using the example accounts baked into the 'phabricator-tools'
+    vagrant/puppet installation. (see ./README)
+
+    to clean up landed local branches:
+    $ barc gc --force --aggressive
+
+    to display help on the 'gc' sub-command:
+    $ barc gc --help
+
+    
