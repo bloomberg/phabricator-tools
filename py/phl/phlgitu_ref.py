@@ -20,6 +20,7 @@
 #   fq_remote_to_short_local
 #   fq_to_short
 #   is_under_remote
+#   is_fq_local_branch
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -252,6 +253,25 @@ def is_under_remote(ref, remote):
 
     """
     return ref.startswith('refs/remotes/' + remote + '/')
+
+
+def is_fq_local_branch(ref):
+    """Return True if a Git reference is a fully qualified local branch.
+
+    Return False otherwise.
+
+    Usage example:
+        >>> is_fq_local_branch("refs/heads/master")
+        True
+
+        >>> is_fq_local_branch("refs/remotes/origin/master")
+        False
+
+        >>> is_fq_local_branch("refs/notes/commits")
+        False
+
+    """
+    return ref.startswith('refs/heads/')
 
 
 # -----------------------------------------------------------------------------
