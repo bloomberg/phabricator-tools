@@ -42,18 +42,14 @@ done
 ###############################################################################
 
 arcyon='bin/arcyon'
+arcyon_commands='
+    show-config query comment raw-diff create-revision update-revision
+    get-diff paste task-create task-update task-query'
+
 ${arcyon} -h > doc/man/arcyon/arcyon.generated.txt
-${arcyon} show-config -h > doc/man/arcyon/arcyon_show_config.generated.txt
-${arcyon} query -h > doc/man/arcyon/arcyon_query.generated.txt
-${arcyon} comment -h > doc/man/arcyon/arcyon_comment.generated.txt
-${arcyon} raw-diff -h > doc/man/arcyon/arcyon_raw_diff.generated.txt
-${arcyon} create-revision -h > doc/man/arcyon/arcyon_create_revision.generated.txt
-${arcyon} update-revision -h > doc/man/arcyon/arcyon_update_revision.generated.txt
-${arcyon} get-diff -h > doc/man/arcyon/arcyon_get_diff.generated.txt
-${arcyon} paste -h > doc/man/arcyon/arcyon_paste.generated.txt
-${arcyon} task-create -h > doc/man/arcyon/arcyon_task_create.generated.txt
-${arcyon} task-update -h > doc/man/arcyon/arcyon_task_update.generated.txt
-${arcyon} task-query -h > doc/man/arcyon/arcyon_task_query.generated.txt
+for command in ${arcyon_commands}; do
+    ${arcyon} ${command} -h > doc/man/arcyon/arcyon_${command}.generated.txt
+done
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
