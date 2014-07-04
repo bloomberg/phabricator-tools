@@ -22,6 +22,7 @@ import argparse
 import phlsys_subcommand
 
 import barcmd_gc
+import barcmd_list
 
 _USAGE_EXAMPLES = """
 usage example:
@@ -47,6 +48,8 @@ def main():
 
     phlsys_subcommand.setup_parser(
         "gc", barcmd_gc, subparsers)
+    phlsys_subcommand.setup_parser(
+        "list", barcmd_list, subparsers)
 
     args = parser.parse_args()
 

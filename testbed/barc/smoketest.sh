@@ -5,6 +5,8 @@ barc='../../proto/barc'
 
 $barc -h
 $barc gc -h
+$barc list -h
+
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #

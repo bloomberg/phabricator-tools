@@ -12,5 +12,5 @@
 ('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phlgit', 'phlmail', 'phlsys', 'phlurl'])
 ('phlsys', ['phldef'])
 ('abdcmnt', ['abdt', 'phlcon'])
-('barcmd', ['abdt', 'phlgit', 'phlsys'])
+('barcmd', ['abdt', 'phlgit', 'phlgitu', 'phlsys'])
 ('pigcmd', ['phlsys'])
