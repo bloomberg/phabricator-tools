@@ -21,6 +21,8 @@ another, to 'pre-fetch' before actually moving over.
 from __future__ import absolute_import
 from __future__ import print_function
 
+import sys
+
 import phlsys_git
 import phlsys_pid
 import phlurl_watcher
@@ -59,7 +61,12 @@ def process(args):
         url_watcher_wrapper.watcher.refresh()
 
         for repo_name, repo_config in repo_name_config_list:
-            print(repo_name + '..', end=' ')
+            print(repo_name + ' ..', end=' ')
+
+            # Make sure that the output is actually visible by flushing stdout
+            # XXX: Will use 'flush' parameter to 'print()' in Python 3.3
+            sys.stdout.flush()
+
             snoop_url = abdi_repoargs.get_repo_snoop_url(repo_config)
 
             abd_repo = abdt_git.Repo(
