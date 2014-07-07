@@ -58,6 +58,14 @@ def process(args):
         url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
             fs.layout.urlwatcher_cache_path)
 
+        # Let the user know what's happening before potentially blocking for a
+        # while.
+        print('Refreshing repository snoop status ..', end=' ')
+        # Make sure that the output is actually visible by flushing stdout
+        # XXX: Will use 'flush' parameter to 'print()' in Python 3.3
+        sys.stdout.flush()
+        print("done")
+
         url_watcher_wrapper.watcher.refresh()
 
         for repo_name, repo_config in repo_name_config_list:
