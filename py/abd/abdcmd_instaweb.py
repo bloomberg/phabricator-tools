@@ -42,19 +42,6 @@ def setupParser(parser):
         help="path to the arcyd report file to render")
 
     parser.add_argument(
-        '--reset-file',
-        metavar="NAME",
-        type=str,
-        help="filename to watch for, will reset operations if the file is "
-             "detected and remove the file.")
-    parser.add_argument(
-        '--pause-file',
-        metavar="NAME",
-        type=str,
-        help="filename to watch for, will pause operations while the file is "
-             "detected.")
-
-    parser.add_argument(
         '--repo-file-dir',
         metavar="REPOFILEDIR",
         type=str,
@@ -97,7 +84,7 @@ class _RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         if self.path == '/':
             content = abdcmd_arcydstatushtml.render_content(
-                args.reset_file, args.pause_file, args.report_file, '')
+                args.report_file, '')
         elif self.path.lower().endswith('favicon.ico'):
             raise _NotFoundError('could not find favicon')
         else:

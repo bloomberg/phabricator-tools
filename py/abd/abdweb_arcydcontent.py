@@ -9,7 +9,6 @@
 #   render_status
 #   render_repo
 #   render_stats
-#   render_controls
 #   render_error_log
 #   render_info_log
 #
@@ -26,14 +25,10 @@ import abdt_arcydreporter
 def render(
         formatter,
         base_url,
-        report,
-        is_reset_scheduled,
-        is_pause_scheduled):
+        report):
 
     formatter.heading('arcyd')
 
-    formatter.horizontal_rule()
-    render_controls(is_reset_scheduled, is_pause_scheduled, formatter)
     formatter.horizontal_rule()
 
     status = report[abdt_arcydreporter.ARCYD_STATUS]
@@ -156,24 +151,6 @@ def render_stats(stats, formatter):
             [i[0] for i in heading_format],
             [i[1] for i in heading_format],
             'stats')
-
-
-def render_controls(is_reset_scheduled, is_pause_scheduled, formatter):
-    with formatter.tags_context('table'):
-        with formatter.tags_context('tr'):
-            with formatter.tags_context('td'):
-                formatter.action_button(
-                    'reset Arcyd', 'reset', not is_reset_scheduled)
-            with formatter.tags_context('td'):
-                formatter.action_button(
-                    'cancel reset', 'cancel-reset', is_reset_scheduled)
-        with formatter.tags_context('tr'):
-            with formatter.tags_context('td'):
-                formatter.action_button(
-                    'pause Arcyd', 'pause', not is_pause_scheduled)
-            with formatter.tags_context('td'):
-                formatter.action_button(
-                    'unpause Arcyd', 'unpause', is_pause_scheduled)
 
 
 def render_error_log(name, item_list, formatter):

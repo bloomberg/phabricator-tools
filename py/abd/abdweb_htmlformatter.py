@@ -13,7 +13,6 @@
 #    .section_break
 #    .horizontal_rule
 #    .link
-#    .action_button
 #    .table_from_tuple_list
 #    .tags_context
 #    .singletag_context
@@ -67,21 +66,6 @@ class HtmlFormatter(object):
         else:
             self.raw(target)
         self._add_close_tag('a')
-
-    def action_button(self, text, action, is_active):
-        self.raw("<form method='post'>")
-        self.raw(
-            "<input type='hidden' name='action' value={action}>".format(
-                action=action))
-        if is_active:
-            self.raw(
-                "<input type='submit' value='{text}'>".format(
-                    text=text))
-        else:
-            self.raw(
-                "<input type='submit' value='{text}' disabled>".format(
-                    text=text))
-        self.raw("</form>")
 
     def table_from_tuple_list(
             self, item_list, heading_list, format_list, class_):

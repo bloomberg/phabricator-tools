@@ -59,9 +59,7 @@ def _write_arcyd_status_page(filename, report):
     abdweb_arcydcontent.render(
         formatter,
         'https://server.test/',
-        report,
-        is_reset_scheduled=False,
-        is_pause_scheduled=False)
+        report)
 
     content = formatter.get_content()
 
