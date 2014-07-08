@@ -79,23 +79,13 @@ class ResetFileError(Exception):
 
 class CheckSpecialFiles(object):
 
-    def __init__(self, kill_file, reset_file, pause_file, on_pause):
+    def __init__(self, kill_file):
         self._kill_file = kill_file
-        self._reset_file = reset_file
-        self._pause_file = pause_file
-        self._on_pause = on_pause
 
     def do(self):
         if self._kill_file and os.path.isfile(self._kill_file):
             os.remove(self._kill_file)
             raise Exception("kill file: " + self._kill_file)
-        if self._reset_file and os.path.isfile(self._reset_file):
-            raise ResetFileError(self._reset_file)
-        if self._pause_file and os.path.isfile(self._pause_file):
-            if self._on_pause:
-                self._on_pause()
-            while os.path.isfile(self._pause_file):
-                time.sleep(1)
         return True
 
 

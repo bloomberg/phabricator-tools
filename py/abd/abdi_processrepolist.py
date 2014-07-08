@@ -14,7 +14,6 @@
 from __future__ import absolute_import
 
 import functools
-import os
 import sys
 
 import phlsys_git
@@ -34,8 +33,6 @@ def do(
         repo_configs,
         sys_admin_emails,
         kill_file,
-        reset_file,
-        pause_file,
         sleep_secs,
         is_no_loop,
         reporter):
@@ -65,10 +62,7 @@ def do(
 
     _append_interrupt_operations(
         operations,
-        sys_admin_emails,
         kill_file,
-        reset_file,
-        pause_file,
         sleep_secs,
         reporter)
 
@@ -76,51 +70,28 @@ def do(
         abdi_operation.RefreshCaches(
             conduits, url_watcher_wrapper.watcher, reporter))
 
-    _process_operations(
-        is_no_loop, operations, sys_admin_emails, reporter)
+    _process_operations(is_no_loop, operations)
 
 
-def _process_operations(is_no_loop, operations, sys_admin_emails, reporter):
-
-    on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-        sys_admin_emails, reporter, None)
-
+def _process_operations(is_no_loop, operations):
     if is_no_loop:
-        def process_once():
-            return phlsys_scheduleunreliables.process_once(list(operations))
-
-        new_ops = _try_handle_reset_file(process_once, on_exception_delay)
+        new_ops = phlsys_scheduleunreliables.process_once(list(operations))
         if new_ops != set(operations):
             print 'ERROR: some operations failed'
             sys.exit(1)
     else:
-        def loopForever():
-            phlsys_scheduleunreliables.process_loop_forever(list(operations))
-
-        while True:
-            _try_handle_reset_file(loopForever, on_exception_delay)
+        phlsys_scheduleunreliables.process_loop_forever(list(operations))
 
 
 def _append_interrupt_operations(
         operations,
-        sys_admin_emails,
         kill_file,
-        reset_file,
-        pause_file,
         sleep_secs,
         reporter):
 
-    def on_pause():
-        on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            sys_admin_emails, reporter, None)
-        on_exception_delay("until_file_removed")
-
     operations.append(
         abdi_operation.CheckSpecialFiles(
-            kill_file,
-            reset_file,
-            pause_file,
-            on_pause))
+            kill_file))
 
     operations.append(
         abdi_operation.Sleep(
@@ -167,17 +138,6 @@ def _append_operations_for_repos(
             on_exception_delay)
 
         operations.append(operation)
-
-
-def _try_handle_reset_file(f, on_exception_delay):
-    try:
-        return f()
-    except abdi_operation.ResetFileError as e:
-        on_exception_delay(None)
-        try:
-            os.remove(e.path)
-        except:
-            on_exception_delay(None)
 
 
 def _process_single_repo(

@@ -67,18 +67,6 @@ def setupParser(parser):
         help="filename to watch for, will stop operations safely if the file "
              "is detected.")
     parser.add_argument(
-        '--pause-file',
-        metavar="NAME",
-        type=str,
-        help="filename to watch for, will pause operations while the file is "
-             "detected.")
-    parser.add_argument(
-        '--reset-file',
-        metavar="NAME",
-        type=str,
-        help="filename to watch for, will reset operations if the file is "
-             "detected and remove the file.")
-    parser.add_argument(
         '--io-log-file',
         metavar="PATH",
         type=str,
@@ -139,8 +127,6 @@ def _processrepolist(args, repo_configs, reporter, on_exception):
             repo_configs,
             args.sys_admin_emails,
             args.kill_file,
-            args.reset_file,
-            args.pause_file,
             args.sleep_secs,
             args.no_loop,
             reporter)
