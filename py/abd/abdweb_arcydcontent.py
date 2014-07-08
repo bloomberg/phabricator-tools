@@ -6,11 +6,6 @@
 #
 # Public Functions:
 #   render
-#   render_status
-#   render_repo
-#   render_stats
-#   render_error_log
-#   render_info_log
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -34,11 +29,11 @@ def render(
     status = report[abdt_arcydreporter.ARCYD_STATUS]
     stats = report[abdt_arcydreporter.ARCYD_STATISTICS]
     description = report[abdt_arcydreporter.ARCYD_STATUS_DESCRIPTION]
-    render_status(status, stats, formatter, description)
+    _render_status(status, stats, formatter, description)
 
     repo = report[abdt_arcydreporter.ARCYD_CURRENT_REPO]
     if repo:
-        render_repo(base_url, repo, formatter)
+        _render_repo(base_url, repo, formatter)
 
     formatter.horizontal_rule()
 
@@ -48,23 +43,23 @@ def render(
             repos, key=lambda x: x[abdt_arcydreporter.REPO_ATTRIB_HUMAN_NAME])
 
         for repo in sorted_repos:
-            render_repo(base_url, repo, formatter)
+            _render_repo(base_url, repo, formatter)
 
     log_system_error = report[abdt_arcydreporter.ARCYD_LOG_SYSTEM_ERROR]
     if log_system_error:
         formatter.horizontal_rule()
-        render_error_log('recent system errors', log_system_error, formatter)
+        _render_error_log('recent system errors', log_system_error, formatter)
 
     log_user_action = report[abdt_arcydreporter.ARCYD_LOG_USER_ACTION]
     if log_user_action:
         formatter.horizontal_rule()
-        render_info_log('recent user actions', log_user_action, formatter)
+        _render_info_log('recent user actions', log_user_action, formatter)
 
     formatter.horizontal_rule()
-    render_stats(stats, formatter)
+    _render_stats(stats, formatter)
 
 
-def render_status(status, stats, formatter, description):
+def _render_status(status, stats, formatter, description):
     this_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
     last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
     if this_duration and last_duration:
@@ -84,7 +79,7 @@ def render_status(status, stats, formatter, description):
                 formatter.text(description)
 
 
-def render_repo(base_url, repo, formatter):
+def _render_repo(base_url, repo, formatter):
     repo_name = repo[abdt_arcydreporter.REPO_ATTRIB_NAME]
     repo_human_name = repo[abdt_arcydreporter.REPO_ATTRIB_HUMAN_NAME]
     repo_status = repo[abdt_arcydreporter.REPO_ATTRIB_STATUS]
@@ -101,7 +96,7 @@ def render_repo(base_url, repo, formatter):
             base_url, repo_name), repo_human_name)
 
 
-def render_stats(stats, formatter):
+def _render_stats(stats, formatter):
     current_duration = stats[abdt_arcydreporter.ARCYD_STAT_CURRENT_CYCLE_TIME]
     last_duration = stats[abdt_arcydreporter.ARCYD_STAT_LAST_CYCLE_TIME]
     tag_samplers = stats[abdt_arcydreporter.ARCYD_STAT_TAG_SAMPLERS]
@@ -153,7 +148,7 @@ def render_stats(stats, formatter):
             'stats')
 
 
-def render_error_log(name, item_list, formatter):
+def _render_error_log(name, item_list, formatter):
     formatter.heading(name)
     with formatter.singletag_context('div', class_='container'):
         for item in reversed(item_list):
@@ -166,7 +161,7 @@ def render_error_log(name, item_list, formatter):
                 formatter.text(detail)
 
 
-def render_info_log(name, item_list, formatter):
+def _render_info_log(name, item_list, formatter):
     formatter.heading(name)
     with formatter.singletag_context('div', class_='container'):
         for item in reversed(item_list):
