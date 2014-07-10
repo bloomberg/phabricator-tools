@@ -72,7 +72,10 @@ def setupParser(parser):
         '--silent',
         action='store_true',
         help="don't send notification emails for this comment")
-
+    parser.add_argument(
+        '--attach-inlines',
+        action='store_true',
+        help="Whether to attach previous inline comments")
     actions.add_argument(
         '--action', '-a',
         choices=phlcon_differential.USER_ACTIONS.keys(),
@@ -91,7 +94,8 @@ def process(args):
     d = {
         'message': args.message,
         'silent': args.silent,
-        'action': phlcon_differential.USER_ACTIONS[args.action]
+        'action': phlcon_differential.USER_ACTIONS[args.action],
+        'attach_inlines': args.attach_inlines
     }
 
     if args.message_file:

@@ -1,7 +1,7 @@
 usage: arcyon comment [-h] [--ids-file FILE] [--message M]
-                      [--message-file FILE] [--silent] [--action ACTION]
-                      [--uri ADDRESS] [--user NAME] [--cert HEX]
-                      [--act-as-user NAME]
+                      [--message-file FILE] [--silent] [--attach-inlines]
+                      [--action ACTION] [--uri ADDRESS] [--user NAME]
+                      [--cert HEX] [--act-as-user NAME]
                       [ids [ids ...]]
 
 create a comment on differential reviews.
@@ -15,6 +15,7 @@ optional arguments:
   --message M, -m M     the body text of the comment
   --message-file FILE   a file to read the message from, use '-' for stdin
   --silent              don't send notification emails for this comment
+  --attach-inlines      Whether to attach previous inline comments
 
 action arguments:
   use any of ['comment', 'unabandon', 'commandeer', 'request changes', 'accept',
