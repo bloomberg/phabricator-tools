@@ -57,10 +57,8 @@ def setup_repo_context(repo_url, repo_path):
         repo('checkout', '-')
 
         # test push to special refs
-        repo(
-            'push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
-        repo(
-            'push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
+        repo('push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
+        repo('push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
 
         # fetch the 'landed' and 'abandoned' refs if they exist
         abdt_git.checkout_master_fetch_special_refs(repo, 'origin')
