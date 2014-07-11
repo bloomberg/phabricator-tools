@@ -18,6 +18,7 @@
 #   chtmpdir_context
 #   nostd
 #   ensure_dir
+#   read_text_file
 #   write_text_file
 #
 # -----------------------------------------------------------------------------
@@ -307,6 +308,17 @@ def ensure_dir(path):
     """
     if not os.path.exists(path):
         os.makedirs(path)
+
+
+def read_text_file(path):
+    """Return text content of file at 'path', raise on error.
+
+    :path: the string path of the file to read
+    :returns: string content of file
+
+    """
+    with open(path) as f:
+        return f.read()
 
 
 def write_text_file(path, text):
