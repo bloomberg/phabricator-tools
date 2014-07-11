@@ -17,6 +17,7 @@ import contextlib
 import shutil
 
 import phlgit_commit
+import phlgitx_ignoreident
 import phlsys_git
 import phlsys_subprocess
 
@@ -49,6 +50,11 @@ def setup_repo_context(repo_url, repo_path):
         'git', 'clone', repo_url, repo_path)
     try:
         repo = phlsys_git.Repo(repo_path)
+
+        # make sure we have no problems with 'ident' strings, we won't build
+        # from arcyd so it shouldn't be externally visible that we don't expand
+        # them.
+        phlgitx_ignoreident.ensure_repo_ignoring(repo_path)
 
         # test pushing to master
         repo('checkout', 'origin/master')
