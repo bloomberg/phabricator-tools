@@ -44,10 +44,9 @@ def setupParser(parser):
 
 def _read_json_file(filename):
     result = None
-    with phlsys_fs.read_file_lock_context(filename) as f:
-        text = f.read()
-        if text:
-            result = json.loads(text)
+    text = phlsys_fs.read_text_file(filename)
+    if text:
+        result = json.loads(text)
     return result
 
 

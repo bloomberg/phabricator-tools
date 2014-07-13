@@ -30,8 +30,7 @@ class ToFile(object):
 
     def write(self, d):
         assert isinstance(d, dict)
-        with phlsys_fs.write_file_lock_context(self._filename) as f:
-            f.write(json.dumps(d))
+        phlsys_fs.atomic_replace_text_file(self._filename, json.dumps(d))
 
 
 class ToDict(object):
