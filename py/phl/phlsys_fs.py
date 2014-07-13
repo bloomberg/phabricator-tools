@@ -9,6 +9,7 @@
 #
 # Public Functions:
 #   read_file_lock_context
+#   atomic_replace_text_file
 #   write_file_lock_context
 #   lockfile_retry_context
 #   lockfile_context
@@ -64,6 +65,33 @@ def read_file_lock_context(filename):
             yield file_object
         finally:
             fcntl.flock(file_object, fcntl.LOCK_UN)
+
+
+def atomic_replace_text_file(filename, text):
+    """Create or replace contents of filename so that reads are consistent.
+
+    Use an intermediate temporary file and move the new content into place, on
+    a POSIX filesystem this means that concurrent reads of 'filename' will
+    either see the new version or another version. Readers will not see an
+    inconsistent hybrid version.
+
+    Note that temporary files may be left behind if the function is
+    interrupted.
+
+    Note that on Windows, if 'filename' already exists, OSError will be raised
+    even if it is a file.
+
+    :filename: string path to the file to replace
+    :text: string new content of the file
+    :returns: None
+
+    """
+    target_dir = os.path.dirname(filename)
+    f = tempfile.NamedTemporaryFile(dir=target_dir, mode='w', delete=False)
+    temp_path = f.name
+    with contextlib.closing(f):
+        f.write(text)
+    os.rename(temp_path, filename)
 
 
 @contextlib.contextmanager

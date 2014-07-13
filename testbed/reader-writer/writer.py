@@ -18,10 +18,10 @@ while True:
     for i in xrange(0, random.randint(1, 1000)):
         d[i] = random.randint(1, 1000)
 
-    with phlsys_fs.write_file_lock_context('test-file') as f:
-        f.write(json.dumps(d))
+    phlsys_fs.atomic_replace_text_file(
+        'test-file', json.dumps(d))
 
-    # print ".",
+
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
