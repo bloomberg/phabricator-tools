@@ -1,8 +1,6 @@
 trap 'kill $(jobs -p)' EXIT
 
-for i in {0..10}; do
-    python writer.py &
-done
+python writer.py &
 
 for i in {0..10}; do
     python reader.py &
