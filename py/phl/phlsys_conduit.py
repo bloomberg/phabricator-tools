@@ -22,6 +22,8 @@
 #
 # Public Assignments:
 #   SESSION_ERROR
+#   CONDUITPROXY_ERROR_CONNECT
+#   CONDUITPROXY_ERROR_BADAUTH
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -157,6 +159,12 @@ class ConduitException(Exception):
 # we would expect this to arise normally from time to time
 SESSION_ERROR = "ERR-INVALID-SESSION"
 
+# if we try to conduit.connect to a conduitproxy then we'll get this error,
+# this means we should send the full cert every time.
+CONDUITPROXY_ERROR_CONNECT = "CONDUITPROXY-ERR-REDUNDANT-CONNECT"
+
+CONDUITPROXY_ERROR_BADAUTH = "CONDUITPROXY-ERR-BADAUTH"
+
 
 class Conduit(object):
 
@@ -214,20 +222,32 @@ class Conduit(object):
         error_message = response["error_info"]
         result = response["result"]
 
-        if error:
-            raise ConduitException(
-                method=method,
-                error=error,
-                errormsg=error_message,
-                result=result,
-                obj=message_dict,
-                uri=self._conduit_uri,
-                actAsUser=self._act_as_user)
+        is_conduitproxy = False
 
-        self._conduit = {
-            'sessionKey': result["sessionKey"],
-            'connectionID': result["connectionID"],
-        }
+        if error:
+            if error == CONDUITPROXY_ERROR_CONNECT:
+                is_conduitproxy = True
+            else:
+                raise ConduitException(
+                    method=method,
+                    error=error,
+                    errormsg=error_message,
+                    result=result,
+                    obj=message_dict,
+                    uri=self._conduit_uri,
+                    actAsUser=self._act_as_user)
+
+        if is_conduitproxy:
+            # conduit proxies don't have sessions, send the cert every time
+            self._conduit = {
+                'user': self._username,
+                'cert': self._certificate
+            }
+        else:
+            self._conduit = {
+                'sessionKey': result["sessionKey"],
+                'connectionID': result["connectionID"],
+            }
 
         if self._act_as_user:
             self._conduit["actAsUser"] = self._act_as_user

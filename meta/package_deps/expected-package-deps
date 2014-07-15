@@ -9,6 +9,7 @@
 ('abdcmd', ['abdi', 'abdt', 'abdweb', 'phlgitx', 'phlsys', 'phlurl'])
 ('gabcmd', ['phlgit', 'phlsys'])
 ('phlgitu', ['phlgit', 'phlsys'])
+('poxcmd', ['phlsys'])
 ('abdi', ['abdcmnt', 'abdmail', 'abdt', 'phlcon', 'phlgit', 'phlgitx', 'phlmail', 'phlsys', 'phlurl'])
 ('phlsys', ['phldef'])
 ('abdcmnt', ['abdt', 'phlcon'])
