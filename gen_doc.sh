@@ -19,6 +19,8 @@ cd "$(dirname "$0")"
 python meta/docgen/updatemodcontents.py \
     --force-insert \
     `find py/ meta/docgen meta/autofix -iname '*.py' | grep -v __t`
+printf "."
+printf " "
 
 ###############################################################################
 # update package group documentation .md files
@@ -35,7 +37,9 @@ for dir in $(find py/ -mindepth 1 -maxdepth 1 -type d); do
     echo >> ${mdfile}
     echo '-----' >> ${mdfile}
     echo '*please note: this file is generated, edits will be lost*' >> ${mdfile}
+    printf "."
 done
+printf " "
 
 ###############################################################################
 # update 'man page' documentation in doc/man
@@ -48,6 +52,7 @@ ${barc} -h > doc/man/barc/barc.generated.txt
 for command in ${barc_commands}; do
     ${barc} ${command} -h > doc/man/barc/barc_${command}.generated.txt
 done
+printf "."
 
 arcyd='proto/arcyd'
 arcyd_commands='
@@ -59,6 +64,7 @@ ${arcyd} -h > doc/man/arcyd/arcyd.generated.txt
 for command in ${arcyd_commands}; do
     ${arcyd} ${command} -h > doc/man/arcyd/arcyd_${command}.generated.txt
 done
+printf "."
 
 arcyon='bin/arcyon'
 arcyon_commands='
@@ -69,6 +75,7 @@ ${arcyon} -h > doc/man/arcyon/arcyon.generated.txt
 for command in ${arcyon_commands}; do
     ${arcyon} ${command} -h > doc/man/arcyon/arcyon_${command}.generated.txt
 done
+printf "."
 
 
 # -----------------------------------------------------------------------------

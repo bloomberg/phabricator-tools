@@ -34,6 +34,7 @@ function run_test_script() {
         exit 1
     fi
     set -e # exit immediately on error
+    printf "."
 }
 
 run_test_script "testbed/arcyd" "exercise_arcyd.sh"

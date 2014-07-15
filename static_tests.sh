@@ -25,6 +25,7 @@ PYTHONPATH=py/phl pylint \
     --rcfile=.pylint.rc \
     --errors-only \
     ${libscripts}
+printf "."
 
 ###############################################################################
 # pychecker
@@ -38,11 +39,13 @@ PYTHONPATH=py/phl:py/abd pychecker \
     --no-deprecated \
     --maxlines 150 --maxbranches 15 --maxreturns 5 --maxargs 16 --maxlocals 20\
     ${libscripts}
+printf "."
 
 ###############################################################################
 # flake8
 ###############################################################################
 flake8 $allscripts
+printf "."
 
 ###############################################################################
 # check dependencies between packages
@@ -52,11 +55,13 @@ flake8 $allscripts
 sfood ${libscripts} --internal > meta/package_deps/deps
 ./meta/package_deps/process.py meta/package_deps/deps meta/package_deps/file-deps meta/package_deps/package-deps
 diff ./meta/package_deps/expected-package-deps ./meta/package_deps/package-deps
+printf "."
 
 ###############################################################################
 # check for unused components
 ###############################################################################
 (cd meta/package_deps; ./check_no_dead_files.sh)
+printf "."
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
