@@ -12,6 +12,7 @@
 #    .get_act_as_user
 #    .get_user
 #    .conduit_uri
+#    .raw_call
 #    .ping
 #
 # Public Functions:
@@ -271,6 +272,9 @@ class Conduit(object):
         return json.loads(data)
 
     def __call__(self, method, param_dict_in=None):
+        return self.raw_call(method, param_dict_in)["result"]
+
+    def raw_call(self, method, param_dict_in=None):
         attempts = 3
         for x in range(attempts):
             param_dict = dict(param_dict_in) if param_dict_in else {}
@@ -308,7 +312,7 @@ class Conduit(object):
                 uri=self._conduit_uri,
                 actAsUser=self._act_as_user)
 
-        return result
+        return response
 
     def ping(self):
         return self("conduit.ping")
