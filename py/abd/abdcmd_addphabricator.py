@@ -52,7 +52,8 @@ def setupParser(parser):
         type=str,
         metavar='STR',
         required=True,
-        help="string name of the phabricator instance, [_a-zA-Z0-9]+")
+        help="string name of the phabricator instance, {regex}".format(
+            regex=abdt_fs.CONFIG_NAME_REGEX))
 
     parser.add_argument(
         '--instance-uri',

@@ -71,8 +71,9 @@ def setupParser(parser):
         '--name',
         type=str,
         metavar='STR',
-        help="string identifier for the repository, '[_a-zA-Z0-9]+'. "
-             "will guess a name from the mandatory args if none provided.")
+        help="string identifier for the repository, '{regex}'. "
+             "will guess a name from the mandatory args if "
+             "none provided.".format(regex=abdt_fs.CONFIG_NAME_REGEX))
 
     parser.add_argument(
         '--repo-desc',

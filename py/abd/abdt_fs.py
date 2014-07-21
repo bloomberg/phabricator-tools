@@ -30,6 +30,11 @@
 # Public Functions:
 #   make_default_accessor
 #   initialise_here
+#   raise_if_config_name_not_valid
+#   is_config_name_valid
+#
+# Public Assignments:
+#   CONFIG_NAME_REGEX
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -39,6 +44,7 @@ from __future__ import absolute_import
 
 import contextlib
 import os
+import re
 
 import phlgit_commit
 import phlgit_diffindex
@@ -46,6 +52,8 @@ import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
 
+
+CONFIG_NAME_REGEX = '^[_a-z0-9]+$'
 
 _README = """
 This is an Arcyd repository.
@@ -131,7 +139,7 @@ class Layout(object):
     def phabricator_config(name):
         """Return the string path to the phabricator config 'name'.
 
-        :name: string name of the new config [a-zA-Z0-9_]
+        :name: string name of the new config, see CONFIG_NAME_REGEX
         :returns: the string relative path of the new file
 
         """
@@ -141,7 +149,7 @@ class Layout(object):
     def repohost_config(name):
         """Return the string path to the repohost config 'name'.
 
-        :name: string name of the new config [a-zA-Z0-9_]
+        :name: string name of the new config, see CONFIG_NAME_REGEX
         :returns: the string relative path of the new file
 
         """
@@ -151,7 +159,7 @@ class Layout(object):
     def repo_config(name):
         """Return the string path to the repo config 'name'.
 
-        :name: string name of the new config [a-zA-Z0-9_]
+        :name: string name of the new config, see CONFIG_NAME_REGEX
         :returns: the string relative path of the new file
 
         """
@@ -254,11 +262,12 @@ class Accessor(object):
     def create_phabricator_config(self, name, content):
         """Create a new phabricator config file.
 
-        :name: string name of the new config [a-zA-Z0-9_]
+        :name: string name of the new config, see CONFIG_NAME_REGEX
         :content: the string content of the new config file
         :returns: None
 
         """
+        raise_if_config_name_not_valid(name)
         rel_path = self._layout.phabricator_config(name)
         self._create_config(
             rel_path, content, 'Add phabricator config: {}'.format(name))
@@ -268,7 +277,7 @@ class Accessor(object):
 
         Raise Exception if the config does not exist.
 
-        :name: string name of the config [a-zA-Z0-9_]
+        :name: string name of the config, see CONFIG_NAME_REGEX
         :returns: None
 
         """
@@ -283,11 +292,12 @@ class Accessor(object):
     def create_repohost_config(self, name, content):
         """Create a new repohost config file.
 
-        :name: string name of the new config [a-zA-Z0-9_]
+        :name: string name of the new config, see CONFIG_NAME_REGEX
         :content: the string content of the new config file
         :returns: None
 
         """
+        raise_if_config_name_not_valid(name)
         rel_path = self._layout.repohost_config(name)
         self._create_config(
             rel_path, content, 'Add repohost config: {}'.format(name))
@@ -297,7 +307,7 @@ class Accessor(object):
 
         Raise Exception if the config does not exist.
 
-        :name: string name of the config [a-zA-Z0-9_]
+        :name: string name of the config, see CONFIG_NAME_REGEX
         :returns: None
 
         """
@@ -312,11 +322,12 @@ class Accessor(object):
     def create_repo_config(self, name, content):
         """Create a new repo config file.
 
-        :name: string name of the new config [a-zA-Z0-9_]
+        :name: string name of the new config, see CONFIG_NAME_REGEX
         :content: the string content of the new config file
         :returns: None
 
         """
+        raise_if_config_name_not_valid(name)
         rel_path = self._layout.repo_config(name)
         self._create_config(
             rel_path, content, 'Add repo config: {}'.format(name))
@@ -392,6 +403,41 @@ def initialise_here():
     phlgit_commit.index(repo, 'Initialised new Arcyd instance')
 
     return Accessor(Layout(), '.')
+
+
+def raise_if_config_name_not_valid(name):
+    """Raise an appropriate error if the supplied 'name' is not valid.
+
+    :name: a string candidate config name
+    :returns: None
+
+    """
+    # XXX: We could add some helpful hints as to why it's not valid in the
+    #      error message.
+    if not is_config_name_valid(name):
+        raise Error("config name is invalid: {}".format(name))
+
+
+def is_config_name_valid(name):
+    """Return True if 'name' is valid for a config, False otherwise.
+
+    Usage examples:
+        >>> is_config_name_valid('my_phabricator99')
+        True
+        >>> is_config_name_valid('My_phabricator99')
+        False
+        >>> is_config_name_valid('my-phabricator99')
+        False
+        >>> is_config_name_valid('my_phabricator.99')
+        False
+
+    :name: a string candidate config name
+    :returns: True or False
+
+    """
+    # Check that all the characters are either underscore, lowercase a-z or
+    # numbers 0-9.  Require a match against the whole string (^$).
+    return re.match(CONFIG_NAME_REGEX, name) is not None
 
 
 # -----------------------------------------------------------------------------
