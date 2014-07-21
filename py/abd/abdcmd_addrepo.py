@@ -98,7 +98,8 @@ def _repo_desc_for_params(phab, repohost, url):
 
 def _repo_name_for_params(phab, repohost, url):
 
-    snakecase_url = url.lower().replace("/", "_")
+    no_dot_git_url = url[:-4] if url.endswith('.git') else url
+    snakecase_url = no_dot_git_url.lower().replace("/", "_")
 
     name = "{phab}_{repohost}_{url}".format(
         phab=phab, repohost=repohost, url=snakecase_url)
