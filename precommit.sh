@@ -61,7 +61,7 @@ if [ "$?" -ne 0 ]; then
     exit -1
 fi
 trap 'echo FAIL; exit 1' ERR
-echo OK
+echo ' OK'
 
 ###############################################################################
 # perform automatic fixes of minor code issues
@@ -81,28 +81,29 @@ if [ "$?" -ne 0 ]; then
     exit -1
 fi
 trap 'echo FAIL; exit 1' ERR
-echo OK
+echo ' OK'
 
 ###############################################################################
 # perform static analysis
 ###############################################################################
 printf "static tests: "
 ./static_tests.sh
-echo OK
+echo ' OK'
 
 ###############################################################################
 # perform run-time tests (unit-tests etc.)
 ###############################################################################
 printf "unit tests: "
 ./unit_tests.sh
-# echo "OK" <-- nose will print status for itself
+# echo ' OK' <-- nose will print status for itself
 
 ###############################################################################
 # perform smoke tests (stuff in testbed/ etc.)
 ###############################################################################
 printf "smoke tests: "
 ./smoke_tests.sh
-echo "OK"
+echo ' OK'
+
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #
