@@ -328,6 +328,16 @@ class ArcydReporter(object):
     def log_system_error(self, identifier, detail):
         self._add_log_item(self._log_system_error, identifier, detail)
         if self._external_system_error_logger:
+
+            #  It's easily possible for 'detail' to exceed the length of
+            #  command-line parameters allowed when calling out to a registered
+            #  external system error logger.
+            #
+            #  Limit the amount of detail that will be sent to an arbitrary
+            #  small number to prevent errors when reporting errors.
+            #
+            detail = detail[:160]
+
             phlsys_subprocess.run(
                 self._external_system_error_logger,
                 identifier,
