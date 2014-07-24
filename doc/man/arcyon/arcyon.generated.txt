@@ -1,6 +1,6 @@
 usage: arcyon [-h]
               
-              {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
+              {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
               ...
 
 Arcyon - util to interact with Conduit API from the command-line.
@@ -10,11 +10,12 @@ dedicated command-line tool. This should make it easier to write shell scripts
 which extend Phabricator.
 
 positional arguments:
-  {show-config,query,comment,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
+  {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
     show-config         show the configuration as discovered from the current
                         directory.
     query               display and filter the list of differential revisions.
     comment             create a comment on differential reviews.
+    comment-inline      create an inline comment on a differential review.
     raw-diff            Create a raw diff in differential.
     create-revision     Create a new revision in differential.
     update-revision     Update an existing revision in differential.

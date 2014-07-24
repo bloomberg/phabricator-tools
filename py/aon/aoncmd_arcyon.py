@@ -25,6 +25,7 @@ import phlsys_makeconduit
 import phlsys_subcommand
 
 import aoncmd_comment
+import aoncmd_commentinline
 import aoncmd_createrevision
 import aoncmd_getdiff
 import aoncmd_paste
@@ -74,6 +75,8 @@ def main():
         "show-config", aoncmd_showconfig, subparsers)
     phlsys_subcommand.setup_parser("query", aoncmd_query, subparsers)
     phlsys_subcommand.setup_parser("comment", aoncmd_comment, subparsers)
+    phlsys_subcommand.setup_parser(
+        "comment-inline", aoncmd_commentinline, subparsers)
     phlsys_subcommand.setup_parser("raw-diff", aoncmd_rawdiff, subparsers)
     phlsys_subcommand.setup_parser(
         "create-revision", aoncmd_createrevision, subparsers)

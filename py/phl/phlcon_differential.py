@@ -423,7 +423,7 @@ def create_inline_comment(
 
     d = phlsys_dictutil.copy_dict_no_nones(d)
 
-    conduit('differential.createinline', d)
+    return conduit('differential.createinline', d)
 
 
 def get_commit_message(conduit, revision_id):

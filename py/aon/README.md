@@ -3,6 +3,8 @@
 Arcyon - util to interact with Conduit API from the command-line.
 * `aoncmd_comment.py` -
 create a comment on differential reviews.
+* `aoncmd_commentinline.py` -
+create an inline comment on a differential review.
 * `aoncmd_createrevision.py` -
 Create a new revision in differential.
 * `aoncmd_getdiff.py` -

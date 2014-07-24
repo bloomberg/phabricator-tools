@@ -1,0 +1,49 @@
+usage: arcyon comment-inline [-h] [--message M] [--message-file FILE]
+                             --filepath FILE --start-line #
+                             [--end-line-offset #] [--left-side]
+                             [--uri ADDRESS] [--user NAME] [--cert HEX]
+                             [--act-as-user NAME]
+                             id
+
+create an inline comment on a differential review.
+
+positional arguments:
+  id                    the revision id to comment on (e.g. 1)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --message M, -m M     the body text of the comment
+  --message-file FILE   a file to read the message from, use '-' for stdin
+  --filepath FILE, -f FILE
+                        the filename of the file to comment on
+  --start-line #, -s #  starting line of the comment
+  --end-line-offset #, -l #
+                        number of extra lines the comment should span, the
+                        default is 0meaning that the comment spans one line
+                        only.
+  --left-side, -o       comment on the left (old) side of the diff
+
+connection arguments:
+  use these optional parameters to override settings present in your
+  "~/.arcrc" or ".arcconfig" files
+
+  --uri ADDRESS         address of the phabricator instance to connect to.
+  --user NAME           name of the user to connect as.
+  --cert HEX            long certificate string of the user to connect as, you
+                        can find this string here:
+                        http://your.phabricator/settings/panel/conduit/.
+                        generally you wouldn't expect to enter this on the
+                        command-line and would make an ~/.arcrc file by using
+                        '$ arc install-certificate'.
+  --act-as-user NAME    name of the user to impersonate (admin only).
+
+    Note: this will create the comments but not submit them.  You must run
+    arcyon comment with the --attach-inlines option in order to actually
+    submit these.
+
+usage examples:
+    comment on revision '1', file requestprocessor.py, starting on line 5,
+    spanning 4 lines in total:
+    $ arcyon comment-inline 1 -s 5 -l 3 --filepath requestprocessor.py
+      -m 'hello revision 1, these four lines will leak memory, please fix'
+    $ arcyon comment 1 --attach-inlines

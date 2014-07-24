@@ -8,6 +8,7 @@ arcyon='../../bin/arcyon'
 
 $arcyon -h
 $arcyon comment -h
+$arcyon comment-inline -h
 $arcyon get-diff -h
 $arcyon paste -h
 $arcyon query -h
@@ -42,6 +43,9 @@ fi
 $arcyon query --format-type ids | grep $id2
 
 $arcyon comment $id2 -m 'hello there!'
+$arcyon comment-inline $id2 --start-line 51 --end-line-offset 0 --filepath 'bin/arcyon' -m 'inline comment!'
+$arcyon comment-inline $id2 --start-line 51 --end-line-offset 0 --filepath 'bin/arcyon' -m 'old-side inline comment!' --left-side
+$arcyon comment $id2 --attach-inlines
 
 taskid=$($arcyon task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob --format-id)
 $arcyon task-query

@@ -69,7 +69,7 @@ printf "."
 arcyon='bin/arcyon'
 arcyon_commands='
     show-config query comment raw-diff create-revision update-revision
-    get-diff paste task-create task-update task-query'
+    get-diff paste task-create task-update task-query comment-inline'
 
 ${arcyon} -h > doc/man/arcyon/arcyon.generated.txt
 for command in ${arcyon_commands}; do
