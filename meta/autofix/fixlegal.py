@@ -21,6 +21,7 @@
 #   DIVIDER
 #   COPYRIGHT_FORMAT
 #   BLANK_LINE
+#   APACHE2_LICENSE
 #   MIT_LICENSE
 #   END_OF_FILE
 #
@@ -49,6 +50,20 @@ DIVIDER = """
 COPYRIGHT_FORMAT = "# Copyright (C) {date_range} Bloomberg Finance L.P."
 
 BLANK_LINE = "#"
+
+APACHE2_LICENSE = """
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+""".strip()
 
 MIT_LICENSE = """
 # Permission is hereby granted, free of charge, to any person obtaining a copy
