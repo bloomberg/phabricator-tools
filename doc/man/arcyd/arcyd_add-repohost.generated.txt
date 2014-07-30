@@ -7,7 +7,7 @@ Add a new repository host for the Arcyd instance to refer to.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --name STR            string name of the repohost, ^[_a-z0-9]+$
+  --name STR            string name of the repohost, ^[_a-z0-9-]+$
   --repo-url-format STRING
                         a python format() string to apply the '--repo-url'
                         argument to produce the final url, e.g.

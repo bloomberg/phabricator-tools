@@ -53,7 +53,7 @@ import phlsys_git
 import phlsys_subprocess
 
 
-CONFIG_NAME_REGEX = '^[_a-z0-9]+$'
+CONFIG_NAME_REGEX = '^[_a-z0-9-]+$'
 
 _README = """
 This is an Arcyd repository.

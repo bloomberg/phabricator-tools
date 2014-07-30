@@ -7,7 +7,7 @@ Make a new phabricator instance known to the Arcyd instance.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --name STR            string name of the phabricator instance, ^[_a-z0-9]+$
+  --name STR            string name of the phabricator instance, ^[_a-z0-9-]+$
   --instance-uri ADDRESS
                         URI to use to access the conduit API, e.g.
                         'http://127.0.0.1/api/'.

@@ -14,7 +14,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  --name STR            string identifier for the repository, '^[_a-z0-9]+$'.
+  --name STR            string identifier for the repository, '^[_a-z0-9-]+$'.
                         will guess a name from the mandatory args if none
                         provided.
   --repo-desc STR       very short description of the repository, appears on
