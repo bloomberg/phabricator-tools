@@ -53,6 +53,16 @@ import phlsys_git
 import phlsys_subprocess
 
 
+# Restrict the names that may be used for config files for repos, phab
+# instances, repo hosts. The names may be used in URLs and filenames, err on
+# the side of caution when allowing characters.
+#
+# Only allow lowercase names so that we don't get tripped up by
+# case-insensitive file systems.
+#
+# Check that all the characters are either dash, underscore, lowercase a-z or
+# numbers 0-9.  Require a match against the whole string (^$).
+#
 CONFIG_NAME_REGEX = '^[_a-z0-9-]+$'
 
 _README = """
@@ -427,7 +437,7 @@ def is_config_name_valid(name):
         >>> is_config_name_valid('My_phabricator99')
         False
         >>> is_config_name_valid('my-phabricator99')
-        False
+        True
         >>> is_config_name_valid('my_phabricator.99')
         False
 
@@ -435,8 +445,6 @@ def is_config_name_valid(name):
     :returns: True or False
 
     """
-    # Check that all the characters are either underscore, lowercase a-z or
-    # numbers 0-9.  Require a match against the whole string (^$).
     return re.match(CONFIG_NAME_REGEX, name) is not None
 
 
