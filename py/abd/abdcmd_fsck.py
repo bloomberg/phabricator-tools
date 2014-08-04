@@ -48,6 +48,12 @@ def process(args):
             parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
             abdi_repoargs.setup_parser(parser)
 
+            repo_filename = os.path.basename(repo)
+            if not abdt_fs.is_config_name_valid(repo_filename):
+                print "'{}' is not a valid repo config name".format(
+                    repo_filename)
+                exit_code = 1
+
             with open(repo) as f:
                 repo_params = parser.parse_args(
                     line.strip() for line in f)
