@@ -32,7 +32,7 @@ def setupParser(parser):
         'name',
         type=str,
         metavar='STR',
-        help="name of the Phabricator instance associated with the repo.")
+        help="string identifier of the repository to remove.")
 
 
 def process(args):
