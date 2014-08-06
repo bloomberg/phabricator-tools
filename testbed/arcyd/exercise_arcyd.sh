@@ -116,6 +116,18 @@ sleep 1
 ${arcyd} stop
 cd ..
 
+# exercise 'list-repos'
+cd arcyd_instance
+${arcyd} list-repos
+${arcyd} list-repos --only-formatted-repo-urls
+cd ..
+
+# exercise 'fsck'
+cd arcyd_instance
+${arcyd} fsck
+${arcyd} fsck --fix
+cd ..
+
 # create a review branch
 cd dev
     git checkout -b 'arcyd-review/myfile/master'
@@ -193,6 +205,12 @@ cat arcyd_instance/savemail.txt
 
 cat arcyd_instance/var/status/localhost_fs_origin.try
 cat arcyd_instance/var/status/localhost_fs_origin.ok
+
+# exercise 'rm-repo'
+cd arcyd_instance
+${arcyd} rm-repo localhost_fs_origin
+git show
+cd ..
 
 cd ${olddir}
 rm -rf ${tempdir}
