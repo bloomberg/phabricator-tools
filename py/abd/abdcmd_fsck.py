@@ -15,7 +15,6 @@
 
 from __future__ import absolute_import
 
-import argparse
 import os
 
 import phlgitx_ignoreident
@@ -44,40 +43,40 @@ def process(args):
     exit_code = 0
 
     with fs.lockfile_context():
-        for repo in fs.repo_config_path_list():
-            parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-            abdi_repoargs.setup_parser(parser)
+        repo_config_path_list = fs.repo_config_path_list()
 
-            repo_filename = os.path.basename(repo)
+        for repo_config_path in repo_config_path_list:
+            repo_filename = os.path.basename(repo_config_path)
             if not abdt_fs.is_config_name_valid(repo_filename):
                 print "'{}' is not a valid repo config name".format(
                     repo_filename)
                 exit_code = 1
 
-            with open(repo) as f:
-                repo_params = parser.parse_args(
-                    line.strip() for line in f)
+        repo_name_config_list = abdi_repoargs.parse_config_file_list(
+            repo_config_path_list)
 
-            if not os.path.isdir(repo_params.repo_path):
+        for repo_name, repo_config in repo_name_config_list:
+
+            if not os.path.isdir(repo_config.repo_path):
                 print "'{}' is missing repo '{}'".format(
-                    repo, repo_params.repo_path)
+                    repo_name, repo_config.repo_path)
                 if args.fix:
-                    repo_url = abdi_repoargs.get_repo_url(repo_params)
+                    repo_url = abdi_repoargs.get_repo_url(repo_config)
                     print "cloning '{}' ..".format(repo_url)
-                    abdi_repo.setup_repo(repo_url, repo_params.repo_path)
+                    abdi_repo.setup_repo(repo_url, repo_config.repo_path)
                 else:
                     exit_code = 1
             else:
                 is_ignoring = phlgitx_ignoreident.is_repo_definitely_ignoring
-                if not is_ignoring(repo_params.repo_path):
+                if not is_ignoring(repo_config.repo_path):
                     print "'{}' is not ignoring ident attributes".format(
-                        repo_params.repo_path)
+                        repo_config.repo_path)
                     if args.fix:
                         print "setting {} to ignore ident ..".format(
-                            repo_params.repo_path)
+                            repo_config.repo_path)
 
                         phlgitx_ignoreident.ensure_repo_ignoring(
-                            repo_params.repo_path)
+                            repo_config.repo_path)
                     else:
                         exit_code = 1
 
