@@ -15,8 +15,6 @@
 
 from __future__ import absolute_import
 
-import argparse
-
 import abdi_repoargs
 import abdt_fs
 
@@ -31,23 +29,20 @@ def setupParser(parser):
         action='store_true')
 
 
-# XXX: this probably belongs somewhere else, for re-use
-def _iter_repo_args(abdt_accessor):
-    for repo_path in abdt_accessor.repo_config_path_list():
-        parser = argparse.ArgumentParser(fromfile_prefix_chars='@')
-        abdi_repoargs.setup_parser(parser)
-        yield parser.parse_args(['@{}'.format(repo_path)])
-
-
 def process(args):
     fs = abdt_fs.make_default_accessor()
 
     with fs.lockfile_context():
-        for repo_args in _iter_repo_args(fs):
+
+        repo_config_path_list = fs.repo_config_path_list()
+        repo_name_config_list = abdi_repoargs.parse_config_file_list(
+            repo_config_path_list)
+
+        for _, repo_config in repo_name_config_list:
             if args.only_formatted_repo_urls:
-                print abdi_repoargs.get_repo_url(repo_args)
+                print abdi_repoargs.get_repo_url(repo_config)
             else:
-                print repo_args
+                print repo_config
 
 
 # -----------------------------------------------------------------------------
