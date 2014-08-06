@@ -86,6 +86,7 @@ def _check_repo_name_config_list(args, repo_name_config_list):
     Will print details of errors found. Will continue when errors are found,
     unless they interfere with the operation of fsck.
 
+    :args: argeparse arguments to arcyd fsck
     :repo_config_path_list: a list of paths to repo configs
     :returns: True or False
 
@@ -93,28 +94,65 @@ def _check_repo_name_config_list(args, repo_name_config_list):
     all_ok = True
     for repo_name, repo_config in repo_name_config_list:
 
-        if not os.path.isdir(repo_config.repo_path):
-            print "'{}' is missing repo '{}'".format(
-                repo_name, repo_config.repo_path)
-            if args.fix:
-                repo_url = abdi_repoargs.get_repo_url(repo_config)
-                print "cloning '{}' ..".format(repo_url)
-                abdi_repo.setup_repo(repo_url, repo_config.repo_path)
-            else:
-                all_ok = False
+        if not _check_repo_cloned(args, repo_name, repo_config):
+            all_ok = False
         else:
-            is_ignoring = phlgitx_ignoreident.is_repo_definitely_ignoring
-            if not is_ignoring(repo_config.repo_path):
-                print "'{}' is not ignoring ident attributes".format(
-                    repo_config.repo_path)
-                if args.fix:
-                    print "setting {} to ignore ident ..".format(
-                        repo_config.repo_path)
+            if not _check_repo_ignoring_ident(args, repo_config):
+                all_ok = False
 
-                    phlgitx_ignoreident.ensure_repo_ignoring(
-                        repo_config.repo_path)
-                else:
-                    all_ok = False
+    return all_ok
+
+
+def _check_repo_cloned(args, repo_name, repo_config):
+    """Return False if the supplied repo isn't cloned or fixed.
+
+    Will print details of errors found. Will continue when errors are found,
+    unless they interfere with the operation of fsck.
+
+    :args: argeparse arguments to arcyd fsck
+    :repo_name: string name of the repository
+    :repo_config: argparse namespace of the repo's config
+    :returns: True or False
+
+    """
+    all_ok = True
+    if not os.path.isdir(repo_config.repo_path):
+        print "'{}' is missing repo '{}'".format(
+            repo_name, repo_config.repo_path)
+        if args.fix:
+            repo_url = abdi_repoargs.get_repo_url(repo_config)
+            print "cloning '{}' ..".format(repo_url)
+            abdi_repo.setup_repo(repo_url, repo_config.repo_path)
+        else:
+            all_ok = False
+
+    return all_ok
+
+
+def _check_repo_ignoring_ident(args, repo_config):
+    """Return False if the supplied repo isn't ignoring ident config.
+
+    Will print details of errors found. Will continue when errors are found,
+    unless they interfere with the operation of fsck.
+
+    :args: argeparse arguments to arcyd fsck
+    :repo_config: argparse namespace of the repo's config
+    :returns: True or False
+
+    """
+    all_ok = True
+    is_ignoring = phlgitx_ignoreident.is_repo_definitely_ignoring
+    if not is_ignoring(repo_config.repo_path):
+        print "'{}' is not ignoring ident attributes".format(
+            repo_config.repo_path)
+        if args.fix:
+            print "setting {} to ignore ident ..".format(
+                repo_config.repo_path)
+
+            phlgitx_ignoreident.ensure_repo_ignoring(
+                repo_config.repo_path)
+        else:
+            all_ok = False
 
     return all_ok
 
