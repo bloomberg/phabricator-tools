@@ -18,6 +18,8 @@ from __future__ import absolute_import
 import os
 
 import phlgitx_ignoreident
+import phlsys_git
+import phlsys_subprocess
 
 import abdi_repo
 import abdi_repoargs
@@ -34,6 +36,12 @@ def setupParser(parser):
         '--fix',
         action="store_true",
         help="resolve issues that are detected, where possible.")
+
+    parser.add_argument(
+        '--remote',
+        action="store_true",
+        help="also check remote resources pointed to by the file system. e.g. "
+             "git remotes.")
 
 
 def process(args):
@@ -99,6 +107,9 @@ def _check_repo_name_config_list(args, repo_name_config_list):
         else:
             if not _check_repo_ignoring_ident(args, repo_config):
                 all_ok = False
+            if args.remote:
+                if not _check_repo_remote(repo_name, repo_config):
+                    all_ok = False
 
     return all_ok
 
@@ -155,6 +166,48 @@ def _check_repo_ignoring_ident(args, repo_config):
             all_ok = False
 
     return all_ok
+
+
+def _check_repo_remote(repo_name, repo_config):
+    """Return False if the supplied repo has problems with it's remote.
+
+    Will print details of errors found. Will continue when errors are found,
+    unless they interfere with the operation of fsck.
+
+    :args: argeparse arguments to arcyd fsck
+    :repo_name: string name of the repository
+    :repo_config: argparse namespace of the repo's config
+    :returns: True or False
+
+    """
+    all_ok = True
+    repo = phlsys_git.Repo(repo_config.repo_path)
+
+    # check that we can read from the remote
+    try:
+        repo("ls-remote")
+    except phlsys_subprocess.CalledProcessError as e:
+        all_ok = False
+        print "error reading remote for {repo}".format(repo=repo_name)
+        _print_indented(4, e.stdout)
+        _print_indented(4, e.stderr)
+        print
+
+    return all_ok
+
+
+def _print_indented(spaces, s):
+    """Print the supplied string 's' with each line indented by 'spaces'.
+
+    :spaces: the integer number of spaces to prepend
+    :s: the string to indent
+    :returns: None
+
+    """
+    for line in s.splitlines():
+        print "{indent}{line}".format(
+            indent=" " * spaces,
+            line=line)
 
 
 # -----------------------------------------------------------------------------
