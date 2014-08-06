@@ -240,7 +240,7 @@ class Accessor(object):
         return pid
 
     def _create_config(self, rel_path, content, message):
-        """Create and commit the a new config file.
+        """Create and commit a new config file.
 
         :rel_path: the string relative path to the config file
         :content: the string contents of the new config file
