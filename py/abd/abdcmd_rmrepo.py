@@ -46,10 +46,10 @@ def process(args):
 
         repo_name = args.name
 
-        os.remove(fs.layout.repo_config(repo_name))
         os.remove(fs.layout.repo_try(repo_name))
         os.remove(fs.layout.repo_ok(repo_name))
         shutil.rmtree(fs.layout.repo(repo_name))
+        fs.remove_repo_config(repo_name)
 
 
 # -----------------------------------------------------------------------------

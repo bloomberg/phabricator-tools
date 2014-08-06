@@ -22,6 +22,7 @@
 #    .create_repohost_config
 #    .get_repohost_config_rel_path
 #    .create_repo_config
+#    .remove_repo_config
 #    .repo_name_list
 #    .repo_config_path_list
 #    .lockfile_context
@@ -259,6 +260,24 @@ class Accessor(object):
         self._repo('add', rel_path)
         phlgit_commit.index(self._repo, message)
 
+    def _remove_config(self, rel_path, message):
+        """Remove and commit the removal of an existing config file.
+
+        :rel_path: the string relative path to the config file
+        :message: the string commit message for the file
+
+        """
+        if phlgit_diffindex.is_index_dirty(self._repo):
+            print Error("git index has staged changes")
+
+        path = self._make_abspath(rel_path)
+
+        if not os.path.exists(path):
+            raise Error("config doesn't exist: {}".format(rel_path))
+
+        self._repo('rm', rel_path)
+        phlgit_commit.index(self._repo, message)
+
     def create_root_config(self, content):
         """Create and commit the root config file.
 
@@ -341,6 +360,17 @@ class Accessor(object):
         rel_path = self._layout.repo_config(name)
         self._create_config(
             rel_path, content, 'Add repo config: {}'.format(name))
+
+    def remove_repo_config(self, name):
+        """Remove an existing repo config file.
+
+        :name: string name of the existing config, see CONFIG_NAME_REGEX
+        :returns: None
+
+        """
+        rel_path = self._layout.repo_config(name)
+        self._remove_config(
+            rel_path, 'Remove repo config: {}'.format(name))
 
     def repo_name_list(self):
         """Return a list of string names of managed repositories.
