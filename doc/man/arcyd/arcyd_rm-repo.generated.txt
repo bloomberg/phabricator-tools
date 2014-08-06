@@ -1,9 +1,12 @@
-usage: arcyd rm-repo [-h] STR
+usage: arcyd rm-repo [-h] [--lookup-url] STR
 
 Remove a repository from the Arcyd instance.
 
 positional arguments:
-  STR         string identifier of the repository to remove.
+  STR           string identifier of the repository to remove.
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help    show this help message and exit
+  --lookup-url  treat 'name' as a full url and lookup the associated
+                repoconfig. Fail if there is more than one repo with the same
+                url.
