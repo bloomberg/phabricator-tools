@@ -35,6 +35,24 @@ def setupParser(parser):
         help="string identifier of the repository to remove.")
 
 
+def _remove_file_ignore_fail(path):
+    try:
+        os.remove(path)
+    except OSError as e:
+        print "Warning, problem removing file '{}':".format(path)
+        print "  {}".format(e)
+        print
+
+
+def _remove_dir_ignore_fail(path):
+    try:
+        shutil.rmtree(path)
+    except OSError as e:
+        print "Warning, problem removing dir '{}':".format(path)
+        print "  {}".format(e)
+        print
+
+
 def process(args):
 
     fs = abdt_fs.make_default_accessor()
@@ -46,9 +64,9 @@ def process(args):
 
         repo_name = args.name
 
-        os.remove(fs.layout.repo_try(repo_name))
-        os.remove(fs.layout.repo_ok(repo_name))
-        shutil.rmtree(fs.layout.repo(repo_name))
+        _remove_file_ignore_fail(fs.layout.repo_try(repo_name))
+        _remove_file_ignore_fail(fs.layout.repo_ok(repo_name))
+        _remove_dir_ignore_fail(fs.layout.repo(repo_name))
         fs.remove_repo_config(repo_name)
 
 
