@@ -45,45 +45,78 @@ def process(args):
     with fs.lockfile_context():
         repo_config_path_list = fs.repo_config_path_list()
 
-        for repo_config_path in repo_config_path_list:
-            repo_filename = os.path.basename(repo_config_path)
-            if not abdt_fs.is_config_name_valid(repo_filename):
-                print "'{}' is not a valid repo config name".format(
-                    repo_filename)
-                exit_code = 1
+        if not _check_repo_config_path_list(repo_config_path_list):
+            exit_code = 1
 
         repo_name_config_list = abdi_repoargs.parse_config_file_list(
             repo_config_path_list)
 
-        for repo_name, repo_config in repo_name_config_list:
-
-            if not os.path.isdir(repo_config.repo_path):
-                print "'{}' is missing repo '{}'".format(
-                    repo_name, repo_config.repo_path)
-                if args.fix:
-                    repo_url = abdi_repoargs.get_repo_url(repo_config)
-                    print "cloning '{}' ..".format(repo_url)
-                    abdi_repo.setup_repo(repo_url, repo_config.repo_path)
-                else:
-                    exit_code = 1
-            else:
-                is_ignoring = phlgitx_ignoreident.is_repo_definitely_ignoring
-                if not is_ignoring(repo_config.repo_path):
-                    print "'{}' is not ignoring ident attributes".format(
-                        repo_config.repo_path)
-                    if args.fix:
-                        print "setting {} to ignore ident ..".format(
-                            repo_config.repo_path)
-
-                        phlgitx_ignoreident.ensure_repo_ignoring(
-                            repo_config.repo_path)
-                    else:
-                        exit_code = 1
+        if not _check_repo_name_config_list(args, repo_name_config_list):
+            exit_code = 1
 
     if exit_code != 0 and not args.fix:
         print "use '--fix' to attempt to fix the issues"
 
     return exit_code
+
+
+def _check_repo_config_path_list(repo_config_path_list):
+    """Return False if any errors are detected in the supplied list.
+
+    Will print details of errors found and continue.
+
+    :repo_config_path_list: a list of paths to repo configs
+    :returns: True or False
+
+    """
+    all_ok = True
+    for repo_config_path in repo_config_path_list:
+        repo_filename = os.path.basename(repo_config_path)
+        if not abdt_fs.is_config_name_valid(repo_filename):
+            print "'{}' is not a valid repo config name".format(
+                repo_filename)
+            all_ok = False
+
+    return all_ok
+
+
+def _check_repo_name_config_list(args, repo_name_config_list):
+    """Return False if any errors are detected in the supplied list.
+
+    Will print details of errors found. Will continue when errors are found,
+    unless they interfere with the operation of fsck.
+
+    :repo_config_path_list: a list of paths to repo configs
+    :returns: True or False
+
+    """
+    all_ok = True
+    for repo_name, repo_config in repo_name_config_list:
+
+        if not os.path.isdir(repo_config.repo_path):
+            print "'{}' is missing repo '{}'".format(
+                repo_name, repo_config.repo_path)
+            if args.fix:
+                repo_url = abdi_repoargs.get_repo_url(repo_config)
+                print "cloning '{}' ..".format(repo_url)
+                abdi_repo.setup_repo(repo_url, repo_config.repo_path)
+            else:
+                all_ok = False
+        else:
+            is_ignoring = phlgitx_ignoreident.is_repo_definitely_ignoring
+            if not is_ignoring(repo_config.repo_path):
+                print "'{}' is not ignoring ident attributes".format(
+                    repo_config.repo_path)
+                if args.fix:
+                    print "setting {} to ignore ident ..".format(
+                        repo_config.repo_path)
+
+                    phlgitx_ignoreident.ensure_repo_ignoring(
+                        repo_config.repo_path)
+                else:
+                    all_ok = False
+
+    return all_ok
 
 
 # -----------------------------------------------------------------------------
