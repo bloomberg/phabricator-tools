@@ -7,6 +7,7 @@
 # Public Functions:
 #   new_branch_force_based_on
 #   branch
+#   previous_branch
 #   orphan
 #   orphan_clean
 #
@@ -41,6 +42,16 @@ def branch(repo, branch):
 
     """
     repo('checkout', branch)
+
+
+def previous_branch(repo):
+    """Checkout onto the branch the repo was on before this one.
+
+    :repo: a callable supporting git commands, e.g. repo("status")
+    :returns: None
+
+    """
+    repo('checkout', '-')
 
 
 def orphan(repo, branch):
