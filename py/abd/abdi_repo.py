@@ -8,6 +8,7 @@
 #   setup_repo
 #   setup_repo_context
 #   try_push_special_refs
+#   is_remote_reserve_branch_present
 #   ensure_reserve_branch
 #
 # -----------------------------------------------------------------------------
@@ -28,6 +29,8 @@ import phlsys_subprocess
 
 import abdt_git
 
+
+_RESERVE_BRANCH_FQ_NAME = 'refs/heads/dev/arcyd/reserve'
 
 # The lines in this string are wrapped as appropriate for a commit message
 _RESERVE_BRANCH_MESSAGE = """
@@ -113,6 +116,18 @@ def try_push_special_refs(repo):
     repo('push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
 
 
+def is_remote_reserve_branch_present(repo):
+    """Return True if the remote for 'repo' is reserving 'dev/arcyd/*'.
+
+    :repo: a callable supporting git commands, e.g. repo("status")
+    :returns: True or False
+
+    """
+    reserve_name = phlgitu_ref.Name(_RESERVE_BRANCH_FQ_NAME)
+    remote_ref_names = repo("ls-remote").split()[1::2]
+    return reserve_name.fq in remote_ref_names
+
+
 def ensure_reserve_branch(repo):
     """Ensure that the supplied 'repo' remote has the reserve branch.
 
@@ -123,9 +138,8 @@ def ensure_reserve_branch(repo):
     :returns: None
 
     """
-    reserve_name = phlgitu_ref.Name('refs/heads/dev/arcyd/reserve')
-    remote_ref_names = repo("ls-remote").split()[1::2]
-    if not reserve_name.fq in remote_ref_names:
+    reserve_name = phlgitu_ref.Name(_RESERVE_BRANCH_FQ_NAME)
+    if not is_remote_reserve_branch_present(repo):
         phlgit_checkout.orphan_clean(repo, reserve_name.short)
         phlgit_commit.allow_empty(repo, _RESERVE_BRANCH_MESSAGE)
         phlgit_push.push(repo, reserve_name.short, 'origin')
