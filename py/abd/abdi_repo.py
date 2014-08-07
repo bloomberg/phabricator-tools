@@ -19,6 +19,7 @@ from __future__ import absolute_import
 import contextlib
 import shutil
 
+import phlgit_branch
 import phlgit_checkout
 import phlgit_commit
 import phlgit_push
@@ -143,6 +144,8 @@ def ensure_reserve_branch(repo):
         phlgit_checkout.orphan_clean(repo, reserve_name.short)
         phlgit_commit.allow_empty(repo, _RESERVE_BRANCH_MESSAGE)
         phlgit_push.push(repo, reserve_name.short, 'origin')
+        phlgit_checkout.previous_branch(repo)
+        phlgit_branch.force_delete(repo, reserve_name.short)
 
 
 # -----------------------------------------------------------------------------
