@@ -19,6 +19,7 @@ import os
 
 import phlgitx_ignoreident
 import phlsys_git
+import phlsys_pid
 import phlsys_subprocess
 
 import abdi_repo
@@ -51,6 +52,10 @@ def process(args):
     exit_code = 0
 
     with fs.lockfile_context():
+        pid = fs.get_pid_or_none()
+        if pid is not None and phlsys_pid.is_running(pid):
+            raise Exception("cannot fsck whilst arcyd is running.")
+
         repo_config_path_list = fs.repo_config_path_list()
 
         if not _check_repo_config_path_list(repo_config_path_list):
