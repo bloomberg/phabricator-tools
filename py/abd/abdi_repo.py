@@ -7,6 +7,7 @@
 # Public Functions:
 #   setup_repo
 #   setup_repo_context
+#   try_push_special_refs
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -62,9 +63,7 @@ def setup_repo_context(repo_url, repo_path):
         repo('push', 'origin', '--dry-run', 'HEAD:refs/heads/master')
         repo('checkout', '-')
 
-        # test push to special refs
-        repo('push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
-        repo('push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
+        try_push_special_refs(repo)
 
         # fetch the 'landed' and 'abandoned' refs if they exist
         abdt_git.checkout_master_fetch_special_refs(repo, 'origin')
@@ -75,6 +74,24 @@ def setup_repo_context(repo_url, repo_path):
         # clean up the git repo on any exception
         shutil.rmtree(repo_path)
         raise
+
+
+def try_push_special_refs(repo):
+    """Try pushing to the special refs that arcyd uses.
+
+    Allow errors to raise through.
+
+    :repo: a callable supporting git commands, e.g. repo("status")
+    :returns: None
+
+    """
+    # test pushing to the 'private' dev/arcyd/ area, where arcyd will store
+    # it's tracker branches
+    repo('push', 'origin', '--dry-run', 'HEAD:refs/heads/dev/arcyd/test')
+
+    # test pushing to the refs/arcyd area, where the 'landed' and 'abandoned'
+    # archive branches will live
+    repo('push', 'origin', '--dry-run', 'HEAD:refs/arcyd/test')
 
 
 # -----------------------------------------------------------------------------
