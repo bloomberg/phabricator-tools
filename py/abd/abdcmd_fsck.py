@@ -193,6 +193,16 @@ def _check_repo_remote(repo_name, repo_config):
         _print_indented(4, e.stderr)
         print
 
+    # check that we can write to the remote
+    try:
+        abdi_repo.try_push_special_refs(repo)
+    except phlsys_subprocess.CalledProcessError as e:
+        all_ok = False
+        print "error writing remote for {repo}".format(repo=repo_name)
+        _print_indented(4, e.stdout)
+        _print_indented(4, e.stderr)
+        print
+
     return all_ok
 
 
