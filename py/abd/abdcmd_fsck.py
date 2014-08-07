@@ -113,7 +113,7 @@ def _check_repo_name_config_list(args, repo_name_config_list):
             if not _check_repo_ignoring_ident(args, repo_config):
                 all_ok = False
             if args.remote:
-                if not _check_repo_remote(repo_name, repo_config):
+                if not _check_repo_remote(args, repo_name, repo_config):
                     all_ok = False
 
     return all_ok
@@ -173,7 +173,7 @@ def _check_repo_ignoring_ident(args, repo_config):
     return all_ok
 
 
-def _check_repo_remote(repo_name, repo_config):
+def _check_repo_remote(args, repo_name, repo_config):
     """Return False if the supplied repo has problems with it's remote.
 
     Will print details of errors found. Will continue when errors are found,
@@ -204,6 +204,23 @@ def _check_repo_remote(repo_name, repo_config):
     except phlsys_subprocess.CalledProcessError as e:
         all_ok = False
         print "error writing remote for {repo}".format(repo=repo_name)
+        _print_indented(4, e.stdout)
+        _print_indented(4, e.stderr)
+        print
+
+    # ensure the reserve branch
+    try:
+        if not abdi_repo.is_remote_reserve_branch_present(repo):
+            print "'{repo}' has no reserve branch".format(repo=repo_name)
+            if args.fix:
+                print "ensuring reserve branch for '{repo}'..".format(
+                    repo=repo_name)
+                abdi_repo.ensure_reserve_branch(repo)
+            else:
+                all_ok = False
+    except phlsys_subprocess.CalledProcessError as e:
+        all_ok = False
+        print "error ensuring reserve branch for {repo}".format(repo=repo_name)
         _print_indented(4, e.stdout)
         _print_indented(4, e.stderr)
         print
