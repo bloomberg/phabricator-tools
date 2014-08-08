@@ -97,9 +97,21 @@ def _repo_desc_for_params(phab, repohost, url):
 
 
 def _repo_name_for_params(phab, repohost, url):
+    """Return a sensible repo name from the given parameters.
 
+    Usage examples:
+        >>> _repo_name_for_params('phab', 'host', 'namespace/repo.1.git')
+        'phab_host_namespace_repo-1'
+
+    :phab: the string name of the phab config
+    :repohost: the string name of the repository host
+    :url: the relative url of the repository
+    :returns: the string best-effort to name the repository config
+
+    """
     no_dot_git_url = url[:-4] if url.endswith('.git') else url
-    snakecase_url = no_dot_git_url.lower().replace("/", "_")
+    dot_to_dash = no_dot_git_url.replace(".", "-")
+    snakecase_url = dot_to_dash.lower().replace("/", "_")
 
     name = "{phab}_{repohost}_{url}".format(
         phab=phab, repohost=repohost, url=snakecase_url)
