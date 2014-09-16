@@ -139,6 +139,7 @@ class Layout(object):
     pid = 'var/run/arcyd.pid'
     stdout = 'var/log/stdout'
     stderr = 'var/log/stderr'
+    log_info = 'var/log/info'
     phabricator_config_dir = 'config/repository'
     repository_config_dir = 'config/repository'
     urlwatcher_cache_path = '.arcyd.urlwatcher.cache'

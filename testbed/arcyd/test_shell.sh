@@ -205,6 +205,7 @@ function cleanup() {
     pwd
     cat arcyd/savemail.txt
     cat arcyd/system_error.log
+    cat arcyd/var/log/info
 
     # clean up
     cd ${olddir}

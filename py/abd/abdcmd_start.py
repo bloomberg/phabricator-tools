@@ -16,6 +16,8 @@
 from __future__ import absolute_import
 
 import argparse
+import logging
+import time
 
 import phlsys_daemonize
 import phlsys_pid
@@ -24,6 +26,8 @@ import phlsys_signal
 import abdi_processrepos
 import abdi_repoargs
 import abdt_fs
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def getFromfilePrefixChars():
@@ -78,7 +82,18 @@ def process(args):
         abdi_processrepos.setupParser(parser)
         args = parser.parse_args(params)
 
-    abdi_processrepos.process(args, repo_configs)
+    # setup to log everything to fs.layout.log_info, with a timestamp
+    logging.Formatter.converter = time.gmtime
+    logging.basicConfig(
+        format='%(asctime)s UTC: %(message)s',
+        level=logging.INFO,
+        filename=fs.layout.log_info)
+
+    _LOGGER.info("arcyd started")
+    try:
+        abdi_processrepos.process(args, repo_configs)
+    finally:
+        _LOGGER.info("arcyd stopped")
 
 
 # -----------------------------------------------------------------------------
