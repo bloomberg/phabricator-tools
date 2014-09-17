@@ -35,7 +35,13 @@ import phlsys_fs
 
 
 _REPO_ATTRIBUTES_PATH = '.git/info/attributes'
-_REPO_ATTRIBUTES_CONTENT = '* -ident\n'
+_REPO_ATTRIBUTES_IDENT_CONTENT = '* -ident\n'
+_REPO_ATTRIBUTES_EOL_CONTENT = '* -eol\n'
+_REPO_ATTRIBUTES_TUPLE = (
+    _REPO_ATTRIBUTES_IDENT_CONTENT,
+    _REPO_ATTRIBUTES_EOL_CONTENT
+)
+_REPO_ATTRIBUTES_CONTENT = "".join(_REPO_ATTRIBUTES_TUPLE)
 
 
 def is_repo_definitely_ignoring(repo_path):
@@ -60,10 +66,18 @@ def ensure_repo_ignoring(repo_path):
             repo_attributes_path,
             _REPO_ATTRIBUTES_CONTENT)
     else:
-        # we won't try to do any sort of merging, just escalate
-        raise Exception(
-            "cannot ensure ignore attributes in existing file: {}".format(
-                repo_attributes_path))
+        contents = phlsys_fs.read_text_file(repo_attributes_path)
+        if contents in _REPO_ATTRIBUTES_TUPLE:
+            # the file is exactly one of the existing attributes, we can merge
+            # correctly by overwriting it with our superset of attributes
+            phlsys_fs.write_text_file(
+                repo_attributes_path,
+                _REPO_ATTRIBUTES_CONTENT)
+        else:
+            # we won't try to do any sort of merging, just escalate
+            raise Exception(
+                "cannot ensure ignore attributes in existing file: {}".format(
+                    repo_attributes_path))
 
 
 # -----------------------------------------------------------------------------
