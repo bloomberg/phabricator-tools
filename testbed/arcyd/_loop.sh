@@ -9,7 +9,11 @@ then
     exit
 fi
 
+# cd to the dir of this script, so paths are relative
+cd "$(dirname "$0")"
+
 arcyd="$1"
+safe_arcyd="$(pwd)/../../proto/arcyd"
 
 set +x
 set -e
@@ -65,13 +69,13 @@ cd -
 mkdir arcyd
 cd arcyd
 
-$arcyd init \
+$safe_arcyd init \
     --sleep-secs 1 \
     --arcyd-email 'arcyd@localhost' \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail
 
-$arcyd add-phabricator \
+$safe_arcyd add-phabricator \
     --name localhost \
     --instance-uri http://127.0.0.1/api/ \
     --review-url-format 'http://127.0.0.1/D{review}' \
@@ -82,13 +86,13 @@ zl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w6lcseh\
 s2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk3lyr3u\
 vot7fxrotwpi3ty2b2sa2kvlpf
 
-$arcyd add-repohost \
+$safe_arcyd add-repohost \
     --name fs \
     --repo-url-format '../{}' \
     --admin-email 'local-repo-admin@localhost' \
     --repo-snoop-url 'http://localhost:8000/info/refs'
 
-$arcyd add-repo localhost fs origin
+$safe_arcyd add-repo localhost fs origin
 
 cd ..
 
@@ -130,10 +134,11 @@ function cleanup() {
     echo $webserver_pid
     kill $webserver_pid
 
-    # display the sent mails
+    # display the sent mails and other messages
     pwd
     cat savemail.txt
     cat logerror.txt
+    cat arcyd/var/log/info
 
     # clean up
     cd ${olddir}

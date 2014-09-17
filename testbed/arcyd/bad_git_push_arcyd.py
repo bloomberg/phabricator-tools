@@ -41,7 +41,7 @@ if __name__ == "__main__":
     # monkey-patch the base-level git clone to be unreliable
     #
 
-    old_call = getattr(phlsys_git.Repo, 'call')
+    old_call = getattr(phlsys_git.Repo, '__call__')
 
     def unreliable_call(self, *args, **kwargs):
         if args and args[0] == 'push':
@@ -49,7 +49,7 @@ if __name__ == "__main__":
                 raise Exception('bad_git_push_arcyd.py: random git push fail')
         return old_call(self, *args, **kwargs)
 
-    setattr(phlsys_git.Repo, 'call', unreliable_call)
+    setattr(phlsys_git.Repo, '__call__', unreliable_call)
 
     # run arcyd as usual
     sys.exit(abdcmd_arcyd.main())
