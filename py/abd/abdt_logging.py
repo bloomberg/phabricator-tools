@@ -54,11 +54,20 @@ def _get_reporter():
 
 
 def on_retry_exception(identifier, detail, e, delay):
+
     if delay is not None:
-        _LOGGER.warning('on_retry_exception: "{}", will retry in {}'.format(
-            e, delay))
+        _LOGGER.warning(
+            'on_retry_exception: during "{}" encountered exception "{}", '
+            'will retry in {}. More detail: "{}".'.format(
+                identifier, type(e).__name__, delay, detail),
+            exc_info=1)
     else:
-        _LOGGER.error('on_retry_exception: "{}", will not retry'.format(e))
+        _LOGGER.error(
+            'on_retry_exception: during "{}" encountered exception "{}", '
+            'will not retry. More detail: "{}".'.format(
+                identifier, type(e).__name__, detail),
+            exc_info=1)
+
     reporter = _get_reporter()
     if reporter:
         reporter.on_tryloop_exception(e, delay)
