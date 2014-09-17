@@ -21,6 +21,8 @@ from __future__ import absolute_import
 import contextlib
 import logging
 
+
+_LOGGER = logging.getLogger(__name__)
 _REPORTER = None
 
 
@@ -47,12 +49,16 @@ def clear_arcyd_reporter():
 def _get_reporter():
     reporter = _REPORTER
     if reporter is None:
-        logging.error("no reporter is set")
+        _LOGGER.error("no reporter is set")
     return reporter
 
 
 def on_retry_exception(identifier, detail, e, delay):
-    logging.error(str(e) + "\nwill wait " + str(delay))
+    if delay is not None:
+        _LOGGER.warning('on_retry_exception: "{}", will retry in {}'.format(
+            e, delay))
+    else:
+        _LOGGER.error('on_retry_exception: "{}", will not retry'.format(e))
     reporter = _get_reporter()
     if reporter:
         reporter.on_tryloop_exception(e, delay)
