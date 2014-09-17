@@ -110,7 +110,7 @@ def _check_repo_name_config_list(args, repo_name_config_list):
         if not _check_repo_cloned(args, repo_name, repo_config):
             all_ok = False
         else:
-            if not _check_repo_ignoring_ident(args, repo_config):
+            if not _check_repo_ignoring_attributes(args, repo_config):
                 all_ok = False
             if args.remote:
                 if not _check_repo_remote(args, repo_name, repo_config):
@@ -145,8 +145,8 @@ def _check_repo_cloned(args, repo_name, repo_config):
     return all_ok
 
 
-def _check_repo_ignoring_ident(args, repo_config):
-    """Return False if the supplied repo isn't ignoring ident config.
+def _check_repo_ignoring_attributes(args, repo_config):
+    """Return False if the supplied repo isn't ignoring attributes config.
 
     Will print details of errors found. Will continue when errors are found,
     unless they interfere with the operation of fsck.
@@ -159,10 +159,10 @@ def _check_repo_ignoring_ident(args, repo_config):
     all_ok = True
     is_ignoring = phlgitx_ignoreattributes.is_repo_definitely_ignoring
     if not is_ignoring(repo_config.repo_path):
-        print "'{}' is not ignoring ident attributes".format(
+        print "'{}' is not ignoring some attributes".format(
             repo_config.repo_path)
         if args.fix:
-            print "setting {} to ignore ident ..".format(
+            print "setting {} to ignore some attributes ..".format(
                 repo_config.repo_path)
 
             phlgitx_ignoreattributes.ensure_repo_ignoring(

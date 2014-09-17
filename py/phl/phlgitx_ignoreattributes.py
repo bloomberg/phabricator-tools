@@ -1,12 +1,12 @@
-"""Configure repos to ignore ident strings, overrule '.gitattributes'.
+"""Configure repos to ignore some attributes, overruling '.gitattributes'.
 
 For non-interactive uses of Git repositories, it can be undesirable to allow
-the 'ident string' functionality as there are some edge-cases that may require
-manual intervention.
+the 'ident string' and other attribute functionality as there are some
+edge-cases that may require manual intervention.
 
 Provide support for writing the repo-global '.git/info/attributes' file such
-that any enabling of 'ident strings' via '.gitattributes' files will be
-ignored.
+that any enabling of 'ident strings' and some other features via
+'.gitattributes' files will be ignored.
 
 Note that this should have no effect on diffs or commits, it only affects the
 content of files in the work tree.  This content should not be relevant for
@@ -62,7 +62,7 @@ def ensure_repo_ignoring(repo_path):
     else:
         # we won't try to do any sort of merging, just escalate
         raise Exception(
-            "cannot ensure ignore ident in existing file: {}".format(
+            "cannot ensure ignore attributes in existing file: {}".format(
                 repo_attributes_path))
 
 

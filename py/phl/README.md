@@ -50,7 +50,7 @@ Fixtures for exercising scenarios with real Git.
 * `phlgitu_ref.py` -
 Utilities for working with git refs.
 * `phlgitx_ignoreattributes.py` -
-Configure repos to ignore ident strings, overrule '.gitattributes'.
+Configure repos to ignore some attributes, overruling '.gitattributes'.
 * `phlgitx_refcache.py` -
 Git callable that maintains a cache of refs for efficient querying.
 * `phlmail_format.py` -
