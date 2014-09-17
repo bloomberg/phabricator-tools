@@ -24,7 +24,7 @@ import phlgit_checkout
 import phlgit_commit
 import phlgit_push
 import phlgitu_ref
-import phlgitx_ignoreident
+import phlgitx_ignoreattributes
 import phlsys_git
 import phlsys_subprocess
 
@@ -76,7 +76,7 @@ def setup_repo_context(repo_url, repo_path):
         # make sure we have no problems with 'ident' strings, we won't build
         # from arcyd so it shouldn't be externally visible that we don't expand
         # them.
-        phlgitx_ignoreident.ensure_repo_ignoring(repo_path)
+        phlgitx_ignoreattributes.ensure_repo_ignoring(repo_path)
 
         # test pushing to master
         repo('checkout', 'origin/master')

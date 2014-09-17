@@ -1,4 +1,4 @@
-"""Test suite for phlgitx_ignoreident."""
+"""Test suite for phlgitx_ignoreattributes."""
 # =============================================================================
 #                                   TEST PLAN
 # -----------------------------------------------------------------------------
@@ -27,7 +27,7 @@ import phlgitu_fixture
 import phlsys_fs
 import phlsys_subprocess
 
-import phlgitx_ignoreident
+import phlgitx_ignoreattributes
 
 
 class Test(unittest.TestCase):
@@ -42,17 +42,17 @@ class Test(unittest.TestCase):
         with phlgitu_fixture.lone_worker_context() as worker:
 
             self.assertFalse(
-                phlgitx_ignoreident.is_repo_definitely_ignoring(
+                phlgitx_ignoreattributes.is_repo_definitely_ignoring(
                     worker.repo.working_dir))
 
-            phlgitx_ignoreident.ensure_repo_ignoring(
+            phlgitx_ignoreattributes.ensure_repo_ignoring(
                 worker.repo.working_dir)
 
             self.assertTrue(
-                phlgitx_ignoreident.is_repo_definitely_ignoring(
+                phlgitx_ignoreattributes.is_repo_definitely_ignoring(
                     worker.repo.working_dir))
 
-            phlgitx_ignoreident.ensure_repo_ignoring(
+            phlgitx_ignoreattributes.ensure_repo_ignoring(
                 worker.repo.working_dir)
 
     def test_B_WorkaroundSpuriousDiff(self):
@@ -99,7 +99,7 @@ class Test(unittest.TestCase):
                 checkout_fix_ident)
 
             # work around the problem, by ignoring the ident setting
-            phlgitx_ignoreident.ensure_repo_ignoring(w1.repo.working_dir)
+            phlgitx_ignoreattributes.ensure_repo_ignoring(w1.repo.working_dir)
 
             # try to checkout back to the branch with the fix
             checkout_fix_ident()

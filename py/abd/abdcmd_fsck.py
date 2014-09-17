@@ -17,7 +17,7 @@ from __future__ import absolute_import
 
 import os
 
-import phlgitx_ignoreident
+import phlgitx_ignoreattributes
 import phlsys_git
 import phlsys_pid
 import phlsys_subprocess
@@ -157,7 +157,7 @@ def _check_repo_ignoring_ident(args, repo_config):
 
     """
     all_ok = True
-    is_ignoring = phlgitx_ignoreident.is_repo_definitely_ignoring
+    is_ignoring = phlgitx_ignoreattributes.is_repo_definitely_ignoring
     if not is_ignoring(repo_config.repo_path):
         print "'{}' is not ignoring ident attributes".format(
             repo_config.repo_path)
@@ -165,7 +165,7 @@ def _check_repo_ignoring_ident(args, repo_config):
             print "setting {} to ignore ident ..".format(
                 repo_config.repo_path)
 
-            phlgitx_ignoreident.ensure_repo_ignoring(
+            phlgitx_ignoreattributes.ensure_repo_ignoring(
                 repo_config.repo_path)
         else:
             all_ok = False

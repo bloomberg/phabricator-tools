@@ -17,7 +17,7 @@ automated builds.
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# phlgitx_ignoreident
+# phlgitx_ignoreattributes
 #
 # Public Functions:
 #   is_repo_definitely_ignoring
