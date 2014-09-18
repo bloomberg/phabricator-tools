@@ -9,7 +9,6 @@
 #    .do
 #   RefreshCaches
 #    .do
-#   ResetFileError
 #   CheckSpecialFiles
 #    .do
 #
@@ -68,13 +67,6 @@ class RefreshCaches(object):
 
         self._reporter.finish_cache_refresh()
         return True
-
-
-class ResetFileError(Exception):
-
-    def __init__(self, path):
-        self.path = path
-        super(ResetFileError, self).__init__()
 
 
 class CheckSpecialFiles(object):
