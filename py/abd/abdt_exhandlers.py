@@ -14,11 +14,16 @@
 
 from __future__ import absolute_import
 
+import logging
 import platform
+import sys
 import traceback
 
 import phlmail_sender
 import phlsys_sendmail
+
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
@@ -47,6 +52,15 @@ def make_exception_message_handler(
             mailsender, emails, uname, subject, tb, body_prefix, message)
 
         short_tb = traceback.format_exc(1)
+
+        exc_type, _, _ = sys.exc_info()
+
+        _LOGGER.error(
+            'abdt_exhandlers: during "{}" encountered exception "{}", '
+            'will retry in {}.'.format(
+                repo, exc_type.__name__, message),
+            exc_info=1)
+
         detail = ""
         if repo:
             detail += "processing repo: {repo}\n".format(repo=repo)
