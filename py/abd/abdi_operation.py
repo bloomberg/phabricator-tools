@@ -9,6 +9,7 @@
 #    .do
 #   RefreshCaches
 #    .do
+#   KillFileError
 #   CheckSpecialFiles
 #    .do
 #
@@ -69,6 +70,10 @@ class RefreshCaches(object):
         return True
 
 
+class KillFileError(Exception):
+    pass
+
+
 class CheckSpecialFiles(object):
 
     def __init__(self, kill_file):
@@ -77,7 +82,7 @@ class CheckSpecialFiles(object):
     def do(self):
         if self._kill_file and os.path.isfile(self._kill_file):
             os.remove(self._kill_file)
-            raise Exception("kill file: " + self._kill_file)
+            raise KillFileError("kill file: " + self._kill_file)
         return True
 
 
