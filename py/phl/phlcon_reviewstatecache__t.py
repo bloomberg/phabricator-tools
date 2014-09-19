@@ -7,8 +7,6 @@
 #
 # Concerns:
 # [ A] ReviewStateCache passes parameters to _ReviewStateCache correctly
-# [ B] _ReviewStateCache asserts if queried with no callable set
-# [ B] _ReviewStateCache asserts if queried before setting callable
 # [ C] _ReviewStateCache does not raise if 'refreshed' before any 'get' calls
 # [ C] _ReviewStateCache does not callable when refreshing if no active queries
 # [ D] _ReviewStateCache calls out to refresh queries since last refresh
@@ -18,7 +16,6 @@
 # -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
-# [ B] test_B_AssertIfNoQueryableSupplied
 # [ C] test_C_RefreshBeforeGet
 # [ D] test_D_InvalidationRules
 # =============================================================================
@@ -83,32 +80,6 @@ class Test(unittest.TestCase):
             cache.get_state(revision_id).status,
             phlcon_differential.ReviewStates.abandoned)
 
-    def test_B_AssertIfNoQueryableSupplied(self):
-
-        # [  ] _ReviewStateCache asserts if queried before setting callable
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache()
-        self.assertRaises(
-            AssertionError,
-            cache_impl.get_state,
-            0)
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache()
-        self.assertRaises(
-            AssertionError,
-            cache_impl.refresh_active_reviews)
-
-        # [  ] _ReviewStateCache asserts if queried with no callable set
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache()
-        cache_impl.clear_revision_list_status_callable()
-        self.assertRaises(
-            AssertionError,
-            cache_impl.get_state,
-            0)
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache()
-        cache_impl.clear_revision_list_status_callable()
-        self.assertRaises(
-            AssertionError,
-            cache_impl.refresh_active_reviews)
-
     def test_C_RefreshBeforeGet(self):
 
         def fake_callable(revision_list):
@@ -118,8 +89,7 @@ class Test(unittest.TestCase):
             raise Exception("shouldn't get here")
 
         # [ C] _ReviewStateCache does not raise if 'refreshed' before any 'get'
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache()
-        cache_impl.set_revision_list_status_callable(fake_callable)
+        cache_impl = phlcon_reviewstatecache._ReviewStateCache(fake_callable)
         cache_impl.refresh_active_reviews()
 
     def test_D_InvalidationRules(self):
@@ -129,8 +99,13 @@ class Test(unittest.TestCase):
         revision_list = [101, 1337, 404]
         expected_queries = [[101], [1337], [404], [101, 1337, 404]]
         queried_revision_list = []
+        callable_should_raise = False
 
         def fake_callable(actual_revision_list):
+
+            if callable_should_raise:
+                raise Exception("shouldn't get here")
+
             # N.B. we have to assign to the slice as we're in a nested func
             #      and otherwise we won't be referring to the same data
             #      in Python 3 we can do better with nonlocal
@@ -153,8 +128,7 @@ class Test(unittest.TestCase):
                 for r in actual_revision_list
             ]
 
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache()
-        cache_impl.set_revision_list_status_callable(fake_callable)
+        cache_impl = phlcon_reviewstatecache._ReviewStateCache(fake_callable)
 
         # exercise getting the state
         for revision in revision_list:
@@ -164,11 +138,7 @@ class Test(unittest.TestCase):
         cache_impl.refresh_active_reviews()
         self.assertSetEqual(set(queried_revision_list), set(revision_list))
 
-        def raise_callable(revision_list):
-            _ = revision_list  # NOQA
-            raise Exception("shouldn't get here")
-
-        cache_impl.set_revision_list_status_callable(raise_callable)
+        callable_should_raise = True
 
         # [ D] _ReviewStateCache does not callable if queried for cached query
         # [ D] _ReviewStateCache returns correct value when retrieving cached

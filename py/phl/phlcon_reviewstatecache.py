@@ -34,8 +34,7 @@ class ReviewStateCache(object):
 
     def __init__(self, conduit):
         super(ReviewStateCache, self).__init__()
-        self._cache = _ReviewStateCache()
-        self._cache.set_revision_list_status_callable(
+        self._cache = _ReviewStateCache(
             make_revision_list_status_callable(
                 conduit))
 
@@ -56,11 +55,11 @@ def make_revision_list_status_callable(conduit):
 
 class _ReviewStateCache(object):
 
-    def __init__(self):
+    def __init__(self, status_callable):
         super(_ReviewStateCache, self).__init__()
         self._review_to_state = {}
         self._active_reviews = set()
-        self._revision_list_status_callable = None
+        self._revision_list_status_callable = status_callable
 
     def _make_state(self, response):
         return ReviewState(response.status, response.dateModified)
@@ -84,13 +83,6 @@ class _ReviewStateCache(object):
                 r.id: self._make_state(r) for r in responses
             }
             self._active_reviews = set()
-
-    def set_revision_list_status_callable(self, status_callable):
-        self._revision_list_status_callable = status_callable
-        assert self._revision_list_status_callable
-
-    def clear_revision_list_status_callable(self):
-        self._revision_list_status_callable = None
 
 
 # -----------------------------------------------------------------------------
