@@ -6,14 +6,16 @@
 #
 # Public Classes:
 #   ReviewStateCache
-#    .get_status
-#    .get_date_modified
+#    .get_state
 #    .refresh_active_reviews
 #    .set_conduit
 #    .clear_conduit
 #
 # Public Functions:
 #   make_revision_list_status_callable
+#
+# Public Assignments:
+#   ReviewState
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -25,6 +27,10 @@ import collections
 
 import phlcon_differential
 
+ReviewState = collections.namedtuple(
+    'phlcon_reviewstatecache__ReviewState',
+    ['status', 'date_modified'])
+
 
 class ReviewStateCache(object):
 
@@ -32,11 +38,8 @@ class ReviewStateCache(object):
         super(ReviewStateCache, self).__init__()
         self._cache = _ReviewStateCache()
 
-    def get_status(self, review_id):
-        return self._cache.get_status(review_id)
-
-    def get_date_modified(self, review_id):
-        return self._cache.get_date_modified(review_id)
+    def get_state(self, review_id):
+        return self._cache.get_state(review_id)
 
     def refresh_active_reviews(self):
         self._cache.refresh_active_reviews()
@@ -59,11 +62,6 @@ def make_revision_list_status_callable(conduit):
     return revision_list_status
 
 
-_ReviewState = collections.namedtuple(
-    'phlcon_reviewstatecache__ReviewState',
-    ['status', 'date_modified'])
-
-
 class _ReviewStateCache(object):
 
     def __init__(self):
@@ -73,9 +71,9 @@ class _ReviewStateCache(object):
         self._revision_list_status_callable = None
 
     def _make_state(self, response):
-        return _ReviewState(response.status, response.dateModified)
+        return ReviewState(response.status, response.dateModified)
 
-    def _get_state(self, review_id):
+    def get_state(self, review_id):
         assert self._revision_list_status_callable
         if review_id not in self._review_to_state:
             response = self._revision_list_status_callable([review_id])[0]
@@ -83,12 +81,6 @@ class _ReviewStateCache(object):
 
         self._active_reviews.add(review_id)
         return self._review_to_state[review_id]
-
-    def get_status(self, review_id):
-        return self._get_state(review_id).status
-
-    def get_date_modified(self, review_id):
-        return self._get_state(review_id).date_modified
 
     def refresh_active_reviews(self):
         assert self._revision_list_status_callable

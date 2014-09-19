@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
 
         # assert it's in 'needs review'
         self.assertEqual(
-            cache.get_status(revision_id),
+            cache.get_state(revision_id).status,
             phlcon_differential.ReviewStates.needs_review)
 
         # change real state to 'abandoned'
@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
 
         # check that the cache still reports 'needs_review'
         self.assertEqual(
-            cache.get_status(revision_id),
+            cache.get_state(revision_id).status,
             phlcon_differential.ReviewStates.needs_review)
 
         # refresh the cache
@@ -84,7 +84,7 @@ class Test(unittest.TestCase):
 
         # check that the cache now reports 'abandoned'
         self.assertEqual(
-            cache.get_status(revision_id),
+            cache.get_state(revision_id).status,
             phlcon_differential.ReviewStates.abandoned)
 
     def test_B_AssertIfNoQueryableSupplied(self):
@@ -93,7 +93,7 @@ class Test(unittest.TestCase):
         cache = phlcon_reviewstatecache.ReviewStateCache()
         self.assertRaises(
             AssertionError,
-            cache.get_status,
+            cache.get_state,
             0)
         cache = phlcon_reviewstatecache.ReviewStateCache()
         self.assertRaises(
@@ -112,7 +112,7 @@ class Test(unittest.TestCase):
         cache.clear_conduit()
         self.assertRaises(
             AssertionError,
-            cache.get_status,
+            cache.get_state,
             0)
         cache = phlcon_reviewstatecache.ReviewStateCache()
         cache.clear_conduit()
@@ -124,7 +124,7 @@ class Test(unittest.TestCase):
         cache_impl = phlcon_reviewstatecache._ReviewStateCache()
         self.assertRaises(
             AssertionError,
-            cache_impl.get_status,
+            cache_impl.get_state,
             0)
         cache_impl = phlcon_reviewstatecache._ReviewStateCache()
         self.assertRaises(
@@ -136,7 +136,7 @@ class Test(unittest.TestCase):
         cache_impl.clear_revision_list_status_callable()
         self.assertRaises(
             AssertionError,
-            cache_impl.get_status,
+            cache_impl.get_state,
             0)
         cache_impl = phlcon_reviewstatecache._ReviewStateCache()
         cache_impl.clear_revision_list_status_callable()
@@ -191,8 +191,9 @@ class Test(unittest.TestCase):
         cache_impl = phlcon_reviewstatecache._ReviewStateCache()
         cache_impl.set_revision_list_status_callable(fake_callable)
 
+        # exercise getting the state
         for revision in revision_list:
-            cache_impl.get_status(revision)
+            _ = cache_impl.get_state(revision).status  # NOQA
 
         self.assertNotEqual(set(queried_revision_list), set(revision_list))
         cache_impl.refresh_active_reviews()
@@ -207,7 +208,7 @@ class Test(unittest.TestCase):
         # [ D] _ReviewStateCache does not callable if queried for cached query
         # [ D] _ReviewStateCache returns correct value when retrieving cached
         for revision in revision_list:
-            result = cache_impl.get_status(revision)
+            result = cache_impl.get_state(revision).status
             self.assertEqual(result, str(revision) + 'r')
 
 

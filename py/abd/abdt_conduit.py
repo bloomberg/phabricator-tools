@@ -191,8 +191,8 @@ class Conduit(object):
         :returns: True if accepted
 
         """
-        status = self._reviewstate_cache.get_status(revisionid)
-        return int(status) == phlcon_differential.ReviewStates.accepted
+        state = self._reviewstate_cache.get_state(revisionid)
+        return int(state.status) == phlcon_differential.ReviewStates.accepted
 
     def is_review_abandoned(self, revisionid):
         """Return True if the supplied 'revisionid' is in 'abandoned' status.
@@ -201,11 +201,12 @@ class Conduit(object):
         :returns: True if abandoned
 
         """
-        status = self._reviewstate_cache.get_status(revisionid)
-        return int(status) == phlcon_differential.ReviewStates.abandoned
+        state = self._reviewstate_cache.get_state(revisionid)
+        return int(state.status) == phlcon_differential.ReviewStates.abandoned
 
     def _get_update_age(self, revisionid):
-        date_modified = self._reviewstate_cache.get_date_modified(revisionid)
+        state = self._reviewstate_cache.get_state(revisionid)
+        date_modified = state.date_modified
         update_time = datetime.datetime.fromtimestamp(float(date_modified))
         return datetime.datetime.now() - update_time
 
@@ -235,8 +236,8 @@ class Conduit(object):
         """
         # do some sanity checks before committing to the expensive operation
         # of storing a diff in Differential
-        status = self._reviewstate_cache.get_status(revisionid)
-        if status == phlcon_differential.ReviewStates.closed:
+        state = self._reviewstate_cache.get_state(revisionid)
+        if state.status == phlcon_differential.ReviewStates.closed:
             raise abdt_exception.AbdUserException(
                 "can't update a closed revision")
 
