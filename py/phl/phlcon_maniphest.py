@@ -92,7 +92,10 @@ CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
         'dateCreated', 'projectPHIDs'
     ],
     defaults={},
-    ignored=[])
+    ignored=[
+        'priorityColor', 'isClosed', 'statusName', 'dependsOnTaskPHIDs'
+    ]
+)
 
 
 def create_task(

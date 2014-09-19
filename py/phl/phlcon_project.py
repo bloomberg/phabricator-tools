@@ -25,7 +25,7 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
     'QueryResponse',
     required=['name', 'phid'],
     defaults={},
-    ignored=['dateCreated', 'members', 'dateModified', 'id'])
+    ignored=['dateCreated', 'members', 'dateModified', 'id', 'slugs'])
 
 
 def query_some(conduit, max_items, offset):
@@ -42,7 +42,11 @@ def query_some(conduit, max_items, offset):
         'offset': offset,
     }
     response = conduit("project.query", d)
-    results = [QueryResponse(**r) for phid, r in response.iteritems()]
+
+    # the new version of the API stores the items under the 'data' key
+    data = response['data'] if 'data' in response else response
+
+    results = [QueryResponse(**r) for phid, r in data.iteritems()]
     return results
 
 
