@@ -50,7 +50,6 @@ from __future__ import absolute_import
 import unittest
 
 import phlcon_differential
-import phlcon_reviewstatecache
 import phldef_conduit
 import phlsys_conduit
 
@@ -74,13 +73,10 @@ class Test(unittest.TestCase):
             self.test_data.TEST_URI,
             self.test_data.PHAB.user,
             self.test_data.PHAB.certificate)
-        self.reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
-        self.reviewstate_cache.set_conduit(self.sys_conduit)
-        self.conduit = abdt_conduit.Conduit(
-            self.sys_conduit, self.reviewstate_cache)
+        self.conduit = abdt_conduit.Conduit(self.sys_conduit)
 
     def _invalidate_cache(self):
-        self.reviewstate_cache.refresh_active_reviews()
+        self.conduit.refresh_cache_on_cycle()
 
     def tearDown(self):
         pass

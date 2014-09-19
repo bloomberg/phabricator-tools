@@ -17,7 +17,6 @@ from __future__ import absolute_import
 import contextlib
 import traceback
 
-import phlcon_reviewstatecache
 import phlmail_sender
 import phlsys_conduit
 import phlsys_pluginmanager
@@ -216,9 +215,7 @@ def _connect(conduits, args, arcyd_reporter):
         conduit = conduit[0]
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
             conduit, 'base_conduit')
-        reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
-        reviewstate_cache.set_conduit(conduit)
-        arcyd_conduit = abdt_conduit.Conduit(conduit, reviewstate_cache)
+        arcyd_conduit = abdt_conduit.Conduit(conduit)
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
             arcyd_conduit, 'conduit')
         conduits[key] = arcyd_conduit
