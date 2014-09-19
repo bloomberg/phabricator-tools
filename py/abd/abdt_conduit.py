@@ -55,8 +55,8 @@ class Conduit(object):
         """
         super(Conduit, self).__init__()
         self._conduit = conduit
-        self._reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache()
-        self._reviewstate_cache.set_conduit(conduit)
+        self._reviewstate_cache = phlcon_reviewstatecache.ReviewStateCache(
+            conduit)
 
     def describe(self):
         """Return a string description of this conduit for a human to read.

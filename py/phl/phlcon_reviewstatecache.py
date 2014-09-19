@@ -8,8 +8,6 @@
 #   ReviewStateCache
 #    .get_state
 #    .refresh_active_reviews
-#    .set_conduit
-#    .clear_conduit
 #
 # Public Functions:
 #   make_revision_list_status_callable
@@ -34,24 +32,18 @@ ReviewState = collections.namedtuple(
 
 class ReviewStateCache(object):
 
-    def __init__(self):
+    def __init__(self, conduit):
         super(ReviewStateCache, self).__init__()
         self._cache = _ReviewStateCache()
+        self._cache.set_revision_list_status_callable(
+            make_revision_list_status_callable(
+                conduit))
 
     def get_state(self, review_id):
         return self._cache.get_state(review_id)
 
     def refresh_active_reviews(self):
         self._cache.refresh_active_reviews()
-
-    def set_conduit(self, conduit):
-        assert conduit
-        self._cache.set_revision_list_status_callable(
-            make_revision_list_status_callable(
-                conduit))
-
-    def clear_conduit(self):
-        self._cache.clear_revision_list_status_callable()
 
 
 def make_revision_list_status_callable(conduit):

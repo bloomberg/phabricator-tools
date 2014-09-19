@@ -7,9 +7,6 @@
 #
 # Concerns:
 # [ A] ReviewStateCache passes parameters to _ReviewStateCache correctly
-# [ B] ReviewStateCache asserts if set to no conduit
-# [ B] ReviewStateCache asserts if queried with no conduit set
-# [ B] ReviewStateCache asserts if queried before setting conduit
 # [ B] _ReviewStateCache asserts if queried with no callable set
 # [ B] _ReviewStateCache asserts if queried before setting callable
 # [ C] _ReviewStateCache does not raise if 'refreshed' before any 'get' calls
@@ -60,8 +57,7 @@ class Test(unittest.TestCase):
 
         revision_id = phlcon_differential.create_empty_revision(conduit)
 
-        cache = phlcon_reviewstatecache.ReviewStateCache()
-        cache.set_conduit(conduit)
+        cache = phlcon_reviewstatecache.ReviewStateCache(conduit)
 
         # assert it's in 'needs review'
         self.assertEqual(
@@ -88,37 +84,6 @@ class Test(unittest.TestCase):
             phlcon_differential.ReviewStates.abandoned)
 
     def test_B_AssertIfNoQueryableSupplied(self):
-
-        # [  ] ReviewStateCache asserts if queried before setting conduit
-        cache = phlcon_reviewstatecache.ReviewStateCache()
-        self.assertRaises(
-            AssertionError,
-            cache.get_state,
-            0)
-        cache = phlcon_reviewstatecache.ReviewStateCache()
-        self.assertRaises(
-            AssertionError,
-            cache.refresh_active_reviews)
-
-        # [  ] ReviewStateCache asserts if set to no conduit
-        cache = phlcon_reviewstatecache.ReviewStateCache()
-        self.assertRaises(
-            AssertionError,
-            cache.set_conduit,
-            None)
-
-        # [  ] ReviewStateCache asserts if queried with no conduit set
-        cache = phlcon_reviewstatecache.ReviewStateCache()
-        cache.clear_conduit()
-        self.assertRaises(
-            AssertionError,
-            cache.get_state,
-            0)
-        cache = phlcon_reviewstatecache.ReviewStateCache()
-        cache.clear_conduit()
-        self.assertRaises(
-            AssertionError,
-            cache.refresh_active_reviews)
 
         # [  ] _ReviewStateCache asserts if queried before setting callable
         cache_impl = phlcon_reviewstatecache._ReviewStateCache()
