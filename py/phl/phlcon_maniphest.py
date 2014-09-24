@@ -91,9 +91,11 @@ CreateTaskResponse = phlsys_namedtuple.make_named_tuple(
         'auxiliary', 'ccPHIDs', 'ownerPHID', 'dateModified',
         'dateCreated', 'projectPHIDs'
     ],
-    defaults={},
+    defaults={
+        'statusName': None,
+    },
     ignored=[
-        'priorityColor', 'isClosed', 'statusName', 'dependsOnTaskPHIDs'
+        'priorityColor', 'isClosed', 'dependsOnTaskPHIDs'
     ]
 )
 

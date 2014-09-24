@@ -244,7 +244,8 @@ def process(args):
     results = [dict(r.__dict__) for r in results]
 
     for r in results:
-        r['statusName'] = phlcon_maniphest.STATUSES[int(r['status'])]
+        if r['statusName'] is None:
+            r['statusName'] = phlcon_maniphest.STATUSES[int(r['status'])]
 
     # initialise to format for 'args.format_short'
     output_format = "{id} / {statusName} / {priority} / {title}"
