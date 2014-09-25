@@ -4,6 +4,9 @@ phabricator-tools
 Tools and daemons for administering lots of Phabricator instances and
 integrating them with other tools.
 
+[![Pull Requests](http://issuestats.com/github/bloomberg/phabricator-tools/badge/pr?style=flat)](http://issuestats.com/github/bloomberg/phabricator-tools)
+[![Issues](http://issuestats.com/github/bloomberg/phabricator-tools/badge/issue?style=flat)](http://issuestats.com/github/bloomberg/phabricator-tools)
+
 Overview
 --------
 
