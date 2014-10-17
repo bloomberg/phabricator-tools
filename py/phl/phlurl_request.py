@@ -10,7 +10,6 @@
 # Public Functions:
 #   join_url
 #   split_url
-#   group_urls
 #   get_many
 #   get
 #
@@ -25,6 +24,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import base64
 import collections
 import httplib
 import traceback
@@ -54,7 +54,7 @@ def join_url(base_url, leaf):
 
 SplitUrlResult = collections.namedtuple(
     'phlurl_request__SplitUrlResult',
-    ['url', 'scheme', 'hostname', 'port', 'path'])
+    ['url', 'scheme', 'hostname', 'port', 'path', 'username', 'password'])
 
 GroupUrlResult = collections.namedtuple(
     'phlurl_request__GroupUrlResult',
@@ -108,11 +108,17 @@ def split_url(url):
         path = url.path
 
     return SplitUrlResult(
-        original_url, url.scheme, url.hostname, url.port, path)
+        original_url,
+        url.scheme,
+        url.hostname,
+        url.port,
+        path,
+        url.username,
+        url.password)
     # pylint: enable=E1103
 
 
-def group_urls(url_list):
+def _group_urls(url_list):
     """Return a GroupUrlResult(http_requests, https_requests) from 'url_list'.
 
     Each of the dicts is layed out like:
@@ -120,15 +126,6 @@ def group_urls(url_list):
 
     This is so that is then trivial to re-use http connections for requests
     to the same host.
-
-    e.g.  { ('www.bloomberg.com', 80): '/index?a=index&b=c' }
-
-    Usage examples:
-        >>> result = group_urls(['http://a.io/a', 'http://a.io/b'])
-        >>> dict(result.http)
-        {('a.io', None): [('/a', 'http://a.io/a'), ('/b', 'http://a.io/b')]}
-        >>> dict(result.https)
-        {}
 
     :url_list: a list of string fully qualified urls
     :returns: a tuple of dicts which map connection params to paths
@@ -145,26 +142,38 @@ def group_urls(url_list):
         else:
             raise Error(str(url) + ' is neither http or https')
         connection = (request.hostname, request.port)
-        result = (request.path, request.url)
-        d[connection].append(result)
+        d[connection].append(request)
     return GroupUrlResult(http=http_requests, https=https_requests)
 
 
-def _request(connection, verb, path, url):
+def _request(connection, verb, request):
     try:
-        connection.request(verb, path)
+        headers = {}
+        if request.username:
+            auth = base64.b64encode(
+                '%s:%s' % (request.username, request.password))
+            headers['Authorization'] = 'Basic %s' % auth
+        connection.request(method=verb,
+                           url=request.path,
+                           headers=headers)
         content = connection.getresponse().read()
         return content
     except Exception as e:
         tb = traceback.format_exc()
-        message = """Was trying to {verb} the url {url}.
+        message = """Was trying to {verb} the url {request.url}.
 
 This exception was triggered from this original exception:
     {exception}
 
 Here is the original traceback:
 {traceback}
-        """.format(verb=verb, url=url, exception=repr(e), traceback=tb).strip()
+        """.format(
+            verb=verb,
+            request=request,
+            exception=repr(e),
+            traceback=tb
+        ).strip()
+
         raise Error(message)
 
 
@@ -180,20 +189,20 @@ def get_many(url_list):
     :returns: a list of string contents
 
     """
-    urls = group_urls(url_list)
+    urls = _group_urls(url_list)
     results = {}
 
     for host_port, request_list in urls.http.iteritems():
         http = httplib.HTTPConnection(
             host_port[0], host_port[1], timeout=_HTTPLIB_TIMEOUT)
-        for path, url in request_list:
-            results[url] = _request(http, 'GET', path, url)
+        for request in request_list:
+            results[request.url] = _request(http, 'GET', request)
 
     for host_port, request_list in urls.https.iteritems():
         https = httplib.HTTPSConnection(
             host_port[0], host_port[1], timeout=_HTTPLIB_TIMEOUT)
-        for path, url in request_list:
-            results[url] = _request(https, 'GET', path, url)
+        for request in request_list:
+            results[request.url] = _request(https, 'GET', request)
 
     return results
 
@@ -212,7 +221,7 @@ def get(url):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
