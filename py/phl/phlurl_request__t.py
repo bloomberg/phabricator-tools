@@ -201,14 +201,14 @@ class HttpTest(unittest.TestCase):
     def test_get(self):
         self.assertEqual(
             phlurl_request.get(self._url('http://{host}:{port}/index')),
-            'OK')
+            (200, 'OK'))
 
     def test_get_many(self):
 
         expected = {
-            self._url('http://{host}:{port}/a'): 'OK',
-            self._url('http://{host}:{port}/b'): 'OK',
-            self._url('http://{host}:{port}/c'): 'OK',
+            self._url('http://{host}:{port}/a'): (200, 'OK'),
+            self._url('http://{host}:{port}/b'): (200, 'OK'),
+            self._url('http://{host}:{port}/c'): (200, 'OK'),
         }
 
         self.assertEqual(
@@ -240,12 +240,12 @@ class HttpTest_Auth(unittest.TestCase):
 
         self.assertEqual(
             phlurl_request.get(self._url('http://{host}:{port}/index')),
-            'Authentication required')
+            (401, 'Authentication required'))
 
         self.assertEqual(
             phlurl_request.get(
                 self._url('http://foo:bar@{host}:{port}/index')),
-            'Basic Zm9vOmJhcg==')
+            (200, 'Basic Zm9vOmJhcg=='))
 
     def test_get_many(self):
 
@@ -254,9 +254,9 @@ class HttpTest_Auth(unittest.TestCase):
         url_c = self._url('http://baz:buz@{host}:{port}/index')
 
         expected = {
-            url_a: 'Authentication required',
-            url_b: 'Basic Zm9vOmJhcg==',
-            url_c: 'Basic YmF6OmJ1eg==',
+            url_a: (401, 'Authentication required'),
+            url_b: (200, 'Basic Zm9vOmJhcg=='),
+            url_c: (200, 'Basic YmF6OmJ1eg=='),
         }
 
         self.assertEqual(

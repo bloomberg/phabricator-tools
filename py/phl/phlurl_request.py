@@ -156,8 +156,8 @@ def _request(connection, verb, request):
         connection.request(method=verb,
                            url=request.path,
                            headers=headers)
-        content = connection.getresponse().read()
-        return content
+        response = connection.getresponse()
+        return (response.status, response.read())
     except Exception as e:
         tb = traceback.format_exc()
         message = """Was trying to {verb} the url {request.url}.

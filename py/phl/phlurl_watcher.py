@@ -46,7 +46,7 @@ class Watcher(object):
             self._requester_object = phlurl_request
 
     def _request_and_set_has_changed(self, url, has_changed):
-        content = self._requester_object.get(url)
+        (status, content) = self._requester_object.get(url)
         # pylint: disable=E1101
         self._results[url] = _HashHexdigestHasChanged(
             hashlib.sha1(content).hexdigest(), has_changed)
@@ -92,7 +92,7 @@ class Watcher(object):
         # XXX: it's safe to refresh multiple times - the 'has changed' flag
         #      is only consumed on 'has_url_recently_changed'
         url_contents = self._requester_object.get_many(self._results.keys())
-        for url, contents in url_contents.iteritems():
+        for url, (status, contents) in url_contents.iteritems():
             old_result = self._results[url]
 
             # Note that hash objects can't be compared directly so we much
@@ -156,7 +156,7 @@ class FileCacheWatcherWrapper(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
