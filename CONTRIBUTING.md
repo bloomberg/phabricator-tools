@@ -14,13 +14,14 @@ quickly as we can.
 Contribution Licensing
 ---------------------
 
-Since phabricator-tools is distributed under the terms of the Apache License,
-Version 2.0, contributions that you make to phabricator-tools are licensed
-under the same terms. In order for us to be able to accept your contributions,
-we will need explicit confirmation from you that you are able and willing to
-provide them under these terms, and the mechanism we use to do this is called a
-Developer's Certificate of Origin DCO. This is very similar to the process used
-by the Linux(R) kernel, Samba, and many other major open source projects.
+Since phabricator-tools is distributed under the terms of the [Apache License,
+Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.html), contributions
+that you make to phabricator-tools are licensed under the same terms. In order
+for us to be able to accept your contributions, we will need explicit
+confirmation from you that you are able and willing to provide them under these
+terms, and the mechanism we use to do this is called a Developer's Certificate
+of Origin [DCO](DCO.md).  This is very similar to the process used by the
+Linux(R) kernel, Samba, and many other major open source projects.
 
 To participate under these terms, all that you must do is include a line like
 the following as the last line of the commit message for each commit in your
