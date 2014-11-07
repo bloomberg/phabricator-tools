@@ -14,6 +14,7 @@
 from __future__ import absolute_import
 
 import functools
+import os
 import sys
 
 import phlsys_git
@@ -72,8 +73,9 @@ def do(
             conduits, url_watcher_wrapper.watcher, reporter))
 
     if external_report_command:
+        full_path = os.path.abspath(external_report_command)
         operations.append(
-            abdi_operation.CycleReportJson(external_report_command))
+            abdi_operation.CycleReportJson(full_path))
 
     _process_operations(is_no_loop, operations)
 
