@@ -9,10 +9,6 @@
 #    .sample
 #    .to_dict
 #    .from_dict
-#   Timer
-#    .start
-#    .stop
-#    .duration
 #   ArcydReporter
 #    .arcyd_email
 #    .set_external_system_error_logger
@@ -33,9 +29,6 @@
 #    .fail_repo
 #    .finish_repo
 #    .close
-#
-# Public Functions:
-#   timer_context
 #
 # Public Assignments:
 #   ARCYD_STATUS
@@ -74,7 +67,6 @@
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
-
 from __future__ import absolute_import
 
 import collections
@@ -87,6 +79,7 @@ import traceback
 import types
 
 import phlsys_subprocess
+import phlsys_timer
 
 ARCYD_STATUS = 'status'
 ARCYD_STATUS_DESCRIPTION = 'status-description'
@@ -162,16 +155,6 @@ ARCYD_LOGITEM_IDENTIFIER = 'logitem-identifier'
 ARCYD_LOGITEM_DETAIL = 'logitem-detail'
 
 
-@contextlib.contextmanager
-def timer_context():
-    timer = Timer()
-    timer.start()
-    try:
-        yield timer
-    finally:
-        timer.stop()
-
-
 class Sampler(object):
 
     def __init__(self):
@@ -208,35 +191,6 @@ class Sampler(object):
         sampler = Sampler()
         sampler.__dict__ = dict(d)
         return sampler
-
-
-class Timer(object):
-
-    def __init__(self):
-        self._start = None
-        self._stop = None
-        self._duration = None
-
-    def start(self):
-        self._start = datetime.datetime.utcnow()
-        self._stop = None
-        self._duration = None
-
-    def stop(self):
-        assert self._start is not None
-        self._stop = datetime.datetime.utcnow()
-
-    @property
-    def duration(self):
-        if self._duration is None:
-            assert self._start is not None
-            if self._stop is None:
-                duration = datetime.datetime.utcnow() - self._start
-                duration = duration.total_seconds()
-                return duration
-            self._duration = self._stop - self._start
-            self._duration = self._duration.total_seconds()
-        return self._duration
 
 
 class _CycleTimer(object):
@@ -385,7 +339,7 @@ class ArcydReporter(object):
 
     @contextlib.contextmanager
     def tag_timer_context(self, tag_name):
-        with timer_context() as timer:
+        with phlsys_timer.timer_context() as timer:
             yield
         self._tag_times_now[tag_name] += timer.duration
 

@@ -107,6 +107,8 @@ Convert between unicode and ascii easily.
 Convert timedeltas to strings.
 * `phlsys_timedqueue.py` -
 Priority queue for objects with associated delays.
+* `phlsys_timer.py` -
+Determine the wall clock duration of events.
 * `phlsys_tracedecorator.py` -
 Decorators for tracing out the execution of functions and methods.
 * `phlsys_tryloop.py` -
