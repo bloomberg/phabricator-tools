@@ -8,6 +8,7 @@
 #   Timer
 #    .start
 #    .stop
+#    .restart
 #    .duration
 #
 # Public Functions:
@@ -48,6 +49,28 @@ class Timer(object):
     def stop(self):
         assert self._start is not None
         self._stop = datetime.datetime.utcnow()
+
+    def restart(self):
+        """Start the timer, return the previous duration.
+
+        If there is no previous duration then return 0.0.
+
+        Usage example:
+            >>> timer = Timer()
+            >>> timer.restart() >= 0.0
+            True
+            >>> timer.restart() >= 0.0
+            True
+
+        :returns: a floating point number of seconds
+
+        """
+        duration = 0.0
+        if self._start is not None:
+            duration = self.duration
+
+        self.start()
+        return duration
 
     @property
     def duration(self):
