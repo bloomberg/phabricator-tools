@@ -35,6 +35,7 @@ def do(
         kill_file,
         sleep_secs,
         is_no_loop,
+        external_report_command,
         reporter):
 
     # TODO: test write access to repos here
@@ -69,6 +70,10 @@ def do(
     operations.append(
         abdi_operation.RefreshCaches(
             conduits, url_watcher_wrapper.watcher, reporter))
+
+    if external_report_command:
+        operations.append(
+            abdi_operation.CycleReportJson(external_report_command))
 
     _process_operations(is_no_loop, operations)
 

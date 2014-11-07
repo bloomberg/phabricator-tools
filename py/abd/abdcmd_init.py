@@ -74,6 +74,13 @@ def setupParser(parser):
         default="sendmail",
         help="type of program to send the mail with (sendmail, catchmail), "
         "this will affect the parameters that Arcyd will use.")
+    parser.add_argument(
+        '--external-report-command',
+        metavar="PATH",
+        type=str,
+        default=None,
+        help="path to an external reporter to send monitoring info to, "
+             "will be called like so: $REPORTER <<json report object>>")
 
 
 def process(args):
@@ -85,6 +92,12 @@ def process(args):
         sendmail_binary=args.sendmail_binary,
         sendmail_type=args.sendmail_type,
         sleep_secs=args.sleep_secs)
+
+    if args.external_report_command:
+        config += "\n--external-report-command\n{}".format(
+            args.external_report_command)
+
+    print config
 
     fs.create_root_config(config)
 

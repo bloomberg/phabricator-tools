@@ -27,6 +27,7 @@ olddir=$(pwd)
 cd ${tempdir}
 
 mail="${olddir}/savemail"
+reporter="${olddir}/savereport"
 
 mkdir origin
 cd origin
@@ -87,7 +88,8 @@ cd arcyd
         --sleep-secs 1 \
         --arcyd-email 'arcyd@localhost' \
         --sendmail-binary ${mail} \
-        --sendmail-type catchmail
+        --sendmail-type catchmail \
+        --external-report-command "${reporter}"
 
     echo '' >> configfile  # the generated file won't end in carriage return
     echo '--external-error-logger' >> configfile
@@ -137,7 +139,8 @@ cd arcyd2
         --sleep-secs 1 \
         --arcyd-email 'arcyd@localhost' \
         --sendmail-binary ${mail} \
-        --sendmail-type catchmail
+        --sendmail-type catchmail \
+        --external-report-command "${reporter}"
 
     $arcyd add-phabricator \
         --name localhost \

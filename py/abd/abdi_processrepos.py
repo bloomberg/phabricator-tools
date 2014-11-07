@@ -94,6 +94,13 @@ def setupParser(parser):
         default=None,
         help="path to an external logger to send errors to, will be called "
              "like so: $LOGGER '<<identifier>>' '<<full details>>'")
+    parser.add_argument(
+        '--external-report-command',
+        metavar="PATH",
+        type=str,
+        default=None,
+        help="path to an external reporter to send monitoring info to, "
+             "will be called like so: $REPORTER <<json report object>>")
 
 
 def process(args, repo_configs):
@@ -126,7 +133,8 @@ def process(args, repo_configs):
         _processrepolist(args, repo_configs, reporter, on_exception)
 
 
-def _processrepolist(args, repo_configs, reporter, on_exception):
+def _processrepolist(
+        args, repo_configs, reporter, on_exception):
     try:
         abdi_processrepolist.do(
             repo_configs,
@@ -134,6 +142,7 @@ def _processrepolist(args, repo_configs, reporter, on_exception):
             args.kill_file,
             args.sleep_secs,
             args.no_loop,
+            args.external_report_command,
             reporter)
     except abdi_operation.KillFileError:
         _LOGGER.info("kill file handled, stopping")

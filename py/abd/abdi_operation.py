@@ -12,6 +12,9 @@
 #   KillFileError
 #   CheckSpecialFiles
 #    .do
+#   CycleReportJson
+#    .do
+#    .getDelay
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -19,11 +22,19 @@
 
 from __future__ import absolute_import
 
+import json
+import logging
 import os
 import time
 
+import phlsys_strtotime
+import phlsys_subprocess
+import phlsys_timer
+
 import abdt_errident
 import abdt_tryloop
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Sleep(object):
@@ -84,6 +95,37 @@ class CheckSpecialFiles(object):
             os.remove(self._kill_file)
             raise KillFileError("kill file: " + self._kill_file)
         return True
+
+
+class CycleReportJson(object):
+
+    "Pipes a json report object to stdin of 'report_command' every cycle."
+
+    def __init__(self, report_command):
+        self._report_command = report_command
+        self._timer = phlsys_timer.Timer()
+        self._timer.start()
+
+        strToTime = phlsys_strtotime.duration_string_to_time_delta
+        self._delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
+
+    def do(self):
+        report = {"cycle_time_secs": self._timer.restart()}
+        report_json = json.dumps(report)
+
+        try:
+            phlsys_subprocess.run(self._report_command, stdin=report_json)
+        except phlsys_subprocess.CalledProcessError as e:
+            _LOGGER.error("CycleReportJson: {}".format(e))
+            return False
+
+        return True
+
+    def getDelay(self):
+        delay = None
+        if self._delays:
+            delay = self._delays.pop(0)
+        return delay
 
 
 # -----------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 usage: arcyd init [-h] --arcyd-email EMAIL
                   [--sys-admin-emails ADDR [ADDR ...]] [--sleep-secs TIME]
                   [--sendmail-binary PROGRAM] [--sendmail-type TYPE]
+                  [--external-report-command PATH]
 
 Create a new arcyd instance in working dir, with backing git repository.
 
@@ -16,3 +17,7 @@ optional arguments:
   --sendmail-type TYPE  type of program to send the mail with (sendmail,
                         catchmail), this will affect the parameters that Arcyd
                         will use.
+  --external-report-command PATH
+                        path to an external reporter to send monitoring info
+                        to, will be called like so: $REPORTER <<json report
+                        object>>
