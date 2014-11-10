@@ -35,7 +35,11 @@ cd origin
     mv hooks/post-update.sample hooks/post-update
 
     # run an http server for Git in the background, for snooping
-    python -m SimpleHTTPServer 8000 < /dev/null > webserver.log 2>&1 &
+    if lsof -i:8000 ; then
+        echo "Port 8000 is already in use."
+        exit 1
+    fi
+    python -m SimpleHTTPServer 8000 < /dev/null > snoopwebserver.log 2>&1 &
     webserver_pid=$!
 cd ..
 
@@ -209,6 +213,7 @@ function cleanup() {
     cat arcyd/savemail.txt
     cat arcyd/system_error.log
     cat arcyd/var/log/info
+    tail origin/snoopwebserver.log
 
     # clean up
     cd ${olddir}
