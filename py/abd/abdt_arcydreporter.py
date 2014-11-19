@@ -24,6 +24,7 @@
 #    .start_cache_refresh
 #    .finish_cache_refresh
 #    .start_repo
+#    .count_repo_start
 #    .tag_timer_context
 #    .tag_timer_decorate_object_methods
 #    .tag_timer_decorate_object_methods_individually
@@ -245,6 +246,7 @@ class ArcydReporter(object):
         self._log_system_error = list()
         self._log_user_action = list()
         self._count_user_action = 0
+        self._count_repo_start = 0
 
         self._external_system_error_logger = None
 
@@ -337,12 +339,17 @@ class ArcydReporter(object):
         self._write_status(ARCYD_STATUS_IDLE)
 
     def start_repo(self, name, human_name):
+        self._count_repo_start += 1
         self._repo = {
             REPO_ATTRIB_NAME: name,
             REPO_ATTRIB_HUMAN_NAME: human_name,
             REPO_ATTRIB_STATUS: REPO_STATUS_UPDATING,
         }
         self._write_status(ARCYD_STATUS_UPDATING)
+
+    @property
+    def count_repo_start(self):
+        return self._count_repo_start
 
     @contextlib.contextmanager
     def tag_timer_context(self, tag_name):

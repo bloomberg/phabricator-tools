@@ -107,6 +107,7 @@ class CycleReportJson(object):
         self._timer = phlsys_timer.Timer()
         self._timer.start()
         self._last_count_user_action = 0
+        self._last_count_repo_start = 0
 
         strToTime = phlsys_strtotime.duration_string_to_time_delta
         self._delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
@@ -116,9 +117,14 @@ class CycleReportJson(object):
         user_action = this_count_user_action - self._last_count_user_action
         self._last_count_user_action = this_count_user_action
 
+        this_count_repo_start = self._reporter.count_repo_start
+        count_repo = this_count_repo_start - self._last_count_repo_start
+        self._last_count_repo_start = this_count_repo_start
+
         report = {
             "cycle_time_secs": self._timer.restart(),
             "count_user_action": user_action,
+            "count_repo": count_repo,
         }
 
         report_json = json.dumps(report)
