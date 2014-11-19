@@ -75,7 +75,7 @@ def do(
     if external_report_command:
         full_path = os.path.abspath(external_report_command)
         operations.append(
-            abdi_operation.CycleReportJson(full_path))
+            abdi_operation.CycleReportJson(full_path, reporter))
 
     _process_operations(is_no_loop, operations)
 

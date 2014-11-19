@@ -17,6 +17,7 @@
 #    .on_tryloop_exception
 #    .log_system_error
 #    .log_user_action
+#    .count_user_action
 #    .log_io_action
 #    .log_system_exception
 #    .finish_sleep
@@ -243,6 +244,7 @@ class ArcydReporter(object):
         self._tag_times_now = collections.defaultdict(float)
         self._log_system_error = list()
         self._log_user_action = list()
+        self._count_user_action = 0
 
         self._external_system_error_logger = None
 
@@ -298,10 +300,15 @@ class ArcydReporter(object):
                 detail)
 
     def log_user_action(self, identifier, detail):
+        self._count_user_action += 1
         self._add_log_item(self._log_user_action, identifier, detail)
         if self._log_user_action > ARCYD_LOG_USER_ACTION_MAX_SIZE:
             max_size = ARCYD_LOG_USER_ACTION_MAX_SIZE
             self._log_user_action = self._log_user_action[-max_size:]
+
+    @property
+    def count_user_action(self):
+        return self._count_user_action
 
     def log_io_action(self, identifier, detail):
         if self._io_log_path:
