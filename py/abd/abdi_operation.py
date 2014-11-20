@@ -108,11 +108,13 @@ class CycleReportJson(object):
         self._timer.start()
         self._last_count_user_action = 0
         self._last_count_repo_start = 0
+        self._is_first_cycle = True
 
         strToTime = phlsys_strtotime.duration_string_to_time_delta
         self._delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
 
     def do(self):
+
         this_count_user_action = self._reporter.count_user_action
         user_action = this_count_user_action - self._last_count_user_action
         self._last_count_user_action = this_count_user_action
@@ -129,11 +131,17 @@ class CycleReportJson(object):
 
         report_json = json.dumps(report)
 
-        try:
-            phlsys_subprocess.run(self._report_command, stdin=report_json)
-        except phlsys_subprocess.CalledProcessError as e:
-            _LOGGER.error("CycleReportJson: {}".format(e))
-            return False
+        # skip actually reporting the first cycle so that we don't get
+        # incomplete results - we may not be the last operation to be processed
+        #
+        if self._is_first_cycle:
+            self._is_first_cycle = False
+        else:
+            try:
+                phlsys_subprocess.run(self._report_command, stdin=report_json)
+            except phlsys_subprocess.CalledProcessError as e:
+                _LOGGER.error("CycleReportJson: {}".format(e))
+                return False
 
         return True
 
