@@ -97,6 +97,29 @@ class CheckSpecialFiles(object):
         return True
 
 
+class _NumericalSampleDiffer(object):
+
+    "Track the sizes of steps between successive samples of a value."
+
+    def __init__(self):
+        self._last_value = None
+
+    def sample(self, value):
+        """Return the difference from last sample to this one.
+
+        Return None if there was no previous sample.
+
+        :value: the numerical value of the current sample
+        :returns: None or numerical difference
+
+        """
+        diff = None
+        if self._last_value is not None:
+            diff = value - self._last_value
+        self._last_value = value
+        return diff
+
+
 class CycleReportJson(object):
 
     "Pipes a json report object to stdin of 'report_command' every cycle."
@@ -106,9 +129,9 @@ class CycleReportJson(object):
         self._reporter = reporter
         self._timer = phlsys_timer.Timer()
         self._timer.start()
-        self._last_count_user_action = 0
-        self._last_count_repo_start = 0
-        self._last_count_repo_fetch = 0
+        self._count_user_action = _NumericalSampleDiffer()
+        self._count_repo_start = _NumericalSampleDiffer()
+        self._count_repo_fetch = _NumericalSampleDiffer()
         self._is_first_cycle = True
 
         strToTime = phlsys_strtotime.duration_string_to_time_delta
@@ -116,23 +139,14 @@ class CycleReportJson(object):
 
     def do(self):
 
-        this_count_user_action = self._reporter.count_user_action
-        user_action = this_count_user_action - self._last_count_user_action
-        self._last_count_user_action = this_count_user_action
-
-        this_count_repo_start = self._reporter.count_repo_start
-        count_repo = this_count_repo_start - self._last_count_repo_start
-        self._last_count_repo_start = this_count_repo_start
-
-        this_count_repo_fetch = self._reporter.count_repo_fetch
-        count_repo_fetch = this_count_repo_fetch - self._last_count_repo_fetch
-        self._last_count_repo_fetch = this_count_repo_fetch
-
         report = {
             "cycle_time_secs": self._timer.restart(),
-            "count_user_action": user_action,
-            "count_repo": count_repo,
-            "count_repo_fetch": count_repo_fetch,
+            "count_user_action": self._count_user_action.sample(
+                self._reporter.count_user_action),
+            "count_repo": self._count_repo_start.sample(
+                self._reporter.count_repo_start),
+            "count_repo_fetch": self._count_repo_fetch.sample(
+                self._reporter.count_repo_fetch),
         }
 
         report_json = json.dumps(report)
