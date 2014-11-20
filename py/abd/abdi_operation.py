@@ -108,6 +108,7 @@ class CycleReportJson(object):
         self._timer.start()
         self._last_count_user_action = 0
         self._last_count_repo_start = 0
+        self._last_count_repo_fetch = 0
         self._is_first_cycle = True
 
         strToTime = phlsys_strtotime.duration_string_to_time_delta
@@ -123,10 +124,15 @@ class CycleReportJson(object):
         count_repo = this_count_repo_start - self._last_count_repo_start
         self._last_count_repo_start = this_count_repo_start
 
+        this_count_repo_fetch = self._reporter.count_repo_fetch
+        count_repo_fetch = this_count_repo_fetch - self._last_count_repo_fetch
+        self._last_count_repo_fetch = this_count_repo_fetch
+
         report = {
             "cycle_time_secs": self._timer.restart(),
             "count_user_action": user_action,
             "count_repo": count_repo,
+            "count_repo_fetch": count_repo_fetch,
         }
 
         report_json = json.dumps(report)

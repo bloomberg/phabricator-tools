@@ -25,6 +25,8 @@
 #    .finish_cache_refresh
 #    .start_repo
 #    .count_repo_start
+#    .fetched_repo
+#    .count_repo_fetch
 #    .tag_timer_context
 #    .tag_timer_decorate_object_methods
 #    .tag_timer_decorate_object_methods_individually
@@ -247,6 +249,7 @@ class ArcydReporter(object):
         self._log_user_action = list()
         self._count_user_action = 0
         self._count_repo_start = 0
+        self._count_repo_fetch = 0
 
         self._external_system_error_logger = None
 
@@ -350,6 +353,13 @@ class ArcydReporter(object):
     @property
     def count_repo_start(self):
         return self._count_repo_start
+
+    def fetched_repo(self):
+        self._count_repo_fetch += 1
+
+    @property
+    def count_repo_fetch(self):
+        return self._count_repo_fetch
 
     @contextlib.contextmanager
     def tag_timer_context(self, tag_name):

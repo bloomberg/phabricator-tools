@@ -108,11 +108,14 @@ def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
         arcyd_reporter.tag_timer_decorate_object_methods_individually(
             repo, 'git')
 
-        fetch_if_needed(
+        did_fetch = fetch_if_needed(
             url_watcher,
             abdi_repoargs.get_repo_snoop_url(args),
             repo,
             args.repo_desc)
+
+        if did_fetch:
+            arcyd_reporter.fetched_repo()
 
         options = _determine_options(args, repo)
 
