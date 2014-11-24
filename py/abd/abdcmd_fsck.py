@@ -34,6 +34,11 @@ def getFromfilePrefixChars():
 def setupParser(parser):
 
     parser.add_argument(
+        '--repos',
+        nargs='*',
+        help="an optional list of repository names to check.")
+
+    parser.add_argument(
         '--fix',
         action="store_true",
         help="resolve issues that are detected, where possible.")
@@ -61,7 +66,8 @@ def process(args):
         if pid is not None and phlsys_pid.is_running(pid):
             raise Exception("cannot fsck whilst arcyd is running.")
 
-        repo_config_path_list = fs.repo_config_path_list()
+        repo_config_path_list = _determine_repo_config_path_list(
+            fs, args.repos)
 
         if not _check_repo_config_path_list(repo_config_path_list):
             exit_code = 1
@@ -76,6 +82,20 @@ def process(args):
         print "use '--fix' to attempt to fix the issues"
 
     return exit_code
+
+
+def _determine_repo_config_path_list(fs, user_repo_names):
+    all_repo_paths = fs.repo_config_path_list()
+    if user_repo_names is None:
+        return all_repo_paths
+    else:
+        user_repo_paths = [fs.layout.repo_config(n) for n in user_repo_names]
+        unknown_paths = set(user_repo_paths) - set(all_repo_paths)
+        if not user_repo_names:
+            raise Exception("no repos specified")
+        if unknown_paths:
+            raise Exception("unknown repos: {}".format(unknown_paths))
+        return user_repo_paths
 
 
 def _check_repo_config_path_list(repo_config_path_list):
