@@ -70,6 +70,16 @@ class Test(unittest.TestCase):
             f.w0.repo('fetch', '--prune')
             phlgit_fetch.all_prune(f.w0.repo)
 
+    def testFetchSpec(self):
+        fetchspec = ["+refs/heads/*:refs/remotes/origin/*"]
+        fetchspec_nonexistant = ["+refs/nope/*:refs/heads/__private_nope/*"]
+
+        f = phlgitu_fixture.CentralisedWithTwoWorkers()
+        with contextlib.closing(f):
+            phlgit_fetch.prune_safe(f.w0.repo, 'origin', [])
+            phlgit_fetch.prune_safe(f.w0.repo, 'origin', fetchspec)
+            phlgit_fetch.prune_safe(f.w0.repo, 'origin', fetchspec_nonexistant)
+
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2014 Bloomberg Finance L.P.

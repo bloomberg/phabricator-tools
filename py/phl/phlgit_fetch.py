@@ -27,7 +27,7 @@ def all_prune(repo):
     repo('fetch', '--all', '--prune')
 
 
-def prune_safe(repo, remote):
+def prune_safe(repo, remote, refspec_list=None):
     """Fetch from the specified remote and prune removed branches.
 
     This safely works around the case where a branch that would be fetched
@@ -47,15 +47,18 @@ def prune_safe(repo, remote):
 
     :repo: a callable supporting git commands, e.g. repo("status")
     :remote: string name of the remote to fetch from
+    :refspec_list: optional list of refspecs to fetch
     :returns: None
 
     """
+    if refspec_list is None:
+        refspec_list = []
     try:
-        repo('fetch', remote, '-p')
+        repo('fetch', remote, '--prune', *refspec_list)
     except phlsys_subprocess.CalledProcessError:
         # assume this was due to the previously mentioned issue
         repo('remote', 'prune', remote)
-        repo('fetch', remote)
+        repo('fetch', remote, *refspec_list)
 
 
 # -----------------------------------------------------------------------------
