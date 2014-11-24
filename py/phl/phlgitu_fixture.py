@@ -277,6 +277,9 @@ class CentralisedWithWorkers(object):
             if i == 0:
                 self.workers[0].commit_new_file('initial commit', 'README')
                 phlgit_push.push(self.workers[0].repo, 'master', 'origin')
+            else:
+                self.workers[i].repo('fetch')
+                self.workers[i].repo('checkout', 'master')
 
     def close(self):
         shutil.rmtree(self._central_repo.working_dir)
