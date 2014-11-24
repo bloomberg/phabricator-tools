@@ -10,6 +10,8 @@
 #   try_push_special_refs
 #   is_remote_reserve_branch_present
 #   ensure_reserve_branch
+#   is_legacy_landinglog_branch_present
+#   remove_landinglog
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -32,6 +34,7 @@ import abdt_git
 
 
 _RESERVE_BRANCH_FQ_NAME = 'refs/heads/dev/arcyd/reserve'
+_LEGACY_LANDINGLOG_NAME = 'refs/arcyd/landinglog'
 
 # The lines in this string are wrapped as appropriate for a commit message
 _RESERVE_BRANCH_MESSAGE = """
@@ -146,6 +149,32 @@ def ensure_reserve_branch(repo):
         phlgit_push.push(repo, reserve_name.short, 'origin')
         phlgit_checkout.previous_branch(repo)
         phlgit_branch.force_delete(repo, reserve_name.short)
+
+
+def is_legacy_landinglog_branch_present(repo):
+    """Return True if the remote for 'repo' has the legacy landing log ref.
+
+    :repo: a callable supporting git commands, e.g. repo("status")
+    :returns: True or False
+
+    """
+    legacy_landinglog_name = phlgitu_ref.Name(_LEGACY_LANDINGLOG_NAME)
+    remote_ref_names = repo("ls-remote").split()[1::2]
+    return legacy_landinglog_name.fq in remote_ref_names
+
+
+def remove_landinglog(repo):
+    """Remove the legacy landing log ref for the 'origin' of 'repo'.
+
+    Behaviour is undefined if the landing log ref is not present, use
+    'is_legacy_landinglog_branch_present' to determine this first.
+
+    :repo: a callable supporting git commands, e.g. repo("status")
+    :returns: None
+
+    """
+    legacy_landinglog_name = phlgitu_ref.Name(_LEGACY_LANDINGLOG_NAME)
+    phlgit_push.delete(repo, 'origin', legacy_landinglog_name.fq)
 
 
 # -----------------------------------------------------------------------------

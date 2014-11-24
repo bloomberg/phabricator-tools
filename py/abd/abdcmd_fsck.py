@@ -233,6 +233,23 @@ def _check_repo_remote(args, repo_name, repo_config):
         _print_indented(4, e.stderr)
         print
 
+    # ensure the vestigial landinglog ref is not present
+    try:
+        if abdi_repo.is_legacy_landinglog_branch_present(repo):
+            print "'{repo}' has legacy landinglog".format(repo=repo_name)
+            if args.fix:
+                print "removing landinglog for '{repo}'..".format(
+                    repo=repo_name)
+                abdi_repo.remove_landinglog(repo)
+            else:
+                all_ok = False
+    except phlsys_subprocess.CalledProcessError as e:
+        all_ok = False
+        print "error removing landinglog for {repo}".format(repo=repo_name)
+        _print_indented(4, e.stdout)
+        _print_indented(4, e.stderr)
+        print
+
     return all_ok
 
 
