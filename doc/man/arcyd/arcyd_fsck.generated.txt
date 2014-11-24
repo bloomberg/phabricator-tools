@@ -1,9 +1,10 @@
-usage: arcyd fsck [-h] [--fix] [--remote]
+usage: arcyd fsck [-h] [--fix] [--remote] [--verbose]
 
 Check the Arcyd files for consistency and fix any issues.
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --fix       resolve issues that are detected, where possible.
-  --remote    also check remote resources pointed to by the file system. e.g.
-              git remotes.
+  -h, --help     show this help message and exit
+  --fix          resolve issues that are detected, where possible.
+  --remote       also check remote resources pointed to by the file system.
+                 e.g. git remotes.
+  --verbose, -v  verbose output.

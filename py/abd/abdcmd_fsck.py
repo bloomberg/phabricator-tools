@@ -44,6 +44,11 @@ def setupParser(parser):
         help="also check remote resources pointed to by the file system. e.g. "
              "git remotes.")
 
+    parser.add_argument(
+        '--verbose', '-v',
+        action="store_true",
+        help="verbose output.")
+
 
 def process(args):
 
@@ -106,6 +111,9 @@ def _check_repo_name_config_list(args, repo_name_config_list):
     """
     all_ok = True
     for repo_name, repo_config in repo_name_config_list:
+
+        if args.verbose:
+            print "Checking", repo_name
 
         if not _check_repo_cloned(args, repo_name, repo_config):
             all_ok = False
