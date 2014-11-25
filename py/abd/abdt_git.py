@@ -57,6 +57,9 @@ import abdt_logging
 import abdt_naming
 
 
+_ARCYD_REFSPACE = 'refs/arcyd'
+_PRIVATE_ARCYD_BRANCHSPACE = '__private_arcyd'
+
 _LANDED_ARCHIVE_BRANCH_MESSAGE = """
 Create an archive branch for landed branches
 
@@ -76,8 +79,8 @@ This branch is useful for:
 
 """.strip()
 
-ARCYD_LANDED_REF = "refs/arcyd/landed"
-_ARCYD_LANDED_BRANCH = "__private_arcyd/landed"
+ARCYD_LANDED_REF = "{}/landed".format(_ARCYD_REFSPACE)
+_ARCYD_LANDED_BRANCH = "{}/landed".format(_PRIVATE_ARCYD_BRANCHSPACE)
 ARCYD_LANDED_BRANCH_FQ = "refs/heads/" + _ARCYD_LANDED_BRANCH
 
 _ABANDONED_ARCHIVE_BRANCH_MESSAGE = """
@@ -96,8 +99,8 @@ This branch is useful for:
 
 """.strip()
 
-ARCYD_ABANDONED_REF = "refs/arcyd/abandoned"
-_ARCYD_ABANDONED_BRANCH = "__private_arcyd/abandoned"
+ARCYD_ABANDONED_REF = "{}/abandoned".format(_ARCYD_REFSPACE)
+_ARCYD_ABANDONED_BRANCH = "{}/abandoned".format(_PRIVATE_ARCYD_BRANCHSPACE)
 ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 
 
@@ -324,7 +327,6 @@ class Repo(object):
         :returns: None
 
         """
-        phlgit_fetch.prune_safe(self, self._remote)
         checkout_master_fetch_special_refs(self, self._remote)
 
     @property
@@ -412,16 +414,12 @@ def checkout_master_fetch_special_refs(repo, remote):
     # current branch with fetch, which would fail.
     phlgit_checkout.branch(repo, 'master')
 
-    ref_list = set(repo('ls-remote').split()[1::2])
-    special_refs = [
-        (ARCYD_ABANDONED_REF, ARCYD_ABANDONED_BRANCH_FQ),
-        (ARCYD_LANDED_REF, ARCYD_LANDED_BRANCH_FQ),
-    ]
-    for ref in special_refs:
-        if ref[0] in ref_list:
-            # Allow non-ff fetches so that we enable users to prune the special
-            # refs if they're getting too large.
-            repo('fetch', remote, '+{}:{}'.format(ref[0], ref[1]))
+    branch_refspec = '+refs/heads/*:refs/remotes/origin/*'
+    arcyd_refspec = '+{refspace}/*:refs/heads/{branchspace}/*'.format(
+        refspace=_ARCYD_REFSPACE, branchspace=_PRIVATE_ARCYD_BRANCHSPACE)
+    refspec_list = [branch_refspec, arcyd_refspec]
+
+    phlgit_fetch.prune_safe(repo, remote, refspec_list)
 
 
 # -----------------------------------------------------------------------------
