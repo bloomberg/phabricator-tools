@@ -594,7 +594,7 @@ function test_branch_gc() {
 }
 
 function test_clean_cutover_path() {
-    test_name='test_happy_path'
+    test_name='test_clean_cutover_path'
     set_branch_name "master" "${test_name}"
 
     # create a review branch
