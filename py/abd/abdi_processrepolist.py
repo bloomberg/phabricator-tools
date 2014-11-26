@@ -37,7 +37,8 @@ def do(
         sleep_secs,
         is_no_loop,
         external_report_command,
-        reporter):
+        reporter,
+        mail_sender):
 
     # TODO: test write access to repos here
 
@@ -60,7 +61,8 @@ def do(
         conduits,
         url_watcher_wrapper,
         sys_admin_emails,
-        repo_configs)
+        repo_configs,
+        mail_sender)
 
     _append_interrupt_operations(
         operations,
@@ -111,7 +113,8 @@ def _append_operations_for_repos(
         conduits,
         url_watcher_wrapper,
         sys_admin_emails,
-        repo_configs):
+        repo_configs,
+        mail_sender):
 
     strToTime = phlsys_strtotime.duration_string_to_time_delta
     retry_delays = [strToTime(d) for d in ["10 minutes", "1 hours"]]
@@ -134,7 +137,8 @@ def _append_operations_for_repos(
             repo_args,
             reporter,
             conduits,
-            url_watcher_wrapper)
+            url_watcher_wrapper,
+            mail_sender)
 
         on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
             sys_admin_emails, reporter, repo_name)
@@ -153,11 +157,19 @@ def _process_single_repo(
         repo_args,
         reporter,
         conduits,
-        url_watcher_wrapper):
+        url_watcher_wrapper,
+        mail_sender):
 
     watcher = url_watcher_wrapper.watcher
+
     abdi_processrepoargs.do(
-        abd_repo, repo_name, repo_args, reporter, conduits, watcher)
+        abd_repo,
+        repo_name,
+        repo_args,
+        reporter,
+        conduits,
+        watcher,
+        mail_sender)
 
     # save the urlwatcher cache
     url_watcher_wrapper.save()

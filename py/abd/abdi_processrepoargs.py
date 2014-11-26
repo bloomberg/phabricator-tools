@@ -17,9 +17,7 @@ from __future__ import absolute_import
 import contextlib
 import traceback
 
-import phlmail_sender
 import phlsys_conduit
-import phlsys_sendmail
 
 import abdmail_mailer
 import abdt_classicnaming
@@ -37,7 +35,14 @@ import abdi_processrepo
 import abdi_repoargs
 
 
-def do(repo, repo_name, args, arcyd_reporter, conduits, url_watcher):
+def do(
+        repo,
+        repo_name,
+        args,
+        arcyd_reporter,
+        conduits,
+        url_watcher,
+        mail_sender):
 
     reporter = abdt_reporeporter.RepoReporter(
         arcyd_reporter,
@@ -49,7 +54,14 @@ def do(repo, repo_name, args, arcyd_reporter, conduits, url_watcher):
 
     with arcyd_reporter.tag_timer_context('process args'):
         with contextlib.closing(reporter):
-            _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher)
+            _do(
+                repo,
+                args,
+                reporter,
+                arcyd_reporter,
+                conduits,
+                url_watcher,
+                mail_sender)
 
 
 def _set_attrib_if_not_none(config, key, value):
@@ -100,7 +112,14 @@ def _determine_options(args, repo):
     return config
 
 
-def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
+def _do(
+        repo,
+        args,
+        reporter,
+        arcyd_reporter,
+        conduits,
+        url_watcher,
+        mail_sender):
 
     with arcyd_reporter.tag_timer_context('process branches prolog'):
 
@@ -122,12 +141,9 @@ def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
 
         reporter.set_config(options)
 
-        sender = phlmail_sender.MailSender(
-            phlsys_sendmail.Sendmail(), arcyd_reporter.arcyd_email)
-
         # TODO: this should be a URI for users not conduit
         mailer = abdmail_mailer.Mailer(
-            sender,
+            mail_sender,
             options.admin_emails,
             options.description,
             args.instance_uri)

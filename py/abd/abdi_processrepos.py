@@ -18,6 +18,7 @@ import contextlib
 import logging
 import os
 
+import phlmail_sender
 import phlsys_sendmail
 
 import abdt_arcydreporter
@@ -117,6 +118,9 @@ def process(args, repo_configs):
     reporter = abdt_arcydreporter.ArcydReporter(
         reporter_data, args.arcyd_email, args.io_log_file)
 
+    mail_sender = phlmail_sender.MailSender(
+        phlsys_sendmail.Sendmail(), args.arcyd_email)
+
     if args.external_error_logger:
         full_path = os.path.abspath(args.external_error_logger)
         reporter.set_external_system_error_logger(full_path)
@@ -130,11 +134,12 @@ def process(args, repo_configs):
 
     arcyd_reporter_context = abdt_logging.arcyd_reporter_context
     with contextlib.closing(reporter), arcyd_reporter_context(reporter):
-        _processrepolist(args, repo_configs, reporter, on_exception)
+        _processrepolist(
+            args, repo_configs, reporter, on_exception, mail_sender)
 
 
 def _processrepolist(
-        args, repo_configs, reporter, on_exception):
+        args, repo_configs, reporter, on_exception, mail_sender):
     try:
         abdi_processrepolist.do(
             repo_configs,
@@ -143,7 +148,8 @@ def _processrepolist(
             args.sleep_secs,
             args.no_loop,
             args.external_report_command,
-            reporter)
+            reporter,
+            mail_sender)
     except abdi_operation.KillFileError:
         _LOGGER.info("kill file handled, stopping")
         return
