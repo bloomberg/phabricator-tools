@@ -19,7 +19,6 @@ import traceback
 
 import phlmail_sender
 import phlsys_conduit
-import phlsys_pluginmanager
 import phlsys_sendmail
 
 import abdmail_mailer
@@ -133,9 +132,6 @@ def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
             options.description,
             args.instance_uri)
 
-        pluginManager = phlsys_pluginmanager.PluginManager(
-            args.plugins, args.trusted_plugins)
-
         branch_url_callable = None
         if options.branch_url_format:
             def make_branch_url(branch_name):
@@ -164,7 +160,6 @@ def _do(repo, args, reporter, arcyd_reporter, conduits, url_watcher):
                 branches,
                 arcyd_conduit,
                 mailer,
-                pluginManager,
                 reporter)
     except Exception:
         reporter.on_traceback(traceback.format_exc())

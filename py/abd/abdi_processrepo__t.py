@@ -8,7 +8,6 @@ import unittest
 
 import phlcon_differential
 import phlmail_mocksender
-import phlsys_pluginmanager
 
 import abdmail_mailer
 import abdt_arcydreporter
@@ -70,7 +69,6 @@ class Test(unittest.TestCase):
         self.conduit = None
         self.mock_sender = None
         self.mailer = None
-        self.plugin_manager = None
         self.arcyd_reporter_data = None
         self.arcyd_reporter = None
         self.reporter = None
@@ -86,7 +84,6 @@ class Test(unittest.TestCase):
             ["admin@server.test"],
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
-        self.plugin_manager = phlsys_pluginmanager.PluginManager([], [])
         self.arcyd_reporter_data = {}
         self.arcyd_reporter = abdt_arcydreporter.ArcydReporter(
             abdt_shareddictoutput.ToDict(self.arcyd_reporter_data),
@@ -119,7 +116,6 @@ class Test(unittest.TestCase):
                 branches,
                 self.conduit,
                 self.mailer,
-                self.plugin_manager,
                 self.reporter)
 
     def test_A_Breathing(self):

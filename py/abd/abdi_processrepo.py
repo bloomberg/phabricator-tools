@@ -35,11 +35,7 @@ import abdt_userwarning
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 
 
-def create_review(conduit, branch, plugin_manager):
-    plugin_manager.hook(
-        "before_create_review",
-        {"conduit": conduit, "branch": branch})
-
+def create_review(conduit, branch):
     branch.verify_review_branch_base()
 
     # TODO: we should also cc other users on the branch
@@ -98,12 +94,6 @@ def create_review(conduit, branch, plugin_manager):
 
     if user_warnings:
         commenter.userWarnings(user_warnings)
-
-    plugin_manager.hook(
-        "after_create_review",
-        {"parsed": parsed, "conduit": conduit, "branch": branch,
-            "rawDiff": raw_diff, "commenter": commenter}
-    )
 
     abdt_logging.on_review_event(
         'createrev', '{} created {} from {}'.format(
@@ -261,9 +251,9 @@ def create_failed_review(conduit, branch, exception):
 
 
 def try_create_review(
-        mailer, conduit, branch, plugin_manager, reporter, mail_on_fail):
+        mailer, conduit, branch, reporter, mail_on_fail):
     try:
-        create_review(conduit, branch, plugin_manager)
+        create_review(conduit, branch)
     except abdt_exception.AbdUserException as e:
         print "failed to create:"
         print e
@@ -279,7 +269,7 @@ def try_create_review(
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
+def process_updated_branch(mailer, conduit, branch, reporter):
     abdte = abdt_exception
     review_branch_name = branch.review_branch_name()
     if branch.is_new():
@@ -288,7 +278,6 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
             mailer,
             conduit,
             branch,
-            plugin_manager,
             reporter,
             mail_on_fail=True)
     else:
@@ -301,7 +290,6 @@ def process_updated_branch(mailer, conduit, branch, plugin_manager, reporter):
                 mailer,
                 conduit,
                 branch,
-                plugin_manager,
                 reporter,
                 mail_on_fail=has_new_commits)
         else:
@@ -337,7 +325,7 @@ def process_abandoned_branch(conduit, branch):
     branch.abandon()
 
 
-def process_branches(branches, conduit, mailer, plugin_manager, reporter):
+def process_branches(branches, conduit, mailer, reporter):
     for branch in branches:
         if branch.is_abandoned():
             process_abandoned_branch(conduit, branch)
@@ -347,7 +335,7 @@ def process_branches(branches, conduit, mailer, plugin_manager, reporter):
             reporter.start_branch(branch.review_branch_name())
             print "pending:", branch.review_branch_name()
             process_updated_branch(
-                mailer, conduit, branch, plugin_manager, reporter)
+                mailer, conduit, branch, reporter)
             reporter.finish_branch(
                 abdt_branch.calc_is_ok(branch),
                 branch.review_id_or_none())
