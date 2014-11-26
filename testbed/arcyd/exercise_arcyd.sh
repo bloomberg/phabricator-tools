@@ -24,8 +24,6 @@ olddir=$(pwd)
 cd ${tempdir}
 
 $arcyd -h
-$arcyd arcyd-status-html -h
-$arcyd repo-status-html -h
 $arcyd init -h
 $arcyd add-phabricator -h
 $arcyd add-repohost -h
@@ -88,16 +86,6 @@ function run_arcyd() {
 cd arcyd_instance
 
 ${arcyd} start --no-loop --foreground
-
-${arcyd} \
-    arcyd-status-html \
-    var/status/arcyd_status.json \
-    https://server.test/arcyd
-
-${arcyd} \
-    repo-status-html \
-    var/status/localhost_fs_origin.try \
-    var/status/localhost_fs_origin.ok
 
 cd ..
 }

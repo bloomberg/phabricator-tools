@@ -101,18 +101,6 @@ function configure_arcyd2() {
 function run_current_dir_as_arcyd() {
     ${arcyd} start --no-loop --foreground
     echo $?
-
-    ${arcyd} \
-        arcyd-status-html \
-        var/status/arcyd_status.json \
-        https://server.test/arcyd
-    echo $?
-
-    ${arcyd} \
-        repo-status-html \
-        var/status/localhost_fs_origin.try \
-        var/status/localhost_fs_origin.ok
-    echo $?
 }
 
 function run_arcyd() {

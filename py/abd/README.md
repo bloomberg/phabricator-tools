@@ -7,8 +7,6 @@ Add a new repository for the Arcyd instance to manage.
 Add a new repository host for the Arcyd instance to refer to.
 * `abdcmd_arcyd.py` -
 Arcyd - daemon to watch git repos, create and land reviews automatically.
-* `abdcmd_arcydstatushtml.py` -
-Render arcyd status file as meaningful html to present to users.
 * `abdcmd_fetch.py` -
 Fetch managed repos.
 * `abdcmd_fsck.py` -
@@ -17,8 +15,6 @@ Check the Arcyd files for consistency and fix any issues.
 Create a new arcyd instance in working dir, with backing git repository.
 * `abdcmd_listrepos.py` -
 List the repositories managed by this arcyd instance.
-* `abdcmd_repostatushtml.py` -
-Render status files as meaningful html to present to users.
 * `abdcmd_rmrepo.py` -
 Remove a repository from the Arcyd instance.
 * `abdcmd_start.py` -
@@ -95,14 +91,6 @@ Provide equivalent classes that write dictionaries to shared resources.
 Retry operations that may intermittently fail, log each failure.
 * `abdt_userwarning.py` -
 Hierarchy of warnings to feed back to users.
-* `abdweb_arcydcontent.py` -
-Render html to report the state of a running instance of Arcyd.
-* `abdweb_htmlformatter.py` -
-Provide useful utilities for formatting html.
-* `abdweb_page.py` -
-Render the outline of an Arcyd report page, with inline CSS, JS etc.
-* `abdweb_repocontent.py` -
-Render html to report the state of a repository watched by Arcyd.
 
 -----
 *please note: this file is generated, edits will be lost*

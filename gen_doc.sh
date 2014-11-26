@@ -56,9 +56,8 @@ printf "."
 
 arcyd='proto/arcyd'
 arcyd_commands='
-        arcyd-status-html repo-status-html init
-        list-repos add-phabricator add-repohost add-repo rm-repo start stop
-        fsck fetch'
+        init list-repos add-phabricator add-repohost add-repo rm-repo start
+        stop fsck fetch'
 
 ${arcyd} -h > doc/man/arcyd/arcyd.generated.txt
 for command in ${arcyd_commands}; do
