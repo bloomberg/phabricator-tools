@@ -1,6 +1,6 @@
 usage: arcyd [-h]
              
-             {arcyd-status-html,repo-status-html,instaweb,init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
+             {arcyd-status-html,repo-status-html,init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
              ...
 
 Arcyd - daemon to watch git repos, create and land reviews automatically.
@@ -26,13 +26,11 @@ minimal user workflow:
     .. Arcyd squashes the 'arcyd-review' branch onto master and deletes it ..
 
 positional arguments:
-  {arcyd-status-html,repo-status-html,instaweb,init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
+  {arcyd-status-html,repo-status-html,init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
     arcyd-status-html   Render arcyd status file as meaningful html to present
                         to users.
     repo-status-html    Render status files as meaningful html to present to
                         users.
-    instaweb            Start a local webserver to report the status of an
-                        arcyd instance.
     init                Create a new arcyd instance in working dir, with
                         backing git repository.
     list-repos          List the repositories managed by this arcyd instance.

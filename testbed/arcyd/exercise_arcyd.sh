@@ -26,7 +26,6 @@ cd ${tempdir}
 $arcyd -h
 $arcyd arcyd-status-html -h
 $arcyd repo-status-html -h
-$arcyd instaweb -h
 $arcyd init -h
 $arcyd add-phabricator -h
 $arcyd add-repohost -h

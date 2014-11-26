@@ -176,15 +176,6 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 
 cd ..
 
-# run arcyd instaweb in the background
-${arcyd} \
-    instaweb \
-    --report-file arcyd/var/status/arcyd_status.json \
-    --repo-file-dir arcyd/var/status \
-    --port 8001 \
-&
-instaweb_pid=$!
-
 # run arcyd in the background
 cd arcyd
 ${arcyd} start
@@ -193,10 +184,6 @@ cd ..
 function cleanup() {
 
     set +e
-
-    echo $instaweb_pid
-    kill $instaweb_pid
-    wait $instaweb_pid
 
     # kill arcyd
     cd ${tempdir}

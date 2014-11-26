@@ -15,8 +15,6 @@ Fetch managed repos.
 Check the Arcyd files for consistency and fix any issues.
 * `abdcmd_init.py` -
 Create a new arcyd instance in working dir, with backing git repository.
-* `abdcmd_instaweb.py` -
-Start a local webserver to report the status of an arcyd instance.
 * `abdcmd_listrepos.py` -
 List the repositories managed by this arcyd instance.
 * `abdcmd_repostatushtml.py` -
