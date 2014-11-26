@@ -56,7 +56,7 @@ printf "."
 
 arcyd='proto/arcyd'
 arcyd_commands='
-        arcyd-status-html repo-status-html dev-status-html instaweb init
+        arcyd-status-html repo-status-html instaweb init
         list-repos add-phabricator add-repohost add-repo rm-repo start stop
         fsck fetch'
 

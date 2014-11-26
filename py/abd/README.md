@@ -9,8 +9,6 @@ Add a new repository host for the Arcyd instance to refer to.
 Arcyd - daemon to watch git repos, create and land reviews automatically.
 * `abdcmd_arcydstatushtml.py` -
 Render arcyd status file as meaningful html to present to users.
-* `abdcmd_devstatushtml.py` -
-Help develop status pages by providing simulating various statuses.
 * `abdcmd_fetch.py` -
 Fetch managed repos.
 * `abdcmd_fsck.py` -
