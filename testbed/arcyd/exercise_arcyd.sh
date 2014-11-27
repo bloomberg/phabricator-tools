@@ -1,5 +1,6 @@
-set -x
-set -e
+set -x  # echo all commands to the terminal
+set -e  # exit with error if anything returns non-zero
+set -u  # exit with error if we use an undefined variable
 trap "echo FAILED!; exit 1" EXIT
 
 # cd to the dir of this script, so paths are relative

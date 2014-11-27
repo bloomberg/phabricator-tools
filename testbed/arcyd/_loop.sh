@@ -15,8 +15,9 @@ cd "$(dirname "$0")"
 arcyd="$1"
 safe_arcyd="$(pwd)/../../proto/arcyd"
 
-set +x
-set -e
+set +x  # DONT echo all commands to the terminal
+set -e  # exit with error if anything returns non-zero
+set -u  # exit with error if we use an undefined variable
 trap "echo FAILED!; exit 1" EXIT
 
 
