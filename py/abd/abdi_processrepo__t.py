@@ -12,7 +12,6 @@ import abdmail_mailer
 import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
-import abdt_repooptions
 
 import abdi_processrepo
 
@@ -80,11 +79,6 @@ class Test(unittest.TestCase):
         pass
 
     def _process_branches(self, branches):
-        config = abdt_repooptions.Data()
-        config.branch_url_format = (
-            'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}')
-        config.review_url_format = 'http://my.phabricator/{review}'
-
         abdi_processrepo.process_branches(
             branches,
             self.conduit,

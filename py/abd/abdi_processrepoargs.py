@@ -23,7 +23,6 @@ import abdt_conduit
 import abdt_errident
 import abdt_git
 import abdt_rbranchnaming
-import abdt_repooptions
 import abdt_tryloop
 
 import abdi_processrepo
@@ -32,12 +31,6 @@ import abdi_repoargs
 
 def do(repo, unused_repo_name, args, conduits, url_watcher, mail_sender):
     _do(repo, args, conduits, url_watcher, mail_sender)
-
-
-def _set_attrib_if_not_none(config, key, value):
-    if value:
-        getattr(config, key)  # raise if 'key' doesn't exist already
-        setattr(config, key, value)
 
 
 def _flatten_list(hierarchy):
@@ -50,38 +43,6 @@ def _flatten_list(hierarchy):
             yield x
 
 
-def _make_config_from_args(args):
-    config = abdt_repooptions.Data()
-    if args.admin_emails:
-        config.admin_emails = set(_flatten_list(args.admin_emails))
-    _set_attrib_if_not_none(
-        config, 'description', args.repo_desc)
-    _set_attrib_if_not_none(
-        config, 'branch_url_format', args.branch_url_format)
-    _set_attrib_if_not_none(
-        config, 'review_url_format', args.review_url_format)
-    return config
-
-
-def _determine_options(args, repo):
-    # combine all the available configs
-    default_config = abdt_repooptions.make_default_data()
-    args_config = _make_config_from_args(args)
-
-    # listing the refs of each repo is quite expensive at scale, we're not
-    # making use of this feature at present, so disable it until we have
-    # optimised the ref query
-    #
-    # repo_config = abdt_repooptions.data_from_repo_or_none(repo)
-    _ = repo  # NOQA
-    repo_config = None
-
-    config = abdt_repooptions.merge_data_objects(
-        default_config, args_config, repo_config)
-    abdt_repooptions.validate_data(config)
-    return config
-
-
 def _do(repo, args, conduits, url_watcher, mail_sender):
 
     fetch_if_needed(
@@ -90,21 +51,21 @@ def _do(repo, args, conduits, url_watcher, mail_sender):
         repo,
         args.repo_desc)
 
-    options = _determine_options(args, repo)
-
     arcyd_conduit = _connect(conduits, args)
+
+    admin_emails = set(_flatten_list(args.admin_emails))
 
     # TODO: this should be a URI for users not conduit
     mailer = abdmail_mailer.Mailer(
         mail_sender,
-        options.admin_emails,
-        options.description,
+        admin_emails,
+        args.repo_desc,
         args.instance_uri)
 
     branch_url_callable = None
-    if options.branch_url_format:
+    if args.branch_url_format:
         def make_branch_url(branch_name):
-            return options.branch_url_format.format(
+            return args.branch_url_format.format(
                 branch=branch_name,
                 repo_url=args.repo_url)
         branch_url_callable = make_branch_url
@@ -115,7 +76,7 @@ def _do(repo, args, conduits, url_watcher, mail_sender):
 
     branches = abdt_git.get_managed_branches(
         repo,
-        options.description,
+        args.repo_desc,
         branch_naming,
         branch_url_callable)
 
