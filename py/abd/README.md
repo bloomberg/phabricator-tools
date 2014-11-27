@@ -39,8 +39,6 @@ Manage git repositories watched by arcyd.
 Define the arguments for a single repository.
 * `abdmail_mailer.py` -
 Send mails to interested parties about pre-specified conditions.
-* `abdt_arcydreporter.py` -
-Report the state of arcyd as it updates repositories.
 * `abdt_branch.py` -
 Implement operations for branch-based reviews.
 * `abdt_branchmock.py` -
@@ -83,10 +81,6 @@ Test suite for abdt naming convention classes.
 Branch naming conventions for 'r/base/description' style.
 * `abdt_repooptions.py` -
 Per-repository configuration options.
-* `abdt_reporeporter.py` -
-Report the state of a repository.
-* `abdt_shareddictoutput.py` -
-Provide equivalent classes that write dictionaries to shared resources.
 * `abdt_tryloop.py` -
 Retry operations that may intermittently fail, log each failure.
 * `abdt_userwarning.py` -

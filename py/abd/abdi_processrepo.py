@@ -25,7 +25,6 @@ from __future__ import absolute_import
 import phlcon_differential
 
 import abdcmnt_commenter
-import abdt_branch
 import abdt_conduitgit
 import abdt_exception
 import abdt_git
@@ -251,7 +250,7 @@ def create_failed_review(conduit, branch, exception):
 
 
 def try_create_review(
-        mailer, conduit, branch, reporter, mail_on_fail):
+        mailer, conduit, branch, mail_on_fail):
     try:
         create_review(conduit, branch)
     except abdt_exception.AbdUserException as e:
@@ -263,13 +262,12 @@ def try_create_review(
             print "failed to create failed review:"
             print e
             branch.mark_bad_pre_review()
-            reporter.no_users_on_branch(e.emails)
             if mail_on_fail:
                 mailer.noUsersOnBranch(
                     e.review_branch_name, e.base_name, e.emails)
 
 
-def process_updated_branch(mailer, conduit, branch, reporter):
+def process_updated_branch(mailer, conduit, branch):
     abdte = abdt_exception
     review_branch_name = branch.review_branch_name()
     if branch.is_new():
@@ -278,7 +276,6 @@ def process_updated_branch(mailer, conduit, branch, reporter):
             mailer,
             conduit,
             branch,
-            reporter,
             mail_on_fail=True)
     else:
         review_id = branch.review_id_or_none()
@@ -290,7 +287,6 @@ def process_updated_branch(mailer, conduit, branch, reporter):
                 mailer,
                 conduit,
                 branch,
-                reporter,
                 mail_on_fail=has_new_commits)
         else:
             print "update review for " + review_branch_name
@@ -325,20 +321,16 @@ def process_abandoned_branch(conduit, branch):
     branch.abandon()
 
 
-def process_branches(branches, conduit, mailer, reporter):
+def process_branches(branches, conduit, mailer):
     for branch in branches:
         if branch.is_abandoned():
             process_abandoned_branch(conduit, branch)
         elif branch.is_null():
             pass  # TODO: should handle these
         else:
-            reporter.start_branch(branch.review_branch_name())
             print "pending:", branch.review_branch_name()
             process_updated_branch(
-                mailer, conduit, branch, reporter)
-            reporter.finish_branch(
-                abdt_branch.calc_is_ok(branch),
-                branch.review_id_or_none())
+                mailer, conduit, branch)
 
 
 # -----------------------------------------------------------------------------

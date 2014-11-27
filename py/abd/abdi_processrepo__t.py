@@ -2,7 +2,6 @@
 
 from __future__ import absolute_import
 
-import contextlib
 import types
 import unittest
 
@@ -10,13 +9,10 @@ import phlcon_differential
 import phlmail_mocksender
 
 import abdmail_mailer
-import abdt_arcydreporter
 import abdt_branchmock
 import abdt_conduitmock
 import abdt_exception
 import abdt_repooptions
-import abdt_reporeporter
-import abdt_shareddictoutput
 
 import abdi_processrepo
 
@@ -69,11 +65,6 @@ class Test(unittest.TestCase):
         self.conduit = None
         self.mock_sender = None
         self.mailer = None
-        self.arcyd_reporter_data = None
-        self.arcyd_reporter = None
-        self.reporter = None
-        self.reporter_try = None
-        self.reporter_ok = None
 
     def setUp(self):
         self.conduit_data = abdt_conduitmock.ConduitMockData()
@@ -84,39 +75,20 @@ class Test(unittest.TestCase):
             ["admin@server.test"],
             "http://server.fake/testrepo.git",
             "http://phabricator.server.fake/")
-        self.arcyd_reporter_data = {}
-        self.arcyd_reporter = abdt_arcydreporter.ArcydReporter(
-            abdt_shareddictoutput.ToDict(self.arcyd_reporter_data),
-            "arcyd@localhost")
 
     def tearDown(self):
         pass
 
     def _process_branches(self, branches):
-        self.reporter_try = {}
-        self.reporter_ok = {}
-
         config = abdt_repooptions.Data()
         config.branch_url_format = (
             'http://my.git/gitweb?p=r.git;a=log;h=refs/heads/{branch}')
         config.review_url_format = 'http://my.phabricator/{review}'
 
-        self.reporter = abdt_reporeporter.RepoReporter(
-            self.arcyd_reporter,
-            'abdi_processrepo__t:Test repo:machine name',
-            'abdi_processrepo__t:Test repo',
-            'org/repo',
-            abdt_shareddictoutput.ToDict(self.reporter_try),
-            abdt_shareddictoutput.ToDict(self.reporter_ok))
-
-        self.reporter.set_config(config)
-
-        with contextlib.closing(self.reporter):
-            abdi_processrepo.process_branches(
-                branches,
-                self.conduit,
-                self.mailer,
-                self.reporter)
+        abdi_processrepo.process_branches(
+            branches,
+            self.conduit,
+            self.mailer)
 
     def test_A_Breathing(self):
         self._process_branches([])
@@ -130,8 +102,6 @@ class Test(unittest.TestCase):
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
         self.assertEqual(len(self.conduit_data.revisions), 1)
-        self.assertFalse(
-            self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH])
 
         self.conduit_data.accept_the_only_review()
         self.conduit_data.set_unchanged()
@@ -141,8 +111,6 @@ class Test(unittest.TestCase):
         self.assertTrue(self.mock_sender.is_empty())
         self.assertFalse(self.conduit_data.is_unchanged())
         self.assertTrue(branch.is_new())
-        self.assertFalse(
-            self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH])
 
     def test_C_NoTestPlan(self):
         branch, branch_data = abdt_branchmock.create_simple_new_review()
@@ -310,11 +278,6 @@ class Test(unittest.TestCase):
             test_K_ExceptionDuringProcessing_Exception,
             self._process_branches,
             [branch])
-
-        # make sure the current branch is set in the report
-        self.assertEqual(
-            self.reporter_try[abdt_reporeporter.REPO_ATTRIB_STATUS_BRANCH],
-            branch.review_branch_name())
 
     def test_L_EmptyDiff(self):
 

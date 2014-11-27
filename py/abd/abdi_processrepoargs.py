@@ -14,9 +14,6 @@
 
 from __future__ import absolute_import
 
-import contextlib
-import traceback
-
 import phlsys_conduit
 
 import abdmail_mailer
@@ -27,41 +24,14 @@ import abdt_errident
 import abdt_git
 import abdt_rbranchnaming
 import abdt_repooptions
-import abdt_reporeporter
-import abdt_shareddictoutput
 import abdt_tryloop
 
 import abdi_processrepo
 import abdi_repoargs
 
 
-def do(
-        repo,
-        repo_name,
-        args,
-        arcyd_reporter,
-        conduits,
-        url_watcher,
-        mail_sender):
-
-    reporter = abdt_reporeporter.RepoReporter(
-        arcyd_reporter,
-        repo_name,
-        args.repo_desc,
-        args.repo_url,
-        abdt_shareddictoutput.ToFile(args.try_touch_path),
-        abdt_shareddictoutput.ToFile(args.ok_touch_path))
-
-    with arcyd_reporter.tag_timer_context('process args'):
-        with contextlib.closing(reporter):
-            _do(
-                repo,
-                args,
-                reporter,
-                arcyd_reporter,
-                conduits,
-                url_watcher,
-                mail_sender)
+def do(repo, unused_repo_name, args, conduits, url_watcher, mail_sender):
+    _do(repo, args, conduits, url_watcher, mail_sender)
 
 
 def _set_attrib_if_not_none(config, key, value):
@@ -112,76 +82,44 @@ def _determine_options(args, repo):
     return config
 
 
-def _do(
-        repo,
-        args,
-        reporter,
-        arcyd_reporter,
-        conduits,
+def _do(repo, args, conduits, url_watcher, mail_sender):
+
+    fetch_if_needed(
         url_watcher,
-        mail_sender):
+        abdi_repoargs.get_repo_snoop_url(args),
+        repo,
+        args.repo_desc)
 
-    with arcyd_reporter.tag_timer_context('process branches prolog'):
+    options = _determine_options(args, repo)
 
-        arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            repo, 'git')
+    arcyd_conduit = _connect(conduits, args)
 
-        did_fetch = fetch_if_needed(
-            url_watcher,
-            abdi_repoargs.get_repo_snoop_url(args),
-            repo,
-            args.repo_desc)
+    # TODO: this should be a URI for users not conduit
+    mailer = abdmail_mailer.Mailer(
+        mail_sender,
+        options.admin_emails,
+        options.description,
+        args.instance_uri)
 
-        if did_fetch:
-            arcyd_reporter.fetched_repo()
+    branch_url_callable = None
+    if options.branch_url_format:
+        def make_branch_url(branch_name):
+            return options.branch_url_format.format(
+                branch=branch_name,
+                repo_url=args.repo_url)
+        branch_url_callable = make_branch_url
 
-        options = _determine_options(args, repo)
+    branch_naming = abdt_compositenaming.Naming(
+        abdt_classicnaming.Naming(),
+        abdt_rbranchnaming.Naming())
 
-        arcyd_conduit = _connect(conduits, args, arcyd_reporter)
+    branches = abdt_git.get_managed_branches(
+        repo,
+        options.description,
+        branch_naming,
+        branch_url_callable)
 
-        reporter.set_config(options)
-
-        # TODO: this should be a URI for users not conduit
-        mailer = abdmail_mailer.Mailer(
-            mail_sender,
-            options.admin_emails,
-            options.description,
-            args.instance_uri)
-
-        branch_url_callable = None
-        if options.branch_url_format:
-            def make_branch_url(branch_name):
-                return options.branch_url_format.format(
-                    branch=branch_name,
-                    repo_url=args.repo_url)
-            branch_url_callable = make_branch_url
-
-        branch_naming = abdt_compositenaming.Naming(
-            abdt_classicnaming.Naming(),
-            abdt_rbranchnaming.Naming())
-
-        branches = abdt_git.get_managed_branches(
-            repo,
-            options.description,
-            branch_naming,
-            branch_url_callable)
-
-        for branch in branches:
-            arcyd_reporter.tag_timer_decorate_object_methods_individually(
-                branch, 'branch')
-
-    try:
-        with arcyd_reporter.tag_timer_context('process branches'):
-            abdi_processrepo.process_branches(
-                branches,
-                arcyd_conduit,
-                mailer,
-                reporter)
-    except Exception:
-        reporter.on_traceback(traceback.format_exc())
-        raise
-
-    reporter.on_completed()
+    abdi_processrepo.process_branches(branches, arcyd_conduit, mailer)
 
 
 def fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
@@ -203,7 +141,7 @@ def fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
     return did_fetch
 
 
-def _connect(conduits, args, arcyd_reporter):
+def _connect(conduits, args):
 
     key = (
         args.instance_uri, args.arcyd_user, args.arcyd_cert, args.https_proxy)
@@ -222,16 +160,11 @@ def _connect(conduits, args, arcyd_reporter):
                 args.arcyd_cert,
                 https_proxy=args.https_proxy)
 
-        with arcyd_reporter.tag_timer_context('conduit connect'):
-            abdt_tryloop.tryloop(
-                connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
+        abdt_tryloop.tryloop(
+            connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
         conduit = conduit[0]
-        arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            conduit, 'base_conduit')
         arcyd_conduit = abdt_conduit.Conduit(conduit)
-        arcyd_reporter.tag_timer_decorate_object_methods_individually(
-            arcyd_conduit, 'conduit')
         conduits[key] = arcyd_conduit
     else:
         arcyd_conduit = conduits[key]

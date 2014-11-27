@@ -5,9 +5,6 @@
 # abdt_logging
 #
 # Public Functions:
-#   arcyd_reporter_context
-#   set_arcyd_reporter
-#   clear_arcyd_reporter
 #   set_external_system_error_logger
 #   clear_external_system_error_logger
 #   set_io_log_path
@@ -22,7 +19,6 @@
 
 from __future__ import absolute_import
 
-import contextlib
 import datetime
 import logging
 import os
@@ -31,36 +27,8 @@ import phlsys_subprocess
 
 
 _LOGGER = logging.getLogger(__name__)
-_REPORTER = None
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
 _IO_LOG_PATH = None
-
-
-@contextlib.contextmanager
-def arcyd_reporter_context(reporter):
-    set_arcyd_reporter(reporter)
-    try:
-        yield
-    finally:
-        clear_arcyd_reporter()
-
-
-def set_arcyd_reporter(reporter):
-    assert reporter
-    global _REPORTER
-    _REPORTER = reporter
-
-
-def clear_arcyd_reporter():
-    global _REPORTER
-    _REPORTER = None
-
-
-def _get_reporter():
-    reporter = _REPORTER
-    if reporter is None:
-        _LOGGER.error("no reporter is set")
-    return reporter
 
 
 def set_external_system_error_logger(logger):
@@ -118,16 +86,11 @@ def on_retry_exception(identifier, detail, e, delay):
                 identifier, type(e).__name__, detail),
             exc_info=1)
 
-    reporter = _get_reporter()
-    if reporter:
-        reporter.on_tryloop_exception(e, delay)
-        _log_system_exception(identifier, detail, e)
+    _log_system_exception(identifier, detail, e)
 
 
 def on_review_event(identifier, detail):
-    reporter = _get_reporter()
-    if reporter:
-        reporter.log_user_action(identifier, detail)
+    pass
 
 
 def on_io_event(identifier, detail):

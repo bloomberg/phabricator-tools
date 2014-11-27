@@ -190,9 +190,6 @@ cd -
 
 cat arcyd_instance/savemail.txt
 
-cat arcyd_instance/var/status/localhost_fs_origin.try
-cat arcyd_instance/var/status/localhost_fs_origin.ok
-
 # exercise 'rm-repo'
 cd arcyd_instance
 ${arcyd} rm-repo localhost_fs_origin
