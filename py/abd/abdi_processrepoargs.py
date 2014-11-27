@@ -30,20 +30,6 @@ import abdi_repoargs
 
 
 def do(repo, unused_repo_name, args, conduits, url_watcher, mail_sender):
-    _do(repo, args, conduits, url_watcher, mail_sender)
-
-
-def _flatten_list(hierarchy):
-    for x in hierarchy:
-        # recurse into hierarchy if it's a list
-        if hasattr(x, '__iter__') and not isinstance(x, str):
-            for y in _flatten_list(x):
-                yield y
-        else:
-            yield x
-
-
-def _do(repo, args, conduits, url_watcher, mail_sender):
 
     fetch_if_needed(
         url_watcher,
@@ -131,6 +117,16 @@ def _connect(conduits, args):
         arcyd_conduit = conduits[key]
 
     return arcyd_conduit
+
+
+def _flatten_list(hierarchy):
+    for x in hierarchy:
+        # recurse into hierarchy if it's a list
+        if hasattr(x, '__iter__') and not isinstance(x, str):
+            for y in _flatten_list(x):
+                yield y
+        else:
+            yield x
 
 
 # -----------------------------------------------------------------------------
