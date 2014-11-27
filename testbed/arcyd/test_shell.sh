@@ -194,9 +194,13 @@ function cleanup() {
 
     # display the sent mails
     pwd
+    echo -- savemail --
     cat arcyd/savemail.txt
+    echo -- system error --
     cat arcyd/system_error.log
+    echo -- var/log/info --
     cat arcyd/var/log/info
+    echo -- snoop web server --
     tail origin/snoopwebserver.log
 
     # clean up
