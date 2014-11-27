@@ -10,6 +10,7 @@
 #   clear_arcyd_reporter
 #   set_external_system_error_logger
 #   clear_external_system_error_logger
+#   set_io_log_path
 #   on_system_error
 #   on_retry_exception
 #   on_review_event
@@ -22,7 +23,9 @@
 from __future__ import absolute_import
 
 import contextlib
+import datetime
 import logging
+import os
 
 import phlsys_subprocess
 
@@ -30,6 +33,7 @@ import phlsys_subprocess
 _LOGGER = logging.getLogger(__name__)
 _REPORTER = None
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
+_IO_LOG_PATH = None
 
 
 @contextlib.contextmanager
@@ -68,6 +72,12 @@ def set_external_system_error_logger(logger):
 def clear_external_system_error_logger():
     global _EXTERNAL_SYSTEM_ERROR_LOGGER
     _EXTERNAL_SYSTEM_ERROR_LOGGER = None
+
+
+def set_io_log_path(path):
+    assert path
+    global _IO_LOG_PATH
+    _IO_LOG_PATH = os.path.abspath(path)
 
 
 def on_system_error(identifier, detail):
@@ -121,9 +131,11 @@ def on_review_event(identifier, detail):
 
 
 def on_io_event(identifier, detail):
-    reporter = _get_reporter()
-    if reporter:
-        reporter.log_io_action(identifier, detail)
+    if _IO_LOG_PATH:
+        with open(_IO_LOG_PATH, 'a') as f:
+            now = str(datetime.datetime.utcnow())
+            description = '{}: {} - {}\n'.format(now, identifier, detail)
+            f.write(description)
 
 
 # -----------------------------------------------------------------------------

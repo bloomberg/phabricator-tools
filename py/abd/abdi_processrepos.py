@@ -116,10 +116,14 @@ def process(args, repo_configs):
 
     reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
     reporter = abdt_arcydreporter.ArcydReporter(
-        reporter_data, args.arcyd_email, args.io_log_file)
+        reporter_data, args.arcyd_email)
 
     mail_sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
+
+    if args.io_log_file:
+        full_path = os.path.abspath(args.io_log_file)
+        abdt_logging.set_io_log_path(full_path)
 
     if args.external_error_logger:
         full_path = os.path.abspath(args.external_error_logger)

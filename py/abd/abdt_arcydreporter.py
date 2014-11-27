@@ -16,7 +16,6 @@
 #    .on_tryloop_exception
 #    .log_user_action
 #    .count_user_action
-#    .log_io_action
 #    .finish_sleep
 #    .start_cache_refresh
 #    .finish_cache_refresh
@@ -75,7 +74,6 @@ import contextlib
 import datetime
 import functools
 import inspect
-import os
 import traceback
 import types
 
@@ -219,19 +217,15 @@ class _CycleTimer(object):
 
 class ArcydReporter(object):
 
-    def __init__(self, output, arcyd_email, io_log_path=None):
+    def __init__(self, output, arcyd_email):
         """Initialise a new reporter to report to the specified outputs.
 
         :output: output to write status to
-        :io_log_path: path to log io operations to
 
         """
         super(ArcydReporter, self).__init__()
         self._output = output
         self._arcyd_email = arcyd_email
-
-        log_path = io_log_path
-        self._io_log_path = os.path.abspath(log_path) if log_path else None
 
         assert self._output
 
@@ -287,13 +281,6 @@ class ArcydReporter(object):
     @property
     def count_user_action(self):
         return self._count_user_action
-
-    def log_io_action(self, identifier, detail):
-        if self._io_log_path:
-            with open(self._io_log_path, 'a') as f:
-                now = str(datetime.datetime.utcnow())
-                description = '{}: {} - {}\n'.format(now, identifier, detail)
-                f.write(description)
 
     def finish_sleep(self):
         self._write_status(ARCYD_STATUS_IDLE)
