@@ -202,6 +202,9 @@ function cleanup() {
     cat arcyd/var/log/info
     echo -- snoop web server --
     tail origin/snoopwebserver.log
+    echo -- git / phab writes --
+    touch arcyd/var/log/git-phab-writes.log
+    cat arcyd/var/log/git-phab-writes.log
 
     # clean up
     cd ${olddir}
