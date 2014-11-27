@@ -41,7 +41,7 @@ olddir=$(pwd)
 cd ${tempdir}
 
 mail="${olddir}/savemail"
-touch savemail.txt
+errorreporter="${olddir}/savesystemerror.sh"
 
 mkdir origin
 cd origin
@@ -73,6 +73,14 @@ $safe_arcyd init \
     --arcyd-email 'arcyd@localhost' \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail
+
+touch savemail.txt
+touch system_error.log
+
+# set up the error reporter
+echo '' >> configfile  # the generated file won't end in carriage return
+echo '--external-error-logger' >> configfile
+echo "${errorreporter}" >> configfile
 
 $safe_arcyd add-phabricator \
     --name localhost \
@@ -122,8 +130,13 @@ function cleanup() {
 
     # display the sent mails and other messages
     pwd
-    cat savemail.txt
+    echo -- savemail --
+    cat arcyd/savemail.txt
+    echo -- system error --
+    cat arcyd/system_error.log
+    echo -- var/log/info --
     cat arcyd/var/log/info
+
 
     # clean up
     cd ${olddir}
