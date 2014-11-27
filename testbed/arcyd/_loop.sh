@@ -41,9 +41,7 @@ olddir=$(pwd)
 cd ${tempdir}
 
 mail="${olddir}/savemail"
-logger="${olddir}/logerror"
 touch savemail.txt
-touch logerror.txt
 
 mkdir origin
 cd origin
@@ -125,7 +123,6 @@ function cleanup() {
     # display the sent mails and other messages
     pwd
     cat savemail.txt
-    cat logerror.txt
     cat arcyd/var/log/info
 
     # clean up
