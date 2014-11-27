@@ -151,13 +151,6 @@ def _processrepolist(
         print "stopping"
         raise
 
-    if not args.no_loop:
-        # we should never get here, raise and handle an exception if we do
-        try:
-            raise Exception("Arcyd stopped unexpectedly")
-        except Exception:
-            on_exception("Arcyd will now stop")
-
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.

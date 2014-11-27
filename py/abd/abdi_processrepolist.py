@@ -14,7 +14,10 @@
 from __future__ import absolute_import
 
 import functools
+import logging
+import multiprocessing
 import os
+import signal
 import sys
 
 import phlsys_git
@@ -30,7 +33,88 @@ import abdi_operation
 import abdi_processrepoargs
 
 
+_LOGGER = logging.getLogger(__name__)
+
+
+class _WorkerManager(object):
+
+    def __init__(self):
+        self._processes = []
+
+    def add(self, process):
+        self._processes.append(process)
+        process.start()
+
+    def terminate_all(self, unused1, unused2):
+        for p in self._processes:
+            p.terminate()
+
+    def join_all(self):
+        for p in self._processes:
+            p.join()
+        self._processes = []
+
+
 def do(
+        repo_configs,
+        sys_admin_emails,
+        kill_file,
+        sleep_secs,
+        is_no_loop,
+        external_report_command,
+        mail_sender):
+
+    args = (
+        repo_configs,
+        sys_admin_emails,
+        kill_file,
+        sleep_secs,
+        is_no_loop,
+        external_report_command,
+        mail_sender
+    )
+
+    # TODO: Although this basically works for one worker process, when we add
+    # more we'll encounter problems with sharing resources. We'll need to share
+    # at least the following:
+    #
+    # - log file access
+    # - git snoop url cache
+    # - conduit connections (or limit the amount of connections)
+    # - git host connections (or limit the amount of connections)
+    # - later: Phabricator user info cache
+    # - later: Phabricator review status cache (repo-specific)
+    #
+    manager = _WorkerManager()
+    manager.add(
+        multiprocessing.Process(target=_multiprocessing_worker, args=args))
+    signal.signal(signal.SIGTERM, manager.terminate_all)
+    manager.join_all()
+
+
+def _multiprocessing_worker(
+        repo_configs,
+        sys_admin_emails,
+        kill_file,
+        sleep_secs,
+        is_no_loop,
+        external_report_command,
+        mail_sender):
+    try:
+        _multiprocessing_worker_impl(
+            repo_configs,
+            sys_admin_emails,
+            kill_file,
+            sleep_secs,
+            is_no_loop,
+            external_report_command,
+            mail_sender)
+    except abdi_operation.KillFileError:
+        _LOGGER.info("kill file handled, stopping")
+        return
+
+
+def _multiprocessing_worker_impl(
         repo_configs,
         sys_admin_emails,
         kill_file,
