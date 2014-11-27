@@ -141,7 +141,7 @@ def _append_operations_for_repos(
             mail_sender)
 
         on_exception_delay = abdt_exhandlers.make_exception_delay_handler(
-            sys_admin_emails, reporter, repo_name)
+            sys_admin_emails, repo_name)
 
         operation = phlsys_scheduleunreliables.DelayedRetryNotifyOperation(
             process_func,

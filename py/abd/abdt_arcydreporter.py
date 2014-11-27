@@ -11,15 +11,12 @@
 #    .from_dict
 #   ArcydReporter
 #    .arcyd_email
-#    .set_external_system_error_logger
 #    .start_sleep
 #    .update_sleep
 #    .on_tryloop_exception
-#    .log_system_error
 #    .log_user_action
 #    .count_user_action
 #    .log_io_action
-#    .log_system_exception
 #    .finish_sleep
 #    .start_cache_refresh
 #    .finish_cache_refresh
@@ -82,7 +79,6 @@ import os
 import traceback
 import types
 
-import phlsys_subprocess
 import phlsys_timer
 
 ARCYD_STATUS = 'status'
@@ -251,16 +247,11 @@ class ArcydReporter(object):
         self._count_repo_start = 0
         self._count_repo_fetch = 0
 
-        self._external_system_error_logger = None
-
         self._write_status(ARCYD_STATUS_STARTING)
 
     @property
     def arcyd_email(self):
         return self._arcyd_email
-
-    def set_external_system_error_logger(self, path):
-        self._external_system_error_logger = path
 
     def start_sleep(self, duration):
         _ = duration  # NOQA
@@ -286,24 +277,6 @@ class ArcydReporter(object):
         }
         log.append(d)
 
-    def log_system_error(self, identifier, detail):
-        self._add_log_item(self._log_system_error, identifier, detail)
-        if self._external_system_error_logger:
-
-            #  It's easily possible for 'detail' to exceed the length of
-            #  command-line parameters allowed when calling out to a registered
-            #  external system error logger.
-            #
-            #  Limit the amount of detail that will be sent to an arbitrary
-            #  small number to prevent errors when reporting errors.
-            #
-            detail = detail[:160]
-
-            phlsys_subprocess.run(
-                self._external_system_error_logger,
-                identifier,
-                detail)
-
     def log_user_action(self, identifier, detail):
         self._count_user_action += 1
         self._add_log_item(self._log_user_action, identifier, detail)
@@ -321,10 +294,6 @@ class ArcydReporter(object):
                 now = str(datetime.datetime.utcnow())
                 description = '{}: {} - {}\n'.format(now, identifier, detail)
                 f.write(description)
-
-    def log_system_exception(self, identifier, detail, exception):
-        message = detail + '\n' + repr(exception)
-        self.log_system_error(identifier, message)
 
     def finish_sleep(self):
         self._write_status(ARCYD_STATUS_IDLE)

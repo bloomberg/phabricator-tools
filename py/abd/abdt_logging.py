@@ -8,6 +8,9 @@
 #   arcyd_reporter_context
 #   set_arcyd_reporter
 #   clear_arcyd_reporter
+#   set_external_system_error_logger
+#   clear_external_system_error_logger
+#   on_system_error
 #   on_retry_exception
 #   on_review_event
 #   on_io_event
@@ -21,9 +24,12 @@ from __future__ import absolute_import
 import contextlib
 import logging
 
+import phlsys_subprocess
+
 
 _LOGGER = logging.getLogger(__name__)
 _REPORTER = None
+_EXTERNAL_SYSTEM_ERROR_LOGGER = None
 
 
 @contextlib.contextmanager
@@ -53,6 +59,40 @@ def _get_reporter():
     return reporter
 
 
+def set_external_system_error_logger(logger):
+    assert logger
+    global _EXTERNAL_SYSTEM_ERROR_LOGGER
+    _EXTERNAL_SYSTEM_ERROR_LOGGER = logger
+
+
+def clear_external_system_error_logger():
+    global _EXTERNAL_SYSTEM_ERROR_LOGGER
+    _EXTERNAL_SYSTEM_ERROR_LOGGER = None
+
+
+def on_system_error(identifier, detail):
+    if _EXTERNAL_SYSTEM_ERROR_LOGGER:
+
+        #  It's easily possible for 'detail' to exceed the length of
+        #  command-line parameters allowed when calling out to a registered
+        #  external system error logger.
+        #
+        #  Limit the amount of detail that will be sent to an arbitrary
+        #  small number to prevent errors when reporting errors.
+        #
+        detail = detail[:160]
+
+        phlsys_subprocess.run(
+            _EXTERNAL_SYSTEM_ERROR_LOGGER,
+            identifier,
+            detail)
+
+
+def _log_system_exception(identifier, detail, exception):
+    message = detail + '\n' + repr(exception)
+    on_system_error(identifier, message)
+
+
 def on_retry_exception(identifier, detail, e, delay):
 
     if delay is not None:
@@ -71,7 +111,7 @@ def on_retry_exception(identifier, detail, e, delay):
     reporter = _get_reporter()
     if reporter:
         reporter.on_tryloop_exception(e, delay)
-        reporter.log_system_exception(identifier, detail, e)
+        _log_system_exception(identifier, detail, e)
 
 
 def on_review_event(identifier, detail):
