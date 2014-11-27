@@ -29,6 +29,7 @@ cd ${tempdir}
 
 mail="${olddir}/savemail"
 reporter="${olddir}/savereport"
+errorreporter="${olddir}/savesystemerror.sh"
 
 mkdir origin
 cd origin
@@ -96,16 +97,11 @@ cd arcyd
         --sendmail-type catchmail \
         --external-report-command "${reporter}"
 
+    # set up the error reporter
     echo '' >> configfile  # the generated file won't end in carriage return
     echo '--external-error-logger' >> configfile
-    echo "on_system_error.sh" >> configfile
-
+    echo "${errorreporter}" >> configfile
     touch system_error.log
-    echo '#! /usr/bin/env bash' > on_system_error.sh
-    echo 'echo $1 >> system_error.log' >> on_system_error.sh
-    echo 'echo $2 >> system_error.log' >> on_system_error.sh
-    echo 'echo >> system_error.log' >> on_system_error.sh
-    chmod +x on_system_error.sh
 
     $arcyd add-phabricator \
         --name localhost \
