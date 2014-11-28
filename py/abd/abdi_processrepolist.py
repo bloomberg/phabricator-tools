@@ -60,29 +60,88 @@ def do(
         external_report_command,
         mail_sender):
 
-    args = (
-        repo_configs,
-        sys_admin_emails,
-        kill_file,
-        sleep_secs,
-        is_no_loop,
-        external_report_command,
-        mail_sender
-    )
+    conduits = {}
 
-    # TODO: Although this basically works for one worker thread, when we add
-    # more we'll encounter problems with sharing resources. We'll need to
-    # consider at least the following:
-    #
-    # - logging to files
-    # - sharing git snoop url cache
-    # - conduits, allowing multiple connections at once
-    # - limit max connections to git hosts
-    #
-    manager = _WorkerManager()
-    manager.add(
-        threading.Thread(target=_worker, args=args))
-    manager.join_all()
+    fs_accessor = abdt_fs.make_default_accessor()
+    url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+        fs_accessor.layout.urlwatcher_cache_path)
+
+    finished = False
+
+    repos = []
+    for name, config in repo_configs:
+        repos.append(
+            _ArcydManagedRepository(
+                name,
+                config,
+                conduits,
+                url_watcher_wrapper,
+                sys_admin_emails,
+                mail_sender))
+
+    while not finished:
+        timer = phlsys_timer.Timer()
+
+        # refresh git snoops
+        abdt_tryloop.critical_tryloop(
+            url_watcher_wrapper.watcher.refresh,
+            abdt_errident.GIT_SNOOP,
+            '')
+
+        # refresh conduits
+        for key in conduits:
+            conduit = conduits[key]
+            abdt_tryloop.critical_tryloop(
+                conduit.refresh_cache_on_cycle,
+                abdt_errident.CONDUIT_REFRESH,
+                conduit.describe())
+
+        # TODO: Although this basically works for one worker thread, when we
+        # add more we'll encounter problems with sharing resources. We'll need
+        # to consider at least the following:
+        #
+        # - logging to files
+        # - sharing git snoop url cache
+        # - conduits, allowing multiple connections at once
+        # - limit max connections to git hosts
+        #
+        manager = _WorkerManager()
+        manager.add(
+            threading.Thread(
+                target=_worker, args=(repos,)))
+        manager.join_all()
+
+        # report cycle stats
+        if external_report_command:
+            report = {
+                "cycle_time_secs": timer.restart(),
+            }
+            report_json = json.dumps(report)
+            full_path = os.path.abspath(external_report_command)
+            try:
+                phlsys_subprocess.run(full_path, stdin=report_json)
+            except phlsys_subprocess.CalledProcessError as e:
+                _LOGGER.error("CycleReportJson: {}".format(e))
+
+        # look for killfile
+        if os.path.isfile(kill_file):
+            os.remove(kill_file)
+            finished = True
+            break
+
+        if is_no_loop:
+            finished = True
+            break
+
+        # sleep
+        time.sleep(sleep_secs)
+
+
+def _worker(repo_list):
+
+    # process repos
+    for repo in repo_list:
+        repo()
 
 
 class _ArcydManagedRepository(object):
@@ -126,83 +185,6 @@ class _ArcydManagedRepository(object):
             self._is_disabled = True
 
         self._url_watcher_wrapper.save()
-
-
-def _worker(
-        repo_configs,
-        sys_admin_emails,
-        kill_file,
-        sleep_secs,
-        is_no_loop,
-        external_report_command,
-        mail_sender):
-
-    # TODO: test write access to repos here
-
-    conduits = {}
-
-    fs_accessor = abdt_fs.make_default_accessor()
-    url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
-        fs_accessor.layout.urlwatcher_cache_path)
-
-    finished = False
-
-    repos = []
-    for name, config in repo_configs:
-        repos.append(
-            _ArcydManagedRepository(
-                name,
-                config,
-                conduits,
-                url_watcher_wrapper,
-                sys_admin_emails,
-                mail_sender))
-
-    while not finished:
-        timer = phlsys_timer.Timer()
-
-        # refresh git snoops
-        abdt_tryloop.critical_tryloop(
-            url_watcher_wrapper.watcher.refresh,
-            abdt_errident.GIT_SNOOP,
-            '')
-
-        # refresh conduits
-        for key in conduits:
-            conduit = conduits[key]
-            abdt_tryloop.critical_tryloop(
-                conduit.refresh_cache_on_cycle,
-                abdt_errident.CONDUIT_REFRESH,
-                conduit.describe())
-
-        # process repos
-        for r in repos:
-            r()
-
-        # report cycle stats
-        if external_report_command:
-            report = {
-                "cycle_time_secs": timer.restart(),
-            }
-            report_json = json.dumps(report)
-            full_path = os.path.abspath(external_report_command)
-            try:
-                phlsys_subprocess.run(full_path, stdin=report_json)
-            except phlsys_subprocess.CalledProcessError as e:
-                _LOGGER.error("CycleReportJson: {}".format(e))
-
-        # look for killfile
-        if os.path.isfile(kill_file):
-            os.remove(kill_file)
-            finished = True
-            break
-
-        if is_no_loop:
-            finished = True
-            break
-
-        # sleep
-        time.sleep(sleep_secs)
 
 
 # -----------------------------------------------------------------------------
