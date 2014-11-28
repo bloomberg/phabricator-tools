@@ -84,8 +84,9 @@ def process(args):
 
     # setup to log everything to fs.layout.log_info, with a timestamp
     logging.Formatter.converter = time.gmtime
+    logfmt = '%(asctime)s UTC: %(levelname)s: (%(threadName)-10s) %(message)s'
     logging.basicConfig(
-        format='%(asctime)s UTC: %(levelname)s: %(message)s',
+        format=logfmt,
         level=logging.INFO,
         filename=fs.layout.log_info)
 
