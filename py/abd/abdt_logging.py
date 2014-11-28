@@ -10,7 +10,6 @@
 #   set_io_log_path
 #   on_system_error
 #   on_retry_exception
-#   on_review_event
 #   on_io_event
 #
 # -----------------------------------------------------------------------------
@@ -87,10 +86,6 @@ def on_retry_exception(identifier, detail, e, delay):
             exc_info=1)
 
     _log_system_exception(identifier, detail, e)
-
-
-def on_review_event(identifier, detail):
-    pass
 
 
 def on_io_event(identifier, detail):
