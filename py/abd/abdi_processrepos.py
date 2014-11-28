@@ -14,7 +14,6 @@
 
 from __future__ import absolute_import
 
-import logging
 import os
 
 import phlmail_sender
@@ -23,11 +22,7 @@ import phlsys_sendmail
 import abdt_exhandlers
 import abdt_logging
 
-import abdi_operation
 import abdi_processrepolist
-
-
-_LOGGER = logging.getLogger(__name__)
 
 
 def setupParser(parser):
@@ -143,9 +138,6 @@ def _processrepolist(
             args.no_loop,
             args.external_report_command,
             mail_sender)
-    except abdi_operation.KillFileError:
-        _LOGGER.info("kill file handled, stopping")
-        return
     except BaseException:
         on_exception("Arcyd will now stop")
         print "stopping"

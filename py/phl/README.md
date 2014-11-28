@@ -85,8 +85,6 @@ Create a conduit from the available information.
 Wrapper around collections.namedtuple with some added features.
 * `phlsys_pid.py` -
 Work with process ids easily.
-* `phlsys_scheduleunreliables.py` -
-Conveniently schedule unreliable tasks, retry them after a delay.
 * `phlsys_sendmail.py` -
 A simple wrapper to call sendmail-like binary.
 * `phlsys_signal.py` -
@@ -103,8 +101,6 @@ Interact with other programs using command-line semantics.
 Convert between unicode and ascii easily.
 * `phlsys_timedeltatostr.py` -
 Convert timedeltas to strings.
-* `phlsys_timedqueue.py` -
-Priority queue for objects with associated delays.
 * `phlsys_timer.py` -
 Determine the wall clock duration of events.
 * `phlsys_tracedecorator.py` -
