@@ -15,10 +15,9 @@ from __future__ import absolute_import
 
 import functools
 import logging
-import multiprocessing
 import os
-import signal
 import sys
+import threading
 
 import phlsys_git
 import phlsys_scheduleunreliables
@@ -39,20 +38,16 @@ _LOGGER = logging.getLogger(__name__)
 class _WorkerManager(object):
 
     def __init__(self):
-        self._processes = []
+        self._workers = []
 
-    def add(self, process):
-        self._processes.append(process)
-        process.start()
-
-    def terminate_all(self, unused1, unused2):
-        for p in self._processes:
-            p.terminate()
+    def add(self, worker):
+        self._workers.append(worker)
+        worker.start()
 
     def join_all(self):
-        for p in self._processes:
-            p.join()
-        self._processes = []
+        for w in self._workers:
+            w.join()
+        self._workers = []
 
 
 def do(
@@ -74,25 +69,22 @@ def do(
         mail_sender
     )
 
-    # TODO: Although this basically works for one worker process, when we add
-    # more we'll encounter problems with sharing resources. We'll need to share
-    # at least the following:
+    # TODO: Although this basically works for one worker thread, when we add
+    # more we'll encounter problems with sharing resources. We'll need to
+    # consider at least the following:
     #
-    # - log file access
-    # - git snoop url cache
-    # - conduit connections (or limit the amount of connections)
-    # - git host connections (or limit the amount of connections)
-    # - later: Phabricator user info cache
-    # - later: Phabricator review status cache (repo-specific)
+    # - logging to files
+    # - sharing git snoop url cache
+    # - conduits, allowing multiple connections at once
+    # - limit max connections to git hosts
     #
     manager = _WorkerManager()
     manager.add(
-        multiprocessing.Process(target=_multiprocessing_worker, args=args))
-    signal.signal(signal.SIGTERM, manager.terminate_all)
+        threading.Thread(target=_worker, args=args))
     manager.join_all()
 
 
-def _multiprocessing_worker(
+def _worker(
         repo_configs,
         sys_admin_emails,
         kill_file,
@@ -101,7 +93,7 @@ def _multiprocessing_worker(
         external_report_command,
         mail_sender):
     try:
-        _multiprocessing_worker_impl(
+        _worker_impl(
             repo_configs,
             sys_admin_emails,
             kill_file,
@@ -114,7 +106,7 @@ def _multiprocessing_worker(
         return
 
 
-def _multiprocessing_worker_impl(
+def _worker_impl(
         repo_configs,
         sys_admin_emails,
         kill_file,
