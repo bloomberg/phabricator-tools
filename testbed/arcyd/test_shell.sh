@@ -185,7 +185,7 @@ function cleanup() {
     # kill arcyd
     cd ${tempdir}
     cd arcyd
-    ${arcyd} stop -f
+    ${arcyd} stop
     cd ..
 
     echo $webserver_pid
