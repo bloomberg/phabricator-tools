@@ -22,6 +22,8 @@
 
 from __future__ import absolute_import
 
+import logging
+
 import phlcon_differential
 
 import abdcmnt_commenter
@@ -33,6 +35,9 @@ import abdt_userwarning
 _DEFAULT_TEST_PLAN = "I DIDNT TEST"
 
 
+_LOGGER = logging.getLogger(__name__)
+
+
 def create_review(conduit, branch):
     branch.verify_review_branch_base()
 
@@ -42,7 +47,7 @@ def create_review(conduit, branch):
     name, email, user, phid = abdt_conduitgit.getPrimaryUserDetailsFromBranch(
         conduit, branch)
 
-    print "- author: " + user
+    _LOGGER.debug("- author: {}".format(user))
 
     user_warnings = []
 
@@ -95,14 +100,14 @@ def create_review(conduit, branch):
 
 
 def create_differential_review(conduit, user, parsed, branch, raw_diff):
-    print "- creating revision"
+    _LOGGER.debug("- creating revision")
     revision_id = conduit.create_revision_as_user(
         raw_diff, parsed.fields, user)
 
-    print "- created " + str(revision_id)
+    _LOGGER.debug("- created {}".format(revision_id))
     branch.mark_ok_new_review(revision_id)
 
-    print "- commenting on " + str(revision_id)
+    _LOGGER.debug("- commenting on {}".format(revision_id))
     commenter = abdcmnt_commenter.Commenter(conduit, revision_id)
     commenter.createdReview(
         branch.get_repo_name(),
@@ -118,7 +123,7 @@ def update_review(conduit, branch):
     revision_id = branch.review_id_or_none()
 
     if branch.has_new_commits():
-        print "changes on branch"
+        _LOGGER.debug("changes on branch")
         branch.verify_review_branch_base()
         update_in_review(conduit, branch)
     elif branch.is_status_bad_abandoned():
@@ -140,11 +145,11 @@ def update_review(conduit, branch):
         raise abdt_exception.ReviewAbandonedException()
     elif branch.is_status_bad() and not branch.is_status_bad_land():
         try:
-            print "try updating bad branch"
+            _LOGGER.debug("try updating bad branch")
             branch.verify_review_branch_base()
             update_in_review(conduit, branch)
         except abdt_exception.AbdUserException:
-            print "still bad"
+            _LOGGER.debug("still bad")
 
     if not branch.is_status_bad():
         if conduit.is_review_accepted(revision_id):
@@ -152,13 +157,13 @@ def update_review(conduit, branch):
             land(conduit, branch)
             # TODO: we probably want to do a better job of cleaning up locally
         else:
-            print "do nothing"
+            _LOGGER.debug("do nothing")
 
 
 def update_in_review(conduit, branch):
-    print "update_in_review"
+    _LOGGER.debug("update_in_review")
 
-    print "- creating diff"
+    _LOGGER.debug("- creating diff")
     diff_result = branch.make_raw_diff()
 
     if not diff_result.diff:
@@ -171,7 +176,7 @@ def update_in_review(conduit, branch):
     review_id = branch.review_id_or_none()
     review_id_str = str(review_id)
 
-    print "- updating revision " + review_id_str
+    _LOGGER.debug("- updating revision {}".format(review_id_str))
     conduit.update_revision(
         review_id,
         diff_result.diff,
@@ -179,7 +184,7 @@ def update_in_review(conduit, branch):
 
     branch.mark_ok_in_review()
 
-    print "- commenting on revision " + review_id_str
+    _LOGGER.debug("- commenting on revision {}".format(review_id_str))
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.updatedReview(
         branch.review_branch_hash(),
@@ -189,7 +194,7 @@ def update_in_review(conduit, branch):
 
 
 def land(conduit, branch):
-    print "landing " + branch.review_branch_name()
+    _LOGGER.debug("landing {}".format(branch.review_branch_name()))
 
     review_branch_name = branch.review_branch_name()
     base_branch_name = branch.base_branch_name()
@@ -212,7 +217,7 @@ def land(conduit, branch):
 
     land_message = branch.land(name, email, message)
 
-    print "- commenting on revision " + str(review_id)
+    _LOGGER.debug("- commenting on revision {}".format(review_id))
     commenter = abdcmnt_commenter.Commenter(conduit, review_id)
     commenter.landedReview(
         review_branch_hash,
@@ -241,13 +246,11 @@ def try_create_review(
     try:
         create_review(conduit, branch)
     except abdt_exception.AbdUserException as e:
-        print "failed to create:"
-        print e
+        _LOGGER.debug("failed to create: {}".format(e))
         try:
             create_failed_review(conduit, branch, e)
         except abdt_exception.NoUsersOnBranchException as e:
-            print "failed to create failed review:"
-            print e
+            _LOGGER.debug("failed to create failed review: {}".format(e))
             branch.mark_bad_pre_review()
             if mail_on_fail:
                 mailer.noUsersOnBranch(
@@ -258,7 +261,7 @@ def process_updated_branch(mailer, conduit, branch):
     abdte = abdt_exception
     review_branch_name = branch.review_branch_name()
     if branch.is_new():
-        print "create review for " + review_branch_name
+        _LOGGER.debug("create review for {}".format(review_branch_name))
         try_create_review(
             mailer,
             conduit,
@@ -268,7 +271,8 @@ def process_updated_branch(mailer, conduit, branch):
         review_id = branch.review_id_or_none()
         commenter = abdcmnt_commenter.Commenter(conduit, review_id)
         if branch.is_status_bad_pre_review():
-            print "try again to create review for " + review_branch_name
+            _LOGGER.debug(
+                "try again to create review for {}".format(review_branch_name))
             has_new_commits = branch.has_new_commits()
             try_create_review(
                 mailer,
@@ -276,30 +280,31 @@ def process_updated_branch(mailer, conduit, branch):
                 branch,
                 mail_on_fail=has_new_commits)
         else:
-            print "update review for " + review_branch_name
+            _LOGGER.debug("update review for {}".format(review_branch_name))
             try:
                 update_review(conduit, branch)
             except abdte.ReviewAbandonedException as e:
                 branch.mark_bad_abandoned()
                 commenter.exception(e)
             except abdte.LandingException as e:
-                print "landing exception"
+                _LOGGER.debug("landing exception")
                 branch.mark_bad_land()
                 commenter.exception(e)
                 conduit.set_requires_revision(review_id)
             except abdte.LandingPushBaseException as e:
-                print "landing push base exception"
+                _LOGGER.debug("landing push base exception")
                 # we don't need to set bad_land here, requiring revision is ok
                 commenter.exception(e)
                 conduit.set_requires_revision(review_id)
             except abdte.AbdUserException as e:
-                print "user exception"
+                _LOGGER.debug("user exception")
                 branch.mark_bad_in_review()
                 commenter.exception(e)
 
 
 def process_abandoned_branch(conduit, branch):
-    print "untracking abandoned branch: " + branch.review_branch_name()
+    _LOGGER.debug(
+        "untracking abandoned branch: {}".format(branch.review_branch_name()))
     review_id = branch.review_id_or_none()
     if review_id is not None:
         commenter = abdcmnt_commenter.Commenter(conduit, review_id)
@@ -315,7 +320,7 @@ def process_branches(branches, conduit, mailer):
         elif branch.is_null():
             pass  # TODO: should handle these
         else:
-            print "pending:", branch.review_branch_name()
+            _LOGGER.debug("pending: {}".format(branch.review_branch_name()))
             process_updated_branch(
                 mailer, conduit, branch)
 
