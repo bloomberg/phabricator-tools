@@ -52,6 +52,9 @@ def process(args):
     phlsys_signal.set_exit_on_sigterm()
 
     fs = abdt_fs.make_default_accessor()
+    _setup_logger(fs)
+
+    _LOGGER.debug("start with args: {}".format(args))
 
     with fs.lockfile_context():
         pid = fs.get_pid_or_none()
@@ -82,19 +85,27 @@ def process(args):
         abdi_processrepos.setupParser(parser)
         args = parser.parse_args(params)
 
-    # setup to log everything to fs.layout.log_info, with a timestamp
-    logging.Formatter.converter = time.gmtime
-    logfmt = '%(asctime)s UTC: %(levelname)s: (%(threadName)-10s) %(message)s'
-    logging.basicConfig(
-        format=logfmt,
-        level=logging.INFO,
-        filename=fs.layout.log_info)
-
     _LOGGER.info("arcyd started")
     try:
         abdi_processrepos.process(args, repo_configs)
     finally:
         _LOGGER.info("arcyd stopped")
+
+
+def _setup_logger(fs):
+    # log DEBUG+ and INFO+ to separate files
+    info_handler = logging.FileHandler(fs.layout.log_info)
+    info_handler.setLevel(logging.INFO)
+    debug_handler = logging.FileHandler(fs.layout.log_debug)
+    debug_handler.setLevel(logging.DEBUG)
+    logfmt = '%(asctime)s UTC: %(levelname)s: (%(threadName)-10s) %(message)s'
+    formatter = logging.Formatter(logfmt)
+    logging.Formatter.converter = time.gmtime
+    info_handler.setFormatter(formatter)
+    debug_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(info_handler)
+    logging.getLogger().addHandler(debug_handler)
+    logging.getLogger().setLevel(logging.DEBUG)
 
 
 # -----------------------------------------------------------------------------
