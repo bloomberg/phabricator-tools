@@ -100,7 +100,6 @@ def do(
         # add more we'll encounter problems with sharing resources. We'll need
         # to consider at least the following:
         #
-        # - logging to files
         # - sharing git snoop url cache
         # - conduits, allowing multiple connections at once
         # - limit max connections to git hosts
