@@ -102,6 +102,7 @@ cd arcyd
     echo '--external-error-logger' >> configfile
     echo "${errorreporter}" >> configfile
     touch system_error.log
+    git commit -m 'update configfile' -- configfile
 
     $arcyd add-phabricator \
         --name localhost \
