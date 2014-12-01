@@ -250,7 +250,7 @@ class Accessor(object):
 
         """
         if phlgit_diffindex.is_index_dirty(self._repo):
-            print Error("git index has staged changes")
+            raise Error("git index has staged changes")
 
         path = self._make_abspath(rel_path)
 
@@ -269,7 +269,7 @@ class Accessor(object):
 
         """
         if phlgit_diffindex.is_index_dirty(self._repo):
-            print Error("git index has staged changes")
+            raise Error("git index has staged changes")
 
         path = self._make_abspath(rel_path)
 
