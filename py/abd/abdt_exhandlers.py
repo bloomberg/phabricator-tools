@@ -32,7 +32,6 @@ def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
     body = uname + "\n" + tb
     body += str(body_prefix)
     body += str(message)
-    print body
     mailsender.send(
         subject=str(subject),
         message=body,
