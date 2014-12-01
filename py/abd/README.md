@@ -25,10 +25,10 @@ Stop the arcyd instance for the current directory.
 Make pre-defined comments on Differential revisions.
 * `abdi_processrepo.py` -
 abd automates the creation and landing of reviews from branches.
+* `abdi_processrepoarglist.py` -
+Process a list of repository arguments.
 * `abdi_processrepoargs.py` -
 Process the arguments for a single repository and execute.
-* `abdi_processrepolist.py` -
-Process a list of repository arguments.
 * `abdi_processrepos.py` -
 Setup to process multiple repos.
 * `abdi_repo.py` -

@@ -22,7 +22,7 @@ import phlsys_sendmail
 import abdt_exhandlers
 import abdt_logging
 
-import abdi_processrepolist
+import abdi_processrepoarglist
 
 
 def setupParser(parser):
@@ -130,7 +130,7 @@ def process(args, repo_configs):
 def _processrepolist(
         args, repo_configs, on_exception, mail_sender):
     try:
-        abdi_processrepolist.do(
+        abdi_processrepoarglist.do(
             repo_configs,
             args.sys_admin_emails,
             args.kill_file,
