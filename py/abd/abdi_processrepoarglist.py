@@ -67,7 +67,7 @@ def do(
         external_report_command,
         mail_sender):
 
-    conduits = {}
+    conduit_manager = _ConduitManager()
 
     fs_accessor = abdt_fs.make_default_accessor()
     url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
@@ -81,7 +81,7 @@ def do(
             _ArcydManagedRepository(
                 name,
                 config,
-                conduits,
+                conduit_manager,
                 url_watcher_wrapper,
                 sys_admin_emails,
                 mail_sender))
@@ -95,19 +95,14 @@ def do(
             abdt_errident.GIT_SNOOP,
             '')
 
-        # refresh conduits
-        for key in conduits:
-            conduit = conduits[key]
-            abdt_tryloop.critical_tryloop(
-                conduit.refresh_cache_on_cycle,
-                abdt_errident.CONDUIT_REFRESH,
-                conduit.describe())
+        conduit_manager.refresh_conduits()
 
         # TODO: Although this basically works for one worker thread, when we
         # add more we'll encounter problems with sharing resources. We'll need
         # to consider at least the following:
         #
-        # - conduits, allowing multiple connections at once
+        # - conduits, need to make them thread-safe
+        # - conduits, support limited number of connections at the same time
         # - limit max connections to git hosts
         #
         manager = _WorkerManager()
@@ -159,7 +154,7 @@ class _ArcydManagedRepository(object):
             self,
             repo_name,
             repo_args,
-            conduits,
+            conduit_manager,
             url_watcher_wrapper,
             sys_admin_emails,
             mail_sender):
@@ -171,7 +166,7 @@ class _ArcydManagedRepository(object):
             repo_args.repo_desc)
         self._name = repo_name
         self._args = repo_args
-        self._conduits = conduits
+        self._conduit_manager = conduit_manager
         self._url_watcher_wrapper = url_watcher_wrapper
         self._mail_sender = mail_sender
         self._on_exception = abdt_exhandlers.make_exception_delay_handler(
@@ -186,12 +181,71 @@ class _ArcydManagedRepository(object):
                 self._abd_repo,
                 self._name,
                 self._args,
-                self._conduits,
+                self._conduit_manager,
                 self._url_watcher_wrapper.watcher,
                 self._mail_sender)
         except Exception:
             self._on_exception(None)
             self._is_disabled = True
+
+
+class _ConduitManager(object):
+
+    def __init__(self):
+        super(_ConduitManager, self).__init__()
+        self._lock = threading.Lock()
+        self._conduits = {}
+
+    def get_conduit_for_args(self, args):
+        key = (
+            args.instance_uri,
+            args.arcyd_user,
+            args.arcyd_cert,
+            args.https_proxy
+        )
+
+        # We must lock around getting and creating conduits to make sure we
+        # create exactly the amount of conduits we need and not more
+        with self._lock:
+
+            if key not in self._conduits:
+                # create an array so that the 'connect' closure binds to the
+                # 'conduit' variable as we'd expect, otherwise it'll just
+                # modify a local variable and this 'conduit' will remain 'None'
+                # XXX: we can _process_repo better in python 3.x (nonlocal?)
+                conduit = [None]
+
+                def connect():
+                    # XXX: we'll rebind in python 3.x, instead
+                    # nonlocal conduit
+                    conduit[0] = phlsys_conduit.Conduit(
+                        args.instance_uri,
+                        args.arcyd_user,
+                        args.arcyd_cert,
+                        https_proxy=args.https_proxy)
+
+                abdt_tryloop.tryloop(
+                    connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
+
+                conduit = conduit[0]
+                arcyd_conduit = abdt_conduit.Conduit(conduit)
+                self._conduits[key] = arcyd_conduit
+            else:
+                arcyd_conduit = self._conduits[key]
+
+        return arcyd_conduit
+
+    def refresh_conduits(self):
+
+        # XXX: This operation should only be run in the main thread, with no
+        # other threads running so we don't need to lock.
+
+        for key in self._conduits:
+            conduit = self._conduits[key]
+            abdt_tryloop.critical_tryloop(
+                conduit.refresh_cache_on_cycle,
+                abdt_errident.CONDUIT_REFRESH,
+                conduit.describe())
 
 
 def fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
@@ -214,7 +268,12 @@ def fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
 
 
 def _process_repo(
-        repo, unused_repo_name, args, conduits, url_watcher, mail_sender):
+        repo,
+        unused_repo_name,
+        args,
+        conduit_manager,
+        url_watcher,
+        mail_sender):
 
     fetch_if_needed(
         url_watcher,
@@ -222,7 +281,7 @@ def _process_repo(
         repo,
         args.repo_desc)
 
-    arcyd_conduit = _connect(conduits, args)
+    arcyd_conduit = conduit_manager.get_conduit_for_args(args)
 
     admin_emails = set(_flatten_list(args.admin_emails))
 
@@ -262,37 +321,6 @@ def _flatten_list(hierarchy):
                 yield y
         else:
             yield x
-
-
-def _connect(conduits, args):
-
-    key = (
-        args.instance_uri, args.arcyd_user, args.arcyd_cert, args.https_proxy)
-    if key not in conduits:
-        # create an array so that the 'connect' closure binds to the 'conduit'
-        # variable as we'd expect, otherwise it'll just modify a local variable
-        # and this 'conduit' will remain 'None'
-        # XXX: we can _process_repo better in python 3.x (nonlocal?)
-        conduit = [None]
-
-        def connect():
-            # nonlocal conduit # XXX: we'll rebind in python 3.x, instead
-            conduit[0] = phlsys_conduit.Conduit(
-                args.instance_uri,
-                args.arcyd_user,
-                args.arcyd_cert,
-                https_proxy=args.https_proxy)
-
-        abdt_tryloop.tryloop(
-            connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
-
-        conduit = conduit[0]
-        arcyd_conduit = abdt_conduit.Conduit(conduit)
-        conduits[key] = arcyd_conduit
-    else:
-        arcyd_conduit = conduits[key]
-
-    return arcyd_conduit
 
 
 # -----------------------------------------------------------------------------
