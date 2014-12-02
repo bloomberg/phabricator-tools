@@ -63,6 +63,16 @@ class Test(unittest.TestCase):
             "dontcreateausercalledthis",
             test_data.ALICE.certificate)
 
+    def test_multiconduit_breathing(self):
+        test_data = phldef_conduit
+        conduit = phlsys_conduit.MultiConduit(
+            test_data.TEST_URI,
+            test_data.PHAB.user,
+            test_data.PHAB.certificate)
+        conduit("differential.query")
+        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(conduit, 'bob')
+        as_user_conduit("differential.query")
+
     # TODO: test re-authentication when the token expires
     # TODO: need to test something that requires authentication
     # TODO: test raises on bad instanceUri

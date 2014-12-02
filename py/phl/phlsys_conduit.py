@@ -13,6 +13,9 @@
 #    .conduit_uri
 #    .raw_call
 #    .ping
+#   MultiConduit
+#    .call_as_user
+#   CallMultiConduitAsUser
 #
 # Public Functions:
 #   act_as_user_context
@@ -34,6 +37,7 @@ import contextlib
 import hashlib
 import json
 import logging
+import threading
 import time
 import urllib
 import urllib2
@@ -332,6 +336,40 @@ class Conduit(object):
 
     def ping(self):
         return self("conduit.ping")
+
+
+class MultiConduit(object):
+
+    """A conduit that supports multi-threading."""
+
+    def __init__(self, *args, **kwargs):
+        self._args = args
+        self._kwargs = kwargs
+        self._thread_act_as_users = {}
+        self._conduit = Conduit(*args, **kwargs)
+        self._lock = threading.Lock()
+
+    def call_as_user(self, user, *args, **kwargs):
+        with self._lock:
+            with act_as_user_context(self._conduit, user):
+                return self._conduit(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        with self._lock:
+            return self._conduit(*args, **kwargs)
+
+
+class CallMultiConduitAsUser(object):
+
+    """A proxy for calling a MultiConduit as a particular user."""
+
+    def __init__(self, conduit, as_user):
+        super(CallMultiConduitAsUser, self).__init__()
+        self._conduit = conduit
+        self._as_user = as_user
+
+    def __call__(self, *args, **kwargs):
+        return self._conduit.call_as_user(self._as_user, *args, **kwargs)
 
 
 # -----------------------------------------------------------------------------
