@@ -27,8 +27,6 @@ Make pre-defined comments on Differential revisions.
 abd automates the creation and landing of reviews from branches.
 * `abdi_processrepoarglist.py` -
 Process a list of repository arguments.
-* `abdi_processrepoargs.py` -
-Process the arguments for a single repository and execute.
 * `abdi_processrepos.py` -
 Setup to process multiple repos.
 * `abdi_repo.py` -
