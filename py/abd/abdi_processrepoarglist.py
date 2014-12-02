@@ -107,7 +107,6 @@ def do(
         # add more we'll encounter problems with sharing resources. We'll need
         # to consider at least the following:
         #
-        # - sharing git snoop url cache
         # - conduits, allowing multiple connections at once
         # - limit max connections to git hosts
         #
@@ -116,6 +115,10 @@ def do(
             threading.Thread(
                 target=_worker, args=(repos,)))
         manager.join_all()
+
+        # important to do this before stopping arcyd and as soon as possible
+        # after doing fetches
+        url_watcher_wrapper.save()
 
         # report cycle stats
         if external_report_command:
@@ -189,8 +192,6 @@ class _ArcydManagedRepository(object):
         except Exception:
             self._on_exception(None)
             self._is_disabled = True
-
-        self._url_watcher_wrapper.save()
 
 
 def fetch_if_needed(url_watcher, snoop_url, repo, repo_desc):
