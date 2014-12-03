@@ -103,8 +103,7 @@ class Conduit(object):
         :returns: id of created revision
 
         """
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, username)
+        as_user_conduit = self._make_as_user_conduit(username)
         revision = phlcon_differential.create_empty_revision(as_user_conduit)
         self._log(
             'conduit-createemptyrev',
@@ -134,8 +133,7 @@ class Conduit(object):
         :returns: id of created revision
 
         """
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, username)
+        as_user_conduit = self._make_as_user_conduit(username)
         diffid = phlcon_differential.create_raw_diff(
             as_user_conduit, raw_diff).id
         review = phlcon_differential.create_revision(
@@ -249,8 +247,7 @@ class Conduit(object):
                 "can't update a closed revision")
 
         author_user = self._get_author_user(revisionid)
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, author_user)
+        as_user_conduit = self._make_as_user_conduit(author_user)
         diffid = phlcon_differential.create_raw_diff(
             as_user_conduit, raw_diff).id
         try:
@@ -271,8 +268,7 @@ class Conduit(object):
 
         """
         author_user = self._get_author_user(revisionid)
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, author_user)
+        as_user_conduit = self._make_as_user_conduit(author_user)
         phlcon_differential.create_comment(
             as_user_conduit,
             revisionid,
@@ -289,8 +285,7 @@ class Conduit(object):
 
         """
         author_user = self._get_author_user(revisionid)
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, author_user)
+        as_user_conduit = self._make_as_user_conduit(author_user)
         phlcon_differential.close(as_user_conduit, revisionid)
         self._log(
             'conduit-close',
@@ -304,8 +299,7 @@ class Conduit(object):
 
         """
         author_user = self._get_author_user(revisionid)
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, author_user)
+        as_user_conduit = self._make_as_user_conduit(author_user)
         phlcon_differential.create_comment(
             as_user_conduit,
             revisionid,
@@ -323,8 +317,7 @@ class Conduit(object):
         :returns: None
 
         """
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, username)
+        as_user_conduit = self._make_as_user_conduit(username)
         phlcon_differential.create_comment(
             as_user_conduit,
             revisionid,
@@ -344,8 +337,7 @@ class Conduit(object):
         :returns: None
 
         """
-        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
-            self._multi_conduit, username)
+        as_user_conduit = self._make_as_user_conduit(username)
         phlcon_differential.create_comment(
             as_user_conduit,
             revisionid,
@@ -357,6 +349,10 @@ class Conduit(object):
     def _log(self, identifier, description):
         abdt_logging.on_io_event(identifier, '{}:{}'.format(
             self.describe(), description))
+
+    def _make_as_user_conduit(self, username):
+        return phlsys_conduit.CallMultiConduitAsUser(
+            self._multi_conduit, username)
 
 
 # -----------------------------------------------------------------------------
