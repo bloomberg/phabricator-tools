@@ -46,8 +46,9 @@ class _Worker(object):
 
     """Simulate a person working with Phabricator, Git and Arcyd."""
 
-    def __init__(self, repo, working_dir):
+    def __init__(self, repo, working_dir, barc_cmd_path):
         self._repo = repo
+        self._barc = _CommandWithWorkingDirectory(barc_cmd_path, working_dir)
         self._working_dir = working_dir
         self._git_worker = phlgitu_fixture.Worker(repo)
 
@@ -64,10 +65,14 @@ class _Worker(object):
     def repo(self):
         return self._repo
 
+    @property
+    def barc(self):
+        return self._barc
+
 
 class _SharedRepo(object):
 
-    def __init__(self, root_dir=None, worker_count=1):
+    def __init__(self, root_dir, barc_cmd_path, worker_count=1):
         if worker_count < 1:
             raise(
                 Exception("worker_count must be 1 or more, got {}".format(
@@ -84,7 +89,10 @@ class _SharedRepo(object):
             worker_path = os.path.join(self._root_dir, 'worker-{}'.format(i))
             os.makedirs(worker_path)
             self._workers.append(
-                _Worker(phlsys_git.Repo(worker_path), worker_path))
+                _Worker(
+                    phlsys_git.Repo(worker_path),
+                    worker_path,
+                    barc_cmd_path))
             self._workers[-1].setup(self._central_repo.working_dir)
 
             if i == 0:
@@ -130,7 +138,8 @@ class _ArcydInstance(object):
 
 class _Fixture(object):
 
-    def __init__(self, arcyd_command, repo_count=1, arcyd_count=1):
+    def __init__(
+            self, arcyd_command, barc_command, repo_count=1, arcyd_count=1):
         if repo_count < 1:
             raise(Exception("repo_count must be 1 or more, got {}".format(
                 repo_count)))
@@ -146,7 +155,7 @@ class _Fixture(object):
         for i in xrange(repo_count):
             repo_path = os.path.join(self._repo_root_dir, 'repo-{}'.format(i))
             os.makedirs(repo_path)
-            self._repos.append(_SharedRepo(repo_path))
+            self._repos.append(_SharedRepo(repo_path, barc_command))
 
         self._arcyd_root_dir = os.path.join(self._root_dir, 'arcyds')
         os.makedirs(self._arcyd_root_dir)
@@ -178,12 +187,13 @@ def _do_tests():
     py_dir = os.path.dirname(script_dir)
     root_dir = os.path.dirname(py_dir)
     arcyd_cmd_path = os.path.join(root_dir, 'proto', 'arcyd')
+    barc_cmd_path = os.path.join(root_dir, 'proto', 'barc')
 
     # pychecker makes us declare this before 'with'
-    fixture = _Fixture(arcyd_cmd_path)
-
+    fixture = _Fixture(arcyd_cmd_path, barc_cmd_path)
     with contextlib.closing(fixture):
         print fixture.repos[0].workers[0].repo('status')
+        print fixture.repos[0].workers[0].barc('list')
         arcyd = fixture.arcyds[0]
 
         print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
