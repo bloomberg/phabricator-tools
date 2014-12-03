@@ -218,7 +218,7 @@ class _ConduitManager(object):
                 def connect():
                     # XXX: we'll rebind in python 3.x, instead
                     # nonlocal conduit
-                    conduit[0] = phlsys_conduit.Conduit(
+                    conduit[0] = phlsys_conduit.MultiConduit(
                         args.instance_uri,
                         args.arcyd_user,
                         args.arcyd_cert,
@@ -227,8 +227,8 @@ class _ConduitManager(object):
                 abdt_tryloop.tryloop(
                     connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
-                conduit = conduit[0]
-                arcyd_conduit = abdt_conduit.Conduit(conduit)
+                multi_conduit = conduit[0]
+                arcyd_conduit = abdt_conduit.Conduit(multi_conduit)
                 self._conduits[key] = arcyd_conduit
             else:
                 arcyd_conduit = self._conduits[key]

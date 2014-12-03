@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         self.test_data = phldef_conduit
-        self.sys_conduit = phlsys_conduit.Conduit(
+        self.sys_conduit = phlsys_conduit.MultiConduit(
             self.test_data.TEST_URI,
             self.test_data.PHAB.user,
             self.test_data.PHAB.certificate)
@@ -133,11 +133,12 @@ class Test(unittest.TestCase):
         self.assertTrue(self.conduit.is_review_recently_updated(revision))
 
         # un-abandon
-        with phlsys_conduit.act_as_user_context(self.sys_conduit, bob):
-            phlcon_differential.create_comment(
-                self.sys_conduit,
-                revision,
-                action=phlcon_differential.Action.reclaim)
+        as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(
+            self.sys_conduit, bob)
+        phlcon_differential.create_comment(
+            as_user_conduit,
+            revision,
+            action=phlcon_differential.Action.reclaim)
 
         self._invalidate_cache()
         self.assertFalse(self.conduit.is_review_accepted(revision))
