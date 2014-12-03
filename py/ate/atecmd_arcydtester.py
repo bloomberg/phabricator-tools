@@ -74,6 +74,9 @@ class _Worker(object):
             base='origin/master')
         return phlgit_push.push(self._repo, branch_name, 'origin')
 
+    def fetch(self):
+        self._repo('fetch', '--prune')
+
     def list_reviews(self):
         return json.loads(self.barc('list', '--format-json'))
 
@@ -238,7 +241,7 @@ def _do_tests():
 
         print worker.push_new_review_branch('review1')
         print arcyd.run_once()
-        print worker.repo('fetch')
+        worker.fetch()
         print worker.list_reviews()
 
 
