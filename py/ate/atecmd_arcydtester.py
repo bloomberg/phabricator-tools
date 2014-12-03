@@ -15,6 +15,7 @@ from __future__ import absolute_import
 
 import argparse
 import contextlib
+import json
 import os
 import shutil
 import tempfile
@@ -72,6 +73,9 @@ class _Worker(object):
             relative_path=identifier,
             base='origin/master')
         return phlgit_push.push(self._repo, branch_name, 'origin')
+
+    def list_reviews(self):
+        return json.loads(self.barc('list', '--format-json'))
 
     @property
     def repo(self):
@@ -235,7 +239,7 @@ def _do_tests():
         print worker.push_new_review_branch('review1')
         print arcyd.run_once()
         print worker.repo('fetch')
-        print worker.barc('list')
+        print worker.list_reviews()
 
 
 # -----------------------------------------------------------------------------
