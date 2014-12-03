@@ -46,14 +46,17 @@ class _Worker(object):
 
     """Simulate a person working with Phabricator, Git and Arcyd."""
 
-    def __init__(self, repo, working_dir, barc_cmd_path):
+    def __init__(self, repo, working_dir, barc_cmd_path, phab_account):
         self._repo = repo
         self._barc = _CommandWithWorkingDirectory(barc_cmd_path, working_dir)
         self._working_dir = working_dir
         self._git_worker = phlgitu_fixture.Worker(repo)
+        self._phab_account = phab_account
 
     def setup(self, central_repo_path):
         self._repo("init")
+        self._repo('config', 'user.name', self._phab_account.user)
+        self._repo('config', 'user.email', self._phab_account.email)
         self._repo("remote", "add", "origin", central_repo_path)
         self._repo("fetch")
 
@@ -81,11 +84,7 @@ class _Worker(object):
 
 class _SharedRepo(object):
 
-    def __init__(self, root_dir, barc_cmd_path, worker_count=1):
-        if worker_count < 1:
-            raise(
-                Exception("worker_count must be 1 or more, got {}".format(
-                    worker_count)))
+    def __init__(self, root_dir, barc_cmd_path):
 
         self._root_dir = root_dir
         central_path = os.path.join(self._root_dir, 'central')
@@ -94,20 +93,21 @@ class _SharedRepo(object):
         self._central_repo("init", "--bare")
 
         self._workers = []
-        for i in xrange(worker_count):
-            worker_path = os.path.join(self._root_dir, 'worker-{}'.format(i))
+        for account in (phldef_conduit.ALICE, phldef_conduit.BOB):
+            worker_path = os.path.join(self._root_dir, account.user)
             os.makedirs(worker_path)
             self._workers.append(
                 _Worker(
                     phlsys_git.Repo(worker_path),
                     worker_path,
-                    barc_cmd_path))
+                    barc_cmd_path,
+                    account))
             self._workers[-1].setup(self._central_repo.working_dir)
 
-            if i == 0:
+            if len(self._workers) == 1:
                 self._workers[0].push_initial_commit()
             else:
-                self._workers[i].repo('checkout', 'master')
+                self._workers[-1].repo('checkout', 'master')
 
     @property
     def central_repo(self):
@@ -116,6 +116,14 @@ class _SharedRepo(object):
     @property
     def workers(self):
         return self._workers
+
+    @property
+    def alice(self):
+        return self._workers[0]
+
+    @property
+    def bob(self):
+        return self._workers[1]
 
 
 class _CommandWithWorkingDirectory(object):
@@ -201,7 +209,7 @@ def _do_tests():
     # pychecker makes us declare this before 'with'
     fixture = _Fixture(arcyd_cmd_path, barc_cmd_path)
     with contextlib.closing(fixture):
-        worker = fixture.repos[0].workers[0]
+        worker = fixture.repos[0].alice
         arcyd = fixture.arcyds[0]
 
         print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
