@@ -8,6 +8,7 @@ cd "$(dirname "$0")"
 arcyd_tester='../../proto/arcyd-tester'
 
 ${arcyd_tester} --help
+${arcyd_tester}
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
