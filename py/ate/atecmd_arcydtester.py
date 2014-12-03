@@ -23,6 +23,7 @@ import phlgit_push
 import phlgitu_fixture
 import phlsys_fs
 import phlsys_git
+import phlsys_subprocess
 
 _USAGE_EXAMPLES = """
 """
@@ -81,9 +82,24 @@ class _SharedRepo(object):
         return self._workers
 
 
+class _ArcydInstance(object):
+
+    def __init__(self, root_dir, arcyd_command):
+        self._root_dir = os.path.abspath(root_dir)
+        self._arcyd_command = os.path.abspath(arcyd_command)
+
+    def __call__(self, *args, **kwargs):
+        stdin = kwargs.pop("stdin", None)
+        assert(not kwargs)
+        result = phlsys_subprocess.run(
+            self._arcyd_command, *args,
+            stdin=stdin, workingDir=self._root_dir)
+        return result.stdout
+
+
 class _Fixture(object):
 
-    def __init__(self, repo_count=1, arcyd_count=1):
+    def __init__(self, arcyd_command, repo_count=1, arcyd_count=1):
         if repo_count < 1:
             raise(Exception("repo_count must be 1 or more, got {}".format(
                 repo_count)))
@@ -92,6 +108,7 @@ class _Fixture(object):
                 arcyd_count)))
 
         self._root_dir = tempfile.mkdtemp()
+
         self._repo_root_dir = os.path.join(self._root_dir, 'repos')
         os.makedirs(self._repo_root_dir)
         self._repos = []
@@ -100,6 +117,15 @@ class _Fixture(object):
             os.makedirs(repo_path)
             self._repos.append(_SharedRepo(repo_path))
 
+        self._arcyd_root_dir = os.path.join(self._root_dir, 'arcyds')
+        os.makedirs(self._arcyd_root_dir)
+        self._arcyds = []
+        for i in xrange(arcyd_count):
+            arcyd_path = os.path.join(
+                self._arcyd_root_dir, 'arcyd-{}'.format(i))
+            os.makedirs(arcyd_path)
+            self._arcyds.append(_ArcydInstance(arcyd_path, arcyd_command))
+
     def close(self):
         shutil.rmtree(self._root_dir)
 
@@ -107,11 +133,24 @@ class _Fixture(object):
     def repos(self):
         return self._repos
 
+    @property
+    def arcyds(self):
+        return self._arcyds
+
 
 def _do_tests():
-    fixture = _Fixture()  # pychecker makes us declare this before 'with'
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    py_dir = os.path.dirname(script_dir)
+    root_dir = os.path.dirname(py_dir)
+    arcyd_cmd_path = os.path.join(root_dir, 'proto', 'arcyd')
+
+    # pychecker makes us declare this before 'with'
+    fixture = _Fixture(arcyd_cmd_path)
+
     with contextlib.closing(fixture):
         print fixture.repos[0].workers[0].repo('status')
+        print fixture.arcyds[0]('init', '--arcyd-email', 'arcyd@localhost')
+        print fixture.arcyds[0]('start', '--foreground', '--no-loop')
 
 
 # -----------------------------------------------------------------------------
