@@ -61,6 +61,15 @@ class _Worker(object):
         self._git_worker.commit_new_file('initial commit', 'README')
         phlgit_push.push(self._repo, 'master', 'origin')
 
+    def push_new_review_branch(self, identifier):
+        branch_name = 'r/master/{}'.format(identifier)
+        self._git_worker.commit_new_file_on_new_branch(
+            branch=branch_name,
+            message='Making review for {}'.format(identifier),
+            relative_path=identifier,
+            base='origin/master')
+        return phlgit_push.push(self._repo, branch_name, 'origin')
+
     @property
     def repo(self):
         return self._repo
@@ -192,8 +201,7 @@ def _do_tests():
     # pychecker makes us declare this before 'with'
     fixture = _Fixture(arcyd_cmd_path, barc_cmd_path)
     with contextlib.closing(fixture):
-        print fixture.repos[0].workers[0].repo('status')
-        print fixture.repos[0].workers[0].barc('list')
+        worker = fixture.repos[0].workers[0]
         arcyd = fixture.arcyds[0]
 
         print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
@@ -216,7 +224,10 @@ def _do_tests():
         print arcyd('add-repo', 'localphab', 'localdir', 'repo-0')
         print arcyd('fetch')
 
+        print worker.push_new_review_branch('review1')
         print arcyd.run_once()
+        print worker.repo('fetch')
+        print worker.barc('list')
 
 
 # -----------------------------------------------------------------------------
