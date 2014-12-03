@@ -42,6 +42,29 @@ def main():
         _do_tests()
 
 
+class _Worker(object):
+
+    """Simulate a person working with Phabricator, Git and Arcyd."""
+
+    def __init__(self, repo, working_dir):
+        self._repo = repo
+        self._working_dir = working_dir
+        self._git_worker = phlgitu_fixture.Worker(repo)
+
+    def setup(self, central_repo_path):
+        self._repo("init")
+        self._repo("remote", "add", "origin", central_repo_path)
+        self._repo("fetch")
+
+    def push_initial_commit(self):
+        self._git_worker.commit_new_file('initial commit', 'README')
+        phlgit_push.push(self._repo, 'master', 'origin')
+
+    @property
+    def repo(self):
+        return self._repo
+
+
 class _SharedRepo(object):
 
     def __init__(self, root_dir=None, worker_count=1):
@@ -61,17 +84,12 @@ class _SharedRepo(object):
             worker_path = os.path.join(self._root_dir, 'worker-{}'.format(i))
             os.makedirs(worker_path)
             self._workers.append(
-                phlgitu_fixture.Worker(phlsys_git.Repo(worker_path)))
-            self._workers[-1].repo("init")
-            self._workers[-1].repo(
-                "remote", "add", "origin", self._central_repo.working_dir)
-            self._workers[-1].repo("fetch")
+                _Worker(phlsys_git.Repo(worker_path), worker_path))
+            self._workers[-1].setup(self._central_repo.working_dir)
 
             if i == 0:
-                self._workers[0].commit_new_file('initial commit', 'README')
-                phlgit_push.push(self._workers[0].repo, 'master', 'origin')
+                self._workers[0].push_initial_commit()
             else:
-                self._workers[i].repo('fetch')
                 self._workers[i].repo('checkout', 'master')
 
     @property
