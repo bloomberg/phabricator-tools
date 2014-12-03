@@ -19,6 +19,7 @@ import os
 import shutil
 import tempfile
 
+import phldef_conduit
 import phlgit_push
 import phlgitu_fixture
 import phlsys_fs
@@ -137,6 +138,10 @@ class _Fixture(object):
     def arcyds(self):
         return self._arcyds
 
+    @property
+    def repo_root_dir(self):
+        return self._repo_root_dir
+
 
 def _do_tests():
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -149,8 +154,29 @@ def _do_tests():
 
     with contextlib.closing(fixture):
         print fixture.repos[0].workers[0].repo('status')
-        print fixture.arcyds[0]('init', '--arcyd-email', 'arcyd@localhost')
-        print fixture.arcyds[0]('start', '--foreground', '--no-loop')
+        arcyd = fixture.arcyds[0]
+
+        print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
+
+        print arcyd(
+            'add-phabricator',
+            '--name', 'localphab',
+            '--instance-uri', phldef_conduit.TEST_URI,
+            '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
+            '--admin-emails', 'local-phab-admin@localhost',
+            '--arcyd-user', phldef_conduit.PHAB.user,
+            '--arcyd-cert', phldef_conduit.PHAB.certificate)
+
+        repo_url_format = '{}/{{}}/central'.format(fixture.repo_root_dir)
+        print arcyd(
+            'add-repohost',
+            '--name', 'localdir',
+            '--repo-url-format', repo_url_format)
+
+        print arcyd('add-repo', 'localphab', 'localdir', 'repo-0')
+        print arcyd('fetch')
+
+        print arcyd('start', '--foreground', '--no-loop')
 
 
 # -----------------------------------------------------------------------------
