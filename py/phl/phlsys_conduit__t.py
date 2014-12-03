@@ -69,6 +69,7 @@ class Test(unittest.TestCase):
             test_data.TEST_URI,
             test_data.PHAB.user,
             test_data.PHAB.certificate)
+        self.assertEqual(conduit.conduit_uri, test_data.TEST_URI)
         conduit("differential.query")
         as_user_conduit = phlsys_conduit.CallMultiConduitAsUser(conduit, 'bob')
         as_user_conduit("differential.query")

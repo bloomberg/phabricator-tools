@@ -15,6 +15,7 @@
 #    .ping
 #   MultiConduit
 #    .call_as_user
+#    .conduit_uri
 #   CallMultiConduitAsUser
 #
 # Public Functions:
@@ -357,6 +358,10 @@ class MultiConduit(object):
     def __call__(self, *args, **kwargs):
         with self._lock:
             return self._conduit(*args, **kwargs)
+
+    @property
+    def conduit_uri(self):
+        return self._conduit.conduit_uri
 
 
 class CallMultiConduitAsUser(object):
