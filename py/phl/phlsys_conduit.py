@@ -10,7 +10,6 @@
 #    .set_act_as_user
 #    .clear_act_as_user
 #    .get_act_as_user
-#    .get_user
 #    .conduit_uri
 #    .raw_call
 #    .ping
@@ -203,9 +202,6 @@ class Conduit(object):
 
     def get_act_as_user(self):
         return self._act_as_user
-
-    def get_user(self):
-        return self._username
 
     @property
     def conduit_uri(self):

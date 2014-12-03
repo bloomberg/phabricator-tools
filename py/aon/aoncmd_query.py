@@ -70,6 +70,7 @@ import sys
 import textwrap
 
 import phlcon_user
+import phlsys_conduit
 import phlsys_dictutil
 import phlsys_makeconduit
 import phlsys_strtotime
@@ -311,11 +312,12 @@ def _set_options(args, d):
 
 def process(args):
     _validate_args(args)
-    conduit = phlsys_makeconduit.make_conduit(
-        args.uri, args.user, args.cert, args.act_as_user)
-    me = conduit.get_user()
 
-    d = _process_user_fields(me, conduit, args)
+    uri, user, cert, _ = phlsys_makeconduit.get_uri_user_cert_explanation(
+        args.uri, args.user, args.cert)
+    conduit = phlsys_conduit.Conduit(uri, user, cert, args.act_as_user)
+
+    d = _process_user_fields(user, conduit, args)
     _set_options(args, d)
 
     d["order"] = 'order-' + args.order
