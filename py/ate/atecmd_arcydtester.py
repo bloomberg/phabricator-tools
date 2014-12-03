@@ -97,6 +97,9 @@ class _ArcydInstance(object):
             stdin=stdin, workingDir=self._root_dir)
         return result.stdout
 
+    def run_once(self):
+        return self('start', '--foreground', '--no-loop')
+
 
 class _Fixture(object):
 
@@ -176,7 +179,7 @@ def _do_tests():
         print arcyd('add-repo', 'localphab', 'localdir', 'repo-0')
         print arcyd('fetch')
 
-        print arcyd('start', '--foreground', '--no-loop')
+        print arcyd.run_once()
 
 
 # -----------------------------------------------------------------------------
