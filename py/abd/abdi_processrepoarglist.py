@@ -45,12 +45,31 @@ _LOGGER = logging.getLogger(__name__)
 
 class _WorkerManager(object):
 
-    def __init__(self):
+    def __init__(self, max_workers):
         self._workers = []
+        self._semaphore = threading.Semaphore(max_workers)
 
-    def add(self, worker):
+    def add(self, repos):
+        self._semaphore.acquire()
+        self._remove_joinable()
+
+        worker = threading.Thread(
+            target=self._worker_wrapper, args=(repos,))
         self._workers.append(worker)
         worker.start()
+
+    def _worker_wrapper(self, repos):
+        _worker(repos)
+        self._semaphore.release()
+
+    def _remove_joinable(self):
+        joinable = []
+        for w in self._workers:
+            if not w.is_alive():
+                joinable.append(w)
+        for w in joinable:
+            w.join()
+            self._workers.remove(w)
 
     def join_all(self):
         for w in self._workers:
@@ -105,10 +124,9 @@ def do(
         # - conduits, support limited number of connections at the same time
         # - limit max connections to git hosts
         #
-        manager = _WorkerManager()
-        manager.add(
-            threading.Thread(
-                target=_worker, args=(repos,)))
+        manager = _WorkerManager(max_workers=1)
+        for r in repos:
+            manager.add([r])
         manager.join_all()
 
         # important to do this before stopping arcyd and as soon as possible
