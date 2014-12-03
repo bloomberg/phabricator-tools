@@ -101,19 +101,28 @@ class _SharedRepo(object):
         return self._workers
 
 
-class _ArcydInstance(object):
+class _CommandWithWorkingDirectory(object):
 
-    def __init__(self, root_dir, arcyd_command):
-        self._root_dir = os.path.abspath(root_dir)
-        self._arcyd_command = os.path.abspath(arcyd_command)
+    def __init__(self, command_path, working_dir_path):
+        self._working_dir_path = os.path.abspath(working_dir_path)
+        self._command_path = os.path.abspath(command_path)
 
     def __call__(self, *args, **kwargs):
         stdin = kwargs.pop("stdin", None)
         assert(not kwargs)
         result = phlsys_subprocess.run(
-            self._arcyd_command, *args,
-            stdin=stdin, workingDir=self._root_dir)
+            self._command_path, *args,
+            stdin=stdin, workingDir=self._working_dir_path)
         return result.stdout
+
+
+class _ArcydInstance(object):
+
+    def __init__(self, root_dir, arcyd_command):
+        self._command = _CommandWithWorkingDirectory(arcyd_command, root_dir)
+
+    def __call__(self, *args, **kwargs):
+        return self._command(*args, **kwargs)
 
     def run_once(self):
         return self('start', '--foreground', '--no-loop')
