@@ -59,8 +59,10 @@ class _WorkerManager(object):
         worker.start()
 
     def _worker_wrapper(self, repos):
-        _worker(repos)
-        self._semaphore.release()
+        try:
+            _worker(repos)
+        finally:
+            self._semaphore.release()
 
     def _remove_joinable(self):
         joinable = []
