@@ -251,10 +251,13 @@ def _do_tests():
                 '--name', 'localdir',
                 '--repo-url-format', repo_url_format)
 
+        with phlsys_timer.print_duration_context("Add repos to arcyd"):
+            for i in xrange(repo_count):
+                arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
+
         with phlsys_timer.print_duration_context("Pushing reviews"):
             for i in xrange(repo_count):
                 worker = fixture.repos[i].alice
-                arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
                 worker.push_new_review_branch('review1')
 
         with phlsys_timer.print_duration_context("Processing reviews"):
