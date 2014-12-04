@@ -38,13 +38,14 @@ import contextlib
 import hashlib
 import json
 import logging
-import threading
 import time
 import urllib
 import urllib2
 import urlparse
 
 import phldef_conduit
+
+import phlsys_threading
 
 _URLLIB_TIMEOUT = 600
 
@@ -344,24 +345,32 @@ class MultiConduit(object):
     """A conduit that supports multi-threading."""
 
     def __init__(self, *args, **kwargs):
-        self._args = args
-        self._kwargs = kwargs
-        self._thread_act_as_users = {}
-        self._conduit = Conduit(*args, **kwargs)
-        self._lock = threading.Lock()
+
+        def factory():
+            return Conduit(*args, **kwargs)
+
+        # Phabricator supports 5 simultaneous connections per user
+        # by default:
+        #
+        #   conf/default.conf.php:  'auth.sessions.conduit'       => 5,
+        #
+        max_sessions_per_user = 5
+        self._conduits = phlsys_threading.MultiResource(
+            max_sessions_per_user, factory)
 
     def call_as_user(self, user, *args, **kwargs):
-        with self._lock:
-            with act_as_user_context(self._conduit, user):
-                return self._conduit(*args, **kwargs)
+        with self._conduits.resource_context() as conduit:
+            with act_as_user_context(conduit, user):
+                return conduit(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
-        with self._lock:
-            return self._conduit(*args, **kwargs)
+        with self._conduits.resource_context() as conduit:
+            return conduit(*args, **kwargs)
 
     @property
     def conduit_uri(self):
-        return self._conduit.conduit_uri
+        with self._conduits.resource_context() as conduit:
+            return conduit.conduit_uri
 
 
 class CallMultiConduitAsUser(object):
