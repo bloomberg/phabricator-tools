@@ -26,6 +26,7 @@ import phlgitu_fixture
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
+import phlsys_timer
 
 _USAGE_EXAMPLES = """
 """
@@ -151,6 +152,7 @@ class _CommandWithWorkingDirectory(object):
 class _ArcydInstance(object):
 
     def __init__(self, root_dir, arcyd_command):
+        self._root_dir = root_dir
         self._command = _CommandWithWorkingDirectory(arcyd_command, root_dir)
 
     def __call__(self, *args, **kwargs):
@@ -158,6 +160,10 @@ class _ArcydInstance(object):
 
     def run_once(self):
         return self('start', '--foreground', '--no-loop')
+
+    def debug_log(self):
+        return phlsys_fs.read_text_file(
+            '{}/var/log/debug'.format(self._root_dir))
 
 
 class _Fixture(object):
@@ -215,15 +221,16 @@ def _do_tests():
 
     # pychecker makes us declare this before 'with'
     repo_count = 10
-    fixture = _Fixture(arcyd_cmd_path, barc_cmd_path, repo_count=repo_count)
+    with phlsys_timer.print_duration_context("Fixture setup"):
+        fixture = _Fixture(
+            arcyd_cmd_path, barc_cmd_path, repo_count=repo_count)
     with contextlib.closing(fixture):
-        arcyd = fixture.arcyds[0]
-        for i in xrange(repo_count):
-            worker = fixture.repos[i].alice
+        with phlsys_timer.print_duration_context("Arcyd setup"):
+            arcyd = fixture.arcyds[0]
 
-            print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
+            arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
 
-            print arcyd(
+            arcyd(
                 'add-phabricator',
                 '--name', 'localphab',
                 '--instance-uri', phldef_conduit.TEST_URI,
@@ -233,24 +240,26 @@ def _do_tests():
                 '--arcyd-cert', phldef_conduit.PHAB.certificate)
 
             repo_url_format = '{}/{{}}/central'.format(fixture.repo_root_dir)
-            print arcyd(
+            arcyd(
                 'add-repohost',
                 '--name', 'localdir',
                 '--repo-url-format', repo_url_format)
 
-            print arcyd(
-                'add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
-            print arcyd('fetch')
+        with phlsys_timer.print_duration_context("Pushing reviews"):
+            for i in xrange(repo_count):
+                worker = fixture.repos[i].alice
+                arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
+                worker.push_new_review_branch('review1')
 
-            print worker.push_new_review_branch('review1')
+        with phlsys_timer.print_duration_context("Processing reviews"):
+            arcyd.run_once()
+            print arcyd.debug_log()
 
-        print arcyd.run_once()
-
-        for i in xrange(repo_count):
-            worker = fixture.repos[i].alice
-
-            worker.fetch()
-            print worker.list_reviews()
+        with phlsys_timer.print_duration_context("Listing reviews"):
+            for i in xrange(repo_count):
+                worker = fixture.repos[i].alice
+                worker.fetch()
+                assert len(worker.list_reviews()) == 1
 
 
 # -----------------------------------------------------------------------------
