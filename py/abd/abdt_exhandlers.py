@@ -49,9 +49,6 @@ def make_exception_message_handler(
 
     def msg_exception(message):
         tb = traceback.format_exc()
-        _send_mail(
-            mailsender, emails, uname, subject, tb, body_prefix, message)
-
         short_tb = traceback.format_exc(1)
 
         exc_type, _, _ = sys.exc_info()
@@ -67,6 +64,12 @@ def make_exception_message_handler(
             detail += "processing repo: {repo}\n".format(repo=repo)
         detail += "exception: {exception}".format(exception=short_tb)
         abdt_logging.on_system_error('processargs', detail)
+
+        try:
+            _send_mail(
+                mailsender, emails, uname, subject, tb, body_prefix, message)
+        except Exception:
+            _LOGGER.error('Exception when sending mail', exc_info=1)
 
     return msg_exception
 
