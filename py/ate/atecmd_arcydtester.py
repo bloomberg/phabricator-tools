@@ -49,12 +49,22 @@ class _Worker(object):
 
     """Simulate a person working with Phabricator, Git and Arcyd."""
 
-    def __init__(self, repo, working_dir, barc_cmd_path, phab_account):
+    def __init__(
+            self,
+            repo,
+            working_dir,
+            barc_cmd_path,
+            phab_account,
+            arcyon_cmd_path,
+            phab_uri):
         self._repo = repo
         self._barc = _CommandWithWorkingDirectory(barc_cmd_path, working_dir)
+        self._arcyon = _CommandWithWorkingDirectory(
+            arcyon_cmd_path, working_dir)
         self._working_dir = working_dir
         self._git_worker = phlgitu_fixture.Worker(repo)
         self._phab_account = phab_account
+        self._phab_uri = phab_uri
 
     def setup(self, central_repo_path):
         self._repo("init")
@@ -82,6 +92,19 @@ class _Worker(object):
     def list_reviews(self):
         return json.loads(self.barc('list', '--format-json'))
 
+    def accept_review(self, review_id):
+        connection_args = [
+            '--user', self._phab_account.user,
+            '--cert', self._phab_account.certificate,
+            '--uri', self._phab_uri,
+        ]
+        self._arcyon(
+            'comment',
+            review_id,
+            '--message', 'accepting',
+            '--action', 'accept',
+            *connection_args)
+
     @property
     def repo(self):
         return self._repo
@@ -93,7 +116,7 @@ class _Worker(object):
 
 class _SharedRepo(object):
 
-    def __init__(self, root_dir, barc_cmd_path):
+    def __init__(self, root_dir, barc_cmd_path, arcyon_cmd_path, phab_uri):
 
         self._root_dir = root_dir
         central_path = os.path.join(self._root_dir, 'central')
@@ -110,7 +133,9 @@ class _SharedRepo(object):
                     phlsys_git.Repo(worker_path),
                     worker_path,
                     barc_cmd_path,
-                    account))
+                    account,
+                    arcyon_cmd_path,
+                    phab_uri))
             self._workers[-1].setup(self._central_repo.working_dir)
 
             if len(self._workers) == 1:
@@ -170,7 +195,13 @@ class _ArcydInstance(object):
 class _Fixture(object):
 
     def __init__(
-            self, arcyd_command, barc_command, repo_count=1, arcyd_count=1):
+            self,
+            arcyd_command,
+            barc_command,
+            arcyon_command,
+            phab_uri,
+            repo_count,
+            arcyd_count):
         if repo_count < 1:
             raise(Exception("repo_count must be 1 or more, got {}".format(
                 repo_count)))
@@ -186,7 +217,9 @@ class _Fixture(object):
         for i in xrange(repo_count):
             repo_path = os.path.join(self._repo_root_dir, 'repo-{}'.format(i))
             os.makedirs(repo_path)
-            self._repos.append(_SharedRepo(repo_path, barc_command))
+            self._repos.append(
+                _SharedRepo(
+                    repo_path, barc_command, arcyon_command, phab_uri))
 
         self._arcyd_root_dir = os.path.join(self._root_dir, 'arcyds')
         os.makedirs(self._arcyd_root_dir)
@@ -224,12 +257,20 @@ def _do_tests():
     root_dir = os.path.dirname(py_dir)
     arcyd_cmd_path = os.path.join(root_dir, 'proto', 'arcyd')
     barc_cmd_path = os.path.join(root_dir, 'proto', 'barc')
+    arcyon_cmd_path = os.path.join(root_dir, 'bin', 'arcyon')
+    phab_uri = phldef_conduit.TEST_URI
 
     # pychecker makes us declare this before 'with'
     repo_count = 10
+    arcyd_count = 1
     with phlsys_timer.print_duration_context("Fixture setup"):
         fixture = _Fixture(
-            arcyd_cmd_path, barc_cmd_path, repo_count=repo_count)
+            arcyd_cmd_path,
+            barc_cmd_path,
+            arcyon_cmd_path,
+            phab_uri,
+            repo_count,
+            arcyd_count)
     with contextlib.closing(fixture):
         with phlsys_timer.print_duration_context("Arcyd setup"):
             arcyd = fixture.arcyds[0]
@@ -239,7 +280,7 @@ def _do_tests():
             arcyd(
                 'add-phabricator',
                 '--name', 'localphab',
-                '--instance-uri', phldef_conduit.TEST_URI,
+                '--instance-uri', phab_uri,
                 '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
                 '--admin-emails', 'local-phab-admin@localhost',
                 '--arcyd-user', phldef_conduit.PHAB.user,
@@ -260,15 +301,24 @@ def _do_tests():
                 worker = fixture.repos[i].alice
                 worker.push_new_review_branch('review1')
 
-        with phlsys_timer.print_duration_context("Processing reviews"):
+        with phlsys_timer.print_duration_context("Creating reviews"):
             arcyd.run_once()
-            print arcyd.debug_log()
 
-        with phlsys_timer.print_duration_context("Listing reviews"):
+        with phlsys_timer.print_duration_context("Accepting reviews"):
             for i in xrange(repo_count):
-                worker = fixture.repos[i].alice
-                worker.fetch()
-                assert len(worker.list_reviews()) == 1
+                bob = fixture.repos[i].bob
+                bob.fetch()
+                reviews = bob.list_reviews()
+                assert len(reviews) == 1
+                r = reviews[0]
+                bob.accept_review(r["review_id"])
+
+        with phlsys_timer.print_duration_context("Landing reviews"):
+            arcyd.run_once()
+
+        with phlsys_timer.print_duration_context("Update nothing"):
+            arcyd.run_once()
+
 
         # launch a debug shell for the user to poke around in
         # fixture.launch_debug_shell()
