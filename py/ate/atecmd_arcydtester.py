@@ -214,35 +214,43 @@ def _do_tests():
     barc_cmd_path = os.path.join(root_dir, 'proto', 'barc')
 
     # pychecker makes us declare this before 'with'
-    fixture = _Fixture(arcyd_cmd_path, barc_cmd_path)
+    repo_count = 10
+    fixture = _Fixture(arcyd_cmd_path, barc_cmd_path, repo_count=repo_count)
     with contextlib.closing(fixture):
-        worker = fixture.repos[0].alice
         arcyd = fixture.arcyds[0]
+        for i in xrange(repo_count):
+            worker = fixture.repos[i].alice
 
-        print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
+            print arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
 
-        print arcyd(
-            'add-phabricator',
-            '--name', 'localphab',
-            '--instance-uri', phldef_conduit.TEST_URI,
-            '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
-            '--admin-emails', 'local-phab-admin@localhost',
-            '--arcyd-user', phldef_conduit.PHAB.user,
-            '--arcyd-cert', phldef_conduit.PHAB.certificate)
+            print arcyd(
+                'add-phabricator',
+                '--name', 'localphab',
+                '--instance-uri', phldef_conduit.TEST_URI,
+                '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
+                '--admin-emails', 'local-phab-admin@localhost',
+                '--arcyd-user', phldef_conduit.PHAB.user,
+                '--arcyd-cert', phldef_conduit.PHAB.certificate)
 
-        repo_url_format = '{}/{{}}/central'.format(fixture.repo_root_dir)
-        print arcyd(
-            'add-repohost',
-            '--name', 'localdir',
-            '--repo-url-format', repo_url_format)
+            repo_url_format = '{}/{{}}/central'.format(fixture.repo_root_dir)
+            print arcyd(
+                'add-repohost',
+                '--name', 'localdir',
+                '--repo-url-format', repo_url_format)
 
-        print arcyd('add-repo', 'localphab', 'localdir', 'repo-0')
-        print arcyd('fetch')
+            print arcyd(
+                'add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
+            print arcyd('fetch')
 
-        print worker.push_new_review_branch('review1')
+            print worker.push_new_review_branch('review1')
+
         print arcyd.run_once()
-        worker.fetch()
-        print worker.list_reviews()
+
+        for i in xrange(repo_count):
+            worker = fixture.repos[i].alice
+
+            worker.fetch()
+            print worker.list_reviews()
 
 
 # -----------------------------------------------------------------------------
