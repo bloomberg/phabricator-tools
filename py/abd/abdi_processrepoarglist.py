@@ -107,8 +107,9 @@ def do(
                 sys_admin_emails,
                 mail_sender))
 
+    timer = phlsys_timer.Timer()
+    timer.start()
     while not finished:
-        timer = phlsys_timer.Timer()
 
         # refresh git snoops
         abdt_tryloop.critical_tryloop(
