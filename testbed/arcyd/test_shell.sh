@@ -206,6 +206,8 @@ function cleanup() {
     echo -- git / phab writes --
     touch arcyd/var/log/git-phab-writes.log
     cat arcyd/var/log/git-phab-writes.log
+    echo -- savereport --
+    tail arcyd/savereport.txt
 
     # clean up
     cd ${olddir}
