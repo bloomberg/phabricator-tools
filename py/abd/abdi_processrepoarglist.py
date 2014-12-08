@@ -127,10 +127,8 @@ def do(
         # - conduits, support limited number of connections at the same time
         # - limit max connections to git hosts
         #
-        manager = _WorkerManager(max_workers=1)
         for r in repos:
-            manager.add([r])
-        manager.join_all()
+            r()
 
         # important to do this before stopping arcyd and as soon as possible
         # after doing fetches
