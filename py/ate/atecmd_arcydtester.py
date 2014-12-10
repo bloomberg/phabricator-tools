@@ -46,6 +46,22 @@ def main():
         help='URI of Phabricator instance to connect to, defaults to expect a '
              'phabricator-tools provisioned local install.')
 
+    default_arcyd_creds = (
+        phldef_conduit.PHAB.user,
+        phldef_conduit.PHAB.email,
+        phldef_conduit.PHAB.certificate,
+    )
+
+    parser.add_argument(
+        '--arcyd-user-email-cert',
+        type=str,
+        nargs=3,
+        default=default_arcyd_creds,
+        help='The username, email address and conduit certificate of the '
+             'arcyd user, default to the "phab" user in a phabricator-tools '
+             'provisioned install. The user should be an administrator of the '
+             'instance.')
+
     args = parser.parse_args()
 
     with phlsys_fs.chtmpdir_context():
@@ -266,6 +282,7 @@ def _do_tests(args):
     barc_cmd_path = os.path.join(root_dir, 'proto', 'barc')
     arcyon_cmd_path = os.path.join(root_dir, 'bin', 'arcyon')
     phab_uri = args.phab_uri
+    arcyd_user, arcyd_email, arcyd_cert = args.arcyd_user_email_cert
 
     # pychecker makes us declare this before 'with'
     repo_count = 10
@@ -282,7 +299,7 @@ def _do_tests(args):
         with phlsys_timer.print_duration_context("Arcyd setup"):
             arcyd = fixture.arcyds[0]
 
-            arcyd('init', '--arcyd-email', phldef_conduit.PHAB.email)
+            arcyd('init', '--arcyd-email', arcyd_email)
 
             arcyd(
                 'add-phabricator',
@@ -290,8 +307,8 @@ def _do_tests(args):
                 '--instance-uri', phab_uri,
                 '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
                 '--admin-emails', 'local-phab-admin@localhost',
-                '--arcyd-user', phldef_conduit.PHAB.user,
-                '--arcyd-cert', phldef_conduit.PHAB.certificate)
+                '--arcyd-user', arcyd_user,
+                '--arcyd-cert', arcyd_cert)
 
             repo_url_format = '{}/{{}}/central'.format(fixture.repo_root_dir)
             arcyd(
