@@ -142,7 +142,7 @@ class _ArcydManagedRepository(object):
             repo_args.repo_desc)
         self._name = repo_name
         self._args = repo_args
-        self._conduit_manager = conduit_manager
+        self._arcyd_conduit = conduit_manager.get_conduit_for_args(repo_args)
         self._url_watcher_wrapper = url_watcher_wrapper
         self._mail_sender = mail_sender
         self._on_exception = abdt_exhandlers.make_exception_delay_handler(
@@ -157,7 +157,7 @@ class _ArcydManagedRepository(object):
                 self._abd_repo,
                 self._name,
                 self._args,
-                self._conduit_manager,
+                self._arcyd_conduit,
                 self._url_watcher_wrapper.watcher,
                 self._mail_sender)
         except Exception:
@@ -247,7 +247,7 @@ def _process_repo(
         repo,
         unused_repo_name,
         args,
-        conduit_manager,
+        arcyd_conduit,
         url_watcher,
         mail_sender):
 
@@ -256,8 +256,6 @@ def _process_repo(
         abdi_repoargs.get_repo_snoop_url(args),
         repo,
         args.repo_desc)
-
-    arcyd_conduit = conduit_manager.get_conduit_for_args(args)
 
     admin_emails = set(_flatten_list(args.admin_emails))
 
