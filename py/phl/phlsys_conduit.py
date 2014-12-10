@@ -45,7 +45,7 @@ import urlparse
 
 import phldef_conduit
 
-import phlsys_threading
+import phlsys_multiprocessing
 
 _URLLIB_TIMEOUT = 600
 
@@ -342,7 +342,7 @@ class Conduit(object):
 
 class MultiConduit(object):
 
-    """A conduit that supports multi-threading."""
+    """A conduit that supports multi-processing."""
 
     def __init__(self, *args, **kwargs):
 
@@ -355,7 +355,7 @@ class MultiConduit(object):
         #   conf/default.conf.php:  'auth.sessions.conduit'       => 5,
         #
         max_sessions_per_user = 5
-        self._conduits = phlsys_threading.MultiResource(
+        self._conduits = phlsys_multiprocessing.MultiResource(
             max_sessions_per_user, factory)
 
     def call_as_user(self, user, *args, **kwargs):
