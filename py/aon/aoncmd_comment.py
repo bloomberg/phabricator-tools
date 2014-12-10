@@ -111,8 +111,7 @@ def process(args):
 
     for i in ids:
         d["revision_id"] = i
-        result = conduit("differential.createcomment", d)
-        print result
+        conduit("differential.createcomment", d)
 
 
 # -----------------------------------------------------------------------------
