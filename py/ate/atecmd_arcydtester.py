@@ -63,6 +63,26 @@ def main():
              'provisioned install. The user should be an administrator of the '
              'instance.')
 
+    parser.add_argument(
+        '--alice-user-email-cert',
+        type=str,
+        nargs=3,
+        default=make_creds_from_account(phldef_conduit.ALICE),
+        help='The username, email address and conduit certificate of the '
+             '"alice" user, default to the "alice" user in a '
+             'phabricator-tools provisioned install. The user should be an '
+             'administrator of the instance.')
+
+    parser.add_argument(
+        '--bob-user-email-cert',
+        type=str,
+        nargs=3,
+        default=make_creds_from_account(phldef_conduit.BOB),
+        help='The username, email address and conduit certificate of the '
+             '"bob" user, default to the "bob" user in a phabricator-tools '
+             'provisioned install. The user should be an administrator of the '
+             'instance.')
+
     args = parser.parse_args()
 
     with phlsys_fs.chtmpdir_context():
@@ -78,7 +98,9 @@ class _Worker(object):
             repo,
             working_dir,
             barc_cmd_path,
-            phab_account,
+            phab_username,
+            email,
+            conduit_cert,
             arcyon_cmd_path,
             phab_uri):
         self._repo = repo
@@ -87,13 +109,15 @@ class _Worker(object):
             arcyon_cmd_path, working_dir)
         self._working_dir = working_dir
         self._git_worker = phlgitu_fixture.Worker(repo)
-        self._phab_account = phab_account
+        self._phab_username = phab_username
+        self._email = email
+        self._conduit_cert = conduit_cert
         self._phab_uri = phab_uri
 
     def setup(self, central_repo_path):
         self._repo("init")
-        self._repo('config', 'user.name', self._phab_account.user)
-        self._repo('config', 'user.email', self._phab_account.email)
+        self._repo('config', 'user.name', self._phab_username)
+        self._repo('config', 'user.email', self._email)
         self._repo("remote", "add", "origin", central_repo_path)
         self._repo("fetch")
 
@@ -118,8 +142,8 @@ class _Worker(object):
 
     def accept_review(self, review_id):
         connection_args = [
-            '--user', self._phab_account.user,
-            '--cert', self._phab_account.certificate,
+            '--user', self._phab_username,
+            '--cert', self._conduit_cert,
             '--uri', self._phab_uri,
         ]
         self._arcyon(
@@ -140,7 +164,14 @@ class _Worker(object):
 
 class _SharedRepo(object):
 
-    def __init__(self, root_dir, barc_cmd_path, arcyon_cmd_path, phab_uri):
+    def __init__(
+            self,
+            root_dir,
+            barc_cmd_path,
+            arcyon_cmd_path,
+            phab_uri,
+            alice,
+            bob):
 
         self._root_dir = root_dir
         central_path = os.path.join(self._root_dir, 'central')
@@ -149,15 +180,20 @@ class _SharedRepo(object):
         self._central_repo("init", "--bare")
 
         self._workers = []
-        for account in (phldef_conduit.ALICE, phldef_conduit.BOB):
-            worker_path = os.path.join(self._root_dir, account.user)
+        for account in (alice, bob):
+            account_user = account[0]
+            account_email = account[1]
+            account_cert = account[2]
+            worker_path = os.path.join(self._root_dir, account_user)
             os.makedirs(worker_path)
             self._workers.append(
                 _Worker(
                     phlsys_git.Repo(worker_path),
                     worker_path,
                     barc_cmd_path,
-                    account,
+                    account_user,
+                    account_email,
+                    account_cert,
                     arcyon_cmd_path,
                     phab_uri))
             self._workers[-1].setup(self._central_repo.working_dir)
@@ -225,7 +261,9 @@ class _Fixture(object):
             arcyon_command,
             phab_uri,
             repo_count,
-            arcyd_count):
+            arcyd_count,
+            alice,
+            bob):
         if repo_count < 1:
             raise(Exception("repo_count must be 1 or more, got {}".format(
                 repo_count)))
@@ -243,7 +281,12 @@ class _Fixture(object):
             os.makedirs(repo_path)
             self._repos.append(
                 _SharedRepo(
-                    repo_path, barc_command, arcyon_command, phab_uri))
+                    repo_path,
+                    barc_command,
+                    arcyon_command,
+                    phab_uri,
+                    alice,
+                    bob))
 
         self._arcyd_root_dir = os.path.join(self._root_dir, 'arcyds')
         os.makedirs(self._arcyd_root_dir)
@@ -295,7 +338,9 @@ def _do_tests(args):
             arcyon_cmd_path,
             phab_uri,
             repo_count,
-            arcyd_count)
+            arcyd_count,
+            args.alice_user_email_cert,
+            args.bob_user_email_cert)
     with contextlib.closing(fixture):
         with phlsys_timer.print_duration_context("Arcyd setup"):
             arcyd = fixture.arcyds[0]
