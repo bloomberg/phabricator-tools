@@ -83,6 +83,14 @@ def main():
              'provisioned install. The user should be an administrator of the '
              'instance.')
 
+    parser.add_argument(
+        '--repo-count',
+        type=int,
+        default=1,
+        help='The number of repositories to simulate working on, a simple way '
+             'to exercise concurrency and gather more accurate performance '
+             'information.')
+
     args = parser.parse_args()
 
     with phlsys_fs.chtmpdir_context():
@@ -329,7 +337,6 @@ def _do_tests(args):
     arcyd_user, arcyd_email, arcyd_cert = args.arcyd_user_email_cert
 
     # pychecker makes us declare this before 'with'
-    repo_count = 10
     arcyd_count = 1
     with phlsys_timer.print_duration_context("Fixture setup"):
         fixture = _Fixture(
@@ -337,7 +344,7 @@ def _do_tests(args):
             barc_cmd_path,
             arcyon_cmd_path,
             phab_uri,
-            repo_count,
+            args.repo_count,
             arcyd_count,
             args.alice_user_email_cert,
             args.bob_user_email_cert)
@@ -363,11 +370,11 @@ def _do_tests(args):
                 '--repo-url-format', repo_url_format)
 
         with phlsys_timer.print_duration_context("Add repos to arcyd"):
-            for i in xrange(repo_count):
+            for i in xrange(args.repo_count):
                 arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
 
         with phlsys_timer.print_duration_context("Pushing reviews"):
-            for i in xrange(repo_count):
+            for i in xrange(args.repo_count):
                 worker = fixture.repos[i].alice
                 worker.push_new_review_branch('review1')
 
@@ -375,7 +382,7 @@ def _do_tests(args):
             arcyd.run_once()
 
         with phlsys_timer.print_duration_context("Accepting reviews"):
-            for i in xrange(repo_count):
+            for i in xrange(args.repo_count):
                 bob = fixture.repos[i].bob
                 bob.fetch()
                 reviews = bob.list_reviews()
@@ -385,6 +392,22 @@ def _do_tests(args):
 
         with phlsys_timer.print_duration_context("Landing reviews"):
             arcyd.run_once()
+
+        print arcyd.debug_log()
+
+        with phlsys_timer.print_duration_context("Check reviews are landed"):
+            for i in xrange(repo_count):
+                bob = fixture.repos[i].bob
+                bob.fetch()
+                reviews = bob.list_reviews()
+                assert len(reviews) == 0
+
+        with phlsys_timer.print_duration_context("Check reviews are landed"):
+            for i in xrange(args.repo_count):
+                bob = fixture.repos[i].bob
+                bob.fetch()
+                reviews = bob.list_reviews()
+                assert len(reviews) == 0
 
         with phlsys_timer.print_duration_context("Update nothing"):
             arcyd.run_once()
