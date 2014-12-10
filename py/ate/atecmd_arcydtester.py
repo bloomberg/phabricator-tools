@@ -39,10 +39,17 @@ def main():
         description=__doc__,
         epilog=_USAGE_EXAMPLES)
 
-    parser.parse_args()
+    parser.add_argument(
+        '--phab-uri',
+        type=str,
+        default=phldef_conduit.TEST_URI,
+        help='URI of Phabricator instance to connect to, defaults to expect a '
+             'phabricator-tools provisioned local install.')
+
+    args = parser.parse_args()
 
     with phlsys_fs.chtmpdir_context():
-        _do_tests()
+        _do_tests(args)
 
 
 class _Worker(object):
@@ -251,14 +258,14 @@ class _Fixture(object):
         return self._repo_root_dir
 
 
-def _do_tests():
+def _do_tests(args):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     py_dir = os.path.dirname(script_dir)
     root_dir = os.path.dirname(py_dir)
     arcyd_cmd_path = os.path.join(root_dir, 'proto', 'arcyd')
     barc_cmd_path = os.path.join(root_dir, 'proto', 'barc')
     arcyon_cmd_path = os.path.join(root_dir, 'bin', 'arcyon')
-    phab_uri = phldef_conduit.TEST_URI
+    phab_uri = args.phab_uri
 
     # pychecker makes us declare this before 'with'
     repo_count = 10
