@@ -46,17 +46,18 @@ def main():
         help='URI of Phabricator instance to connect to, defaults to expect a '
              'phabricator-tools provisioned local install.')
 
-    default_arcyd_creds = (
-        phldef_conduit.PHAB.user,
-        phldef_conduit.PHAB.email,
-        phldef_conduit.PHAB.certificate,
-    )
+    def make_creds_from_account(account):
+        return (
+            account.user,
+            account.email,
+            account.certificate,
+        )
 
     parser.add_argument(
         '--arcyd-user-email-cert',
         type=str,
         nargs=3,
-        default=default_arcyd_creds,
+        default=make_creds_from_account(phldef_conduit.PHAB),
         help='The username, email address and conduit certificate of the '
              'arcyd user, default to the "phab" user in a phabricator-tools '
              'provisioned install. The user should be an administrator of the '
