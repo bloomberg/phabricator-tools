@@ -4,6 +4,10 @@
 # -----------------------------------------------------------------------------
 # phlsys_multiprocessing
 #
+# Public Classes:
+#   MultiResource
+#    .resource_context
+#
 # Public Functions:
 #   logging_context
 #
@@ -16,6 +20,7 @@ from __future__ import absolute_import
 import contextlib
 import logging
 import multiprocessing
+import multiprocessing.queues
 
 
 @contextlib.contextmanager
@@ -100,6 +105,49 @@ class _QueueLoggingHandler(logging.Handler):
                 self._prepare(record))
         except:
             self.handleError(record)
+
+
+class _NotAResource(object):
+    pass
+
+
+class MultiResource(object):
+
+    """Allocate and share resources in a multiprocess-safe manner."""
+
+    def __init__(self, max_resources, factory):
+        """Create a new MultiResource, use 'factory' to create new resources.
+
+        Will call 'factory' at most 'max_resources' times.
+        Note that 'factory' must be multiprocess-safe.
+
+        :max_resources: integer
+        :factory: a callable that returns a new resource
+
+        """
+        if max_resources < 1:
+            raise ValueError(
+                'max_resources should be at least 1, got {}'.format(
+                    max_resources))
+        self._factory = factory
+
+        # pychecker makes us do this, it won't recognise that
+        # multiprocessing.queues is a thing.
+        mp = multiprocessing
+        self._free_resources = mp.queues.SimpleQueue()
+        for _ in xrange(max_resources):
+            self._free_resources.put(_NotAResource)
+
+    @contextlib.contextmanager
+    def resource_context(self):
+        resource = self._free_resources.get()
+        if resource is _NotAResource:
+            resource = self._factory()
+
+        try:
+            yield resource
+        finally:
+            self._free_resources.put(resource)
 
 
 # -----------------------------------------------------------------------------

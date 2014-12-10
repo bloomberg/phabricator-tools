@@ -15,6 +15,7 @@
 from __future__ import absolute_import
 
 import logging
+import multiprocessing
 import unittest
 
 import phlsys_multiprocessing
@@ -35,6 +36,40 @@ class Test(unittest.TestCase):
 
         with phlsys_multiprocessing.logging_context(logger_config):
             logging.debug("logging test")
+
+    def test_multiresource_breathing(self):
+
+        def factory():
+            return "resource"
+
+        # make sure that we can get a resource in the main process
+        multi_resource = phlsys_multiprocessing.MultiResource(1, factory)
+        with multi_resource.resource_context() as resource:
+            self.assertEqual("resource", resource)
+        with multi_resource.resource_context() as resource:
+            self.assertEqual("resource", resource)
+
+    def test_multiresource_changes_propagate(self):
+
+        def worker(resource):
+            with resource.resource_context() as r:
+                r.append("worker process")
+
+        def factory():
+            return ["main process"]
+
+        multi_resource = phlsys_multiprocessing.MultiResource(1, factory)
+
+        worker_list = []
+        num_workers = 5
+        for _ in xrange(num_workers):
+            worker_list.append(
+                multiprocessing.Process(target=worker, args=(multi_resource,)))
+            worker_list[-1].start()
+        for w in worker_list:
+            w.join()
+        with multi_resource.resource_context() as r:
+            self.assertEqual(len(r), num_workers + 1)
 
 
 # -----------------------------------------------------------------------------
