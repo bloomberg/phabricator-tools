@@ -110,8 +110,7 @@ def process(args):
         sys.exit(1)
 
     for i in ids:
-        d["revision_id"] = i
-        conduit("differential.createcomment", d)
+        phlcon_differential.create_comment(conduit, i, **d)
 
 
 # -----------------------------------------------------------------------------
