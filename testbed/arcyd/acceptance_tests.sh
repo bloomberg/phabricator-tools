@@ -782,9 +782,11 @@ cat savemail.txt
 # display the io activity
 echo
 echo '-- arcyd/var/log/git-phab-writes.log'
+touch arcyd/var/log/git-phab-writes.log
 cat arcyd/var/log/git-phab-writes.log
 echo
 echo '-- arcyd2/var/log/git-phab-writes.log'
+touch arcyd2/var/log/git-phab-writes.log
 cat arcyd2/var/log/git-phab-writes.log
 
 # clean up
