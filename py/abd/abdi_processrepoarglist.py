@@ -142,7 +142,13 @@ class _ArcydManagedRepository(object):
             repo_args.repo_desc)
         self._name = repo_name
         self._args = repo_args
-        self._arcyd_conduit = conduit_manager.get_conduit_for_args(repo_args)
+        self._conduit_manager = conduit_manager
+
+        conduit_cache = conduit_manager.get_conduit_and_cache_for_args(
+            repo_args)
+        self._arcyd_conduit, self._review_cache = conduit_cache
+
+        self._mail_sender = mail_sender
         self._url_watcher_wrapper = url_watcher_wrapper
         self._mail_sender = mail_sender
         self._on_exception = abdt_exhandlers.make_exception_delay_handler(
@@ -169,9 +175,9 @@ class _ConduitManager(object):
 
     def __init__(self):
         super(_ConduitManager, self).__init__()
-        self._conduits = {}
+        self._conduits_caches = {}
 
-    def get_conduit_for_args(self, args):
+    def get_conduit_and_cache_for_args(self, args):
         key = (
             args.instance_uri,
             args.arcyd_user,
@@ -179,7 +185,7 @@ class _ConduitManager(object):
             args.https_proxy
         )
 
-        if key not in self._conduits:
+        if key not in self._conduits_caches:
             # create an array so that the 'connect' closure binds to the
             # 'conduit' variable as we'd expect, otherwise it'll just
             # modify a local variable and this 'conduit' will remain 'None'
@@ -199,18 +205,16 @@ class _ConduitManager(object):
                 connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
             multi_conduit = conduit[0]
-            arcyd_conduit = abdt_conduit.Conduit(
-                multi_conduit,
-                phlcon_reviewstatecache.ReviewStateCache(multi_conduit))
-            self._conduits[key] = arcyd_conduit
+            cache = phlcon_reviewstatecache.ReviewStateCache(multi_conduit)
+            arcyd_conduit = abdt_conduit.Conduit(multi_conduit, cache)
+            self._conduits_caches[key] = (arcyd_conduit, cache)
         else:
-            arcyd_conduit = self._conduits[key]
+            arcyd_conduit, cache = self._conduits_caches[key]
 
-        return arcyd_conduit
+        return arcyd_conduit, cache
 
     def refresh_conduits(self):
-        for key in self._conduits:
-            conduit = self._conduits[key]
+        for conduit, _ in self._conduits_caches.itervalues():
             abdt_tryloop.critical_tryloop(
                 conduit.refresh_cache_on_cycle,
                 abdt_errident.CONDUIT_REFRESH,
