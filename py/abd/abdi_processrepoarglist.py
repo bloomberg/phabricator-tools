@@ -214,9 +214,9 @@ class _ConduitManager(object):
         return arcyd_conduit, cache
 
     def refresh_conduits(self):
-        for conduit, _ in self._conduits_caches.itervalues():
+        for conduit, cache in self._conduits_caches.itervalues():
             abdt_tryloop.critical_tryloop(
-                conduit.refresh_cache_on_cycle,
+                cache.refresh_active_reviews,
                 abdt_errident.CONDUIT_REFRESH,
                 conduit.describe())
 

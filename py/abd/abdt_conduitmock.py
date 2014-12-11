@@ -19,7 +19,6 @@
 #   ConduitMock
 #    .describe
 #    .create_comment
-#    .refresh_cache_on_cycle
 #    .create_empty_revision_as_user
 #    .get_commit_message
 #    .create_revision_as_user
@@ -216,18 +215,6 @@ class ConduitMock(object):
         self._data.assert_is_revision(revision)
         str(message)  # test that message can be converted to string
         self._data.set_changed()
-
-    def refresh_cache_on_cycle(self):
-        """Refresh the stored state of revisions and users.
-
-        Note that this should be called once per 'cycle' of git
-        repositories to avoid degredation of performance.  This is
-        necessary because revisions that were not accessed since the
-        last refresh are evicted and will not benefit from the batching
-        of revision queries.
-
-        """
-        pass
 
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
