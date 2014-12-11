@@ -11,7 +11,6 @@
 #
 # Public Functions:
 #   make_from_conduit
-#   make_revision_list_status_callable
 #
 # Public Assignments:
 #   ReviewState
@@ -32,17 +31,11 @@ ReviewState = collections.namedtuple(
 
 
 def make_from_conduit(conduit):
-    return ReviewStateCache(
-        make_revision_list_status_callable(
-            conduit))
-
-
-def make_revision_list_status_callable(conduit):
 
     def revision_list_status(revision_list):
         return phlcon_differential.query(conduit, revision_list)
 
-    return revision_list_status
+    return ReviewStateCache(revision_list_status)
 
 
 class ReviewStateCache(object):
