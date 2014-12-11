@@ -50,6 +50,7 @@ from __future__ import absolute_import
 import unittest
 
 import phlcon_differential
+import phlcon_reviewstatecache
 import phldef_conduit
 import phlsys_conduit
 
@@ -73,7 +74,9 @@ class Test(unittest.TestCase):
             self.test_data.TEST_URI,
             self.test_data.PHAB.user,
             self.test_data.PHAB.certificate)
-        self.conduit = abdt_conduit.Conduit(self.sys_conduit)
+        self.conduit = abdt_conduit.Conduit(
+            self.sys_conduit,
+            phlcon_reviewstatecache.ReviewStateCache(self.sys_conduit))
 
     def _invalidate_cache(self):
         self.conduit.refresh_cache_on_cycle()

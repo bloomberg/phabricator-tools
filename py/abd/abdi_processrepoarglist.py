@@ -19,6 +19,7 @@ import os
 import threading
 import time
 
+import phlcon_reviewstatecache
 import phlsys_conduit
 import phlsys_git
 import phlsys_subprocess
@@ -204,7 +205,9 @@ class _ConduitManager(object):
                     connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
                 multi_conduit = conduit[0]
-                arcyd_conduit = abdt_conduit.Conduit(multi_conduit)
+                arcyd_conduit = abdt_conduit.Conduit(
+                    multi_conduit,
+                    phlcon_reviewstatecache.ReviewStateCache(multi_conduit))
                 self._conduits[key] = arcyd_conduit
             else:
                 arcyd_conduit = self._conduits[key]
