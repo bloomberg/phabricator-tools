@@ -305,6 +305,25 @@ class _Fixture(object):
             os.makedirs(arcyd_path)
             self._arcyds.append(_ArcydInstance(arcyd_path, arcyd_command))
 
+    def setup_arcyds(self, arcyd_user, arcyd_email, arcyd_cert, phab_uri):
+        for arcyd in self.arcyds:
+            arcyd('init', '--arcyd-email', arcyd_email)
+
+            arcyd(
+                'add-phabricator',
+                '--name', 'localphab',
+                '--instance-uri', phab_uri,
+                '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
+                '--admin-emails', 'local-phab-admin@localhost',
+                '--arcyd-user', arcyd_user,
+                '--arcyd-cert', arcyd_cert)
+
+            repo_url_format = '{}/{{}}/central'.format(self.repo_root_dir)
+            arcyd(
+                'add-repohost',
+                '--name', 'localdir',
+                '--repo-url-format', repo_url_format)
+
     def close(self):
         shutil.rmtree(self._root_dir)
 
@@ -348,26 +367,11 @@ def _do_tests(args):
             arcyd_count,
             args.alice_user_email_cert,
             args.bob_user_email_cert)
+
     with contextlib.closing(fixture):
+        arcyd = fixture.arcyds[0]
         with phlsys_timer.print_duration_context("Arcyd setup"):
-            arcyd = fixture.arcyds[0]
-
-            arcyd('init', '--arcyd-email', arcyd_email)
-
-            arcyd(
-                'add-phabricator',
-                '--name', 'localphab',
-                '--instance-uri', phab_uri,
-                '--review-url-format', phldef_conduit.REVIEW_URL_FORMAT,
-                '--admin-emails', 'local-phab-admin@localhost',
-                '--arcyd-user', arcyd_user,
-                '--arcyd-cert', arcyd_cert)
-
-            repo_url_format = '{}/{{}}/central'.format(fixture.repo_root_dir)
-            arcyd(
-                'add-repohost',
-                '--name', 'localdir',
-                '--repo-url-format', repo_url_format)
+            fixture.setup_arcyds(arcyd_user, arcyd_email, arcyd_cert, phab_uri)
 
         with phlsys_timer.print_duration_context("Add repos to arcyd"):
             for i in xrange(args.repo_count):
