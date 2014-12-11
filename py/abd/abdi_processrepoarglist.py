@@ -205,7 +205,7 @@ class _ConduitManager(object):
                 connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
             multi_conduit = conduit[0]
-            cache = phlcon_reviewstatecache.ReviewStateCache(multi_conduit)
+            cache = phlcon_reviewstatecache.make_from_conduit(multi_conduit)
             arcyd_conduit = abdt_conduit.Conduit(multi_conduit, cache)
             self._conduits_caches[key] = (arcyd_conduit, cache)
         else:

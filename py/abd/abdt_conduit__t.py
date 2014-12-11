@@ -76,7 +76,7 @@ class Test(unittest.TestCase):
             self.test_data.PHAB.certificate)
         self.conduit = abdt_conduit.Conduit(
             self.sys_conduit,
-            phlcon_reviewstatecache.ReviewStateCache(self.sys_conduit))
+            phlcon_reviewstatecache.make_from_conduit(self.sys_conduit))
 
     def _invalidate_cache(self):
         self.conduit.refresh_cache_on_cycle()

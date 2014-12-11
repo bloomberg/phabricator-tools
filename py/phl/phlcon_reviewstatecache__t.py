@@ -6,7 +6,6 @@
 # cover those concerns.
 #
 # Concerns:
-# [ A] ReviewStateCache passes parameters to _ReviewStateCache correctly
 # [ C] _ReviewStateCache does not raise if 'refreshed' before any 'get' calls
 # [ C] _ReviewStateCache does not callable when refreshing if no active queries
 # [ D] _ReviewStateCache calls out to refresh queries since last refresh
@@ -54,7 +53,7 @@ class Test(unittest.TestCase):
 
         revision_id = phlcon_differential.create_empty_revision(conduit)
 
-        cache = phlcon_reviewstatecache.ReviewStateCache(conduit)
+        cache = phlcon_reviewstatecache.make_from_conduit(conduit)
 
         # assert it's in 'needs review'
         self.assertEqual(
