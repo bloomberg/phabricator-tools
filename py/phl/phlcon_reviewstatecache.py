@@ -8,6 +8,8 @@
 #   ReviewStateCache
 #    .get_state
 #    .refresh_active_reviews
+#    .active_reviews
+#    .merge_additional_active_reviews
 #
 # Public Functions:
 #   make_from_conduit
@@ -68,6 +70,13 @@ class ReviewStateCache(object):
                 r.id: self._make_state(r) for r in responses
             }
             self._active_reviews = set()
+
+    @property
+    def active_reviews(self):
+        return self._active_reviews
+
+    def merge_additional_active_reviews(self, active_review_set):
+        self._active_reviews.update(active_review_set)
 
 
 # -----------------------------------------------------------------------------

@@ -6,6 +6,7 @@
 # cover those concerns.
 #
 # Concerns:
+# [ B] ReviewStateCache merges additional active reviews
 # [ C] ReviewStateCache does not raise if 'refreshed' before any 'get' calls
 # [ C] ReviewStateCache does not callable when refreshing if no active queries
 # [ D] ReviewStateCache calls out to refresh queries since last refresh
@@ -15,6 +16,7 @@
 # -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
+# [ B] test_B_MergeAdditionalActiveReviews
 # [ C] test_C_RefreshBeforeGet
 # [ D] test_D_InvalidationRules
 # =============================================================================
@@ -55,10 +57,16 @@ class Test(unittest.TestCase):
 
         cache = phlcon_reviewstatecache.make_from_conduit(conduit)
 
+        # shouldn't have active reviews to start with
+        self.assertEqual(set(), cache.active_reviews)
+
         # assert it's in 'needs review'
         self.assertEqual(
             cache.get_state(revision_id).status,
             phlcon_differential.ReviewStates.needs_review)
+
+        # should now have cached the review
+        self.assertEqual(set((revision_id,)), cache.active_reviews)
 
         # change real state to 'abandoned'
         phlcon_differential.create_comment(
@@ -78,6 +86,16 @@ class Test(unittest.TestCase):
         self.assertEqual(
             cache.get_state(revision_id).status,
             phlcon_differential.ReviewStates.abandoned)
+
+    def test_B_MergeAdditionalActiveReviews(self):
+        # [ B] ReviewStateCache merges additional active reviews
+        cache = phlcon_reviewstatecache.ReviewStateCache(None)
+        reviews = set((1, 2, 3))
+        additional_reviews = set((4, 5, 6))
+        cache.merge_additional_active_reviews(reviews)
+        self.assertEqual(reviews, cache.active_reviews)
+        cache.merge_additional_active_reviews(additional_reviews)
+        self.assertEqual(reviews | additional_reviews, cache.active_reviews)
 
     def test_C_RefreshBeforeGet(self):
 
