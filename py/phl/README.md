@@ -101,8 +101,6 @@ Help to wrap up modules as subcommands.
 Interact with other programs using command-line semantics.
 * `phlsys_textconvert.py` -
 Convert between unicode and ascii easily.
-* `phlsys_threading.py` -
-Helpers for multi-threading.
 * `phlsys_timedeltatostr.py` -
 Convert timedeltas to strings.
 * `phlsys_timer.py` -
