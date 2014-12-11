@@ -4,6 +4,11 @@
 # -----------------------------------------------------------------------------
 # phlcon_reviewstatecache
 #
+# Public Classes:
+#   ReviewStateCache
+#    .get_state
+#    .refresh_active_reviews
+#
 # Public Functions:
 #   make_from_conduit
 #   make_revision_list_status_callable
@@ -27,7 +32,7 @@ ReviewState = collections.namedtuple(
 
 
 def make_from_conduit(conduit):
-    return _ReviewStateCache(
+    return ReviewStateCache(
         make_revision_list_status_callable(
             conduit))
 
@@ -40,10 +45,10 @@ def make_revision_list_status_callable(conduit):
     return revision_list_status
 
 
-class _ReviewStateCache(object):
+class ReviewStateCache(object):
 
     def __init__(self, status_callable):
-        super(_ReviewStateCache, self).__init__()
+        super(ReviewStateCache, self).__init__()
         self._review_to_state = {}
         self._active_reviews = set()
         self._revision_list_status_callable = status_callable

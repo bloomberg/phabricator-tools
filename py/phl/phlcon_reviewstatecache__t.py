@@ -6,12 +6,12 @@
 # cover those concerns.
 #
 # Concerns:
-# [ C] _ReviewStateCache does not raise if 'refreshed' before any 'get' calls
-# [ C] _ReviewStateCache does not callable when refreshing if no active queries
-# [ D] _ReviewStateCache calls out to refresh queries since last refresh
-# [ D] _ReviewStateCache retrieves statuses for reviews not queried before
-# [ D] _ReviewStateCache does not callable when queried for cached query
-# [ D] _ReviewStateCache returns correct value when retrieving cached
+# [ C] ReviewStateCache does not raise if 'refreshed' before any 'get' calls
+# [ C] ReviewStateCache does not callable when refreshing if no active queries
+# [ D] ReviewStateCache calls out to refresh queries since last refresh
+# [ D] ReviewStateCache retrieves statuses for reviews not queried before
+# [ D] ReviewStateCache does not callable when queried for cached query
+# [ D] ReviewStateCache returns correct value when retrieving cached
 # -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
@@ -82,18 +82,18 @@ class Test(unittest.TestCase):
     def test_C_RefreshBeforeGet(self):
 
         def fake_callable(revision_list):
-            # [ C] _ReviewStateCache does not callable when refreshing
+            # [ C] ReviewStateCache does not callable when refreshing
             #      if no active queries
             _ = revision_list  # NOQA
             raise Exception("shouldn't get here")
 
-        # [ C] _ReviewStateCache does not raise if 'refreshed' before any 'get'
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache(fake_callable)
+        # [ C] ReviewStateCache does not raise if 'refreshed' before any 'get'
+        cache_impl = phlcon_reviewstatecache.ReviewStateCache(fake_callable)
         cache_impl.refresh_active_reviews()
 
     def test_D_InvalidationRules(self):
-        # [  ] _ReviewStateCache calls out to refresh queries since refresh
-        # [  ] _ReviewStateCache retrieves statuses for reviews not queried
+        # [  ] ReviewStateCache calls out to refresh queries since refresh
+        # [  ] ReviewStateCache retrieves statuses for reviews not queried
 
         revision_list = [101, 1337, 404]
         expected_queries = [[101], [1337], [404], [101, 1337, 404]]
@@ -127,7 +127,7 @@ class Test(unittest.TestCase):
                 for r in actual_revision_list
             ]
 
-        cache_impl = phlcon_reviewstatecache._ReviewStateCache(fake_callable)
+        cache_impl = phlcon_reviewstatecache.ReviewStateCache(fake_callable)
 
         # exercise getting the state
         for revision in revision_list:
@@ -139,8 +139,8 @@ class Test(unittest.TestCase):
 
         callable_should_raise = True
 
-        # [ D] _ReviewStateCache does not callable if queried for cached query
-        # [ D] _ReviewStateCache returns correct value when retrieving cached
+        # [ D] ReviewStateCache does not callable if queried for cached query
+        # [ D] ReviewStateCache returns correct value when retrieving cached
         for revision in revision_list:
             result = cache_impl.get_state(revision).status
             self.assertEqual(result, str(revision) + 'r')
