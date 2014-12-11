@@ -16,7 +16,6 @@ from __future__ import absolute_import
 import json
 import logging
 import os
-import threading
 import time
 
 import phlcon_reviewstatecache
@@ -170,7 +169,6 @@ class _ConduitManager(object):
 
     def __init__(self):
         super(_ConduitManager, self).__init__()
-        self._lock = threading.Lock()
         self._conduits = {}
 
     def get_conduit_for_args(self, args):
@@ -181,44 +179,36 @@ class _ConduitManager(object):
             args.https_proxy
         )
 
-        # We must lock around getting and creating conduits to make sure we
-        # create exactly the amount of conduits we need and not more
-        with self._lock:
+        if key not in self._conduits:
+            # create an array so that the 'connect' closure binds to the
+            # 'conduit' variable as we'd expect, otherwise it'll just
+            # modify a local variable and this 'conduit' will remain 'None'
+            # XXX: we can _process_repo better in python 3.x (nonlocal?)
+            conduit = [None]
 
-            if key not in self._conduits:
-                # create an array so that the 'connect' closure binds to the
-                # 'conduit' variable as we'd expect, otherwise it'll just
-                # modify a local variable and this 'conduit' will remain 'None'
-                # XXX: we can _process_repo better in python 3.x (nonlocal?)
-                conduit = [None]
+            def connect():
+                # XXX: we'll rebind in python 3.x, instead
+                # nonlocal conduit
+                conduit[0] = phlsys_conduit.MultiConduit(
+                    args.instance_uri,
+                    args.arcyd_user,
+                    args.arcyd_cert,
+                    https_proxy=args.https_proxy)
 
-                def connect():
-                    # XXX: we'll rebind in python 3.x, instead
-                    # nonlocal conduit
-                    conduit[0] = phlsys_conduit.MultiConduit(
-                        args.instance_uri,
-                        args.arcyd_user,
-                        args.arcyd_cert,
-                        https_proxy=args.https_proxy)
+            abdt_tryloop.tryloop(
+                connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
 
-                abdt_tryloop.tryloop(
-                    connect, abdt_errident.CONDUIT_CONNECT, args.instance_uri)
-
-                multi_conduit = conduit[0]
-                arcyd_conduit = abdt_conduit.Conduit(
-                    multi_conduit,
-                    phlcon_reviewstatecache.ReviewStateCache(multi_conduit))
-                self._conduits[key] = arcyd_conduit
-            else:
-                arcyd_conduit = self._conduits[key]
+            multi_conduit = conduit[0]
+            arcyd_conduit = abdt_conduit.Conduit(
+                multi_conduit,
+                phlcon_reviewstatecache.ReviewStateCache(multi_conduit))
+            self._conduits[key] = arcyd_conduit
+        else:
+            arcyd_conduit = self._conduits[key]
 
         return arcyd_conduit
 
     def refresh_conduits(self):
-
-        # XXX: This operation should only be run in the main thread, with no
-        # other threads running so we don't need to lock.
-
         for key in self._conduits:
             conduit = self._conduits[key]
             abdt_tryloop.critical_tryloop(
