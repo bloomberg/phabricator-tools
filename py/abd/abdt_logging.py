@@ -20,15 +20,15 @@ from __future__ import absolute_import
 
 import datetime
 import logging
+import multiprocessing
 import os
-import threading
 
 import phlsys_subprocess
 
 
 _LOGGER = logging.getLogger(__name__)
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
-_IO_LOG_LOCK = threading.Lock()
+_IO_LOG_LOCK = multiprocessing.Lock()
 _IO_LOG_PATH = None
 
 
