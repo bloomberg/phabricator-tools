@@ -7,7 +7,7 @@
 # Public Functions:
 #   set_external_system_error_logger
 #   clear_external_system_error_logger
-#   set_io_log_path
+#   set_remote_io_write_log_path
 #   on_system_error
 #   on_retry_exception
 #   on_remote_io_write_event
@@ -43,7 +43,7 @@ def clear_external_system_error_logger():
     _EXTERNAL_SYSTEM_ERROR_LOGGER = None
 
 
-def set_io_log_path(path):
+def set_remote_io_write_log_path(path):
     assert path
     global _IO_LOG_PATH
     with _IO_LOG_LOCK:

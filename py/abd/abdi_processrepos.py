@@ -111,7 +111,7 @@ def process(args, repo_configs):
 
     if args.io_log_file:
         full_path = os.path.abspath(args.io_log_file)
-        abdt_logging.set_io_log_path(full_path)
+        abdt_logging.set_remote_io_write_log_path(full_path)
 
     if args.external_error_logger:
         full_path = os.path.abspath(args.external_error_logger)
