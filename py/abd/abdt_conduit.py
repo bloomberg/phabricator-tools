@@ -92,9 +92,10 @@ class Conduit(object):
         :returns: None
 
         """
-        phlcon_differential.create_comment(
-            self._multi_conduit, revision, message, silent=silent)
-        self._log('conduit-comment', 'commented on {}'.format(revision))
+        with self._log_context(
+                'conduit-comment', 'commented on {}'.format(revision)):
+            phlcon_differential.create_comment(
+                self._multi_conduit, revision, message, silent=silent)
 
     def create_empty_revision_as_user(self, username):
         """Return the id of a newly created empty revision as 'username'.
@@ -103,11 +104,16 @@ class Conduit(object):
         :returns: id of created revision
 
         """
-        as_user_conduit = self._make_as_user_conduit(username)
-        revision = phlcon_differential.create_empty_revision(as_user_conduit)
-        self._log(
-            'conduit-createemptyrev',
-            'created {} as {}'.format(revision, username))
+        with self._log_context(
+                'conduit-createemptyrev',
+                'create as {}'.format(username)) as log:
+
+            as_user_conduit = self._make_as_user_conduit(username)
+            revision = phlcon_differential.create_empty_revision(
+                as_user_conduit)
+
+            log.append(revision)
+
         return revision
 
     def get_commit_message(self, revisionid):
@@ -134,13 +140,19 @@ class Conduit(object):
 
         """
         as_user_conduit = self._make_as_user_conduit(username)
-        diffid = phlcon_differential.create_raw_diff(
-            as_user_conduit, raw_diff).id
-        review = phlcon_differential.create_revision(
-            as_user_conduit, diffid, fields)
-        self._log(
-            'conduit-createrev',
-            'created {} as {}'.format(review.revisionid, username))
+
+        with self._log_context(
+                'conduit-createrev',
+                'create as {}'.format(username)) as log:
+
+            diffid = phlcon_differential.create_raw_diff(
+                as_user_conduit, raw_diff).id
+
+            review = phlcon_differential.create_revision(
+                as_user_conduit, diffid, fields)
+
+            log.append(review.revisionid)
+
         return review.revisionid
 
     def query_name_and_phid_from_email(self, email):
@@ -248,17 +260,19 @@ class Conduit(object):
 
         author_user = self._get_author_user(revisionid)
         as_user_conduit = self._make_as_user_conduit(author_user)
-        diffid = phlcon_differential.create_raw_diff(
-            as_user_conduit, raw_diff).id
-        try:
-            phlcon_differential.update_revision(
-                as_user_conduit, revisionid, diffid, [], message)
-        except phlcon_differential.UpdateClosedRevisionError:
-            raise abdt_exception.AbdUserException(
-                "CONDUIT: can't update a closed revision")
-        self._log(
-            'conduit-updaterev',
-            'updated {} as {}'.format(revisionid, author_user))
+
+        with self._log_context(
+                'conduit-updaterev',
+                'update {} as {}'.format(revisionid, author_user)):
+
+            diffid = phlcon_differential.create_raw_diff(
+                as_user_conduit, raw_diff).id
+            try:
+                phlcon_differential.update_revision(
+                    as_user_conduit, revisionid, diffid, [], message)
+            except phlcon_differential.UpdateClosedRevisionError:
+                raise abdt_exception.AbdUserException(
+                    "CONDUIT: can't update a closed revision")
 
     def set_requires_revision(self, revisionid):
         """Set an existing Differential revision to 'requires revision'.
@@ -269,13 +283,14 @@ class Conduit(object):
         """
         author_user = self._get_author_user(revisionid)
         as_user_conduit = self._make_as_user_conduit(author_user)
-        phlcon_differential.create_comment(
-            as_user_conduit,
-            revisionid,
-            action=phlcon_differential.Action.rethink)
-        self._log(
-            'conduit-setrequiresrev',
-            'updated {} as {}'.format(revisionid, author_user))
+        with self._log_context(
+                'conduit-setrequiresrev',
+                'update {} as {}'.format(revisionid, author_user)):
+
+            phlcon_differential.create_comment(
+                as_user_conduit,
+                revisionid,
+                action=phlcon_differential.Action.rethink)
 
     def close_revision(self, revisionid):
         """Set an existing Differential revision to 'closed'.
@@ -286,10 +301,11 @@ class Conduit(object):
         """
         author_user = self._get_author_user(revisionid)
         as_user_conduit = self._make_as_user_conduit(author_user)
-        phlcon_differential.close(as_user_conduit, revisionid)
-        self._log(
-            'conduit-close',
-            'closed {} as {}'.format(revisionid, author_user))
+        with self._log_context(
+                'conduit-close',
+                'close {} as {}'.format(revisionid, author_user)):
+
+            phlcon_differential.close(as_user_conduit, revisionid)
 
     def abandon_revision(self, revisionid):
         """Set an existing Differential revision to 'abandoned'.
@@ -300,13 +316,14 @@ class Conduit(object):
         """
         author_user = self._get_author_user(revisionid)
         as_user_conduit = self._make_as_user_conduit(author_user)
-        phlcon_differential.create_comment(
-            as_user_conduit,
-            revisionid,
-            action=phlcon_differential.Action.abandon)
-        self._log(
-            'conduit-abandon',
-            'abandoned {} as {}'.format(revisionid, author_user))
+        with self._log_context(
+                'conduit-abandon',
+                'abandon {} as {}'.format(revisionid, author_user)):
+
+            phlcon_differential.create_comment(
+                as_user_conduit,
+                revisionid,
+                action=phlcon_differential.Action.abandon)
 
     # XXX: test function - will disappear when moved to new processrepo tests
     def accept_revision_as_user(self, revisionid, username):
@@ -318,13 +335,14 @@ class Conduit(object):
 
         """
         as_user_conduit = self._make_as_user_conduit(username)
-        phlcon_differential.create_comment(
-            as_user_conduit,
-            revisionid,
-            action=phlcon_differential.Action.accept)
-        self._log(
-            'conduit-accept',
-            'accepted {} as {}'.format(revisionid, username))
+        with self._log_context(
+                'conduit-accept',
+                'accept {} as {}'.format(revisionid, username)):
+
+            phlcon_differential.create_comment(
+                as_user_conduit,
+                revisionid,
+                action=phlcon_differential.Action.accept)
 
     # XXX: test function currently but needed for changing owner in the case
     #      where no valid author is detected on a branch at creation but is
@@ -338,17 +356,18 @@ class Conduit(object):
 
         """
         as_user_conduit = self._make_as_user_conduit(username)
-        phlcon_differential.create_comment(
-            as_user_conduit,
-            revisionid,
-            action=phlcon_differential.Action.claim)
-        self._log(
-            'conduit-commandeer',
-            'commandeered {} as {}'.format(revisionid, username))
+        with self._log_context(
+                'conduit-commandeer',
+                'commandeer {} as {}'.format(revisionid, username)):
+            phlcon_differential.create_comment(
+                as_user_conduit,
+                revisionid,
+                action=phlcon_differential.Action.claim)
 
-    def _log(self, identifier, description):
-        abdt_logging.on_remote_io_write_event(identifier, '{}:{}'.format(
-            self.describe(), description))
+    def _log_context(self, identifier, description):
+        return abdt_logging.remote_io_write_event_context(
+            identifier,
+            '{}:{}'.format(self.describe(), description))
 
     def _make_as_user_conduit(self, username):
         return phlsys_conduit.CallMultiConduitAsUser(

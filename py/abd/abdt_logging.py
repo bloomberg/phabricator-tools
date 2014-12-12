@@ -11,8 +11,8 @@
 #   set_remote_io_read_log_path
 #   on_system_error
 #   on_retry_exception
-#   on_remote_io_write_event
-#   on_remote_io_read_event
+#   remote_io_write_event_context
+#   remote_io_read_event_context
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -20,12 +20,14 @@
 
 from __future__ import absolute_import
 
+import contextlib
 import datetime
 import logging
 import multiprocessing
 import os
 
 import phlsys_subprocess
+import phlsys_timer
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -102,25 +104,40 @@ def on_retry_exception(identifier, detail, e, delay):
     _log_system_exception(identifier, detail, e)
 
 
-def _on_remote_io_event(identifier, detail, lock, path):
+def _log_remote_io_event(prolog, identifier, detail, epilog, lock, path):
     with lock:
         if path:
             with open(path, 'a') as f:
                 now = str(datetime.datetime.utcnow())
-                description = '{}: {} - {}\n'.format(now, identifier, detail)
+                description = '{}: ({}) {} - {} - ({})\n'.format(
+                    now, prolog, identifier, detail, epilog)
                 f.write(description)
 
 
-def on_remote_io_write_event(identifier, detail):
-    _on_remote_io_event(
+@contextlib.contextmanager
+def _remote_io_event_context(identifier, detail, lock, path):
+    _log_remote_io_event('start', identifier, detail, '', lock, path)
+    timer = phlsys_timer.Timer()
+    timer.start()
+    result_list = []
+    try:
+        yield result_list
+    finally:
+        prolog = '{:.3f}s'.format(timer.duration)
+        _log_remote_io_event(
+            prolog, identifier, detail, result_list, lock, path)
+
+
+def remote_io_write_event_context(identifier, detail):
+    return _remote_io_event_context(
         identifier,
         detail,
         _REMOTE_IO_WRITE_LOG_LOCK,
         _REMOTE_IO_WRITE_LOG_PATH)
 
 
-def on_remote_io_read_event(identifier, detail):
-    _on_remote_io_event(
+def remote_io_read_event_context(identifier, detail):
+    return _remote_io_event_context(
         identifier,
         detail,
         _REMOTE_IO_READ_LOG_LOCK,
