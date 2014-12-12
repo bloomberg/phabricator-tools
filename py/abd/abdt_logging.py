@@ -28,8 +28,8 @@ import phlsys_subprocess
 
 _LOGGER = logging.getLogger(__name__)
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
-_IO_LOG_LOCK = multiprocessing.Lock()
-_IO_LOG_PATH = None
+_REMOTE_IO_WRITE_LOG_LOCK = multiprocessing.Lock()
+_REMOTE_IO_WRITE_LOG_PATH = None
 
 
 def set_external_system_error_logger(logger):
@@ -45,9 +45,9 @@ def clear_external_system_error_logger():
 
 def set_remote_io_write_log_path(path):
     assert path
-    global _IO_LOG_PATH
-    with _IO_LOG_LOCK:
-        _IO_LOG_PATH = os.path.abspath(path)
+    global _REMOTE_IO_WRITE_LOG_PATH
+    with _REMOTE_IO_WRITE_LOG_LOCK:
+        _REMOTE_IO_WRITE_LOG_PATH = os.path.abspath(path)
 
 
 def on_system_error(identifier, detail):
@@ -92,9 +92,9 @@ def on_retry_exception(identifier, detail, e, delay):
 
 
 def on_remote_io_write_event(identifier, detail):
-    with _IO_LOG_LOCK:
-        if _IO_LOG_PATH:
-            with open(_IO_LOG_PATH, 'a') as f:
+    with _REMOTE_IO_WRITE_LOG_LOCK:
+        if _REMOTE_IO_WRITE_LOG_PATH:
+            with open(_REMOTE_IO_WRITE_LOG_PATH, 'a') as f:
                 now = str(datetime.datetime.utcnow())
                 description = '{}: {} - {}\n'.format(now, identifier, detail)
                 f.write(description)
