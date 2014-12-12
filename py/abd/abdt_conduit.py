@@ -347,7 +347,7 @@ class Conduit(object):
             'commandeered {} as {}'.format(revisionid, username))
 
     def _log(self, identifier, description):
-        abdt_logging.on_io_event(identifier, '{}:{}'.format(
+        abdt_logging.on_remote_io_write_event(identifier, '{}:{}'.format(
             self.describe(), description))
 
     def _make_as_user_conduit(self, username):

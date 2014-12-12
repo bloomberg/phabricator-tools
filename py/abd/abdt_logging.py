@@ -10,7 +10,7 @@
 #   set_io_log_path
 #   on_system_error
 #   on_retry_exception
-#   on_io_event
+#   on_remote_io_write_event
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -91,7 +91,7 @@ def on_retry_exception(identifier, detail, e, delay):
     _log_system_exception(identifier, detail, e)
 
 
-def on_io_event(identifier, detail):
+def on_remote_io_write_event(identifier, detail):
     with _IO_LOG_LOCK:
         if _IO_LOG_PATH:
             with open(_IO_LOG_PATH, 'a') as f:

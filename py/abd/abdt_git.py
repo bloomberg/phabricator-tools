@@ -341,7 +341,7 @@ class Repo(object):
 
     def __call__(self, *args, **kwargs):
         if args and args[0] == 'push':
-            abdt_logging.on_io_event(
+            abdt_logging.on_remote_io_write_event(
                 'git-push',
                 '{}: {} {}'.format(
                     self._description, ' '.join(args), kwargs))
