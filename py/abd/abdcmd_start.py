@@ -28,6 +28,7 @@ import phlsys_signal
 import abdi_processrepos
 import abdi_repoargs
 import abdt_fs
+import abdt_logging
 
 _LOGGER = logging.getLogger(__name__)
 
