@@ -91,13 +91,21 @@ def on_retry_exception(identifier, detail, e, delay):
     _log_system_exception(identifier, detail, e)
 
 
-def on_remote_io_write_event(identifier, detail):
-    with _REMOTE_IO_WRITE_LOG_LOCK:
-        if _REMOTE_IO_WRITE_LOG_PATH:
-            with open(_REMOTE_IO_WRITE_LOG_PATH, 'a') as f:
+def _on_remote_io_event(identifier, detail, lock, path):
+    with lock:
+        if path:
+            with open(path, 'a') as f:
                 now = str(datetime.datetime.utcnow())
                 description = '{}: {} - {}\n'.format(now, identifier, detail)
                 f.write(description)
+
+
+def on_remote_io_write_event(identifier, detail):
+    _on_remote_io_event(
+        identifier,
+        detail,
+        _REMOTE_IO_WRITE_LOG_LOCK,
+        _REMOTE_IO_WRITE_LOG_PATH)
 
 
 # -----------------------------------------------------------------------------
