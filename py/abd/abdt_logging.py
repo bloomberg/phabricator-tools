@@ -8,9 +8,11 @@
 #   set_external_system_error_logger
 #   clear_external_system_error_logger
 #   set_remote_io_write_log_path
+#   set_remote_io_read_log_path
 #   on_system_error
 #   on_retry_exception
 #   on_remote_io_write_event
+#   on_remote_io_read_event
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -29,7 +31,9 @@ import phlsys_subprocess
 _LOGGER = logging.getLogger(__name__)
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
 _REMOTE_IO_WRITE_LOG_LOCK = multiprocessing.Lock()
+_REMOTE_IO_READ_LOG_LOCK = multiprocessing.Lock()
 _REMOTE_IO_WRITE_LOG_PATH = None
+_REMOTE_IO_READ_LOG_PATH = None
 
 
 def set_external_system_error_logger(logger):
@@ -48,6 +52,13 @@ def set_remote_io_write_log_path(path):
     global _REMOTE_IO_WRITE_LOG_PATH
     with _REMOTE_IO_WRITE_LOG_LOCK:
         _REMOTE_IO_WRITE_LOG_PATH = os.path.abspath(path)
+
+
+def set_remote_io_read_log_path(path):
+    assert path
+    global _REMOTE_IO_READ_LOG_PATH
+    with _REMOTE_IO_READ_LOG_LOCK:
+        _REMOTE_IO_READ_LOG_PATH = os.path.abspath(path)
 
 
 def on_system_error(identifier, detail):
@@ -106,6 +117,14 @@ def on_remote_io_write_event(identifier, detail):
         detail,
         _REMOTE_IO_WRITE_LOG_LOCK,
         _REMOTE_IO_WRITE_LOG_PATH)
+
+
+def on_remote_io_read_event(identifier, detail):
+    _on_remote_io_event(
+        identifier,
+        detail,
+        _REMOTE_IO_READ_LOG_LOCK,
+        _REMOTE_IO_READ_LOG_PATH)
 
 
 # -----------------------------------------------------------------------------

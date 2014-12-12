@@ -87,6 +87,7 @@ def process(args):
     def logger_config():
         _setup_logger(fs)
 
+    abdt_logging.set_remote_io_read_log_path(fs.layout.log_remote_io_reads)
     with phlsys_multiprocessing.logging_context(logger_config):
         _LOGGER.debug("start with args: {}".format(args))
         _LOGGER.info("arcyd started")
