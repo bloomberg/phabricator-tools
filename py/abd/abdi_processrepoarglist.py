@@ -15,6 +15,7 @@ from __future__ import absolute_import
 
 import json
 import logging
+import multiprocessing
 import os
 import time
 
@@ -51,7 +52,8 @@ def do(
         sleep_secs,
         is_no_loop,
         external_report_command,
-        mail_sender):
+        mail_sender,
+        max_workers):
 
     conduit_manager = _ConduitManager()
 
@@ -60,6 +62,20 @@ def do(
         fs_accessor.layout.urlwatcher_cache_path)
 
     finished = False
+
+    # decide max workers based on number of CPUs if no value is specified
+    if max_workers is None:
+        try:
+            # use the same default as multiprocessing.Pool
+            max_workers = multiprocessing.cpu_count()
+            _LOGGER.debug(
+                "max_workers unspecified, defaulted to cpu_count: {}".format(
+                    max_workers))
+        except NotImplementedError:
+            _LOGGER.warning(
+                "multiprocessing.cpu_count() not supported, disabling "
+                "multiprocessing. Specify max workers explicitly to enable.")
+            max_workers = 0
 
     repos = []
     for name, config in repo_configs:
@@ -90,16 +106,14 @@ def do(
 
         conduit_manager.refresh_conduits()
 
-        # TODO: Although this basically works for one worker thread, when we
-        # add more we'll encounter problems with sharing resources. We'll need
-        # to consider at least the following:
-        #
-        # - conduits, need to make them thread-safe
-        # - conduits, support limited number of connections at the same time
-        # - limit max connections to git hosts
-        #
-        for r in repos:
-            r()
+        if max_workers:
+            worker_manager = _WorkerManager(max_workers=max_workers)
+            for r in repos:
+                worker_manager.add(r)
+            worker_manager.join_all()
+        else:
+            for r in repos:
+                r()
 
         # important to do this before stopping arcyd and as soon as possible
         # after doing fetches
@@ -131,6 +145,71 @@ def do(
         secs_to_sleep = float(sleep_secs) - float(sleep_timer.duration)
         if secs_to_sleep > 0:
             time.sleep(secs_to_sleep)
+
+
+class _WorkerManager(object):
+
+    def __init__(self, max_workers):
+        self._jobs = []
+        self._semaphore = multiprocessing.Semaphore(max_workers)
+
+    def add(self, repo):
+        self._semaphore.acquire()
+        self._remove_joinable()
+
+        receiver_pipe, sender_pipe = multiprocessing.Pipe()
+        worker = multiprocessing.Process(
+            target=self._worker_wrapper, args=(repo, sender_pipe))
+        self._jobs.append((worker, repo, receiver_pipe))
+        worker.start()
+
+    def _worker_wrapper(self, repo, sender_pipe):
+        try:
+            results = repo()
+            sender_pipe.send(results)
+            sender_pipe.close()
+        finally:
+            self._semaphore.release()
+
+    def _finish_job(self, job):
+        worker, repo, receiver_pipe = job
+        worker.join()
+        results = receiver_pipe.recv()
+        receiver_pipe.close()
+        repo.merge_from_worker(results)
+
+    def _remove_joinable(self):
+        joinable = []
+        for job in self._jobs:
+            worker = job[0]
+            if not worker.is_alive():
+                joinable.append(job)
+        for job in joinable:
+            self._finish_job(job)
+            self._jobs.remove(job)
+
+    def join_all(self):
+        for job in self._jobs:
+            self._finish_job(job)
+        self._jobs = []
+
+
+class _RecordingWatcherWrapper(object):
+
+    def __init__(self, watcher):
+        self._watcher = watcher
+        self._tested_urls = set()
+
+    def peek_has_url_recently_changed(self, url):
+        return self._watcher.peek_has_url_recently_changed(url)
+
+    def has_url_recently_changed(self, url):
+        self._tested_urls.add(url)
+        return self._watcher.peek_has_url_recently_changed(url)
+
+    @property
+    def tested_urls(self):
+        return self._tested_urls
 
 
 class _ArcydManagedRepository(object):
@@ -167,20 +246,39 @@ class _ArcydManagedRepository(object):
             sys_admin_emails, repo_name)
 
     def __call__(self):
-        if self._is_disabled:
-            return
+        watcher = _RecordingWatcherWrapper(
+            self._url_watcher_wrapper.watcher)
 
-        try:
-            _process_repo(
-                self._abd_repo,
-                self._name,
-                self._args,
-                self._arcyd_conduit,
-                self._url_watcher_wrapper.watcher,
-                self._mail_sender)
-        except Exception:
-            self._on_exception(None)
-            self._is_disabled = True
+        if not self._is_disabled:
+            try:
+                _process_repo(
+                    self._abd_repo,
+                    self._name,
+                    self._args,
+                    self._arcyd_conduit,
+                    watcher,
+                    self._mail_sender)
+            except Exception:
+                self._on_exception(None)
+                self._is_disabled = True
+
+        return (
+            self._review_cache.active_reviews,
+            self._is_disabled,
+            watcher.tested_urls,
+            self._refcache_repo.peek_hash_ref_pairs()
+        )
+
+    def merge_from_worker(self, results):
+
+        active_reviews, is_disabled, tested_urls, hash_ref_pairs = results
+        self._review_cache.merge_additional_active_reviews(active_reviews)
+        self._is_disabled = is_disabled
+        self._refcache_repo.set_hash_ref_pairs(hash_ref_pairs)
+
+        # merge in the consumed urls from the worker
+        for url in tested_urls:
+            self._url_watcher_wrapper.watcher.has_url_recently_changed(url)
 
 
 class _ConduitManager(object):

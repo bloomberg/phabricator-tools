@@ -94,6 +94,14 @@ def setupParser(parser):
         default=None,
         help="path to an external reporter to send monitoring info to, "
              "will be called like so: $REPORTER <<json report object>>")
+    parser.add_argument(
+        '--max-workers',
+        metavar="COUNT",
+        type=int,
+        default=None,
+        help="maximum number of worker processes to run at one time, leave "
+             "unset to let Arcyd decide the number. Set to 0 to disable "
+             "multiprocessing completely.")
 
 
 def process(args, repo_configs):
@@ -137,7 +145,8 @@ def _processrepolist(
             args.sleep_secs,
             args.no_loop,
             args.external_report_command,
-            mail_sender)
+            mail_sender,
+            args.max_workers)
     except BaseException:
         on_exception("Arcyd will now stop")
         print "stopping"
