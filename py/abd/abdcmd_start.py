@@ -20,6 +20,7 @@ import logging
 import time
 
 import phlsys_daemonize
+import phlsys_multiprocessing
 import phlsys_pid
 import phlsys_signal
 
@@ -52,9 +53,6 @@ def process(args):
     phlsys_signal.set_exit_on_sigterm()
 
     fs = abdt_fs.make_default_accessor()
-    _setup_logger(fs)
-
-    _LOGGER.debug("start with args: {}".format(args))
 
     with fs.lockfile_context():
         pid = fs.get_pid_or_none()
@@ -85,11 +83,16 @@ def process(args):
         abdi_processrepos.setupParser(parser)
         args = parser.parse_args(params)
 
-    _LOGGER.info("arcyd started")
-    try:
-        abdi_processrepos.process(args, repo_configs)
-    finally:
-        _LOGGER.info("arcyd stopped")
+    def logger_config():
+        _setup_logger(fs)
+
+    with phlsys_multiprocessing.logging_context(logger_config):
+        _LOGGER.debug("start with args: {}".format(args))
+        _LOGGER.info("arcyd started")
+        try:
+            abdi_processrepos.process(args, repo_configs)
+        finally:
+            _LOGGER.info("arcyd stopped")
 
 
 def _setup_logger(fs):
@@ -98,7 +101,7 @@ def _setup_logger(fs):
     info_handler.setLevel(logging.INFO)
     debug_handler = logging.FileHandler(fs.layout.log_debug)
     debug_handler.setLevel(logging.DEBUG)
-    logfmt = '%(asctime)s UTC: %(levelname)s: (%(threadName)-10s) %(message)s'
+    logfmt = '%(asctime)s UTC: %(levelname)s: (%(processName)-11s) %(message)s'
     formatter = logging.Formatter(logfmt)
     logging.Formatter.converter = time.gmtime
     info_handler.setFormatter(formatter)
