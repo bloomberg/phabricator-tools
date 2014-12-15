@@ -81,6 +81,8 @@ Helpers for interacting with the filesystem.
 Wrapper to call git, with working directory.
 * `phlsys_makeconduit.py` -
 Create a conduit from the available information.
+* `phlsys_multiprocessing.py` -
+Helpers for multi-processing.
 * `phlsys_namedtuple.py` -
 Wrapper around collections.namedtuple with some added features.
 * `phlsys_pid.py` -
