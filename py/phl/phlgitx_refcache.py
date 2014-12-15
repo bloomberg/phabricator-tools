@@ -7,6 +7,8 @@
 # Public Classes:
 #   Repo
 #    .hash_ref_pairs
+#    .peek_hash_ref_pairs
+#    .set_hash_ref_pairs
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -31,13 +33,38 @@ class Repo(object):
     def hash_ref_pairs(self):
         """Return a list of (sha1, name) tuples from the repo's list of refs.
 
-        :repo: a callable supporting git commands, e.g. repo("status")
         :returns: a list of (sha1, name)
 
         """
         if self._hash_ref_pairs is None:
             self._hash_ref_pairs = phlgit_showref.hash_ref_pairs(self._repo)
         return self._hash_ref_pairs
+
+    def peek_hash_ref_pairs(self):
+        """Return the current cached list of (sha1, name) tuples or None.
+
+        Don't attempt to update the cache if it's stale, just return the
+        current state as it is.
+
+        This is useful if trying to persist the state in some way.
+
+        :repo: a callable supporting git commands, e.g. repo("status")
+        :returns: a list of (sha1, name)
+
+        """
+        return self._hash_ref_pairs
+
+    def set_hash_ref_pairs(self, hash_ref_pairs):
+        """Update the cached (sha1, name) tuples with the supplied list.
+
+        This is useful if the client knows more about the state on disk in
+        certain circumstances. e.g. updating with results from another process.
+
+        :hash_ref_pairs: a list of (sha1, name)
+        :returns: None
+
+        """
+        self._hash_ref_pairs = hash_ref_pairs
 
     def __call__(self, *args, **kwargs):
         self._hash_ref_pairs = None
