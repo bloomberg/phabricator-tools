@@ -17,6 +17,7 @@ from __future__ import absolute_import
 
 import argparse
 import logging
+import logging.handlers
 import time
 
 import phlsys_daemonize
@@ -99,7 +100,15 @@ def _setup_logger(fs):
     # log DEBUG+ and INFO+ to separate files
     info_handler = logging.FileHandler(fs.layout.log_info)
     info_handler.setLevel(logging.INFO)
-    debug_handler = logging.FileHandler(fs.layout.log_debug)
+
+    # pychecker makes us do this, it won't recognise that logging.handlers is a
+    # thing
+    lg = logging
+    debug_handler = lg.handlers.RotatingFileHandler(
+        fs.layout.log_debug,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=10)
+
     debug_handler.setLevel(logging.DEBUG)
     logfmt = '%(asctime)s UTC: %(levelname)s: (%(processName)-11s) %(message)s'
     formatter = logging.Formatter(logfmt)
