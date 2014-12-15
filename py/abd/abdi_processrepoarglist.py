@@ -19,6 +19,7 @@ import os
 import time
 
 import phlcon_reviewstatecache
+import phlgitx_refcache
 import phlsys_conduit
 import phlsys_git
 import phlsys_subprocess
@@ -144,8 +145,11 @@ class _ArcydManagedRepository(object):
             mail_sender):
 
         self._is_disabled = False
+        self._refcache_repo = phlgitx_refcache.Repo(
+            phlsys_git.Repo(
+                repo_args.repo_path))
         self._abd_repo = abdt_git.Repo(
-            phlsys_git.Repo(repo_args.repo_path),
+            self._refcache_repo,
             "origin",
             repo_args.repo_desc)
         self._name = repo_name

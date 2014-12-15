@@ -49,7 +49,6 @@ import phlgit_merge
 import phlgit_push
 import phlgit_showref
 import phlgitu_ref
-import phlgitx_refcache
 
 import abdt_branch
 import abdt_lander
@@ -107,7 +106,7 @@ ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 class Repo(object):
 
     def __init__(
-            self, repo, remote, description):
+            self, refcache_repo, remote, description):
         """Initialise a new Repo.
 
         :repo: a callable supporting git commands, e.g. repo("status")
@@ -117,7 +116,7 @@ class Repo(object):
 
         """
         super(Repo, self).__init__()
-        self._repo = phlgitx_refcache.Repo(repo)
+        self._repo = refcache_repo
         self._remote = remote
         self._description = description
         self._is_landing_archive_enabled = None

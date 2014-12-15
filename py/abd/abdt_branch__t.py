@@ -50,6 +50,7 @@ import phlgit_branch
 import phlgit_push
 import phlgit_revparse
 import phlgitu_fixture
+import phlgitx_refcache
 
 import abdt_branch
 import abdt_branchtester
@@ -72,7 +73,8 @@ class Test(unittest.TestCase):
         self.repo_central = self.repos.central_repo
         self.repo_dev = self.repos.w0.repo
         sys_repo = self.repos.w1.repo
-        self.repo_arcyd = abdt_git.Repo(sys_repo, 'origin', 'myrepo')
+        refcache_repo = phlgitx_refcache.Repo(sys_repo)
+        self.repo_arcyd = abdt_git.Repo(refcache_repo, 'origin', 'myrepo')
 
     def tearDown(self):
         self.repos.close()

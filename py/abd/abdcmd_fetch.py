@@ -22,6 +22,7 @@ from __future__ import print_function
 
 import sys
 
+import phlgitx_refcache
 import phlsys_git
 import phlsys_pid
 import phlurl_watcher
@@ -76,8 +77,10 @@ def process(args):
 
             snoop_url = abdi_repoargs.get_repo_snoop_url(repo_config)
 
+            sys_repo = phlsys_git.Repo(repo_config.repo_path)
+            refcache_repo = phlgitx_refcache.Repo(sys_repo)
             abd_repo = abdt_git.Repo(
-                phlsys_git.Repo(repo_config.repo_path),
+                refcache_repo,
                 "origin",
                 repo_config.repo_desc)
 
