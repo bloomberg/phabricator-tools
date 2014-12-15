@@ -43,42 +43,6 @@ import abdi_repoargs
 _LOGGER = logging.getLogger(__name__)
 
 
-class _WorkerManager(object):
-
-    def __init__(self, max_workers):
-        self._workers = []
-        self._semaphore = threading.Semaphore(max_workers)
-
-    def add(self, repos):
-        self._semaphore.acquire()
-        self._remove_joinable()
-
-        worker = threading.Thread(
-            target=self._worker_wrapper, args=(repos,))
-        self._workers.append(worker)
-        worker.start()
-
-    def _worker_wrapper(self, repos):
-        try:
-            _worker(repos)
-        finally:
-            self._semaphore.release()
-
-    def _remove_joinable(self):
-        joinable = []
-        for w in self._workers:
-            if not w.is_alive():
-                joinable.append(w)
-        for w in joinable:
-            w.join()
-            self._workers.remove(w)
-
-    def join_all(self):
-        for w in self._workers:
-            w.join()
-        self._workers = []
-
-
 def do(
         repo_configs,
         sys_admin_emails,
@@ -158,13 +122,6 @@ def do(
 
         # sleep
         time.sleep(sleep_secs)
-
-
-def _worker(repo_list):
-
-    # process repos
-    for repo in repo_list:
-        repo()
 
 
 class _ArcydManagedRepository(object):
