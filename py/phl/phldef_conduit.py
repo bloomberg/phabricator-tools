@@ -9,7 +9,9 @@
 #
 # Public Assignments:
 #   Account
+#   BASE_TEST_URI
 #   TEST_URI
+#   REVIEW_URL_FORMAT
 #   ALICE
 #   BOB
 #   PHAB
@@ -31,7 +33,9 @@ Account = collections.namedtuple(
 
 # if using Vagrant, there will be a Phabricator available locally
 # TODO: this should be configurable from the command-line or a config file
-TEST_URI = "http://127.0.0.1/api/"
+BASE_TEST_URI = "http://127.0.0.1"
+TEST_URI = "{}/api/".format(BASE_TEST_URI)
+REVIEW_URL_FORMAT = "{}/D{{review}}".format(BASE_TEST_URI)
 
 ALICE = Account(
     user="alice",

@@ -42,14 +42,10 @@ import phlsys_subcommand
 import abdcmd_addphabricator
 import abdcmd_addrepo
 import abdcmd_addrepohost
-import abdcmd_arcydstatushtml
-import abdcmd_devstatushtml
 import abdcmd_fetch
 import abdcmd_fsck
 import abdcmd_init
-import abdcmd_instaweb
 import abdcmd_listrepos
-import abdcmd_repostatushtml
 import abdcmd_rmrepo
 import abdcmd_start
 import abdcmd_stop
@@ -103,14 +99,6 @@ def main():
 
     subparsers = parser.add_subparsers()
 
-    phlsys_subcommand.setup_parser(
-        "arcyd-status-html", abdcmd_arcydstatushtml, subparsers)
-    phlsys_subcommand.setup_parser(
-        "repo-status-html", abdcmd_repostatushtml, subparsers)
-    phlsys_subcommand.setup_parser(
-        "dev-status-html", abdcmd_devstatushtml, subparsers)
-    phlsys_subcommand.setup_parser(
-        "instaweb", abdcmd_instaweb, subparsers)
     phlsys_subcommand.setup_parser(
         "init", abdcmd_init, subparsers)
     phlsys_subcommand.setup_parser(

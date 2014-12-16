@@ -2,8 +2,9 @@
 # test shell for Arcyd, aimed at letting you poke around interactively
 ###############################################################################
 
-set +x
-set -e
+set +x  # DONT echo all commands to the terminal
+set -e  # exit with error if anything returns non-zero
+set -u  # exit with error if we use an undefined variable
 trap "echo FAILED!; exit 1" EXIT
 
 # cd to the dir of this script, so paths are relative
@@ -28,6 +29,7 @@ cd ${tempdir}
 
 mail="${olddir}/savemail"
 reporter="${olddir}/savereport"
+errorreporter="${olddir}/savesystemerror.sh"
 
 mkdir origin
 cd origin
@@ -95,16 +97,12 @@ cd arcyd
         --sendmail-type catchmail \
         --external-report-command "${reporter}"
 
+    # set up the error reporter
     echo '' >> configfile  # the generated file won't end in carriage return
     echo '--external-error-logger' >> configfile
-    echo "on_system_error.sh" >> configfile
-
+    echo "${errorreporter}" >> configfile
     touch system_error.log
-    echo '#! /usr/bin/env bash' > on_system_error.sh
-    echo 'echo $1 >> system_error.log' >> on_system_error.sh
-    echo 'echo $2 >> system_error.log' >> on_system_error.sh
-    echo 'echo >> system_error.log' >> on_system_error.sh
-    chmod +x on_system_error.sh
+    git commit -m 'update configfile' -- configfile
 
     $arcyd add-phabricator \
         --name localhost \
@@ -176,15 +174,6 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 
 cd ..
 
-# run arcyd instaweb in the background
-${arcyd} \
-    instaweb \
-    --report-file arcyd/var/status/arcyd_status.json \
-    --repo-file-dir arcyd/var/status \
-    --port 8001 \
-&
-instaweb_pid=$!
-
 # run arcyd in the background
 cd arcyd
 ${arcyd} start
@@ -194,14 +183,10 @@ function cleanup() {
 
     set +e
 
-    echo $instaweb_pid
-    kill $instaweb_pid
-    wait $instaweb_pid
-
     # kill arcyd
     cd ${tempdir}
     cd arcyd
-    ${arcyd} stop -f
+    ${arcyd} stop
     cd ..
 
     echo $webserver_pid
@@ -210,10 +195,19 @@ function cleanup() {
 
     # display the sent mails
     pwd
+    echo -- savemail --
     cat arcyd/savemail.txt
+    echo -- system error --
     cat arcyd/system_error.log
+    echo -- var/log/info --
     cat arcyd/var/log/info
+    echo -- snoop web server --
     tail origin/snoopwebserver.log
+    echo -- git / phab writes --
+    touch arcyd/var/log/git-phab-writes.log
+    cat arcyd/var/log/git-phab-writes.log
+    echo -- savereport --
+    tail arcyd/savereport.txt
 
     # clean up
     cd ${olddir}

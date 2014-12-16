@@ -1,5 +1,6 @@
-set -x
-set -e
+set -x  # echo all commands to the terminal
+set -e  # exit with error if anything returns non-zero
+set -u  # exit with error if we use an undefined variable
 trap "echo FAILED!; exit 1" EXIT
 
 # cd to the dir of this script, so paths are relative
@@ -24,10 +25,6 @@ olddir=$(pwd)
 cd ${tempdir}
 
 $arcyd -h
-$arcyd arcyd-status-html -h
-$arcyd repo-status-html -h
-$arcyd dev-status-html -h
-$arcyd instaweb -h
 $arcyd init -h
 $arcyd add-phabricator -h
 $arcyd add-repohost -h
@@ -90,16 +87,6 @@ function run_arcyd() {
 cd arcyd_instance
 
 ${arcyd} start --no-loop --foreground
-
-${arcyd} \
-    arcyd-status-html \
-    var/status/arcyd_status.json \
-    https://server.test/arcyd
-
-${arcyd} \
-    repo-status-html \
-    var/status/localhost_fs_origin.try \
-    var/status/localhost_fs_origin.ok
 
 cd ..
 }
@@ -202,9 +189,6 @@ cd dev
 cd -
 
 cat arcyd_instance/savemail.txt
-
-cat arcyd_instance/var/status/localhost_fs_origin.try
-cat arcyd_instance/var/status/localhost_fs_origin.ok
 
 # exercise 'rm-repo'
 cd arcyd_instance

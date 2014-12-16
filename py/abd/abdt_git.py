@@ -49,7 +49,6 @@ import phlgit_merge
 import phlgit_push
 import phlgit_showref
 import phlgitu_ref
-import phlgitx_refcache
 
 import abdt_branch
 import abdt_lander
@@ -107,7 +106,7 @@ ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 class Repo(object):
 
     def __init__(
-            self, repo, remote, description):
+            self, refcache_repo, remote, description):
         """Initialise a new Repo.
 
         :repo: a callable supporting git commands, e.g. repo("status")
@@ -117,7 +116,7 @@ class Repo(object):
 
         """
         super(Repo, self).__init__()
-        self._repo = phlgitx_refcache.Repo(repo)
+        self._repo = refcache_repo
         self._remote = remote
         self._description = description
         self._is_landing_archive_enabled = None
@@ -339,12 +338,27 @@ class Repo(object):
         """
         return self._repo.hash_ref_pairs
 
-    def __call__(self, *args, **kwargs):
-        if args and args[0] == 'push':
-            abdt_logging.on_io_event(
-                'git-push',
+    def _log_read_call(self, args, kwargs):
+        with abdt_logging.remote_io_read_event_context(
+                'git-{}'.format(args[0]),
                 '{}: {} {}'.format(
-                    self._description, ' '.join(args), kwargs))
+                    self._description, ' '.join(args), kwargs)):
+            return self._repo(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if args:
+            if args[0] == 'push':
+                with abdt_logging.remote_io_write_event_context(
+                        'git-push',
+                        '{}: {} {}'.format(
+                            self._description, ' '.join(args), kwargs)):
+                    return self._repo(*args, **kwargs)
+            elif args[0] in ('fetch', 'pull', 'ls-remote'):
+                # N.B. git-archive may also read but we're not using it
+                return self._log_read_call(args, kwargs)
+            elif len(args) >= 2 and args[:2] == ('remote', 'prune'):
+                return self._log_read_call(args, kwargs)
+
         return self._repo(*args, **kwargs)
 
     def get_remote(self):

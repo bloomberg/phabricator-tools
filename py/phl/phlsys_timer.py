@@ -12,6 +12,7 @@
 #    .duration
 #
 # Public Functions:
+#   print_duration_context
 #   timer_context
 #
 # -----------------------------------------------------------------------------
@@ -22,6 +23,13 @@ from __future__ import absolute_import
 
 import contextlib
 import datetime
+
+
+@contextlib.contextmanager
+def print_duration_context(name):
+    with timer_context() as t:
+        yield
+        print "{} took {} secs".format(name, t.duration)
 
 
 @contextlib.contextmanager

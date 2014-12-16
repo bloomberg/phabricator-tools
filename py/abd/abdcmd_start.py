@@ -17,15 +17,18 @@ from __future__ import absolute_import
 
 import argparse
 import logging
+import logging.handlers
 import time
 
 import phlsys_daemonize
+import phlsys_multiprocessing
 import phlsys_pid
 import phlsys_signal
 
 import abdi_processrepos
 import abdi_repoargs
 import abdt_fs
+import abdt_logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -82,18 +85,41 @@ def process(args):
         abdi_processrepos.setupParser(parser)
         args = parser.parse_args(params)
 
-    # setup to log everything to fs.layout.log_info, with a timestamp
-    logging.Formatter.converter = time.gmtime
-    logging.basicConfig(
-        format='%(asctime)s UTC: %(levelname)s: %(message)s',
-        level=logging.INFO,
-        filename=fs.layout.log_info)
+    def logger_config():
+        _setup_logger(fs)
 
-    _LOGGER.info("arcyd started")
-    try:
-        abdi_processrepos.process(args, repo_configs)
-    finally:
-        _LOGGER.info("arcyd stopped")
+    abdt_logging.set_remote_io_read_log_path(fs.layout.log_remote_io_reads)
+    with phlsys_multiprocessing.logging_context(logger_config):
+        _LOGGER.debug("start with args: {}".format(args))
+        _LOGGER.info("arcyd started")
+        try:
+            abdi_processrepos.process(args, repo_configs)
+        finally:
+            _LOGGER.info("arcyd stopped")
+
+
+def _setup_logger(fs):
+    # log DEBUG+ and INFO+ to separate files
+    info_handler = logging.FileHandler(fs.layout.log_info)
+    info_handler.setLevel(logging.INFO)
+
+    # pychecker makes us do this, it won't recognise that logging.handlers is a
+    # thing
+    lg = logging
+    debug_handler = lg.handlers.RotatingFileHandler(
+        fs.layout.log_debug,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=10)
+
+    debug_handler.setLevel(logging.DEBUG)
+    logfmt = '%(asctime)s UTC: %(levelname)s: (%(processName)-11s) %(message)s'
+    formatter = logging.Formatter(logfmt)
+    logging.Formatter.converter = time.gmtime
+    info_handler.setFormatter(formatter)
+    debug_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(info_handler)
+    logging.getLogger().addHandler(debug_handler)
+    logging.getLogger().setLevel(logging.DEBUG)
 
 
 # -----------------------------------------------------------------------------

@@ -1,6 +1,0 @@
-usage: arcyd dev-status-html [-h]
-
-Help develop status pages by providing simulating various statuses.
-
-optional arguments:
-  -h, --help  show this help message and exit

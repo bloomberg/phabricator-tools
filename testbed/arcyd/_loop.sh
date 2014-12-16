@@ -15,8 +15,9 @@ cd "$(dirname "$0")"
 arcyd="$1"
 safe_arcyd="$(pwd)/../../proto/arcyd"
 
-set +x
-set -e
+set +x  # DONT echo all commands to the terminal
+set -e  # exit with error if anything returns non-zero
+set -u  # exit with error if we use an undefined variable
 trap "echo FAILED!; exit 1" EXIT
 
 
@@ -40,9 +41,7 @@ olddir=$(pwd)
 cd ${tempdir}
 
 mail="${olddir}/savemail"
-logger="${olddir}/logerror"
-touch savemail.txt
-touch logerror.txt
+errorreporter="${olddir}/savesystemerror.sh"
 
 mkdir origin
 cd origin
@@ -75,6 +74,14 @@ $safe_arcyd init \
     --sendmail-binary ${mail} \
     --sendmail-type catchmail
 
+touch savemail.txt
+touch system_error.log
+
+# set up the error reporter
+echo '' >> configfile  # the generated file won't end in carriage return
+echo '--external-error-logger' >> configfile
+echo "${errorreporter}" >> configfile
+
 $safe_arcyd add-phabricator \
     --name localhost \
     --instance-uri http://127.0.0.1/api/ \
@@ -103,15 +110,6 @@ cd arcyd
     ${arcyd} start
 cd ..
 
-# run arcyd instaweb in the background
-${arcyd} \
-    instaweb \
-    --report-file arcyd/var/status/arcyd_status.json \
-    --repo-file-dir arcyd/var/status \
-    --port 8001 \
-&
-instaweb_pid=$!
-
 # run poke_loop.sh in the background
 cd dev
     ${pokeloop} > /dev/null &
@@ -121,10 +119,6 @@ cd -
 function cleanup() {
 
     set +e
-
-    echo $instaweb_pid
-    kill $instaweb_pid
-    wait $instaweb_pid
 
     # kill arcyd and poke_loop
     touch dev/__kill_poke__
@@ -136,9 +130,13 @@ function cleanup() {
 
     # display the sent mails and other messages
     pwd
-    cat savemail.txt
-    cat logerror.txt
+    echo -- savemail --
+    cat arcyd/savemail.txt
+    echo -- system error --
+    cat arcyd/system_error.log
+    echo -- var/log/info --
     cat arcyd/var/log/info
+
 
     # clean up
     cd ${olddir}

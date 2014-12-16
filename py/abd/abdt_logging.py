@@ -5,12 +5,14 @@
 # abdt_logging
 #
 # Public Functions:
-#   arcyd_reporter_context
-#   set_arcyd_reporter
-#   clear_arcyd_reporter
+#   set_external_system_error_logger
+#   clear_external_system_error_logger
+#   set_remote_io_write_log_path
+#   set_remote_io_read_log_path
+#   on_system_error
 #   on_retry_exception
-#   on_review_event
-#   on_io_event
+#   remote_io_write_event_context
+#   remote_io_read_event_context
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -19,38 +21,69 @@
 from __future__ import absolute_import
 
 import contextlib
+import datetime
 import logging
+import multiprocessing
+import os
+
+import phlsys_subprocess
+import phlsys_timer
 
 
 _LOGGER = logging.getLogger(__name__)
-_REPORTER = None
+_EXTERNAL_SYSTEM_ERROR_LOGGER = None
+_REMOTE_IO_WRITE_LOG_LOCK = multiprocessing.Lock()
+_REMOTE_IO_READ_LOG_LOCK = multiprocessing.Lock()
+_REMOTE_IO_WRITE_LOG_PATH = None
+_REMOTE_IO_READ_LOG_PATH = None
 
 
-@contextlib.contextmanager
-def arcyd_reporter_context(reporter):
-    set_arcyd_reporter(reporter)
-    try:
-        yield
-    finally:
-        clear_arcyd_reporter()
+def set_external_system_error_logger(logger):
+    assert logger
+    global _EXTERNAL_SYSTEM_ERROR_LOGGER
+    _EXTERNAL_SYSTEM_ERROR_LOGGER = logger
 
 
-def set_arcyd_reporter(reporter):
-    assert reporter
-    global _REPORTER
-    _REPORTER = reporter
+def clear_external_system_error_logger():
+    global _EXTERNAL_SYSTEM_ERROR_LOGGER
+    _EXTERNAL_SYSTEM_ERROR_LOGGER = None
 
 
-def clear_arcyd_reporter():
-    global _REPORTER
-    _REPORTER = None
+def set_remote_io_write_log_path(path):
+    assert path
+    global _REMOTE_IO_WRITE_LOG_PATH
+    with _REMOTE_IO_WRITE_LOG_LOCK:
+        _REMOTE_IO_WRITE_LOG_PATH = os.path.abspath(path)
 
 
-def _get_reporter():
-    reporter = _REPORTER
-    if reporter is None:
-        _LOGGER.error("no reporter is set")
-    return reporter
+def set_remote_io_read_log_path(path):
+    assert path
+    global _REMOTE_IO_READ_LOG_PATH
+    with _REMOTE_IO_READ_LOG_LOCK:
+        _REMOTE_IO_READ_LOG_PATH = os.path.abspath(path)
+
+
+def on_system_error(identifier, detail):
+    if _EXTERNAL_SYSTEM_ERROR_LOGGER:
+
+        #  It's easily possible for 'detail' to exceed the length of
+        #  command-line parameters allowed when calling out to a registered
+        #  external system error logger.
+        #
+        #  Limit the amount of detail that will be sent to an arbitrary
+        #  small number to prevent errors when reporting errors.
+        #
+        detail = detail[:160]
+
+        phlsys_subprocess.run(
+            _EXTERNAL_SYSTEM_ERROR_LOGGER,
+            identifier,
+            detail)
+
+
+def _log_system_exception(identifier, detail, exception):
+    message = detail + '\n' + repr(exception)
+    on_system_error(identifier, message)
 
 
 def on_retry_exception(identifier, detail, e, delay):
@@ -68,22 +101,47 @@ def on_retry_exception(identifier, detail, e, delay):
                 identifier, type(e).__name__, detail),
             exc_info=1)
 
-    reporter = _get_reporter()
-    if reporter:
-        reporter.on_tryloop_exception(e, delay)
-        reporter.log_system_exception(identifier, detail, e)
+    _log_system_exception(identifier, detail, e)
 
 
-def on_review_event(identifier, detail):
-    reporter = _get_reporter()
-    if reporter:
-        reporter.log_user_action(identifier, detail)
+def _log_remote_io_event(prolog, identifier, detail, epilog, lock, path):
+    with lock:
+        if path:
+            with open(path, 'a') as f:
+                now = str(datetime.datetime.utcnow())
+                description = '{}: ({}) {} - {} - ({})\n'.format(
+                    now, prolog, identifier, detail, epilog)
+                f.write(description)
 
 
-def on_io_event(identifier, detail):
-    reporter = _get_reporter()
-    if reporter:
-        reporter.log_io_action(identifier, detail)
+@contextlib.contextmanager
+def _remote_io_event_context(identifier, detail, lock, path):
+    _log_remote_io_event('start', identifier, detail, '', lock, path)
+    timer = phlsys_timer.Timer()
+    timer.start()
+    result_list = []
+    try:
+        yield result_list
+    finally:
+        prolog = '{:.3f}s'.format(timer.duration)
+        _log_remote_io_event(
+            prolog, identifier, detail, result_list, lock, path)
+
+
+def remote_io_write_event_context(identifier, detail):
+    return _remote_io_event_context(
+        identifier,
+        detail,
+        _REMOTE_IO_WRITE_LOG_LOCK,
+        _REMOTE_IO_WRITE_LOG_PATH)
+
+
+def remote_io_read_event_context(identifier, detail):
+    return _remote_io_event_context(
+        identifier,
+        detail,
+        _REMOTE_IO_READ_LOG_LOCK,
+        _REMOTE_IO_READ_LOG_PATH)
 
 
 # -----------------------------------------------------------------------------

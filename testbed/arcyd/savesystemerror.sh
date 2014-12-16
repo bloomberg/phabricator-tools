@@ -1,18 +1,16 @@
 #! /usr/bin/env bash
 
-# The Python 'cProfile' module is widely available and can be invoked from the
-# command-line, this will record results in the 'arcyd.profile' file.
-python -m cProfile -o arcyd.profile $(which arcyd) start --foreground --no-loop
+###############################################################################
+# for use with arcyd, to simply save reported errors to disk
+###############################################################################
 
-# Analyse the profile interactively using the 'pstats' module
-echo 'Starting "pstats" to interactively analyse the profile.'
-echo 'Try typing this to get the top-30 functions by cumulative time:'
-echo
-echo '  sort cumulative'
-echo '  stats 30'
-echo
-echo 'Type "help" to list all commands.'
-python -m pstats arcyd.profile
+set +x  # DONT echo all commands to the terminal
+set -e  # exit with error if anything returns non-zero
+set -u  # exit with error if we use an undefined variable
+
+echo $1 >> system_error.log
+echo $2 >> system_error.log
+echo >> system_error.log
 # -----------------------------------------------------------------------------
 # Copyright (C) 2014 Bloomberg Finance L.P.
 #

@@ -7,22 +7,14 @@ Add a new repository for the Arcyd instance to manage.
 Add a new repository host for the Arcyd instance to refer to.
 * `abdcmd_arcyd.py` -
 Arcyd - daemon to watch git repos, create and land reviews automatically.
-* `abdcmd_arcydstatushtml.py` -
-Render arcyd status file as meaningful html to present to users.
-* `abdcmd_devstatushtml.py` -
-Help develop status pages by providing simulating various statuses.
 * `abdcmd_fetch.py` -
 Fetch managed repos.
 * `abdcmd_fsck.py` -
 Check the Arcyd files for consistency and fix any issues.
 * `abdcmd_init.py` -
 Create a new arcyd instance in working dir, with backing git repository.
-* `abdcmd_instaweb.py` -
-Start a local webserver to report the status of an arcyd instance.
 * `abdcmd_listrepos.py` -
 List the repositories managed by this arcyd instance.
-* `abdcmd_repostatushtml.py` -
-Render status files as meaningful html to present to users.
 * `abdcmd_rmrepo.py` -
 Remove a repository from the Arcyd instance.
 * `abdcmd_start.py` -
@@ -31,13 +23,9 @@ Start the arcyd instance for the current directory, if not already going.
 Stop the arcyd instance for the current directory.
 * `abdcmnt_commenter.py` -
 Make pre-defined comments on Differential revisions.
-* `abdi_operation.py` -
-Arcyd operations that can be scheduled with phlsys_scheduleunreliables.
 * `abdi_processrepo.py` -
 abd automates the creation and landing of reviews from branches.
-* `abdi_processrepoargs.py` -
-Process the arguments for a single repository and execute.
-* `abdi_processrepolist.py` -
+* `abdi_processrepoarglist.py` -
 Process a list of repository arguments.
 * `abdi_processrepos.py` -
 Setup to process multiple repos.
@@ -47,8 +35,6 @@ Manage git repositories watched by arcyd.
 Define the arguments for a single repository.
 * `abdmail_mailer.py` -
 Send mails to interested parties about pre-specified conditions.
-* `abdt_arcydreporter.py` -
-Report the state of arcyd as it updates repositories.
 * `abdt_branch.py` -
 Implement operations for branch-based reviews.
 * `abdt_branchmock.py` -
@@ -89,24 +75,10 @@ Naming conventions for abd.
 Test suite for abdt naming convention classes.
 * `abdt_rbranchnaming.py` -
 Branch naming conventions for 'r/base/description' style.
-* `abdt_repooptions.py` -
-Per-repository configuration options.
-* `abdt_reporeporter.py` -
-Report the state of a repository.
-* `abdt_shareddictoutput.py` -
-Provide equivalent classes that write dictionaries to shared resources.
 * `abdt_tryloop.py` -
 Retry operations that may intermittently fail, log each failure.
 * `abdt_userwarning.py` -
 Hierarchy of warnings to feed back to users.
-* `abdweb_arcydcontent.py` -
-Render html to report the state of a running instance of Arcyd.
-* `abdweb_htmlformatter.py` -
-Provide useful utilities for formatting html.
-* `abdweb_page.py` -
-Render the outline of an Arcyd report page, with inline CSS, JS etc.
-* `abdweb_repocontent.py` -
-Render html to report the state of a repository watched by Arcyd.
 
 -----
 *please note: this file is generated, edits will be lost*

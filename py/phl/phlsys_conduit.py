@@ -10,10 +10,13 @@
 #    .set_act_as_user
 #    .clear_act_as_user
 #    .get_act_as_user
-#    .get_user
 #    .conduit_uri
 #    .raw_call
 #    .ping
+#   MultiConduit
+#    .call_as_user
+#    .conduit_uri
+#   CallMultiConduitAsUser
 #
 # Public Functions:
 #   act_as_user_context
@@ -41,6 +44,8 @@ import urllib2
 import urlparse
 
 import phldef_conduit
+
+import phlsys_multiprocessing
 
 _URLLIB_TIMEOUT = 600
 
@@ -204,9 +209,6 @@ class Conduit(object):
     def get_act_as_user(self):
         return self._act_as_user
 
-    def get_user(self):
-        return self._username
-
     @property
     def conduit_uri(self):
         return self._conduit_uri
@@ -336,6 +338,52 @@ class Conduit(object):
 
     def ping(self):
         return self("conduit.ping")
+
+
+class MultiConduit(object):
+
+    """A conduit that supports multi-processing."""
+
+    def __init__(self, *args, **kwargs):
+
+        def factory():
+            return Conduit(*args, **kwargs)
+
+        # Phabricator supports 5 simultaneous connections per user
+        # by default:
+        #
+        #   conf/default.conf.php:  'auth.sessions.conduit'       => 5,
+        #
+        max_sessions_per_user = 5
+        self._conduits = phlsys_multiprocessing.MultiResource(
+            max_sessions_per_user, factory)
+
+    def call_as_user(self, user, *args, **kwargs):
+        with self._conduits.resource_context() as conduit:
+            with act_as_user_context(conduit, user):
+                return conduit(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        with self._conduits.resource_context() as conduit:
+            return conduit(*args, **kwargs)
+
+    @property
+    def conduit_uri(self):
+        with self._conduits.resource_context() as conduit:
+            return conduit.conduit_uri
+
+
+class CallMultiConduitAsUser(object):
+
+    """A proxy for calling a MultiConduit as a particular user."""
+
+    def __init__(self, conduit, as_user):
+        super(CallMultiConduitAsUser, self).__init__()
+        self._conduit = conduit
+        self._as_user = as_user
+
+    def __call__(self, *args, **kwargs):
+        return self._conduit.call_as_user(self._as_user, *args, **kwargs)
 
 
 # -----------------------------------------------------------------------------

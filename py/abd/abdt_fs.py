@@ -139,7 +139,9 @@ class Layout(object):
     pid = 'var/run/arcyd.pid'
     stdout = 'var/log/stdout'
     stderr = 'var/log/stderr'
+    log_debug = 'var/log/debug'
     log_info = 'var/log/info'
+    log_remote_io_reads = 'var/log/remote_io_reads'
     phabricator_config_dir = 'config/repository'
     repository_config_dir = 'config/repository'
     urlwatcher_cache_path = '.arcyd.urlwatcher.cache'
@@ -250,7 +252,7 @@ class Accessor(object):
 
         """
         if phlgit_diffindex.is_index_dirty(self._repo):
-            print Error("git index has staged changes")
+            raise Error("git index has staged changes")
 
         path = self._make_abspath(rel_path)
 
@@ -269,7 +271,7 @@ class Accessor(object):
 
         """
         if phlgit_diffindex.is_index_dirty(self._repo):
-            print Error("git index has staged changes")
+            raise Error("git index has staged changes")
 
         path = self._make_abspath(rel_path)
 

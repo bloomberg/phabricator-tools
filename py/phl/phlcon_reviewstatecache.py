@@ -8,9 +8,11 @@
 #   ReviewStateCache
 #    .get_state
 #    .refresh_active_reviews
+#    .active_reviews
+#    .merge_additional_active_reviews
 #
 # Public Functions:
-#   make_revision_list_status_callable
+#   make_from_conduit
 #
 # Public Assignments:
 #   ReviewState
@@ -30,33 +32,18 @@ ReviewState = collections.namedtuple(
     ['status', 'date_modified'])
 
 
-class ReviewStateCache(object):
-
-    def __init__(self, conduit):
-        super(ReviewStateCache, self).__init__()
-        self._cache = _ReviewStateCache(
-            make_revision_list_status_callable(
-                conduit))
-
-    def get_state(self, review_id):
-        return self._cache.get_state(review_id)
-
-    def refresh_active_reviews(self):
-        self._cache.refresh_active_reviews()
-
-
-def make_revision_list_status_callable(conduit):
+def make_from_conduit(conduit):
 
     def revision_list_status(revision_list):
         return phlcon_differential.query(conduit, revision_list)
 
-    return revision_list_status
+    return ReviewStateCache(revision_list_status)
 
 
-class _ReviewStateCache(object):
+class ReviewStateCache(object):
 
     def __init__(self, status_callable):
-        super(_ReviewStateCache, self).__init__()
+        super(ReviewStateCache, self).__init__()
         self._review_to_state = {}
         self._active_reviews = set()
         self._revision_list_status_callable = status_callable
@@ -83,6 +70,13 @@ class _ReviewStateCache(object):
                 r.id: self._make_state(r) for r in responses
             }
             self._active_reviews = set()
+
+    @property
+    def active_reviews(self):
+        return self._active_reviews
+
+    def merge_additional_active_reviews(self, active_review_set):
+        self._active_reviews.update(active_review_set)
 
 
 # -----------------------------------------------------------------------------

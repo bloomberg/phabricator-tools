@@ -22,6 +22,8 @@ import traceback
 import phlmail_sender
 import phlsys_sendmail
 
+import abdt_logging
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,7 +32,6 @@ def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
     body = uname + "\n" + tb
     body += str(body_prefix)
     body += str(message)
-    print body
     mailsender.send(
         subject=str(subject),
         message=body,
@@ -38,7 +39,7 @@ def _send_mail(mailsender, emails, uname, subject, tb, body_prefix, message):
 
 
 def make_exception_message_handler(
-        sys_admin_emails, arcyd_reporter, repo, subject, body_prefix):
+        sys_admin_emails, repo, subject, body_prefix):
     uname = str(platform.uname())
     emails = sys_admin_emails
 
@@ -48,9 +49,6 @@ def make_exception_message_handler(
 
     def msg_exception(message):
         tb = traceback.format_exc()
-        _send_mail(
-            mailsender, emails, uname, subject, tb, body_prefix, message)
-
         short_tb = traceback.format_exc(1)
 
         exc_type, _, _ = sys.exc_info()
@@ -65,15 +63,20 @@ def make_exception_message_handler(
         if repo:
             detail += "processing repo: {repo}\n".format(repo=repo)
         detail += "exception: {exception}".format(exception=short_tb)
-        arcyd_reporter.log_system_error('processargs', detail)
+        abdt_logging.on_system_error('processargs', detail)
+
+        try:
+            _send_mail(
+                mailsender, emails, uname, subject, tb, body_prefix, message)
+        except Exception:
+            _LOGGER.error('Exception when sending mail', exc_info=1)
 
     return msg_exception
 
 
-def make_exception_delay_handler(sys_admin_emails, arcyd_reporter, repo):
+def make_exception_delay_handler(sys_admin_emails, repo):
     return make_exception_message_handler(
         sys_admin_emails,
-        arcyd_reporter,
         repo,
         "arcyd paused with exception",
         "will wait: ")

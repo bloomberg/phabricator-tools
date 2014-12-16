@@ -1,19 +1,15 @@
-trap "echo FAILED!; exit 1" ERR
+trap "echo 'FAILED!'; exit 1" ERR
+set -x  # echo all commands to the console for easier debugging
+set -u  # treat usage of undefined variables as an error
 
-# cd to the dir of this script to make paths simpler
+# cd to the dir of this script, so paths are relative
 cd "$(dirname "$0")"
 
-arcyd="$(pwd)/../../proto/arcyd"
+arcyd_tester='../../proto/arcyd-tester'
 
-tempdir=$(mktemp -d)
-olddir=$(pwd)
-cd ${tempdir}
+${arcyd_tester} --help
+${arcyd_tester}
 
-$arcyd dev-status-html
-chromium-browser *.html
-
-cd ${olddir}
-rm -rf ${tempdir}
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #

@@ -29,13 +29,10 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    parser.add_argument(
-        '--force', '-f',
-        action='store_true',
-        help="kill the process.")
+    pass
 
 
-def process(args):
+def process(unused_args):
     fs = abdt_fs.make_default_accessor()
 
     with fs.lockfile_context():
@@ -43,17 +40,14 @@ def process(args):
         if pid is None or not phlsys_pid.is_running(pid):
             raise Exception("Arcyd is not running")
 
-        if args.force:
-            phlsys_pid.request_terminate(pid)
-        else:
-            killfile = 'var/command/killfile'
-            phlsys_fs.write_text_file(killfile, '')
+        killfile = 'var/command/killfile'
+        phlsys_fs.write_text_file(killfile, '')
 
-            if os.path.isfile(killfile):
+        if os.path.isfile(killfile):
+            time.sleep(1)
+            while os.path.isfile(killfile):
+                print 'waiting for arcyd to remove killfile ..'
                 time.sleep(1)
-                while os.path.isfile(killfile):
-                    print 'waiting for arcyd to remove killfile ..'
-                    time.sleep(1)
 
         # wait for Arcyd to not be running
         if phlsys_pid.is_running(pid):

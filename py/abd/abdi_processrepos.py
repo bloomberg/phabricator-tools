@@ -14,22 +14,15 @@
 
 from __future__ import absolute_import
 
-import contextlib
-import logging
 import os
 
+import phlmail_sender
 import phlsys_sendmail
 
-import abdt_arcydreporter
 import abdt_exhandlers
 import abdt_logging
-import abdt_shareddictoutput
 
-import abdi_operation
-import abdi_processrepolist
-
-
-_LOGGER = logging.getLogger(__name__)
+import abdi_processrepoarglist
 
 
 def setupParser(parser):
@@ -101,6 +94,14 @@ def setupParser(parser):
         default=None,
         help="path to an external reporter to send monitoring info to, "
              "will be called like so: $REPORTER <<json report object>>")
+    parser.add_argument(
+        '--max-workers',
+        metavar="COUNT",
+        type=int,
+        default=None,
+        help="maximum number of worker processes to run at one time, leave "
+             "unset to let Arcyd decide the number. Set to 0 to disable "
+             "multiprocessing completely.")
 
 
 def process(args, repo_configs):
@@ -113,51 +114,43 @@ def process(args, repo_configs):
         phlsys_sendmail.Sendmail.set_default_params_from_type(
             args.sendmail_type)
 
-    reporter_data = abdt_shareddictoutput.ToFile(args.status_path)
-    reporter = abdt_arcydreporter.ArcydReporter(
-        reporter_data, args.arcyd_email, args.io_log_file)
+    mail_sender = phlmail_sender.MailSender(
+        phlsys_sendmail.Sendmail(), args.arcyd_email)
+
+    if args.io_log_file:
+        full_path = os.path.abspath(args.io_log_file)
+        abdt_logging.set_remote_io_write_log_path(full_path)
 
     if args.external_error_logger:
         full_path = os.path.abspath(args.external_error_logger)
-        reporter.set_external_system_error_logger(full_path)
+        abdt_logging.set_external_system_error_logger(full_path)
 
     on_exception = abdt_exhandlers.make_exception_message_handler(
         args.sys_admin_emails,
-        reporter,
         None,
         "arcyd stopped with exception",
         "")
 
-    arcyd_reporter_context = abdt_logging.arcyd_reporter_context
-    with contextlib.closing(reporter), arcyd_reporter_context(reporter):
-        _processrepolist(args, repo_configs, reporter, on_exception)
+    _processrepolist(
+        args, repo_configs, on_exception, mail_sender)
 
 
 def _processrepolist(
-        args, repo_configs, reporter, on_exception):
+        args, repo_configs, on_exception, mail_sender):
     try:
-        abdi_processrepolist.do(
+        abdi_processrepoarglist.do(
             repo_configs,
             args.sys_admin_emails,
             args.kill_file,
             args.sleep_secs,
             args.no_loop,
             args.external_report_command,
-            reporter)
-    except abdi_operation.KillFileError:
-        _LOGGER.info("kill file handled, stopping")
-        return
+            mail_sender,
+            args.max_workers)
     except BaseException:
         on_exception("Arcyd will now stop")
         print "stopping"
         raise
-
-    if not args.no_loop:
-        # we should never get here, raise and handle an exception if we do
-        try:
-            raise Exception("Arcyd stopped unexpectedly")
-        except Exception:
-            on_exception("Arcyd will now stop")
 
 
 # -----------------------------------------------------------------------------
