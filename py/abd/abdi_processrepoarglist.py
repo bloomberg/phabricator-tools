@@ -21,6 +21,7 @@ import time
 
 import phlcon_reviewstatecache
 import phlgitx_refcache
+import phlmp_pool
 import phlsys_conduit
 import phlsys_git
 import phlsys_subprocess
@@ -77,9 +78,9 @@ def do(
                 "multiprocessing. Specify max workers explicitly to enable.")
             max_workers = 0
 
-    repos = []
+    repo_list = []
     for name, config in repo_configs:
-        repos.append(
+        repo_list.append(
             _ArcydManagedRepository(
                 name,
                 config,
@@ -107,12 +108,11 @@ def do(
         conduit_manager.refresh_conduits()
 
         if max_workers:
-            worker_manager = _WorkerManager(max_workers=max_workers)
-            for r in repos:
-                worker_manager.add(r)
-            worker_manager.join_all()
+            for i, res in phlmp_pool.generate_results(repo_list, max_workers):
+                repo = repo_list[i]
+                repo.merge_from_worker(res)
         else:
-            for r in repos:
+            for r in repo_list:
                 r()
 
         # important to do this before stopping arcyd and as soon as possible
@@ -145,53 +145,6 @@ def do(
         secs_to_sleep = float(sleep_secs) - float(sleep_timer.duration)
         if secs_to_sleep > 0:
             time.sleep(secs_to_sleep)
-
-
-class _WorkerManager(object):
-
-    def __init__(self, max_workers):
-        self._jobs = []
-        self._semaphore = multiprocessing.Semaphore(max_workers)
-
-    def add(self, repo):
-        self._semaphore.acquire()
-        self._remove_joinable()
-
-        receiver_pipe, sender_pipe = multiprocessing.Pipe()
-        worker = multiprocessing.Process(
-            target=self._worker_wrapper, args=(repo, sender_pipe))
-        self._jobs.append((worker, repo, receiver_pipe))
-        worker.start()
-
-    def _worker_wrapper(self, repo, sender_pipe):
-        try:
-            results = repo()
-            sender_pipe.send(results)
-            sender_pipe.close()
-        finally:
-            self._semaphore.release()
-
-    def _finish_job(self, job):
-        worker, repo, receiver_pipe = job
-        worker.join()
-        results = receiver_pipe.recv()
-        receiver_pipe.close()
-        repo.merge_from_worker(results)
-
-    def _remove_joinable(self):
-        joinable = []
-        for job in self._jobs:
-            worker = job[0]
-            if not worker.is_alive():
-                joinable.append(job)
-        for job in joinable:
-            self._finish_job(job)
-            self._jobs.remove(job)
-
-    def join_all(self):
-        for job in self._jobs:
-            self._finish_job(job)
-        self._jobs = []
 
 
 class _RecordingWatcherWrapper(object):
