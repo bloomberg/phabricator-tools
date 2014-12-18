@@ -119,7 +119,9 @@ def make_raw_diff(repo, base, branch, max_diff_size_utf8_bytes):
     If the diff would exceed the _MAX_DIFF_SIZE then take measures
     to reduce the diff size by reducing the amount of context.
 
-    Raise 'NoDiffError' if the diff could not be fit into
+    Raise 'NoDiffError' if there is no difference to show.
+
+    Raise 'abdt_exception.LargeDiffException' if the diff could not be fit into
     'max_bytes'.
 
     :repo: a callable supporting git commands, e.g. repo("status")
