@@ -21,7 +21,7 @@ import time
 
 import phlcon_reviewstatecache
 import phlgitx_refcache
-import phlmp_pool
+import phlmp_cyclingpool
 import phlsys_conduit
 import phlsys_git
 import phlsys_subprocess
@@ -54,7 +54,8 @@ def do(
         is_no_loop,
         external_report_command,
         mail_sender,
-        max_workers):
+        max_workers,
+        overrun_secs):
 
     conduit_manager = _ConduitManager()
 
@@ -89,6 +90,14 @@ def do(
                 sys_admin_emails,
                 mail_sender))
 
+    # if we always overrun half our workers then the loop is sustainable, if we
+    # overrun more than that then we'll be lagging too far behind. In the event
+    # that we only have one worker then we can't overrun any.
+    max_overrun_workers = max_workers // 2
+
+    pool = phlmp_cyclingpool.CyclingPool(
+        repo_list, max_workers, max_overrun_workers)
+
     cycle_timer = phlsys_timer.Timer()
     cycle_timer.start()
     while not finished:
@@ -108,7 +117,7 @@ def do(
         conduit_manager.refresh_conduits()
 
         if max_workers:
-            for i, res in phlmp_pool.generate_results(repo_list, max_workers):
+            for i, res in pool.cycle_results(overrun_secs=overrun_secs):
                 repo = repo_list[i]
                 repo.merge_from_worker(res)
         else:
@@ -123,6 +132,7 @@ def do(
         if external_report_command:
             report = {
                 "cycle_time_secs": cycle_timer.restart(),
+                "overrun_jobs": pool.num_active_jobs,
             }
             report_json = json.dumps(report)
             full_path = os.path.abspath(external_report_command)
@@ -133,6 +143,16 @@ def do(
 
         # look for killfile
         if os.path.isfile(kill_file):
+
+            # finish any jobs that overran
+            for i, res in pool.finish_results():
+                repo = repo_list[i]
+                repo.merge_from_worker(res)
+
+            # important to do this before stopping arcyd and as soon as
+            # possible after doing fetches
+            url_watcher_wrapper.save()
+
             os.remove(kill_file)
             finished = True
             break

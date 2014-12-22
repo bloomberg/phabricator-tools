@@ -102,6 +102,13 @@ def setupParser(parser):
         help="maximum number of worker processes to run at one time, leave "
              "unset to let Arcyd decide the number. Set to 0 to disable "
              "multiprocessing completely.")
+    parser.add_argument(
+        '--overrun-secs',
+        metavar="SECONDS",
+        type=int,
+        default=60,
+        help="number of seconds to wait before starting the next cycle and "
+             "leaving active jobs behind.")
 
 
 def process(args, repo_configs):
@@ -146,7 +153,8 @@ def _processrepolist(
             args.no_loop,
             args.external_report_command,
             mail_sender,
-            args.max_workers)
+            args.max_workers,
+            args.overrun_secs)
     except BaseException:
         on_exception("Arcyd will now stop")
         print "stopping"
