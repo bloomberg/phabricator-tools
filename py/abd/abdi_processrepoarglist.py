@@ -202,6 +202,8 @@ class _ArcydManagedRepository(object):
         watcher = _RecordingWatcherWrapper(
             self._url_watcher_wrapper.watcher)
 
+        old_active_reviews = set(self._review_cache.active_reviews)
+
         if not self._is_disabled:
             try:
                 _process_repo(
@@ -216,7 +218,7 @@ class _ArcydManagedRepository(object):
                 self._is_disabled = True
 
         return (
-            self._review_cache.active_reviews,
+            self._review_cache.active_reviews - old_active_reviews,
             self._is_disabled,
             watcher.tested_urls,
             self._refcache_repo.peek_hash_ref_pairs()
