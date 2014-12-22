@@ -74,7 +74,7 @@ def setupParser(parser):
         '--sleep-secs',
         metavar="TIME",
         type=int,
-        default=60,
+        default=3,
         help="time to wait between runs through the list")
     parser.add_argument(
         '--no-loop',
