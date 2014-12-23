@@ -22,6 +22,7 @@
 #    .push_delete
 #    .checkout_master_fetch_prune
 #    .hash_ref_pairs
+#    .checkout_make_raw_diff
 #    .get_remote
 #
 # Public Functions:
@@ -53,10 +54,10 @@ import phlgit_showref
 import phlgitu_ref
 
 import abdt_branch
+import abdt_differ
 import abdt_lander
 import abdt_logging
 import abdt_naming
-
 
 _ARCYD_REFSPACE = 'refs/arcyd'
 _PRIVATE_ARCYD_BRANCHSPACE = '__private_arcyd'
@@ -339,6 +340,31 @@ class Repo(object):
 
         """
         return self._repo.hash_ref_pairs
+
+    def checkout_make_raw_diff(
+            self, from_branch, to_branch, max_diff_size_utf8_bytes):
+        """Return an abdt_differ.DiffResult of the changes on the branch.
+
+        If the diff would exceed the pre-specified max diff size then take
+        measures to reduce the diff.
+
+        Potentially checkout onto the 'to_branch' so that changes to
+        .gitattributes files will be considered.
+
+        :from_branch: string name of the merge-base of 'branch'
+        :to_branch: string name of the branch to diff
+        :max_diff_size_utf8_bytes: the maximum allowed size of the diff as utf8
+        :returns: the string diff of the changes on the branch
+
+        """
+        # checkout the 'to' branch, otherwise we won't take into account any
+        # changes to .gitattributes files
+        phlgit_checkout.branch(self._repo, to_branch)
+        return abdt_differ.make_raw_diff(
+            self,
+            from_branch,
+            to_branch,
+            max_diff_size_utf8_bytes)
 
     def _log_read_call(self, args, kwargs):
         with abdt_logging.remote_io_read_event_context(

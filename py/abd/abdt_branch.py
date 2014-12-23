@@ -52,7 +52,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import phlgit_checkout
 import phlgit_log
 import phlgit_push
 import phlgit_revparse
@@ -325,13 +324,8 @@ class Branch(object):
         measures to reduce the diff.
 
         """
-        # checkout the 'to' branch, otherwise we won't take into account any
-        # changes to .gitattributes files
-        phlgit_checkout.branch(self._repo, self._review_branch.remote_branch)
-
         try:
-            return abdt_differ.make_raw_diff(
-                self._repo,
+            return self._repo.checkout_make_raw_diff(
                 self._review_branch.remote_base,
                 self._review_branch.remote_branch,
                 _MAX_DIFF_SIZE)
