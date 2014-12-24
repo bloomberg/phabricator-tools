@@ -129,7 +129,8 @@ def main():
         print("min / mean / max =", end=' ')
         mean = stats.sum / stats.count
         vals = [stats.min, mean, stats.max]
-        print(' / '.join(["{0:0.2f}".format(i) for i in vals]), 'ms')
+        vals_str = ' / '.join(["{0:0.2f}".format(i) for i in vals])
+        print(vals_str, 'ms')
 
 
 # -----------------------------------------------------------------------------
