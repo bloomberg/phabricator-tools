@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import os
@@ -79,7 +80,7 @@ def process(args):
             exit_code = 1
 
     if exit_code != 0 and not args.fix:
-        print "use '--fix' to attempt to fix the issues"
+        print("use '--fix' to attempt to fix the issues")
 
     return exit_code
 
@@ -111,8 +112,8 @@ def _check_repo_config_path_list(repo_config_path_list):
     for repo_config_path in repo_config_path_list:
         repo_filename = os.path.basename(repo_config_path)
         if not abdt_fs.is_config_name_valid(repo_filename):
-            print "'{}' is not a valid repo config name".format(
-                repo_filename)
+            print("'{}' is not a valid repo config name".format(
+                repo_filename))
             all_ok = False
 
     return all_ok
@@ -133,7 +134,7 @@ def _check_repo_name_config_list(args, repo_name_config_list):
     for repo_name, repo_config in repo_name_config_list:
 
         if args.verbose:
-            print "Checking", repo_name
+            print("Checking", repo_name)
 
         if not _check_repo_cloned(args, repo_name, repo_config):
             all_ok = False
@@ -161,11 +162,11 @@ def _check_repo_cloned(args, repo_name, repo_config):
     """
     all_ok = True
     if not os.path.isdir(repo_config.repo_path):
-        print "'{}' is missing repo '{}'".format(
-            repo_name, repo_config.repo_path)
+        print("'{}' is missing repo '{}'".format(
+            repo_name, repo_config.repo_path))
         if args.fix:
             repo_url = abdi_repoargs.get_repo_url(repo_config)
-            print "cloning '{}' ..".format(repo_url)
+            print("cloning '{}' ..".format(repo_url))
             abdi_repo.setup_repo(repo_url, repo_config.repo_path)
         else:
             all_ok = False
@@ -187,11 +188,11 @@ def _check_repo_ignoring_attributes(args, repo_config):
     all_ok = True
     is_ignoring = phlgitx_ignoreattributes.is_repo_definitely_ignoring
     if not is_ignoring(repo_config.repo_path):
-        print "'{}' is not ignoring some attributes".format(
-            repo_config.repo_path)
+        print("'{}' is not ignoring some attributes".format(
+            repo_config.repo_path))
         if args.fix:
-            print "setting {} to ignore some attributes ..".format(
-                repo_config.repo_path)
+            print("setting {} to ignore some attributes ..".format(
+                repo_config.repo_path))
 
             phlgitx_ignoreattributes.ensure_repo_ignoring(
                 repo_config.repo_path)
@@ -221,54 +222,55 @@ def _check_repo_remote(args, repo_name, repo_config):
         repo("ls-remote")
     except phlsys_subprocess.CalledProcessError as e:
         all_ok = False
-        print "error reading remote for {repo}".format(repo=repo_name)
+        print("error reading remote for {repo}".format(repo=repo_name))
         _print_indented(4, e.stdout)
         _print_indented(4, e.stderr)
-        print
+        print()
 
     # check that we can write to the remote
     try:
         abdi_repo.try_push_special_refs(repo)
     except phlsys_subprocess.CalledProcessError as e:
         all_ok = False
-        print "error writing remote for {repo}".format(repo=repo_name)
+        print("error writing remote for {repo}".format(repo=repo_name))
         _print_indented(4, e.stdout)
         _print_indented(4, e.stderr)
-        print
+        print()
 
     # ensure the reserve branch
     try:
         if not abdi_repo.is_remote_reserve_branch_present(repo):
-            print "'{repo}' has no reserve branch".format(repo=repo_name)
+            print("'{repo}' has no reserve branch".format(repo=repo_name))
             if args.fix:
-                print "ensuring reserve branch for '{repo}'..".format(
-                    repo=repo_name)
+                print("ensuring reserve branch for '{repo}'..".format(
+                    repo=repo_name))
                 abdi_repo.ensure_reserve_branch(repo)
             else:
                 all_ok = False
     except phlsys_subprocess.CalledProcessError as e:
         all_ok = False
-        print "error ensuring reserve branch for {repo}".format(repo=repo_name)
+        print(
+            "error ensuring reserve branch for {repo}".format(repo=repo_name))
         _print_indented(4, e.stdout)
         _print_indented(4, e.stderr)
-        print
+        print()
 
     # ensure the vestigial landinglog ref is not present
     try:
         if abdi_repo.is_legacy_landinglog_branch_present(repo):
-            print "'{repo}' has legacy landinglog".format(repo=repo_name)
+            print("'{repo}' has legacy landinglog".format(repo=repo_name))
             if args.fix:
-                print "removing landinglog for '{repo}'..".format(
-                    repo=repo_name)
+                print("removing landinglog for '{repo}'..".format(
+                    repo=repo_name))
                 abdi_repo.remove_landinglog(repo)
             else:
                 all_ok = False
     except phlsys_subprocess.CalledProcessError as e:
         all_ok = False
-        print "error removing landinglog for {repo}".format(repo=repo_name)
+        print("error removing landinglog for {repo}".format(repo=repo_name))
         _print_indented(4, e.stdout)
         _print_indented(4, e.stderr)
-        print
+        print()
 
     return all_ok
 
@@ -282,9 +284,9 @@ def _print_indented(spaces, s):
 
     """
     for line in s.splitlines():
-        print "{indent}{line}".format(
+        print("{indent}{line}".format(
             indent=" " * spaces,
-            line=line)
+            line=line))
 
 
 # -----------------------------------------------------------------------------

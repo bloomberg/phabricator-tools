@@ -29,6 +29,7 @@ or calculated from commits that you provide as parameters.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -170,10 +171,10 @@ def main():
         else:
             reviewed_by = ""
 
-        print "{commit_hash} {review_url} {reviewer}".format(
+        print("{commit_hash} {review_url} {reviewer}".format(
             commit_hash=revision.abbrev_hash,
             review_url=review_url,
-            reviewer=reviewed_by)
+            reviewer=reviewed_by))
 
 
 def passes_filters(args, fields):

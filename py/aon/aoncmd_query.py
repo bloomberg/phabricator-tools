@@ -60,6 +60,7 @@ output formats:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import datetime
@@ -401,24 +402,24 @@ def _output_results(args, results):
         args.format_type = "short"
     if args.format_type:
         if args.format_type == "json":
-            print json.dumps(results, sort_keys=True, indent=2)
+            print(json.dumps(results, sort_keys=True, indent=2))
         elif args.format_type == "python":
             pprint.pprint(results)
         elif args.format_type == "short":
             shortTemplate = string.Template("$id / $statusName / $title")
             for x in results:
-                print shortTemplate.safe_substitute(x)
+                print(shortTemplate.safe_substitute(x))
         elif args.format_type == "ids":
             shortTemplate = string.Template("$id")
             for x in results:
-                print shortTemplate.safe_substitute(x)
+                print(shortTemplate.safe_substitute(x))
         else:
             raise Exception("unsupported format")
     else:  # args.format_string
         assert args.format_string
         template = string.Template(args.format_string)
         for x in results:
-            print template.safe_substitute(x)
+            print(template.safe_substitute(x))
 
 
 # -----------------------------------------------------------------------------

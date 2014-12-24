@@ -12,6 +12,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import functools
@@ -62,7 +63,7 @@ def method_tracer(object_to_string):
             callstring = object_to_string(self) + '.' + f.__name__ + '('
             callstring += ','.join([pprint.pformat(arg) for arg in args])
             callstring += ')'
-            print callstring, '->', pprint.pformat(ret)
+            print(callstring, '->', pprint.pformat(ret))
             return ret
         return wrapper
     return decorator

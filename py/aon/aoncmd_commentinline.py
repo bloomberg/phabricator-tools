@@ -26,6 +26,7 @@ usage examples:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -99,7 +100,7 @@ def process(args):
         not args.left_side,
         args.end_line_offset)
 
-    print result
+    print(result)
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2014 Bloomberg Finance L.P.

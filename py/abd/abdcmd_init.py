@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import abdt_fs
@@ -97,7 +98,7 @@ def process(args):
         config += "\n--external-report-command\n{}".format(
             args.external_report_command)
 
-    print config
+    print(config)
 
     fs.create_root_config(config)
 

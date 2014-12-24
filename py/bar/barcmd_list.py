@@ -53,6 +53,7 @@ Output format examples:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import json
@@ -133,18 +134,18 @@ def process(args):
     #
 
     if args.format_json:
-        print json.dumps(managed_review_branches, sort_keys=True, indent=2)
+        print(json.dumps(managed_review_branches, sort_keys=True, indent=2))
     elif args.format_python:
         pprint.pprint(managed_review_branches)
     elif args.format_string:
         for branch in managed_review_branches:
-            print args.format_string.format(**branch)
+            print(args.format_string.format(**branch))
     else:  # args.format_summary
         if managed_review_branches:
-            print "{:6} {:14} {}".format("ID", "status", "tracked name")
+            print("{:6} {:14} {}".format("ID", "status", "tracked name"))
             for branch in managed_review_branches:
-                print "{review_id:6} {status:14} {tracked_name}".format(
-                    **branch)
+                print("{review_id:6} {status:14} {tracked_name}".format(
+                    **branch))
 
 
 def _remote_branches_as_short_local(hash_ref_pairs, remote):

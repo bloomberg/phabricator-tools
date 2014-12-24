@@ -25,6 +25,7 @@ usage examples:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -106,7 +107,7 @@ def process(args):
         ids.extend([int(i) for i in args.ids_file.read().split()])
 
     if not ids:
-        print "error: you have not specified any revision ids"
+        print("error: you have not specified any revision ids")
         sys.exit(1)
 
     for i in ids:

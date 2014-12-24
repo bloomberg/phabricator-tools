@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import phlsys_makeconduit
@@ -30,11 +31,11 @@ def process(args):
     getExplanation = phlsys_makeconduit.get_uri_user_cert_explanation
     uri, user, cert, explanation = getExplanation(
         args.uri, args.user, args.cert)
-    print explanation
-    print
-    print "uri : ", uri
-    print "user: ", user
-    print "cert: ", phlsys_makeconduit.obscured_cert(cert)
+    print(explanation)
+    print()
+    print("uri : ", uri)
+    print("user: ", user)
+    print("cert: ", phlsys_makeconduit.obscured_cert(cert))
 
 
 # -----------------------------------------------------------------------------

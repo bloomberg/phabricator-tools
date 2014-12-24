@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 
@@ -99,7 +100,7 @@ def prompt_with_options(prompt, options, default):
     hint = '[{}]'.format('/'.join(lead_options))
 
     while True:
-        print '{} {}'.format(prompt, hint),
+        print('{} {}'.format(prompt, hint), end=' ')
         choice = raw_input().lower()
 
         if default is not None and choice == '':
@@ -109,10 +110,10 @@ def prompt_with_options(prompt, options, default):
             if choice in option_list:
                 return option_list
 
-        print "Please choose from:"
+        print("Please choose from:")
         for option_list in options:
-            print "  {}".format(' or '.join(option_list))
-        print
+            print("  {}".format(' or '.join(option_list)))
+        print()
 
 
 # -----------------------------------------------------------------------------

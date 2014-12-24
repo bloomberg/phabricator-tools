@@ -60,6 +60,7 @@ output formats:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import json
@@ -152,37 +153,37 @@ def process(args):
     if args.format_python:
         pprint.pprint(result)
     elif args.format_json:
-        print json.dumps(result, sort_keys=True, indent=2)
+        print(json.dumps(result, sort_keys=True, indent=2))
     elif args.format_unified:
-        print unified_diff(result)
+        print(unified_diff(result))
     elif args.format_files:
         phlcon_differential.write_diff_files(result, args.format_files)
     elif args.format_strings:
         fmt = args.format_strings[0]
         fmt_change = args.format_strings[1]
         if fmt:
-            print fmt.format(**result)
+            print(fmt.format(**result))
         if fmt_change:
             for change in result["changes"]:
-                print fmt_change.format(**change)
+                print(fmt_change.format(**change))
     else:  # args.list_files:
         paths = set()
         for change in result.changes:
             paths.add(change["currentPath"])
             paths.add(change["oldPath"])
         for path in paths:
-            print path
+            print(path)
 
 
 def unified_diff(result):
     for change in result.changes:
-        print '--- ' + change["oldPath"]
-        print '+++ ' + change["currentPath"]
+        print('--- ' + change["oldPath"])
+        print('+++ ' + change["currentPath"])
         for hunk in change["hunks"]:
             hunk_format = "@@ -{oldOffset},{oldLength}"
             hunk_format += " +{newOffset},{newLength} @@"
-            print hunk_format.format(**hunk)
-            print hunk["corpus"]
+            print(hunk_format.format(**hunk))
+            print(hunk["corpus"])
 
 
 # -----------------------------------------------------------------------------

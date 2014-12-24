@@ -12,6 +12,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import difflib
@@ -73,37 +74,37 @@ def check_functions_match(f1, f2):
     f1_argspec = inspect.getargspec(f1)
     f2_argspec = inspect.getargspec(f2)
     if f1_argspec != f2_argspec:
-        print "argspecs differ:"
+        print("argspecs differ:")
 
         if f1_argspec.args != f2_argspec.args:
-            print f1_name, "args:", f1_argspec.args
-            print f2_name, "args:", f2_argspec.args
+            print(f1_name, "args:", f1_argspec.args)
+            print(f2_name, "args:", f2_argspec.args)
 
         if f1_argspec.varargs != f2_argspec.varargs:
-            print f1_name, "varargs:", f1_argspec.varargs
-            print f2_name, "varargs:", f2_argspec.varargs
+            print(f1_name, "varargs:", f1_argspec.varargs)
+            print(f2_name, "varargs:", f2_argspec.varargs)
 
         if f1_argspec.keywords != f2_argspec.keywords:
-            print f1_name, "keywords:", f1_argspec.keywords
-            print f2_name, "keywords:", f2_argspec.keywords
+            print(f1_name, "keywords:", f1_argspec.keywords)
+            print(f2_name, "keywords:", f2_argspec.keywords)
 
         if f1_argspec.defaults != f2_argspec.defaults:
-            print f1_name, "defaults:", f1_argspec.defaults
-            print f2_name, "defaults:", f2_argspec.defaults
+            print(f1_name, "defaults:", f1_argspec.defaults)
+            print(f2_name, "defaults:", f2_argspec.defaults)
 
         does_match = False
 
     f1_docstring = inspect.getdoc(f1)
     f2_docstring = inspect.getdoc(f2)
     if f1_docstring != f2_docstring:
-        print "docstrings differ:"
-        print f1_name, "->", f2_name
-        print "----- diff -----"
+        print("docstrings differ:")
+        print(f1_name, "->", f2_name)
+        print("----- diff -----")
         f1_doclines = f1_docstring.splitlines() if f1_docstring else ""
         f2_doclines = f2_docstring.splitlines() if f2_docstring else ""
         for line in difflib.Differ().compare(f1_doclines, f2_doclines):
-            print line
-        print "--- end diff ---"
+            print(line)
+        print("--- end diff ---")
         does_match = False
 
     return does_match
@@ -184,15 +185,15 @@ def check_public_ifaces_match(cls1, cls2):
     cls2_public_interface = set([i for i in cls2_interface if i[0] != '_'])
 
     if cls1_public_interface != cls2_public_interface:
-        print "interfaces differ:", cls1_name, "and", cls2_name
+        print("interfaces differ:", cls1_name, "and", cls2_name)
         in_cls1_only = cls1_public_interface - cls2_public_interface
         in_cls2_only = cls2_public_interface - cls1_public_interface
         if in_cls1_only:
-            print "only in", cls1_name
-            print ":", list(in_cls1_only)
+            print("only in", cls1_name)
+            print(":", list(in_cls1_only))
         if in_cls2_only:
-            print "only in", cls2_name
-            print ":", list(in_cls2_only)
+            print("only in", cls2_name)
+            print(":", list(in_cls2_only))
 
         return False
 
@@ -202,19 +203,19 @@ def check_public_ifaces_match(cls1, cls2):
 
         if inspect.isfunction(cls2.__dict__[f]):
             if not inspect.isfunction(cls1.__dict__[f]):
-                print f, " is not a function on ", cls1_name
+                print(f, " is not a function on ", cls1_name)
                 return False
 
         if inspect.isfunction(cls1.__dict__[f]):
             if not inspect.isfunction(cls2.__dict__[f]):
-                print f, " is not a function on ", cls2_name
+                print(f, " is not a function on ", cls2_name)
                 return False
 
         if not check_functions_match(cls1.__dict__[f], cls2.__dict__[f]):
             does_match = False
 
     if not does_match:
-        print "interfaces differ:", cls1_name, "and", cls2_name
+        print("interfaces differ:", cls1_name, "and", cls2_name)
     return does_match
 
 

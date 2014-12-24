@@ -20,13 +20,13 @@ while True:
         try:
             data = json.loads(text)
         except Exception as e:
-            print e
-            print "----"
-            print text
-            print "----"
+            print(e)
+            print("----")
+            print(text)
+            print("----")
             raise
 
-    print "read", len(data), "items"
+    print("read", len(data), "items")
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2014 Bloomberg Finance L.P.
 #

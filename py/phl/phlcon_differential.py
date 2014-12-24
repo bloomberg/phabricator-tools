@@ -50,6 +50,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import os
@@ -517,7 +518,7 @@ def _write_hunks(hunk_list, base_path, extra_path, diff_prefix_ignore_char):
                     if line.startswith(diff_prefix_ignore_char):
                         pass
                     else:
-                        print >> outfile, line[1:]
+                        print(line[1:], file=outfile)
     except IOError as e:
         raise WriteDiffError(e)
     except UnicodeEncodeError as e:

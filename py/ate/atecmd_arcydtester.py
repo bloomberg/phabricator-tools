@@ -11,6 +11,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -329,7 +330,7 @@ class _Fixture(object):
 
     def launch_debug_shell(self):
         with phlsys_fs.chdir_context(self._root_dir):
-            print "Launching debug shell, exit the shell to continue ..."
+            print("Launching debug shell, exit the shell to continue ...")
             subprocess.call('bash')
 
     @property
@@ -373,7 +374,7 @@ def _do_tests(args):
         try:
             _happy_path(fixture, args)
         except:
-            print fixture.arcyds[0].debug_log()
+            print(fixture.arcyds[0].debug_log())
             fixture.launch_debug_shell()
             raise
 
@@ -400,7 +401,7 @@ def _happy_path(fixture, args):
             reviews = bob.list_reviews()
             assert len(reviews) == 1
             r = reviews[0]
-            print r["review_id"]
+            print(r["review_id"])
             bob.accept_review(r["review_id"])
 
     with phlsys_timer.print_duration_context("Landing reviews"):

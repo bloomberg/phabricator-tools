@@ -34,7 +34,7 @@ import sys
 ParsedImport = collections.namedtuple(
     'ParsedImport', ['line', 'module', 'is_future'])
 
-_REQUIRED_FUTURE_IMPORTS = set(['absolute_import'])
+_REQUIRED_FUTURE_IMPORTS = set(['absolute_import', 'print_function'])
 
 
 class ProcessingException(Exception):

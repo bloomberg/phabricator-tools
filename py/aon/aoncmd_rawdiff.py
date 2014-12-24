@@ -31,6 +31,7 @@ usage examples:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -62,7 +63,7 @@ def process(args):
     d = {'diff': args.infile.read()}
 
     result = conduit("differential.createrawdiff", d)
-    print result["id"]
+    print(result["id"])
 
 
 # -----------------------------------------------------------------------------

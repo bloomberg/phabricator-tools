@@ -16,10 +16,10 @@ import threading
 
 def sleep_work(lock):
     with lock:
-        print "{}: starting sleep".format(threading.current_thread().name)
+        print("{}: starting sleep".format(threading.current_thread().name))
     subprocess.check_call(["sleep", "3"])
     with lock:
-        print "{}: finished sleep".format(threading.current_thread().name)
+        print("{}: finished sleep".format(threading.current_thread().name))
 
 
 def main():
@@ -40,7 +40,7 @@ def main():
 
     end = datetime.datetime.now()
     duration = end - start
-    print "took {} secs".format(duration)
+    print("took {} secs".format(duration))
 
 
 if __name__ == "__main__":

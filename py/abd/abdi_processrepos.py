@@ -12,6 +12,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import os
@@ -157,7 +158,7 @@ def _processrepolist(
             args.overrun_secs)
     except BaseException:
         on_exception("Arcyd will now stop")
-        print "stopping"
+        print("stopping")
         raise
 
 

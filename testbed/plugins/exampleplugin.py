@@ -14,7 +14,7 @@
 
 
 def on_review_created(params):
-    print "a review was created"
+    print("a review was created")
 
 
 def get_hooks():

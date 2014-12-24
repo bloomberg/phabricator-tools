@@ -20,6 +20,7 @@ For benchmarking Phabricator you might want to take a look at 'Apache Bench'.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -70,12 +71,12 @@ def main():
     args = parser.parse_args()
 
     if args.interval < 0.2:
-        print "interval must be at least 0.2 seconds"
+        print("interval must be at least 0.2 seconds")
         sys.exit(2)
 
     # perform the ping and display the time taken and result
     uri = phlsys_conduit.make_conduit_uri(args.destination)
-    print "conduit.ping " + str(uri)
+    print("conduit.ping " + str(uri))
 
     if args.count is not None:
         sequence = xrange(args.count)
@@ -94,7 +95,7 @@ def main():
             if not is_first:
                 time.sleep(args.interval)
 
-            print "request " + str(i + 1) + " :",
+            print("request " + str(i + 1) + " :", end=' ')
 
             conduit = phlsys_conduit.Conduit(uri)
             start = time.time()
@@ -102,7 +103,7 @@ def main():
             end = time.time()
 
             msecs = (end - start) * 1000
-            print result, ":", str(int(msecs)), "ms"
+            print(result, ":", str(int(msecs)), "ms")
 
             # atomically update the 'stats' object
             # (we may receive KeyboardInterrupt during update)
@@ -118,17 +119,17 @@ def main():
             is_first = False
     except KeyboardInterrupt:
         # print a newline to separate the ^C
-        print
+        print()
 
     if not stats:
-        print "no requests processed."
+        print("no requests processed.")
     else:
-        print "---", uri, "conduit.ping statistics", "---"
-        print stats.count, "requests processed"
-        print "min / mean / max =",
+        print("---", uri, "conduit.ping statistics", "---")
+        print(stats.count, "requests processed")
+        print("min / mean / max =", end=' ')
         mean = stats.sum / stats.count
         vals = [stats.min, mean, stats.max]
-        print ' / '.join(["{0:0.2f}".format(i) for i in vals]), 'ms'
+        print(' / '.join(["{0:0.2f}".format(i) for i in vals]), 'ms')
 
 
 # -----------------------------------------------------------------------------

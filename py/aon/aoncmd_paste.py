@@ -27,6 +27,7 @@ Usage examples:
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
 # =============================================================================
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -86,12 +87,12 @@ def process(args):
     elif args.text_file:
         text = args.text_file.read()
     else:
-        print "error: you have not specified any content for the paste"
+        print("error: you have not specified any content for the paste")
         sys.exit(1)
 
     result = phlcon_paste.create_paste(
         conduit, text, args.title, args.language)
-    print result.uri if not args.format_id else result.id
+    print(result.uri if not args.format_id else result.id)
 
 
 # -----------------------------------------------------------------------------

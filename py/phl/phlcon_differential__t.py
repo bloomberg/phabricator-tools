@@ -1,5 +1,6 @@
 """Test suite for phlcon_differential."""
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import unittest
@@ -449,7 +450,7 @@ index d4711bb..ee5b241 100644
         diff_response = phlcon_differential.create_raw_diff(self.conduit, diff)
         parse_response = phlcon_differential.parse_commit_message(
             self.conduit, message)
-        print str(parse_response.fields)
+        print(str(parse_response.fields))
         phlcon_differential.update_revision(
             self.conduit,
             revisionid,

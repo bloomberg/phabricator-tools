@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import os
@@ -46,14 +47,14 @@ def process(unused_args):
         if os.path.isfile(killfile):
             time.sleep(1)
             while os.path.isfile(killfile):
-                print 'waiting for arcyd to remove killfile ..'
+                print('waiting for arcyd to remove killfile ..')
                 time.sleep(1)
 
         # wait for Arcyd to not be running
         if phlsys_pid.is_running(pid):
             time.sleep(1)
             while phlsys_pid.is_running(pid):
-                print 'waiting for arcyd to exit'
+                print('waiting for arcyd to exit')
                 time.sleep(1)
 
 

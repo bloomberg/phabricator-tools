@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import abdi_repoargs
@@ -40,9 +41,9 @@ def process(args):
 
         for _, repo_config in repo_name_config_list:
             if args.only_formatted_repo_urls:
-                print abdi_repoargs.get_repo_url(repo_config)
+                print(abdi_repoargs.get_repo_url(repo_config))
             else:
-                print repo_config
+                print(repo_config)
 
 
 # -----------------------------------------------------------------------------

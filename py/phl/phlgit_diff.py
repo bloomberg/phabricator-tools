@@ -16,6 +16,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import os
@@ -95,7 +96,7 @@ def create_add_file(path, content):
     Usage examples:
 
         create a diff for new file 'README' with content 'hello'
-        >>> print create_add_file('README', 'hello')
+        >>> print(create_add_file('README', 'hello'))
         diff --git a/README b/README
         new file mode 100644
         index 0000000..b6fc4c6

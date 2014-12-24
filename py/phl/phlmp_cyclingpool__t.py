@@ -48,6 +48,7 @@
 # [ H] test_H_can_overrun_cycle
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import collections
@@ -195,7 +196,7 @@ class Test(unittest.TestCase):
 
         for e in expectations:
             args = e[0]
-            print args
+            print(args)
             self.assertEqual(
                 phlmp_cyclingpool._calc_should_overrun(
                     num_active=args['active'],
@@ -230,7 +231,7 @@ class Test(unittest.TestCase):
         )
 
         for e in expectations:
-            print e[0]
+            print(e[0])
 
             # PyChecker makes us do this because it doesn't see the **e[0] as
             # passing all the required parameters
@@ -326,7 +327,7 @@ class Test(unittest.TestCase):
         job_list = [_TestJob(i) for i in input_list]
         max_workers = multiprocessing.cpu_count()
         max_overrunnable = max_workers // 2
-        print "max workers:", max_workers
+        print("max workers:", max_workers)
 
         result_list = []
         pool = phlmp_cyclingpool.CyclingPool(
@@ -407,7 +408,7 @@ class Test(unittest.TestCase):
         pool = phlmp_cyclingpool.CyclingPool(
             job_list, max_workers, max_overrunnable)
 
-        print "max workers:", max_workers
+        print("max workers:", max_workers)
 
         result_list = []
         for i in xrange(num_loops):

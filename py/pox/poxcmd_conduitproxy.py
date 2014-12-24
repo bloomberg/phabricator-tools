@@ -24,6 +24,7 @@ giving away admin credentials directly to multiple parties.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import BaseHTTPServer
@@ -102,7 +103,7 @@ def _httpd_serve_forever(args):
     httpd = BaseHTTPServer.HTTPServer(server_address, factory)
     if args.sslcert:
         certpath = os.path.abspath(args.sslcert)
-        print certpath
+        print(certpath)
         httpd.socket = ssl.wrap_socket(
             httpd.socket,
             certfile=certpath,

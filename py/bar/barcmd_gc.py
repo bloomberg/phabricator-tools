@@ -28,6 +28,7 @@ branches do:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import sys
@@ -85,15 +86,15 @@ def setupParser(parser):
 def process(args):
     # XXX: only supports 'origin' remote at present
 
-    print """
+    print("""
 ::DEPRECATION NOTICE::
 the 'refs/arcyd/landinglog' ref is no longer being updated, for new
 branches do:
 
     git fetch origin refs/arcyd/landed:refs/arcyd/landed
     git branch --merged refs/arcyd/landed | grep -v '*' | xargs git branch -D
-    """.strip()
-    print
+    """.strip())
+    print()
 
     repo = phlsys_git.Repo('.')
 
@@ -108,24 +109,24 @@ branches do:
         did_something = _prune_branches(
             repo, args, prune_force, log_dict, local_branches)
         if not did_something:
-            print "nothing to do."
+            print("nothing to do.")
         else:
-            print "done."
+            print("done.")
     else:
         assert args.interactive
         would_do_something = _prune_branches(
             repo, args, prune_dryrun, log_dict, local_branches)
         if not would_do_something:
-            print "nothing to do."
+            print("nothing to do.")
         else:
             choice = phlsys_choice.yes_or_no("perform the pruning?", 'no')
-            print
+            print()
             if choice:
                 _prune_branches(
                     repo, args, prune_force, log_dict, local_branches)
-                print "done."
+                print("done.")
             else:
-                print "stopped."
+                print("stopped.")
 
 
 def _fetch_log(repo, always_update, never_update, prompt_update):
@@ -141,30 +142,30 @@ def _fetch_log(repo, always_update, never_update, prompt_update):
     has_landinglog = local_landinglog_ref in local_refs
 
     if not has_landinglog and never_update:
-        print >> sys.stderr, str(
+        print(str(
             "FATAL: the landing log has never been retrieved and "
-            "'--no-update' was specified, nothing to do.")
+            "'--no-update' was specified, nothing to do."), file=sys.stderr)
         sys.exit(1)
 
     if not has_landinglog:
         # see if the remote has a landing log
         remote_refs = repo('ls-remote').split()[1::2]
         if landinglog_ref not in remote_refs:
-            print >> sys.stderr, str(
+            print(str(
                 "FATAL: origin doesn't seem to have a landing log yet "
                 "perhaps it's not managed by arcyd or no branches have ever "
-                "been landed.")
+                "been landed."), file=sys.stderr)
             sys.exit(1)
 
     if not has_landinglog:
-        print "fetching landing log from origin for the first time.."
+        print("fetching landing log from origin for the first time..")
         repo('fetch', 'origin', landinglog_fetch)
-        print
+        print()
     else:
         if always_update:
-            print "fetching landing log from origin .."
+            print("fetching landing log from origin ..")
             repo('fetch', 'origin', landinglog_fetch)
-            print
+            print()
         elif never_update:
             # nothing to do
             pass
@@ -173,15 +174,15 @@ def _fetch_log(repo, always_update, never_update, prompt_update):
             choice = phlsys_choice.yes_or_no_or_abort(
                 "update landing log from origin now?")
             if choice is None:
-                print 'aborting.'
+                print('aborting.')
                 sys.exit(1)
             elif choice:
-                print "fetching landing log from origin .."
+                print("fetching landing log from origin ..")
                 repo('fetch', 'origin', landinglog_fetch)
-                print
+                print()
             else:
                 # they chose 'no', continue without fetching
-                print
+                print()
 
 
 def _prune_branches(repo, args, prune_func, log_dict, local_branches):
@@ -198,8 +199,8 @@ def _prune_branches(repo, args, prune_func, log_dict, local_branches):
                 if local_name == current_branch:
                     err = "cannot prune {}, it's the current branch".format(
                         current_branch)
-                    print >> sys.stderr, err
-                    print
+                    print(err, file=sys.stderr)
+                    print()
                 else:
                     prune_func(
                         repo, local_name, original_name, sha1, landed_sha1)
@@ -234,16 +235,16 @@ def prune_dryrun(repo, local_name, original_name, sha1, landed_sha1):
 
 
 def print_branch(verb_statement, local_name, original_name, sha1, landed_sha1):
-    print "{} '{}'".format(verb_statement, local_name)
-    print "  ({})".format(sha1)
+    print("{} '{}'".format(verb_statement, local_name))
+    print("  ({})".format(sha1))
     if local_name == original_name:
-        print "  which matches landed with the same name"
-        print "    ({})".format(landed_sha1)
+        print("  which matches landed with the same name")
+        print("    ({})".format(landed_sha1))
     else:
-        print "  which matches landed"
-        print "    '{}'".format(original_name)
-        print "    ({})".format(landed_sha1)
-    print
+        print("  which matches landed")
+        print("    '{}'".format(original_name))
+        print("    ({})".format(landed_sha1))
+    print()
 
 
 # -----------------------------------------------------------------------------

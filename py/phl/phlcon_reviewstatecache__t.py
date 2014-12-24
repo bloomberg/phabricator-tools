@@ -21,6 +21,7 @@
 # [ D] test_D_InvalidationRules
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import collections
@@ -127,7 +128,7 @@ class Test(unittest.TestCase):
             #      and otherwise we won't be referring to the same data
             #      in Python 3 we can do better with nonlocal
             queried_revision_list[:] = actual_revision_list
-            print queried_revision_list
+            print(queried_revision_list)
 
             next_expected_query = expected_queries[0]
             self.assertSetEqual(

@@ -18,6 +18,7 @@ Otherwise all entries in the index are compared.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 

@@ -47,6 +47,7 @@ Usage examples:
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -132,16 +133,16 @@ def process(args):
     result = conduit("differential.updaterevision", d)
 
     if args.format_id:
-        print result["revisionid"]
+        print(result["revisionid"])
     elif args.format_url:
-        print result["uri"]
+        print(result["uri"])
     else:  # args.format_summary:
-        print (
+        print((
             "Updated revision '{rev_id}', you can view it at this URL:\n"
             "  {url}"
         ).format(
             rev_id=result["revisionid"],
-            url=result["uri"])
+            url=result["uri"]))
 
 
 # -----------------------------------------------------------------------------

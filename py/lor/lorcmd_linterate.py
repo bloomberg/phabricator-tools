@@ -36,6 +36,7 @@ of what it's already covered.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -90,19 +91,19 @@ def main():
             novel_filter.write_seen()
 
     except phlsys_makeconduit.InsufficientInfoException as e:
-        print "ERROR - insufficient information"
-        print e
-        print
-        print "N.B. you may also specify uri, user or cert explicitly like so:"
-        print "  --uri URI           address of phabricator instance"
-        print "  --user USERNAME     username of user to connect as"
-        print "  --cert CERTIFICATE  certificate for user Phabrictor account"
+        print("ERROR - insufficient information")
+        print(e)
+        print()
+        print("N.B. you may also specify uri, user or cert directly like so:")
+        print("  --uri URI           address of phabricator instance")
+        print("  --user USERNAME     username of user to connect as")
+        print("  --cert CERTIFICATE  certificate for user Phabrictor account")
         return 1
 
     if error_revisions:
-        print 'revisions with errors:', ' '.join(error_revisions)
+        print('revisions with errors:', ' '.join(error_revisions))
     else:
-        print 'no revisions had errors'
+        print('no revisions had errors')
 
 
 def parse_args():
@@ -160,7 +161,7 @@ def yield_revisions(conduit, args):
                 phlcon_differential.write_diff_files(diff, temp_dir)
             except phlcon_differential.WriteDiffError as e:
                 if not args.silent:
-                    print 'skipping revision ', revision.id, ':', e
+                    print('skipping revision ', revision.id, ':', e)
             else:
                 yield revision
 
@@ -173,7 +174,7 @@ def yield_revisions(conduit, args):
 
 def linterate(args, conduit, revision, error_revisions, error_filter):
     if not args.silent:
-        print revision.id, revision.title
+        print(revision.id, revision.title)
 
     try:
         errors = None
@@ -184,14 +185,14 @@ def linterate(args, conduit, revision, error_revisions, error_filter):
 
         if errors:
             if args.silent:
-                print revision.id, revision.title
+                print(revision.id, revision.title)
 
-            print phlsys_cppcheck.summarize_results(errors)
-            print revision.uri
+            print(phlsys_cppcheck.summarize_results(errors))
+            print(revision.uri)
 
             error_revisions.append(str(revision.id))
             if not args.non_interactive and phlsys_choice.yes_or_no('comment'):
-                print "commenting.."
+                print("commenting..")
                 for e in errors:
                     first_line = min(e.line_numbers)
                     last_line = max(e.line_numbers)
@@ -217,10 +218,10 @@ def linterate(args, conduit, revision, error_revisions, error_filter):
                 # phlcon_differential.create_comment(
                 #     conduit, revision.id, message, attach_inlines=True)
 
-            print
+            print()
     except phlsys_subprocess.CalledProcessError as e:
         if not args.silent:
-            print ' ', e
+            print(' ', e)
 
 
 class BoringErrorFilter(object):

@@ -17,6 +17,7 @@ which extend Phabricator.
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import argparse
@@ -96,13 +97,13 @@ def main():
     try:
         return args.func(args)
     except phlsys_makeconduit.InsufficientInfoException as e:
-        print "ERROR - insufficient information"
-        print e
-        print
-        print "N.B. you may also specify uri, user or cert explicitly like so:"
-        print "  --uri URI           address of phabricator instance"
-        print "  --user USERNAME     username of user to connect as"
-        print "  --cert CERTIFICATE  certificate for user Phabrictor account"
+        print("ERROR - insufficient information")
+        print(e)
+        print()
+        print("N.B. you may also specify uri, user or cert directly like so:")
+        print("  --uri URI           address of phabricator instance")
+        print("  --user USERNAME     username of user to connect as")
+        print("  --cert CERTIFICATE  certificate for user Phabrictor account")
         return 1
 
 

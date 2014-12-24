@@ -13,6 +13,7 @@
 # (this contents block is generated, edits will be lost)
 # =============================================================================
 
+from __future__ import print_function
 from __future__ import absolute_import
 
 import os
@@ -46,18 +47,18 @@ def _remove_file_ignore_fail(path):
     try:
         os.remove(path)
     except OSError as e:
-        print "Warning, problem removing file '{}':".format(path)
-        print "  {}".format(e)
-        print
+        print("Warning, problem removing file '{}':".format(path))
+        print("  {}".format(e))
+        print()
 
 
 def _remove_dir_ignore_fail(path):
     try:
         shutil.rmtree(path)
     except OSError as e:
-        print "Warning, problem removing dir '{}':".format(path)
-        print "  {}".format(e)
-        print
+        print("Warning, problem removing dir '{}':".format(path))
+        print("  {}".format(e))
+        print()
 
 
 def process(args):
