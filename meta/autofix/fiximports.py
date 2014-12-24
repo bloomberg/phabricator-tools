@@ -55,7 +55,7 @@ def main():
     for m in modules:
         try:
             process_module(m)
-        except ProcessingException as e:
+        except Exception as e:
             print('Exception while processing: ', m)
             print(e)
             return 1
