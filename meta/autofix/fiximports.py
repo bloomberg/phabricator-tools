@@ -165,15 +165,17 @@ def group_imports(imports, module_name):
 
 def push_current_group(groups, current_group, imports):
     if current_group:
-        imports[:] = sorted(list(set(imports) - set(current_group)))
+        imports[:] = list(set(imports) - set(current_group))
         current_group = ['import ' + i for i in current_group]
+        current_group.sort()
         groups.append(current_group)
 
 
 def push_current_future_group(groups, current_group, imports):
     if current_group:
-        imports[:] = sorted(list(set(imports) - set(current_group)))
+        imports[:] = list(set(imports) - set(current_group))
         current_group = ['from __future__ import ' + i for i in current_group]
+        current_group.sort()
         groups.append(current_group)
 
 

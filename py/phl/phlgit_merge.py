@@ -18,8 +18,8 @@
 # TODO: write test driver
 # TODO: distinguish between different error conditions
 
-from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import print_function
 
 import phlsys_fs
 import phlsys_subprocess

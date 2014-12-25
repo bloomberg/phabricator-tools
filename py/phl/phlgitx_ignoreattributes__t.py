@@ -19,8 +19,8 @@
 # [ C] test_C_WorkaroundSpuriousEolDiff
 # =============================================================================
 
-from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import print_function
 
 import contextlib
 import os
