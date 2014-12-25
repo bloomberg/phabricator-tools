@@ -74,7 +74,7 @@ def in_custom_unit(td, seconds_per_unit, unit_name):
 
     """
     seconds = td.total_seconds()
-    units = int(seconds / seconds_per_unit)  # use // in Python 3
+    units = int(seconds // seconds_per_unit)
     if units != 1:
         unit_name += 's'
     return ' '.join([str(units), unit_name])
@@ -236,7 +236,7 @@ def quantized(td):
 
     remainder = td.total_seconds()
     for (unit_name, seconds_per_unit) in buckets:
-        units = int(remainder / seconds_per_unit)
+        units = int(remainder // seconds_per_unit)
         if units >= 1:
             if units > 1:
                 unit_name += 's'

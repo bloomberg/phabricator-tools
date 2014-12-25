@@ -132,7 +132,7 @@ def check_public_ifaces_match(cls1, cls2):
 
         >>> class ExampleClass2(object):
         ...     def example_method2(self, int_param):
-        ...         return int_param / 2
+        ...         return int_param // 2
 
         >>> check_public_ifaces_match(ExampleClass, ExampleClass2)
         interfaces differ: ExampleClass and ExampleClass2

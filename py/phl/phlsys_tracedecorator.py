@@ -40,7 +40,7 @@ def method_tracer(object_to_string):
         >>> class ExampleClass2(object):
         ...     @method_tracer(lambda x: 'Example2')
         ...     def example_method2(self, int_param):
-        ...         return int_param / 2
+        ...         return int_param // 2
         >>> d = ExampleClass2()
         >>> d.example_method2(42)
         Example2.example_method2(42) -> 21
