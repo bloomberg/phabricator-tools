@@ -49,6 +49,7 @@
 # TODO: write test driver
 
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 import phlgit_checkout

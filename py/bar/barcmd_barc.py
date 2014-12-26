@@ -16,6 +16,7 @@ Essentially a prescriptive tool for supporting arcyd's branch-based workflow.
 # =============================================================================
 
 from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
 
 import argparse
