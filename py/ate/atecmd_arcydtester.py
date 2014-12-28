@@ -374,23 +374,31 @@ def _do_tests(args):
 
     with contextlib.closing(fixture):
         try:
-            run_interaction(_happy_path, fixture, args)
+            run_interaction(
+                _happy_path, _arcyd_run_once_scenario, fixture, args)
         except:
             print(fixture.arcyds[0].debug_log())
             fixture.launch_debug_shell()
             raise
 
 
-def run_interaction(interaction_generator, fixture, args):
+def run_interaction(user_scenario, arcyd_scenario, fixture, args):
+    arcyd_generator = arcyd_scenario(fixture, args)
+    for user_interaction in user_scenario(fixture, args):
+        with phlsys_timer.print_duration_context(user_interaction):
+            next(arcyd_generator)
+
+
+def _arcyd_run_once_scenario(fixture, args):
     arcyd = fixture.arcyds[0]
 
     with phlsys_timer.print_duration_context("Add repos to arcyd"):
         for i in xrange(args.repo_count):
             arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
 
-    for interaction in interaction_generator(fixture, args):
-        with phlsys_timer.print_duration_context(interaction):
-            arcyd.run_once()
+    while True:
+        arcyd.run_once()
+        yield
 
 
 def _happy_path(fixture, args):
