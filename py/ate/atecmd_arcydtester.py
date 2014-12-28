@@ -6,6 +6,7 @@
 #
 # Public Functions:
 #   main
+#   run_interaction
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -373,27 +374,32 @@ def _do_tests(args):
 
     with contextlib.closing(fixture):
         try:
-            _happy_path(fixture, args)
+            run_interaction(_happy_path, fixture, args)
         except:
             print(fixture.arcyds[0].debug_log())
             fixture.launch_debug_shell()
             raise
 
 
-def _happy_path(fixture, args):
+def run_interaction(interaction_generator, fixture, args):
     arcyd = fixture.arcyds[0]
 
     with phlsys_timer.print_duration_context("Add repos to arcyd"):
         for i in xrange(args.repo_count):
             arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
 
+    for interaction in interaction_generator(fixture, args):
+        with phlsys_timer.print_duration_context(interaction):
+            arcyd.run_once()
+
+
+def _happy_path(fixture, args):
     with phlsys_timer.print_duration_context("Pushing reviews"):
         for i in xrange(args.repo_count):
             worker = fixture.repos[i].alice
             worker.push_new_review_branch('review1')
 
-    with phlsys_timer.print_duration_context("Creating reviews"):
-        arcyd.run_once()
+    yield "Creating reviews"
 
     with phlsys_timer.print_duration_context("Accepting reviews"):
         for i in xrange(args.repo_count):
@@ -405,8 +411,7 @@ def _happy_path(fixture, args):
             print(r["review_id"])
             bob.accept_review(r["review_id"])
 
-    with phlsys_timer.print_duration_context("Landing reviews"):
-        arcyd.run_once()
+    yield "Landing reviews"
 
     with phlsys_timer.print_duration_context("Check reviews are landed"):
         for i in xrange(args.repo_count):
@@ -415,8 +420,7 @@ def _happy_path(fixture, args):
             reviews = bob.list_reviews()
             assert len(reviews) == 0
 
-    with phlsys_timer.print_duration_context("Update nothing"):
-        arcyd.run_once()
+    yield "Update nothing"
 
 
 # -----------------------------------------------------------------------------
