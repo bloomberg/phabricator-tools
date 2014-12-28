@@ -151,7 +151,7 @@ class _Worker(object):
     def list_reviews(self):
         return json.loads(self.barc('list', '--format-json'))
 
-    def accept_review(self, review_id):
+    def _arcyon_action(self, review_id, action):
         connection_args = [
             '--user', self._phab_username,
             '--cert', self._conduit_cert,
@@ -161,8 +161,11 @@ class _Worker(object):
             'comment',
             review_id,
             '--message', 'accepting',
-            '--action', 'accept',
+            '--action', action,
             *connection_args)
+
+    def accept_review(self, review_id):
+        self._arcyon_action(review_id, 'accept')
 
     @property
     def repo(self):
