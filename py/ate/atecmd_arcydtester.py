@@ -145,6 +145,13 @@ class _Worker(object):
             base='origin/master')
         return phlgit_push.push(self._repo, branch_name, 'origin')
 
+    def push_review_update(self, identifier, to_append):
+        self._git_worker.commit_append_to_file(
+            identifier, identifier, to_append)
+
+        branch_name = 'r/master/{}'.format(identifier)
+        phlgit_push.push(self._repo, branch_name, 'origin')
+
     def fetch(self):
         self._repo('fetch', '--prune')
 
@@ -166,6 +173,9 @@ class _Worker(object):
 
     def accept_review(self, review_id):
         self._arcyon_action(review_id, 'accept')
+
+    def request_changes(self, review_id):
+        self._arcyon_action(review_id, 'request changes')
 
     @property
     def repo(self):
@@ -377,7 +387,7 @@ def _do_tests(args):
     with contextlib.closing(fixture):
         try:
             run_interaction(
-                _user_story_happy_path,
+                _user_story_request_changes,
                 _arcyd_run_once_scenario,
                 fixture,
                 args)
@@ -418,6 +428,34 @@ def _user_story_happy_path(repo):
     reviews = repo.bob.list_reviews()
     assert len(reviews) == 1
     repo.bob.accept_review(reviews[0]["review_id"])
+
+    yield "Landing reviews"
+
+    print("Check review landed")
+    repo.bob.fetch()
+    assert len(repo.bob.list_reviews()) == 0
+
+    yield "Finished"
+
+
+def _user_story_request_changes(repo):
+
+    print("Push review")
+    repo.alice.push_new_review_branch('review1')
+
+    yield "Creating reviews"
+    repo.bob.fetch()
+    review_id = repo.bob.list_reviews()[0]["review_id"]
+
+    print("Request changes")
+    repo.bob.request_changes(review_id)
+    yield "Nothing"
+
+    yield "Update review"
+    repo.alice.push_review_update('review1', 'more changes')
+
+    print("Accept review")
+    repo.bob.accept_review(review_id)
 
     yield "Landing reviews"
 
