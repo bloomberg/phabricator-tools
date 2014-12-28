@@ -401,7 +401,8 @@ def run_interaction(user_scenario, arcyd_scenario, fixture, args):
     arcyd = fixture.arcyds[0]
     arcyd_generator = arcyd_scenario(arcyd, fixture.repos)
     user_scenario_list = [user_scenario(repo) for repo in fixture.repos]
-    for _ in itertools.izip(*user_scenario_list):
+    for interactions in itertools.izip(*user_scenario_list):
+        print(interactions)
         next(arcyd_generator)
 
 
