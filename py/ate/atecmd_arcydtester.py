@@ -405,6 +405,7 @@ def _arcyd_run_once_scenario(fixture, args):
 
 
 def _user_story_happy_path(fixture, args):
+
     with phlsys_timer.print_duration_context("Pushing reviews"):
         for i in xrange(args.repo_count):
             worker = fixture.repos[i].alice
@@ -430,8 +431,6 @@ def _user_story_happy_path(fixture, args):
             bob.fetch()
             reviews = bob.list_reviews()
             assert len(reviews) == 0
-
-    yield "Update nothing"
 
 
 # -----------------------------------------------------------------------------
