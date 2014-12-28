@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import argparse
 import contextlib
+import itertools
 import json
 import os
 import shutil
@@ -30,7 +31,6 @@ import phlgitu_fixture
 import phlsys_fs
 import phlsys_git
 import phlsys_subprocess
-import phlsys_timer
 
 _USAGE_EXAMPLES = """
 """
@@ -360,17 +360,16 @@ def _do_tests(args):
 
     # pychecker makes us declare this before 'with'
     arcyd_count = 1
-    with phlsys_timer.print_duration_context("Fixture setup"):
-        fixture = _Fixture(
-            arcyd_cmd_path,
-            barc_cmd_path,
-            arcyon_cmd_path,
-            phab_uri,
-            args.repo_count,
-            arcyd_count,
-            args.alice_user_email_cert,
-            args.bob_user_email_cert)
-        fixture.setup_arcyds(arcyd_user, arcyd_email, arcyd_cert, phab_uri)
+    fixture = _Fixture(
+        arcyd_cmd_path,
+        barc_cmd_path,
+        arcyon_cmd_path,
+        phab_uri,
+        args.repo_count,
+        arcyd_count,
+        args.alice_user_email_cert,
+        args.bob_user_email_cert)
+    fixture.setup_arcyds(arcyd_user, arcyd_email, arcyd_cert, phab_uri)
 
     with contextlib.closing(fixture):
         try:
@@ -386,51 +385,44 @@ def _do_tests(args):
 
 
 def run_interaction(user_scenario, arcyd_scenario, fixture, args):
-    arcyd_generator = arcyd_scenario(fixture, args)
-    for user_interaction in user_scenario(fixture, args):
-        with phlsys_timer.print_duration_context(user_interaction):
-            next(arcyd_generator)
-
-
-def _arcyd_run_once_scenario(fixture, args):
     arcyd = fixture.arcyds[0]
+    arcyd_generator = arcyd_scenario(arcyd, fixture.repos)
+    user_scenario_list = [user_scenario(repo) for repo in fixture.repos]
+    for _ in itertools.izip(*user_scenario_list):
+        next(arcyd_generator)
 
-    with phlsys_timer.print_duration_context("Add repos to arcyd"):
-        for i in xrange(args.repo_count):
-            arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
+
+def _arcyd_run_once_scenario(arcyd, repo_list):
+
+    # Add repositories to the single Arcyd instance
+    for i in xrange(len(repo_list)):
+        arcyd('add-repo', 'localphab', 'localdir', 'repo-{}'.format(i))
 
     while True:
         arcyd.run_once()
         yield
 
 
-def _user_story_happy_path(fixture, args):
+def _user_story_happy_path(repo):
 
-    with phlsys_timer.print_duration_context("Pushing reviews"):
-        for i in xrange(args.repo_count):
-            worker = fixture.repos[i].alice
-            worker.push_new_review_branch('review1')
+    print("Push review")
+    repo.alice.push_new_review_branch('review1')
 
     yield "Creating reviews"
 
-    with phlsys_timer.print_duration_context("Accepting reviews"):
-        for i in xrange(args.repo_count):
-            bob = fixture.repos[i].bob
-            bob.fetch()
-            reviews = bob.list_reviews()
-            assert len(reviews) == 1
-            r = reviews[0]
-            print(r["review_id"])
-            bob.accept_review(r["review_id"])
+    print("Accept review")
+    repo.bob.fetch()
+    reviews = repo.bob.list_reviews()
+    assert len(reviews) == 1
+    repo.bob.accept_review(reviews[0]["review_id"])
 
     yield "Landing reviews"
 
-    with phlsys_timer.print_duration_context("Check reviews are landed"):
-        for i in xrange(args.repo_count):
-            bob = fixture.repos[i].bob
-            bob.fetch()
-            reviews = bob.list_reviews()
-            assert len(reviews) == 0
+    print("Check review landed")
+    repo.bob.fetch()
+    assert len(repo.bob.list_reviews()) == 0
+
+    yield "Finished"
 
 
 # -----------------------------------------------------------------------------
