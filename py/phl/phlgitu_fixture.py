@@ -199,7 +199,7 @@ class Worker(object):
             f.write(to_append)
 
     def add_append_to_file(self, relative_path, to_append):
-        """Create a new file in the working tree and index.
+        """Append to a file in the working tree, add the changes.
 
         :relative_path: the path of the file, relative to the repo
         :to_append: the string contents to append to the file
@@ -210,7 +210,7 @@ class Worker(object):
         self._repo('add', relative_path)
 
     def commit_append_to_file(self, message, relative_path, to_append):
-        """Create and commit a new file.
+        """Append to a file in the working tree, commit the changes.
 
         :message: the string content of the commit message
         :relative_path: the path of the file, relative to the repo
