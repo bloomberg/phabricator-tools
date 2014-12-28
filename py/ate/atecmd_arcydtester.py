@@ -375,7 +375,10 @@ def _do_tests(args):
     with contextlib.closing(fixture):
         try:
             run_interaction(
-                _happy_path, _arcyd_run_once_scenario, fixture, args)
+                _user_story_happy_path,
+                _arcyd_run_once_scenario,
+                fixture,
+                args)
         except:
             print(fixture.arcyds[0].debug_log())
             fixture.launch_debug_shell()
@@ -401,7 +404,7 @@ def _arcyd_run_once_scenario(fixture, args):
         yield
 
 
-def _happy_path(fixture, args):
+def _user_story_happy_path(fixture, args):
     with phlsys_timer.print_duration_context("Pushing reviews"):
         for i in xrange(args.repo_count):
             worker = fixture.repos[i].alice
