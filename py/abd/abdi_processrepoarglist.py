@@ -245,15 +245,24 @@ class _ArcydManagedRepository(object):
             self._review_cache.active_reviews - old_active_reviews,
             self._is_disabled,
             watcher.tested_urls,
-            self._refcache_repo.peek_hash_ref_pairs()
+            self._refcache_repo.peek_hash_ref_pairs(),
+            self._differ_cache.get_cache()
         )
 
     def merge_from_worker(self, results):
 
-        active_reviews, is_disabled, tested_urls, hash_ref_pairs = results
+        (
+            active_reviews,
+            is_disabled,
+            tested_urls,
+            hash_ref_pairs,
+            differ_cache
+        ) = results
+
         self._review_cache.merge_additional_active_reviews(active_reviews)
         self._is_disabled = is_disabled
         self._refcache_repo.set_hash_ref_pairs(hash_ref_pairs)
+        self._differ_cache.set_cache(differ_cache)
 
         # merge in the consumed urls from the worker
         for url in tested_urls:
