@@ -53,6 +53,8 @@ Operations combining conduit with git.
 Abstraction for Arcyd's conduit operations.
 * `abdt_differ.py` -
 Generate git diffs between branches suitable for Differential reviews.
+* `abdt_differresultcache.py` -
+Cache the results from abdt_differ.
 * `abdt_errident.py` -
 "A global list of error identifiers that may be used.
 * `abdt_exception.py` -
