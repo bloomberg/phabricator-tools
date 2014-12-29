@@ -54,7 +54,6 @@ import phlgit_showref
 import phlgitu_ref
 
 import abdt_branch
-import abdt_differ
 import abdt_lander
 import abdt_logging
 import abdt_naming
@@ -109,7 +108,7 @@ ARCYD_ABANDONED_BRANCH_FQ = "refs/heads/" + _ARCYD_ABANDONED_BRANCH
 class Repo(object):
 
     def __init__(
-            self, refcache_repo, remote, description):
+            self, refcache_repo, differ_cache, remote, description):
         """Initialise a new Repo.
 
         :repo: a callable supporting git commands, e.g. repo("status")
@@ -123,6 +122,7 @@ class Repo(object):
         self._remote = remote
         self._description = description
         self._is_landing_archive_enabled = None
+        self._differ_cache = differ_cache
 
     def is_identical(self, branch1, branch2):
         """Return True if the branches point to the same commit.
@@ -357,14 +357,8 @@ class Repo(object):
         :returns: the string diff of the changes on the branch
 
         """
-        # checkout the 'to' branch, otherwise we won't take into account any
-        # changes to .gitattributes files
-        phlgit_checkout.branch(self._repo, to_branch)
-        return abdt_differ.make_raw_diff(
-            self,
-            from_branch,
-            to_branch,
-            max_diff_size_utf8_bytes)
+        return self._differ_cache.checkout_make_raw_diff(
+            from_branch, to_branch, max_diff_size_utf8_bytes)
 
     def _log_read_call(self, args, kwargs):
         with abdt_logging.remote_io_read_event_context(

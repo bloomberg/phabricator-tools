@@ -30,6 +30,7 @@ import phlurl_watcher
 
 import abdi_processrepoarglist
 import abdi_repoargs
+import abdt_differresultcache
 import abdt_fs
 import abdt_git
 
@@ -80,8 +81,10 @@ def process(args):
 
             sys_repo = phlsys_git.Repo(repo_config.repo_path)
             refcache_repo = phlgitx_refcache.Repo(sys_repo)
+            differ_cache = abdt_differresultcache.Cache(refcache_repo)
             abd_repo = abdt_git.Repo(
                 refcache_repo,
+                differ_cache,
                 "origin",
                 repo_config.repo_desc)
 

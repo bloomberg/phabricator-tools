@@ -34,6 +34,7 @@ import abdmail_mailer
 import abdt_classicnaming
 import abdt_compositenaming
 import abdt_conduit
+import abdt_differresultcache
 import abdt_errident
 import abdt_exhandlers
 import abdt_fs
@@ -199,11 +200,12 @@ class _ArcydManagedRepository(object):
             mail_sender):
 
         self._is_disabled = False
-        self._refcache_repo = phlgitx_refcache.Repo(
-            phlsys_git.Repo(
-                repo_args.repo_path))
+        sys_repo = phlsys_git.Repo(repo_args.repo_path)
+        self._refcache_repo = phlgitx_refcache.Repo(sys_repo)
+        self._differ_cache = abdt_differresultcache.Cache(self._refcache_repo)
         self._abd_repo = abdt_git.Repo(
             self._refcache_repo,
+            self._differ_cache,
             "origin",
             repo_args.repo_desc)
         self._name = repo_name

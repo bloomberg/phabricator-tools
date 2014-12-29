@@ -57,6 +57,7 @@ import phlgitx_refcache
 import abdt_branch
 import abdt_branchtester
 import abdt_classicnaming
+import abdt_differresultcache
 import abdt_git
 import abdt_naming
 
@@ -76,7 +77,9 @@ class Test(unittest.TestCase):
         self.repo_dev = self.repos.w0.repo
         sys_repo = self.repos.w1.repo
         refcache_repo = phlgitx_refcache.Repo(sys_repo)
-        self.repo_arcyd = abdt_git.Repo(refcache_repo, 'origin', 'myrepo')
+        differ_cache = abdt_differresultcache.Cache(refcache_repo)
+        self.repo_arcyd = abdt_git.Repo(
+            refcache_repo, differ_cache, 'origin', 'myrepo')
 
     def tearDown(self):
         self.repos.close()
