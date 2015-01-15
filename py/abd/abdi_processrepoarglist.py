@@ -15,6 +15,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import datetime
 import json
 import logging
 import multiprocessing
@@ -26,6 +27,7 @@ import phlgitx_refcache
 import phlmp_cyclingpool
 import phlsys_conduit
 import phlsys_git
+import phlsys_strtotime
 import phlsys_subprocess
 import phlsys_timer
 import phlurl_watcher
@@ -188,6 +190,39 @@ class _RecordingWatcherWrapper(object):
         return self._tested_urls
 
 
+class _RepoActiveRetryState(object):
+
+    """Determine when a repo is active and when to retry it."""
+
+    def __init__(self, retry_timestr_list):
+        self._is_active = True
+        self._reactivate_time = None
+        self._retry_delays = [
+            phlsys_strtotime.duration_string_to_time_delta(s)
+            for s in retry_timestr_list
+        ]
+
+    @property
+    def is_active(self):
+
+        if not self._is_active:
+            if datetime.datetime.utcnow() >= self._reactivate_time:
+                self._is_active = True
+                self._reactivate_time = None
+
+        return self._is_active
+
+    def disable(self):
+        self._is_active = False
+        retry_delay = None
+        if self._retry_delays:
+            retry_delay = self._retry_delays.pop(0)
+            self._reactivate_time = datetime.datetime.utcnow() + retry_delay
+        else:
+            self._reactivate_time = None
+        return retry_delay
+
+
 class _ArcydManagedRepository(object):
 
     def __init__(
@@ -199,7 +234,8 @@ class _ArcydManagedRepository(object):
             sys_admin_emails,
             mail_sender):
 
-        self._is_disabled = False
+        self._active_state = _RepoActiveRetryState(
+            retry_timestr_list=["10 seconds", "10 minutes", "1 hours"])
         sys_repo = phlsys_git.Repo(repo_args.repo_path)
         self._refcache_repo = phlgitx_refcache.Repo(sys_repo)
         self._differ_cache = abdt_differresultcache.Cache(self._refcache_repo)
@@ -228,7 +264,7 @@ class _ArcydManagedRepository(object):
 
         old_active_reviews = set(self._review_cache.active_reviews)
 
-        if not self._is_disabled:
+        if self._active_state.is_active:
             try:
                 _process_repo(
                     self._abd_repo,
@@ -238,12 +274,11 @@ class _ArcydManagedRepository(object):
                     watcher,
                     self._mail_sender)
             except Exception:
-                self._on_exception(None)
-                self._is_disabled = True
-
+                retry_delay = self._active_state.disable()
+                self._on_exception(retry_delay)
         return (
             self._review_cache.active_reviews - old_active_reviews,
-            self._is_disabled,
+            self._active_state,
             watcher.tested_urls,
             self._refcache_repo.peek_hash_ref_pairs(),
             self._differ_cache.get_cache()
@@ -253,14 +288,14 @@ class _ArcydManagedRepository(object):
 
         (
             active_reviews,
-            is_disabled,
+            active_state,
             tested_urls,
             hash_ref_pairs,
             differ_cache
         ) = results
 
         self._review_cache.merge_additional_active_reviews(active_reviews)
-        self._is_disabled = is_disabled
+        self._active_state = active_state
         self._refcache_repo.set_hash_ref_pairs(hash_ref_pairs)
         self._differ_cache.set_cache(differ_cache)
 
@@ -393,7 +428,7 @@ def _flatten_list(hierarchy):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
