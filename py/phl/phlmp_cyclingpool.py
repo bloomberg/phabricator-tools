@@ -5,6 +5,7 @@
 # phlmp_cyclingpool
 #
 # Public Classes:
+#   MultiprocessingWorkerFinishError
 #   CyclingPool
 #    .cycle_results
 #    .finish_results
@@ -20,8 +21,36 @@ from __future__ import print_function
 
 import multiprocessing
 import multiprocessing.queues
+import os
 
 import phlsys_timer
+
+
+class MultiprocessingWorkerFinishError(Exception):
+    # Occasionally we see errors of this form after starting workers:
+    #
+    #   File "/.../python2.7/multiprocessing/process.py", line 130, in start
+    #     self._popen = Popen(self)
+    #   File "/.../python2.7/multiprocessing/forking.py", line 127, in __init__
+    #     sys.stderr.flush()
+    #
+    # AttributeError: 'Devnull' object has no attribute 'flush'
+    #
+    # This is when running version '2.7.2'. The only instance of a 'Devnull'
+    # object seems to be in the standard library module 'smtpd' module, this
+    # doesn't seem to be something we're using even indirectly so it's a bit
+    # surprising. This doesn't seem to be related to 'os.devnull', which is
+    # simply a string path to the system's '/dev/null' equivalent.
+    #
+    # There's no mechanism for propagating exceptions back to the original
+    # process at the moment, the least harmful thing seems to be to emit a
+    # custom exception in the worker process which describes the situation.
+    #
+    # The error occurs after all the work has been done, so unless there are
+    # side-effects that haven't yet been noticed, this doesn't appear to be
+    # harmful.
+    #
+    pass
 
 
 class CyclingPool(object):
@@ -224,10 +253,8 @@ class _Pool(object):
         self._worker_list = []
         num_workers = min(max_workers, len(job_list))
         for _ in xrange(num_workers):
-            worker = multiprocessing.Process(
-                target=_worker_process,
-                args=(job_list, self._job_index_queue, self._results_queue))
-            worker.start()
+            worker = _start_worker_process(
+                job_list, self._job_index_queue, self._results_queue)
             self._worker_list.append(worker)
 
     def add_job_index(self, job_index):
@@ -258,6 +285,28 @@ class _Pool(object):
 
     def is_finished(self):
         return not self._worker_list
+
+
+def _start_worker_process(job_list, work_queue, results_queue):
+
+    worker = multiprocessing.Process(
+        target=_worker_process,
+        args=(job_list, work_queue, results_queue))
+
+    pid = os.getpid()
+
+    try:
+        worker.start()
+    except AttributeError:
+        if pid != os.getpid():
+            # We've encountered an unexpected error.
+            # We are in the worker process.
+            # This matches the strange 'Devnull' error, see comments in the
+            # custom exception class for more details
+            raise MultiprocessingWorkerFinishError(
+                'Worker with pid {} oddly failed to finish.'.format(pid))
+
+    return worker
 
 
 def _worker_process(job_list, work_queue, results_queue):
