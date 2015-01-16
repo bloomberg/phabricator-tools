@@ -298,13 +298,15 @@ def _start_worker_process(job_list, work_queue, results_queue):
     try:
         worker.start()
     except AttributeError:
-        if pid != os.getpid():
+        current_pid = os.getpid()
+        if pid != current_pid:
             # We've encountered an unexpected error.
             # We are in the worker process.
             # This matches the strange 'Devnull' error, see comments in the
             # custom exception class for more details
             raise MultiprocessingWorkerFinishError(
-                'Worker with pid {} oddly failed to finish.'.format(pid))
+                'Worker with pid {} oddly failed to finish.'.format(
+                    current_pid))
 
     return worker
 
