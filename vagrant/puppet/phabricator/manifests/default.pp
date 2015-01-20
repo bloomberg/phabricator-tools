@@ -36,10 +36,21 @@ class apache2 {
    }
 
   file { 'vhost':
-    path    => '/etc/apache2/conf.d/95-phab.conf',
+    path    => '/etc/apache2/sites-available/phab.conf',
     ensure  => present,
     content => template("phabricator/vhost.erb"),
     notify  => Service['apache2'],
+  }
+
+  file { '/etc/apache2/sites-enabled/phab.conf':
+    ensure => link,
+    target => '/etc/apache2/sites-available/phab.conf',
+  }
+
+  file { '/etc/apache2/sites-enabled/000-default.conf':
+    ensure => 'absent',
+    purge => true,
+    force => true
   }
 
    define module ( $requires = 'apache2' ) {
