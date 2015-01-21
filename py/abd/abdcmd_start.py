@@ -30,7 +30,6 @@ import phlsys_signal
 import abdi_processrepos
 import abdi_repoargs
 import abdt_fs
-import abdt_logging
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -90,7 +89,6 @@ def process(args):
     def logger_config():
         _setup_logger(fs)
 
-    abdt_logging.set_remote_io_read_log_path(fs.layout.log_remote_io_reads)
     with phlsys_multiprocessing.logging_context(logger_config):
         _LOGGER.debug("start with args: {}".format(args))
         _LOGGER.info("arcyd started")
@@ -125,7 +123,7 @@ def _setup_logger(fs):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

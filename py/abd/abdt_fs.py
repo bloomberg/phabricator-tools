@@ -143,7 +143,6 @@ class Layout(object):
     stderr = 'var/log/stderr'
     log_debug = 'var/log/debug'
     log_info = 'var/log/info'
-    log_remote_io_reads = 'var/log/remote_io_reads'
     phabricator_config_dir = 'config/repository'
     repository_config_dir = 'config/repository'
     urlwatcher_cache_path = '.arcyd.urlwatcher.cache'
@@ -484,7 +483,7 @@ def is_config_name_valid(name):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

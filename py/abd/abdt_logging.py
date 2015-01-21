@@ -8,7 +8,6 @@
 #   set_external_system_error_logger
 #   clear_external_system_error_logger
 #   set_remote_io_write_log_path
-#   set_remote_io_read_log_path
 #   on_system_error
 #   on_retry_exception
 #   remote_io_write_event_context
@@ -35,9 +34,7 @@ import phlsys_timer
 _LOGGER = logging.getLogger(__name__)
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
 _REMOTE_IO_WRITE_LOG_LOCK = multiprocessing.Lock()
-_REMOTE_IO_READ_LOG_LOCK = multiprocessing.Lock()
 _REMOTE_IO_WRITE_LOG_PATH = None
-_REMOTE_IO_READ_LOG_PATH = None
 
 
 def set_external_system_error_logger(logger):
@@ -56,13 +53,6 @@ def set_remote_io_write_log_path(path):
     global _REMOTE_IO_WRITE_LOG_PATH
     with _REMOTE_IO_WRITE_LOG_LOCK:
         _REMOTE_IO_WRITE_LOG_PATH = os.path.abspath(path)
-
-
-def set_remote_io_read_log_path(path):
-    assert path
-    global _REMOTE_IO_READ_LOG_PATH
-    with _REMOTE_IO_READ_LOG_LOCK:
-        _REMOTE_IO_READ_LOG_PATH = os.path.abspath(path)
 
 
 def on_system_error(identifier, detail):
@@ -130,6 +120,30 @@ def _remote_io_event_context(identifier, detail, lock, path):
             prolog, identifier, detail, result_list, lock, path)
 
 
+def _log_remote_io_event_to_logger(
+        kind, prolog, identifier, detail, epilog, logger):
+
+    entry = '{}: ({}) {} - {} - ({})\n'.format(
+        kind, prolog, identifier, detail, epilog)
+
+    logger(entry)
+
+
+@contextlib.contextmanager
+def _remote_io_event_log_context(kind, identifier, detail, logger):
+    _log_remote_io_event_to_logger(
+        kind, 'start', identifier, detail, '', logger)
+    timer = phlsys_timer.Timer()
+    timer.start()
+    result_list = []
+    try:
+        yield result_list
+    finally:
+        prolog = '{:.3f}s'.format(timer.duration)
+        _log_remote_io_event_to_logger(
+            kind, prolog, identifier, detail, result_list, logger)
+
+
 def remote_io_write_event_context(identifier, detail):
     return _remote_io_event_context(
         identifier,
@@ -139,15 +153,12 @@ def remote_io_write_event_context(identifier, detail):
 
 
 def remote_io_read_event_context(identifier, detail):
-    return _remote_io_event_context(
-        identifier,
-        detail,
-        _REMOTE_IO_READ_LOG_LOCK,
-        _REMOTE_IO_READ_LOG_PATH)
+    return _remote_io_event_log_context(
+        'io-read-event', identifier, detail, _LOGGER.debug)
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
