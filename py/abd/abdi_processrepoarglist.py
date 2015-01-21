@@ -125,13 +125,16 @@ def do(
         with abdt_logging.remote_io_read_event_context('refresh-conduit', ''):
             conduit_manager.refresh_conduits()
 
-        if max_workers:
-            for i, res in pool.cycle_results(overrun_secs=overrun_secs):
-                repo = repo_list[i]
-                repo.merge_from_worker(res)
-        else:
-            for r in repo_list:
-                r()
+        with abdt_logging.misc_operation_event_context(
+                'process-repos',
+                '{} workers, {} repos'.format(max_workers, len(repo_list))):
+            if max_workers:
+                for i, res in pool.cycle_results(overrun_secs=overrun_secs):
+                    repo = repo_list[i]
+                    repo.merge_from_worker(res)
+            else:
+                for r in repo_list:
+                    r()
 
         # important to do this before stopping arcyd and as soon as possible
         # after doing fetches
@@ -145,10 +148,12 @@ def do(
             }
             report_json = json.dumps(report)
             full_path = os.path.abspath(external_report_command)
-            try:
-                phlsys_subprocess.run(full_path, stdin=report_json)
-            except phlsys_subprocess.CalledProcessError as e:
-                _LOGGER.error("CycleReportJson: {}".format(e))
+            with abdt_logging.misc_operation_event_context(
+                    'external-report-command', external_report_command):
+                try:
+                    phlsys_subprocess.run(full_path, stdin=report_json)
+                except phlsys_subprocess.CalledProcessError as e:
+                    _LOGGER.error("CycleReportJson: {}".format(e))
 
         # look for killfile
         if os.path.isfile(kill_file):
@@ -173,7 +178,9 @@ def do(
         # sleep to pad out the cycle
         secs_to_sleep = float(sleep_secs) - float(sleep_timer.duration)
         if secs_to_sleep > 0:
-            time.sleep(secs_to_sleep)
+            with abdt_logging.misc_operation_event_context(
+                    'sleep', secs_to_sleep):
+                time.sleep(secs_to_sleep)
 
 
 class _RecordingWatcherWrapper(object):

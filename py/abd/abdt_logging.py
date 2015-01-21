@@ -12,6 +12,7 @@
 #   on_retry_exception
 #   remote_io_write_event_context
 #   remote_io_read_event_context
+#   misc_operation_event_context
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -155,6 +156,11 @@ def remote_io_write_event_context(identifier, detail):
 def remote_io_read_event_context(identifier, detail):
     return _remote_io_event_log_context(
         'io-read-event', identifier, detail, _LOGGER.debug)
+
+
+def misc_operation_event_context(identifier, detail):
+    return _remote_io_event_log_context(
+        'misc-event', identifier, detail, _LOGGER.debug)
 
 
 # -----------------------------------------------------------------------------
