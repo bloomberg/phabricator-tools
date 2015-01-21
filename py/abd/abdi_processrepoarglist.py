@@ -41,6 +41,7 @@ import abdt_errident
 import abdt_exhandlers
 import abdt_fs
 import abdt_git
+import abdt_logging
 import abdt_rbranchnaming
 import abdt_tryloop
 
@@ -114,12 +115,15 @@ def do(
         sleep_timer.start()
 
         # refresh git snoops
-        abdt_tryloop.critical_tryloop(
-            url_watcher_wrapper.watcher.refresh,
-            abdt_errident.GIT_SNOOP,
-            '')
+        with abdt_logging.remote_io_read_event_context(
+                'refresh-git-snoop', ''):
+            abdt_tryloop.critical_tryloop(
+                url_watcher_wrapper.watcher.refresh,
+                abdt_errident.GIT_SNOOP,
+                '')
 
-        conduit_manager.refresh_conduits()
+        with abdt_logging.remote_io_read_event_context('refresh-conduit', ''):
+            conduit_manager.refresh_conduits()
 
         if max_workers:
             for i, res in pool.cycle_results(overrun_secs=overrun_secs):
