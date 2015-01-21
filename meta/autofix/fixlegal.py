@@ -76,7 +76,7 @@ def main():
         '--different-since',
         metavar='COMMIT',
         help='restrict checking to files which are different since COMMIT. '
-             'a diff from COMMIT...HEAD will be generated and the files '
+             'a diff from COMMIT to the INDEX will be generated and the files '
              'mentioned will be considered.',
         type=str)
     args = argparser.parse_args()
@@ -84,9 +84,13 @@ def main():
     os.chdir(args.path)
 
     if args.different_since:
-        diff_param = args.different_since + '...'
         file_list = subprocess.check_output(
-            ['git', 'diff', diff_param, '--name-only']).splitlines()
+            [
+                'git', 'diff', args.different_since,
+                '--cached',
+                '--name-only'
+            ]
+        ).splitlines()
     else:
         file_list = subprocess.check_output(
             ['git', 'ls-tree', '-r', '--name-only', 'HEAD']).splitlines()
@@ -236,7 +240,7 @@ if __name__ == "__main__":
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
