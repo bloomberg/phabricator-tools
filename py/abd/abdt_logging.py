@@ -110,12 +110,12 @@ def _remote_io_event_log_context(kind, identifier, detail, logger):
 
 def remote_io_write_event_context(identifier, detail):
     return _remote_io_event_log_context(
-        'io-write-event', identifier, detail, _LOGGER.info)
+        'write-io-event', identifier, detail, _LOGGER.info)
 
 
 def remote_io_read_event_context(identifier, detail):
     return _remote_io_event_log_context(
-        'io-read-event', identifier, detail, _LOGGER.debug)
+        'read-io-event', identifier, detail, _LOGGER.debug)
 
 
 def misc_operation_event_context(identifier, detail):
