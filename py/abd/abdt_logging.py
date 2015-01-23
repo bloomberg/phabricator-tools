@@ -124,7 +124,7 @@ def _remote_io_event_context(identifier, detail, lock, path):
 def _log_remote_io_event_to_logger(
         kind, prolog, identifier, detail, epilog, logger):
 
-    entry = '{}: ({}) {} - {} - ({})\n'.format(
+    entry = '{}: ({}) {} - {} - ({})'.format(
         kind, prolog, identifier, detail, epilog)
 
     logger(entry)
