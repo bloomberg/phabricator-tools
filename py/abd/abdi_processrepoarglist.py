@@ -141,11 +141,12 @@ def do(
         url_watcher_wrapper.save()
 
         # report cycle stats
+        report = {
+            "cycle_time_secs": cycle_timer.restart(),
+            "overrun_jobs": pool.num_active_jobs,
+        }
+        _LOGGER.debug("cycle-stats: {}".format(report))
         if external_report_command:
-            report = {
-                "cycle_time_secs": cycle_timer.restart(),
-                "overrun_jobs": pool.num_active_jobs,
-            }
             report_json = json.dumps(report)
             full_path = os.path.abspath(external_report_command)
             with abdt_logging.misc_operation_event_context(
