@@ -158,8 +158,6 @@ def update_review(conduit, branch):
             branch.verify_review_branch_base()
             land(conduit, branch)
             # TODO: we probably want to do a better job of cleaning up locally
-        else:
-            _LOGGER.debug("do nothing")
 
 
 def update_in_review(conduit, branch):
@@ -282,7 +280,6 @@ def process_updated_branch(mailer, conduit, branch):
                 branch,
                 mail_on_fail=has_new_commits)
         else:
-            _LOGGER.debug("update review for {}".format(review_branch_name))
             try:
                 update_review(conduit, branch)
             except abdte.ReviewAbandonedException as e:
@@ -322,7 +319,6 @@ def process_branches(branches, conduit, mailer):
         elif branch.is_null():
             pass  # TODO: should handle these
         else:
-            _LOGGER.debug("pending: {}".format(branch.review_branch_name()))
             process_updated_branch(
                 mailer, conduit, branch)
 
