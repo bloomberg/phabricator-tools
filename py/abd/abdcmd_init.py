@@ -28,8 +28,6 @@ _DEFAULT_CONFIG = """
 {sendmail_binary}
 --sendmail-type
 {sendmail_type}
---status-path
-var/status/arcyd_status.json
 --kill-file
 var/command/killfile
 --sleep-secs

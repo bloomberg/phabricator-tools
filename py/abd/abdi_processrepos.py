@@ -55,12 +55,6 @@ def setupParser(parser):
         help="type of program to send the mail with (sendmail, catchmail), "
         "this will affect the parameters that Arycd will use.")
     parser.add_argument(
-        '--status-path',
-        metavar="PATH",
-        type=str,
-        required=True,
-        help="file to write status to")
-    parser.add_argument(
         '--kill-file',
         metavar="NAME",
         type=str,
