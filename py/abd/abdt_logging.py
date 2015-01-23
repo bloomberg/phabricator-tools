@@ -7,7 +7,6 @@
 # Public Functions:
 #   set_external_system_error_logger
 #   clear_external_system_error_logger
-#   set_remote_io_write_log_path
 #   on_system_error
 #   on_retry_exception
 #   remote_io_write_event_context
@@ -23,10 +22,7 @@ from __future__ import division
 from __future__ import print_function
 
 import contextlib
-import datetime
 import logging
-import multiprocessing
-import os
 
 import phlsys_subprocess
 import phlsys_timer
@@ -34,8 +30,6 @@ import phlsys_timer
 
 _LOGGER = logging.getLogger(__name__)
 _EXTERNAL_SYSTEM_ERROR_LOGGER = None
-_REMOTE_IO_WRITE_LOG_LOCK = multiprocessing.Lock()
-_REMOTE_IO_WRITE_LOG_PATH = None
 
 
 def set_external_system_error_logger(logger):
@@ -47,13 +41,6 @@ def set_external_system_error_logger(logger):
 def clear_external_system_error_logger():
     global _EXTERNAL_SYSTEM_ERROR_LOGGER
     _EXTERNAL_SYSTEM_ERROR_LOGGER = None
-
-
-def set_remote_io_write_log_path(path):
-    assert path
-    global _REMOTE_IO_WRITE_LOG_PATH
-    with _REMOTE_IO_WRITE_LOG_LOCK:
-        _REMOTE_IO_WRITE_LOG_PATH = os.path.abspath(path)
 
 
 def on_system_error(identifier, detail):
@@ -97,30 +84,6 @@ def on_retry_exception(identifier, detail, e, delay):
     _log_system_exception(identifier, detail, e)
 
 
-def _log_remote_io_event(prolog, identifier, detail, epilog, lock, path):
-    with lock:
-        if path:
-            with open(path, 'a') as f:
-                now = str(datetime.datetime.utcnow())
-                description = '{}: ({}) {} - {} - ({})\n'.format(
-                    now, prolog, identifier, detail, epilog)
-                f.write(description)
-
-
-@contextlib.contextmanager
-def _remote_io_event_context(identifier, detail, lock, path):
-    _log_remote_io_event('start', identifier, detail, '', lock, path)
-    timer = phlsys_timer.Timer()
-    timer.start()
-    result_list = []
-    try:
-        yield result_list
-    finally:
-        prolog = '{:.3f}s'.format(timer.duration)
-        _log_remote_io_event(
-            prolog, identifier, detail, result_list, lock, path)
-
-
 def _log_remote_io_event_to_logger(
         kind, prolog, identifier, detail, epilog, logger):
 
@@ -146,11 +109,8 @@ def _remote_io_event_log_context(kind, identifier, detail, logger):
 
 
 def remote_io_write_event_context(identifier, detail):
-    return _remote_io_event_context(
-        identifier,
-        detail,
-        _REMOTE_IO_WRITE_LOG_LOCK,
-        _REMOTE_IO_WRITE_LOG_PATH)
+    return _remote_io_event_log_context(
+        'io-write-event', identifier, detail, _LOGGER.info)
 
 
 def remote_io_read_event_context(identifier, detail):

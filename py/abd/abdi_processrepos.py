@@ -67,12 +67,6 @@ def setupParser(parser):
         help="filename to watch for, will stop operations safely if the file "
              "is detected.")
     parser.add_argument(
-        '--io-log-file',
-        metavar="PATH",
-        type=str,
-        default=None,
-        help="filename of the io log file.")
-    parser.add_argument(
         '--sleep-secs',
         metavar="TIME",
         type=int,
@@ -126,10 +120,6 @@ def process(args, repo_configs):
     mail_sender = phlmail_sender.MailSender(
         phlsys_sendmail.Sendmail(), args.arcyd_email)
 
-    if args.io_log_file:
-        full_path = os.path.abspath(args.io_log_file)
-        abdt_logging.set_remote_io_write_log_path(full_path)
-
     if args.external_error_logger:
         full_path = os.path.abspath(args.external_error_logger)
         abdt_logging.set_external_system_error_logger(full_path)
@@ -164,7 +154,7 @@ def _processrepolist(
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

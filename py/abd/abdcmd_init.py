@@ -30,8 +30,6 @@ _DEFAULT_CONFIG = """
 {sendmail_type}
 --status-path
 var/status/arcyd_status.json
---io-log-file
-var/log/git-phab-writes.log
 --kill-file
 var/command/killfile
 --sleep-secs
@@ -105,7 +103,7 @@ def process(args):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

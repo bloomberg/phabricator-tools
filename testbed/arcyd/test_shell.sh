@@ -203,9 +203,9 @@ function cleanup() {
     cat arcyd/var/log/info
     echo -- snoop web server --
     tail origin/snoopwebserver.log
-    echo -- git / phab writes --
-    touch arcyd/var/log/git-phab-writes.log
-    cat arcyd/var/log/git-phab-writes.log
+    echo -- arcyd/var/log/info --
+    touch arcyd/var/log/info
+    cat arcyd/var/log/info
     echo -- savereport --
     tail arcyd/savereport.txt
 
@@ -223,7 +223,7 @@ cd -
 trap - EXIT
 cleanup
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

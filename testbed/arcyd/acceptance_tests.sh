@@ -781,13 +781,13 @@ cat savemail.txt
 
 # display the io activity
 echo
-echo '-- arcyd/var/log/git-phab-writes.log'
-touch arcyd/var/log/git-phab-writes.log
-cat arcyd/var/log/git-phab-writes.log
+echo '-- arcyd/var/log/info'
+touch arcyd/var/log/info
+cat arcyd/var/log/info
 echo
-echo '-- arcyd2/var/log/git-phab-writes.log'
-touch arcyd2/var/log/git-phab-writes.log
-cat arcyd2/var/log/git-phab-writes.log
+echo '-- arcyd2/var/log/info'
+touch arcyd2/var/log/info
+cat arcyd2/var/log/info
 
 # clean up
 cd ${olddir}
@@ -796,7 +796,7 @@ rm -rf ${tempdir}
 trap - EXIT
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
