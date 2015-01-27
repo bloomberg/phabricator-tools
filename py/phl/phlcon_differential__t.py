@@ -22,6 +22,7 @@ import phlcon_differential
 # [ C] the 'closed' status does not allow revisions to be updated
 # [ C] the 'closed' status does allow revisions to be closed again
 # [ D] can detect 'missing testplan', 'invalid reviewer' parse errors
+# [ E] commit messages with reviewers as the title are handled
 # [  ] TODO
 # -----------------------------------------------------------------------------
 # Tests:
@@ -29,6 +30,7 @@ import phlcon_differential
 # [ B] test_B_AcceptedPersistsWhenUpdated
 # [ C] test_C_CantUpdateClosedReviews
 # [ D] test_D_DistinguishParseErrors
+# [ E] test_E_HandleReviewersAsTitle
 # TODO
 # =============================================================================
 
@@ -195,6 +197,19 @@ class Test(unittest.TestCase):
                 did_test = True
 
         self.assertTrue(did_test)
+
+    def test_E_HandleReviewersAsTitle(self):
+        message = """Reviewers: alice
+
+        Here is the real title.
+        """
+
+        # this should give us an UnknownParseCommitMessageResponseError
+        self.assertRaises(
+            phlcon_differential.UnknownParseCommitMessageResponseError,
+            phlcon_differential.parse_commit_message,
+            self.conduit,
+            message)
 
     def testNullQuery(self):
         phlcon_differential.query(self.conduit)
@@ -491,7 +506,7 @@ index d4711bb..ee5b241 100644
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

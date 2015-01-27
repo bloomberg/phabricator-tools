@@ -15,6 +15,7 @@
 #   Error
 #   UpdateClosedRevisionError
 #   WriteDiffError
+#   UnknownParseCommitMessageResponseError
 #
 # Public Functions:
 #   create_raw_diff
@@ -225,6 +226,10 @@ class WriteDiffError(Error):
     pass
 
 
+class UnknownParseCommitMessageResponseError(Error):
+    pass
+
+
 def create_raw_diff(conduit, diff):
     response = conduit("differential.createrawdiff", {"diff": diff})
     return CreateRawDiffResponse(**response)
@@ -310,6 +315,11 @@ def parse_commit_message(conduit, corpus, partial=None):
     d = phlsys_dictutil.copy_dict_no_nones(d)
     p = ParseCommitMessageResponse(
         **conduit("differential.parsecommitmessage", d))
+
+    if not isinstance(p.fields, dict):
+        raise UnknownParseCommitMessageResponseError(
+            "p.fields is not a dict: {}".format(p.fields))
+
     phlsys_dictutil.ensure_keys_default(
         p.fields, "", ["summary", "testPlan", "title"])
     phlsys_dictutil.ensure_keys_default(
@@ -537,7 +547,7 @@ def write_diff_files(diff_result, path):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
