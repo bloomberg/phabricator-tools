@@ -273,8 +273,13 @@ class _ArcydInstance(object):
         return self('start', '--foreground', '--no-loop')
 
     def debug_log(self):
-        return phlsys_fs.read_text_file(
-            '{}/var/log/debug'.format(self._root_dir))
+        debug_path = '{}/var/log/debug'.format(self._root_dir)
+
+        if os.path.isfile(debug_path):
+            return phlsys_fs.read_text_file(
+                debug_path)
+        else:
+            return ""
 
 
 class _Fixture(object):
@@ -472,7 +477,7 @@ def _user_story_request_changes(repo):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
