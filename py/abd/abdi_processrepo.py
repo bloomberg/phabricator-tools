@@ -54,7 +54,14 @@ def create_review(conduit, branch):
     user_warnings = []
 
     message = branch.get_commit_message_from_tip()
-    parsed = conduit.parse_commit_message(message)
+
+    try:
+        parsed = conduit.parse_commit_message(message)
+    except phlcon_differential.UnknownParseCommitMessageResponseError as e:
+        raise abdt_exception.CommitMessageParseException(
+            errors=[e],
+            fields=[],
+            digest=message)
 
     d = phlcon_differential
     if parsed.errors:

@@ -137,11 +137,15 @@ class _Worker(object):
         self._git_worker.commit_new_file('initial commit', 'README')
         phlgit_push.push(self._repo, 'master', 'origin')
 
-    def push_new_review_branch(self, identifier):
+    def push_new_review_branch(self, identifier, message=None):
         branch_name = 'r/master/{}'.format(identifier)
+
+        if message is None:
+            message = 'Making review for {}'.format(identifier)
+
         self._git_worker.commit_new_file_on_new_branch(
             branch=branch_name,
-            message='Making review for {}'.format(identifier),
+            message=message,
             relative_path=identifier,
             base='origin/master')
         return phlgit_push.push(self._repo, branch_name, 'origin')
@@ -406,6 +410,7 @@ def run_all_interactions(fixture):
     interaction_tuple = (
         _user_story_happy_path,
         _user_story_request_changes,
+        _user_story_reviewers_as_title,
     )
 
     for interaction in interaction_tuple:
@@ -477,6 +482,35 @@ def _user_story_request_changes(repo):
 
     print("Accept review")
     repo.bob.accept_review(review_id)
+
+    yield "Landing reviews"
+
+    print("Check review landed")
+    repo.bob.fetch()
+    assert len(repo.bob.list_reviews()) == 0
+
+    yield "Finished"
+
+
+def _user_story_reviewers_as_title(repo):
+
+    branch_name = '_user_story_reviewers_as_title'
+
+    message = """Reviewers: alice
+
+    Here is the real title.
+    """
+
+    repo.alice.push_new_review_branch(
+        branch_name, message=message)
+
+    yield "Creating reviews"
+
+    print("Accept review")
+    repo.bob.fetch()
+    reviews = repo.bob.list_reviews()
+    assert len(reviews) == 1
+    repo.bob.accept_review(reviews[0]["review_id"])
 
     yield "Landing reviews"
 
