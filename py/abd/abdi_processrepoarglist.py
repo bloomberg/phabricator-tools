@@ -217,7 +217,7 @@ class _RepoActiveRetryState(object):
     @property
     def is_active(self):
 
-        if not self._is_active:
+        if not self._is_active and self._reactivate_time is not None:
             if datetime.datetime.utcnow() >= self._reactivate_time:
                 self._is_active = True
                 self._reactivate_time = None
