@@ -404,6 +404,7 @@ def run_all_interactions(fixture):
     arcyd_generator = _arcyd_run_once_scenario(arcyd, fixture.repos)
 
     interaction_tuple = (
+        _user_story_happy_path,
         _user_story_request_changes,
     )
 
