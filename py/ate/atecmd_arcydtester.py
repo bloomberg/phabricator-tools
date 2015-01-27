@@ -435,8 +435,10 @@ def _arcyd_run_once_scenario(arcyd, repo_list):
 
 def _user_story_happy_path(repo):
 
+    branch_name = '_user_story_happy_path'
+
     print("Push review")
-    repo.alice.push_new_review_branch('review1')
+    repo.alice.push_new_review_branch(branch_name)
 
     yield "Creating reviews"
 
@@ -457,8 +459,10 @@ def _user_story_happy_path(repo):
 
 def _user_story_request_changes(repo):
 
+    branch_name = '_user_story_request_changes'
+
     print("Push review")
-    repo.alice.push_new_review_branch('review1')
+    repo.alice.push_new_review_branch(branch_name)
 
     yield "Creating reviews"
     repo.bob.fetch()
@@ -469,7 +473,7 @@ def _user_story_request_changes(repo):
     yield "Nothing"
 
     yield "Update review"
-    repo.alice.push_review_update('review1', 'more changes')
+    repo.alice.push_review_update(branch_name, 'more changes')
 
     print("Accept review")
     repo.bob.accept_review(review_id)
