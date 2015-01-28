@@ -214,14 +214,17 @@ class _RepoActiveRetryState(object):
             for s in retry_timestr_list
         ]
 
-    @property
-    def is_active(self):
+    def calc_active(self):
 
         if not self._is_active and self._reactivate_time is not None:
             if datetime.datetime.utcnow() >= self._reactivate_time:
                 self._is_active = True
                 self._reactivate_time = None
 
+        return self._is_active
+
+    @property
+    def is_active(self):
         return self._is_active
 
     def disable(self):
@@ -233,6 +236,10 @@ class _RepoActiveRetryState(object):
         else:
             self._reactivate_time = None
         return retry_delay
+
+    @property
+    def reactivate_time(self):
+        return self._reactivate_time
 
 
 class _ArcydManagedRepository(object):
@@ -276,7 +283,12 @@ class _ArcydManagedRepository(object):
 
         old_active_reviews = set(self._review_cache.active_reviews)
 
-        if self._active_state.is_active:
+        was_active = self._active_state.is_active
+        if self._active_state.calc_active():
+            if not was_active:
+                _LOGGER.info(
+                    'repo-event: {} re-enabled'.format(self._name))
+
             try:
                 _process_repo(
                     self._abd_repo,
@@ -287,7 +299,15 @@ class _ArcydManagedRepository(object):
                     self._mail_sender)
             except Exception:
                 retry_delay = self._active_state.disable()
+                _LOGGER.info(
+                    'repo-event: {} disabled, retry in {}'.format(
+                        self._name, retry_delay))
                 self._on_exception(retry_delay)
+        else:
+            _LOGGER.debug(
+                'repo-status: {} is inactive until {}'.format(
+                    self._name, self._active_state.reactivate_time))
+
         return (
             self._review_cache.active_reviews - old_active_reviews,
             self._active_state,
