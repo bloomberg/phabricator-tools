@@ -150,17 +150,18 @@ def query_users_from_phids(conduit, phids):
         raise ValueError("phids must be a list")
     d = {"phids": phids, "limit": len(phids)}
 
+    response = None
     try:
         response = conduit("user.query", d)
     except phlsys_conduit.ConduitException as e:
         if not is_no_such_error(e):
             raise
         return None
-    else:
-        if len(response) != len(phids):
-            raise Exception("unexpected number of entries\n" + str(response))
 
-    return [QueryResponse(**u) for u in response]
+    if response and len(response) == len(phids):
+        return [QueryResponse(**u) for u in response]
+    else:
+        return None
 
 
 def query_users_from_usernames(conduit, usernames):
@@ -183,13 +184,10 @@ def query_users_from_usernames(conduit, usernames):
         if not is_no_such_error(e):
             raise
 
-    if response is None:
+    if response and len(response) == len(usernames):
+        return [QueryResponse(**u) for u in response]
+    else:
         return None
-
-    if len(response) != len(usernames):
-        raise Exception("unexpected number of entries")
-
-    return [QueryResponse(**u) for u in response]
 
 
 def query_usernames_from_phids(conduit, phids):
@@ -241,7 +239,7 @@ def make_phid_username_dict(conduit, phids):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

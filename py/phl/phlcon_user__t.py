@@ -93,14 +93,35 @@ class Test(unittest.TestCase):
             self.conduit, [bad_username])
         self.assertIsNone(userDict)
 
+    def testAliceAndBadUsername(self):
+        bad_username = "#@)4308f:"
+        users = phlcon_user.query_users_from_usernames(
+            self.conduit, [self.test_user, bad_username])
+        self.assertIsNone(users)
+
+        userDict = phlcon_user.make_username_phid_dict(
+            self.conduit, [self.test_user, bad_username])
+        self.assertIsNone(userDict)
+
     def testBadPhid(self):
         bad_phid = "asd9f87"
         phidDict = phlcon_user.make_phid_username_dict(
             self.conduit, [bad_phid])
         self.assertIsNone(phidDict)
 
+    def testAliceAndBadPhid(self):
+        users = phlcon_user.query_users_from_usernames(
+            self.conduit, [self.test_user])
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0].userName, self.test_user)
+
+        bad_phid = "asd9f87"
+        phidDict = phlcon_user.make_phid_username_dict(
+            self.conduit, [users[0].phid, bad_phid])
+        self.assertIsNone(phidDict)
+
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
