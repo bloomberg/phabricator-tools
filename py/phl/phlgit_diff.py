@@ -147,7 +147,7 @@ def stat_range(repo, base, new):
     """
     return repo(
         "diff",
-        "--stat",
+        "--stat=80",
         base + "..." + new,
         "-M")  # automatically detect moves/renames
 
@@ -172,7 +172,7 @@ def parse_filenames_from_raw_diff(diff):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
