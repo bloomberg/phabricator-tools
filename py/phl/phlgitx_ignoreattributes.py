@@ -60,24 +60,25 @@ def ensure_repo_ignoring(repo_path):
         return
 
     repo_attributes_path = os.path.join(repo_path, _REPO_ATTRIBUTES_PATH)
-    if not os.path.exists(repo_attributes_path):
-        # create the file with required content
-        phlsys_fs.write_text_file(
-            repo_attributes_path,
-            _REPO_ATTRIBUTES_CONTENT)
-    else:
+
+    # check that any existing file is compatible with the new contents we will
+    # write, i.e. it is a subset of the new content
+    if os.path.exists(repo_attributes_path):
         contents = phlsys_fs.read_text_file(repo_attributes_path)
-        if contents.strip() in _REPO_ATTRIBUTES_TUPLE:
-            # the file is exactly one of the existing attributes, we can merge
-            # correctly by overwriting it with our superset of attributes
-            phlsys_fs.write_text_file(
-                repo_attributes_path,
-                _REPO_ATTRIBUTES_CONTENT)
-        else:
-            # we won't try to do any sort of merging, just escalate
-            raise Exception(
-                "cannot ensure ignore attributes in existing file: {}".format(
-                    repo_attributes_path))
+        lines = contents.splitlines()
+        for l in lines:
+            stripped = l.strip()
+            if stripped and stripped not in _REPO_ATTRIBUTES_TUPLE:
+                # we won't try to do any sort of merging, just escalate
+                raise Exception(
+                    "cannot merge attributes in existing file: {}".format(
+                        repo_attributes_path))
+
+    # the file is exactly one of the existing attributes, we can merge
+    # correctly by overwriting it with our superset of attributes
+    phlsys_fs.write_text_file(
+        repo_attributes_path,
+        _REPO_ATTRIBUTES_CONTENT)
 
 
 # -----------------------------------------------------------------------------

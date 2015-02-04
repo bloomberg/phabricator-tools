@@ -26,6 +26,7 @@ from __future__ import division
 from __future__ import print_function
 
 import contextlib
+import itertools
 import os
 import unittest
 
@@ -161,7 +162,18 @@ class Test(unittest.TestCase):
 
     def test_D_UpdateInfoAttributes(self):
 
-        for content in phlgitx_ignoreattributes._REPO_ATTRIBUTES_TUPLE:
+        all_attributes = list(phlgitx_ignoreattributes._REPO_ATTRIBUTES_TUPLE)
+        all_attributes.append("")
+
+        all_lines = itertools.combinations(
+            all_attributes,
+            len(all_attributes) - 1)
+
+        for lines in all_lines:
+
+            content = "\n".join(lines)
+            print(content)
+            print("---")
             with phlgitu_fixture.lone_worker_context() as worker:
 
                 working_dir = worker.repo.working_dir
