@@ -12,11 +12,13 @@
 # [ A] Can 'Ensure' already 'Ensured' repositories without error
 # [ B] 'Ensuring' repos with pre-expanded files works around spurious diffs
 # [ C] 'Ensuring' repos with incorrect line-endings works around spurious diffs
+# [ D] Can 'Ensure' a repo with supported existing content in .git/info/attr...
 # -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
 # [ B] test_B_WorkaroundSpuriousIdentDiff
 # [ C] test_C_WorkaroundSpuriousEolDiff
+# [ D] test_D_UpdateInfoAttributes
 # =============================================================================
 
 from __future__ import absolute_import
@@ -157,9 +159,23 @@ class Test(unittest.TestCase):
             # try to checkout back to the branch with the fix
             checkout_fix_badeol()
 
+    def test_D_UpdateInfoAttributes(self):
+
+        for content in phlgitx_ignoreattributes._REPO_ATTRIBUTES_TUPLE:
+            with phlgitu_fixture.lone_worker_context() as worker:
+
+                working_dir = worker.repo.working_dir
+                attributes_path = os.path.join(
+                    working_dir, '.git/info/attributes')
+                phlsys_fs.write_text_file(attributes_path, content)
+
+                # should not throw
+                phlgitx_ignoreattributes.ensure_repo_ignoring(
+                    worker.repo.working_dir)
+
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
