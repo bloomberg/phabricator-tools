@@ -19,7 +19,6 @@
 #
 # Public Functions:
 #   create_raw_diff
-#   create_diff
 #   parse_commit_message
 #   parse_commit_message_errors
 #   create_revision
@@ -233,81 +232,6 @@ class UnknownParseCommitMessageResponseError(Error):
 def create_raw_diff(conduit, diff):
     response = conduit("differential.createrawdiff", {"diff": diff})
     return CreateRawDiffResponse(**response)
-
-
-def create_diff(
-        conduit,
-        changes_dict,
-        source_machine,
-        source_path,
-        branch,
-        source_control_system,  # svn or git
-        source_control_path,
-        source_control_base_revision,
-        lint_status,
-        unit_status,
-        bookmark=None,
-        parent_revision_id=None,
-        creation_method=None,
-        author_phid=None,
-        arcanist_project=None,
-        repository_uuid=None):
-    """@todo: Docstring for create_diff.
-
-    :conduit: conduit to operate on
-    :changes_dict: changes response, 'changes' field of GetDiffResponse
-    :source_machine: string name of submitting machine
-    :source_path: string @todo
-    :branch: string name of the branch this change is being submitted from
-    :source_control_system: string? svn or git
-    :source_control_path: @todo
-    :source_control_base_revision: @todo
-    :lint_status: string? none, skip, okay, warn, fail, postponed
-    :unit_status: string? none, skip, okay, warn, fail, postponed
-    :bookmark: optional string bookmark (mercurial term?)
-    :parent_revision_id: @todo
-    :creation_method: @todo
-    :author_phid: optional string phid of the author
-    :arcanist_project: optional string human context for the change
-    :repository_uuid: @todo
-    :returns: @todo
-
-    Perhaps the best reference for this function is in the Phabricator source
-    code itself.
-    .../differential/conduit/ConduitAPI_differential_creatediff_Method.php
-
-    """
-    d = {
-        "changes": changes_dict,
-        "sourceMachine": source_machine,
-        "sourcePath": source_path,
-        "branch": branch,
-        "sourceControlSystem": source_control_system,
-        "sourceControlPath": source_control_path,
-        "sourceControlBaseRevision": source_control_base_revision,
-        "lintStatus": lint_status,
-        "unitStatus": unit_status,
-        "bookmark": bookmark,
-        "parentRevisionID": parent_revision_id,
-        "creationMethod": creation_method,
-        "authorPHID": author_phid,
-        "arcanistProject": arcanist_project,
-        "repositoryUUID": repository_uuid,
-    }
-    d = phlsys_dictutil.copy_dict_no_nones(d)
-    response = conduit("differential.creatediff", d)
-    return response
-
-
-# XXX: it might be better to narrow the contract of this if the conduit
-#      API is going to keep changing, don't want to fixup based on
-#      changes that don't matter
-def _get_diff(conduit, revision_id=None, diff_id=None):
-    d = {"revision_id": revision_id, "diff_id": diff_id}
-    d = phlsys_dictutil.copy_dict_no_nones(d)
-    response = conduit("differential.getdiff", d)
-    response["id"] = int(response["id"])
-    return GetDiffIdResponse(**response)
 
 
 def parse_commit_message(conduit, corpus, partial=None):

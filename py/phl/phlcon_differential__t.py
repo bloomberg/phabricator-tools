@@ -266,10 +266,6 @@ index d4711bb..1c634f5 100644
 
         diff_response = phlcon_differential.create_raw_diff(self.conduit, diff)
 
-        get_diff_response = phlcon_differential._get_diff(
-            self.conduit, diff_id=diff_response.id)
-        self.assertEqual(get_diff_response.id, diff_response.id)
-
         parse_response = phlcon_differential.parse_commit_message(
             self.conduit, message)
         self.assertEqual(len(parse_response.errors), 0)
@@ -323,55 +319,6 @@ index d4711bb..1c634f5 100644
             query_response_list[0].status,
             phlcon_differential.ReviewStates.closed)
 
-    def testCreateDiffRevision(self):
-        diff = """
-diff --git a/readme b/readme
-index d4711bb..ee5b241 100644
---- a/readme
-+++ b/readme
-@@ -1,3 +1,4 @@ and one more!!
- -- and one last(?) one
- alaric!
- local stuff!
-+manual conduit submission
-"""
-        message = """
-add a line to README
-
-Test Plan: I proof-read it and it looked ok
-"""
-        raw_diff_response = phlcon_differential.create_raw_diff(
-            self.conduit, diff)
-        get_diff_response = phlcon_differential._get_diff(
-            self.conduit,
-            diff_id=raw_diff_response.id)
-
-        diff_response = phlcon_differential.create_diff(
-            self.conduit,
-            changes_dict=get_diff_response.changes,
-            source_machine="test_machine",
-            source_path="source_path",
-            branch="branch",
-            source_control_system="git",  # svn or git
-            source_control_path="control_path",
-            source_control_base_revision="0",
-            lint_status="none",
-            unit_status="none",
-            bookmark=None,
-            parent_revision_id=None,
-            creation_method="arcanist daemon",
-            author_phid=None,
-            arcanist_project="project",
-            repository_uuid=None)
-
-        parse_response = phlcon_differential.parse_commit_message(
-            self.conduit, message)
-        self.assertEqual(len(parse_response.errors), 0)
-
-        # rely on create_revision to raise if we get anything seriously wrong
-        phlcon_differential.create_revision(
-            self.conduit, diff_response["diffid"], parse_response.fields)
-
     def _createRevision(self, title):
         diff = """diff --git a/ b/"""
         message = title + "\n\ntest plan: no test plan"
@@ -398,10 +345,6 @@ index d4711bb..ee5b241 100644
         message = "{}\n\nTest Plan: this is the plan".format(title)
 
         diff_response = phlcon_differential.create_raw_diff(self.conduit, diff)
-
-        get_diff_response = phlcon_differential._get_diff(
-            self.conduit, diff_id=diff_response.id)
-        self.assertEqual(get_diff_response.id, diff_response.id)
 
         parse_response = phlcon_differential.parse_commit_message(
             self.conduit, message)
