@@ -37,13 +37,11 @@ import phlsys_fs
 
 
 _REPO_ATTRIBUTES_PATH = '.git/info/attributes'
-_REPO_ATTRIBUTES_IDENT_CONTENT = '* -ident\n'
-_REPO_ATTRIBUTES_EOL_CONTENT = '* -eol\n'
 _REPO_ATTRIBUTES_TUPLE = (
-    _REPO_ATTRIBUTES_IDENT_CONTENT,
-    _REPO_ATTRIBUTES_EOL_CONTENT
+    '* -ident',
+    '* -eol',
 )
-_REPO_ATTRIBUTES_CONTENT = "".join(_REPO_ATTRIBUTES_TUPLE)
+_REPO_ATTRIBUTES_CONTENT = "\n".join(_REPO_ATTRIBUTES_TUPLE)
 
 
 def is_repo_definitely_ignoring(repo_path):
@@ -69,7 +67,7 @@ def ensure_repo_ignoring(repo_path):
             _REPO_ATTRIBUTES_CONTENT)
     else:
         contents = phlsys_fs.read_text_file(repo_attributes_path)
-        if contents in _REPO_ATTRIBUTES_TUPLE:
+        if contents.strip() in _REPO_ATTRIBUTES_TUPLE:
             # the file is exactly one of the existing attributes, we can merge
             # correctly by overwriting it with our superset of attributes
             phlsys_fs.write_text_file(
@@ -83,7 +81,7 @@ def ensure_repo_ignoring(repo_path):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
