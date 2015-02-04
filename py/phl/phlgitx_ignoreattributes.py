@@ -40,6 +40,8 @@ _REPO_ATTRIBUTES_PATH = '.git/info/attributes'
 _REPO_ATTRIBUTES_TUPLE = (
     '* -ident',
     '* -eol',
+    '* -text',
+    '* -filter',
 )
 _REPO_ATTRIBUTES_CONTENT = "\n".join(_REPO_ATTRIBUTES_TUPLE)
 
