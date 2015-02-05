@@ -116,5 +116,5 @@ Thanks to the awesome guys working on the Phabricator project!
 License
 -------
 
-MIT-style license. See license text in
+Apache License, Version 2.0. See license text in
 [LICENSE](https://github.com/bloomberg/phabricator-tools/blob/master/LICENSE).
