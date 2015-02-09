@@ -55,6 +55,7 @@ def logging_context(logging_configurer_fn, logging_level=logging.DEBUG):
         yield
     finally:
         # instruct the logger process to stop by sending it 'None'
+        root_logger.removeHandler(handler)
         logging_queue.put_nowait(None)
         logging_process_object.join()
 
@@ -153,7 +154,7 @@ class MultiResource(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
