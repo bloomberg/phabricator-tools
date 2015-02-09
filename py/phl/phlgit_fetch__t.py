@@ -19,8 +19,6 @@ from __future__ import print_function
 import contextlib
 import unittest
 
-import phlsys_subprocess
-
 import phlgit_fetch
 import phlgitu_fixture
 
@@ -58,16 +56,6 @@ class Test(unittest.TestCase):
         f = phlgitu_fixture.CentralisedWithTwoWorkers()
         with contextlib.closing(f):
             self._setupBranchBomb(f)
-
-            fetch_prune = lambda: f.w0.repo('fetch', '--prune')
-            fetch_all_prune = lambda: phlgit_fetch.all_prune(f.w0.repo)
-            self.assertRaises(
-                phlsys_subprocess.CalledProcessError,
-                fetch_prune)
-            self.assertRaises(
-                phlsys_subprocess.CalledProcessError,
-                fetch_all_prune)
-
             phlgit_fetch.prune_safe(f.w0.repo, 'origin')
             f.w0.repo('fetch', '--prune')
             phlgit_fetch.all_prune(f.w0.repo)
@@ -84,7 +72,7 @@ class Test(unittest.TestCase):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
