@@ -25,13 +25,14 @@ PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.join(PARENT_DIR, "py", "gab"))
 sys.path.append(os.path.join(PARENT_DIR, "py", "phl"))
 
-import gabcmd_gitphablog
+# flake8 rightly complains about this, disable it with 'noqa'
+import gabcmd_gitphablog  # noqa
 
 if __name__ == "__main__":
     sys.exit(gabcmd_gitphablog.main())
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

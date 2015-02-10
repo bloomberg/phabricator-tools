@@ -26,13 +26,14 @@ sys.path.append(os.path.join(PARENT_DIR, "py", "ate"))
 sys.path.append(os.path.join(PARENT_DIR, "py", "abd"))
 sys.path.append(os.path.join(PARENT_DIR, "py", "phl"))
 
-import atecmd_arcydtester
+# flake8 rightly complains about this, disable it with 'noqa'
+import atecmd_arcydtester  # noqa
 
 if __name__ == "__main__":
     sys.exit(atecmd_arcydtester.main())
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

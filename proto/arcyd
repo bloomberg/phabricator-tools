@@ -29,13 +29,14 @@ sys.path.append(os.path.join(PARENT_DIR, "py", "phl"))
 # notation python packages.
 sys.path.append(os.path.join(PARENT_DIR, "testbed", "plugins"))
 
-import abdcmd_arcyd
+# flake8 rightly complains about this, disable it with 'noqa'
+import abdcmd_arcyd  # noqa
 
 if __name__ == "__main__":
     sys.exit(abdcmd_arcyd.main())
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
