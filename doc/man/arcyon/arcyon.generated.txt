@@ -1,5 +1,4 @@
 usage: arcyon [-h]
-              
               {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
               ...
 

@@ -1,5 +1,4 @@
 usage: arcyd [-h]
-             
              {init,list-repos,add-phabricator,add-repohost,add-repo,rm-repo,start,stop,fsck,fetch}
              ...
 
