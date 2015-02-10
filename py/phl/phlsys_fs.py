@@ -196,7 +196,7 @@ def chdir_context(new_path):
 
 @contextlib.contextmanager
 def tmpfile(tmp_dir=None, suffix=''):
-    "Create & remove tmp file"
+    """Create & remove tmp file."""
     dir = tmp_dir or os.getenv('TMPDIR', '/tmp')
     tmp_file = tempfile.NamedTemporaryFile(dir=dir, suffix=suffix)
     yield tmp_file
@@ -282,7 +282,7 @@ def chtmpdir_context():
 
 @contextlib.contextmanager
 def nostd(err=True):
-    "Suppress stderr or stdout"
+    """Suppress stderr or stdout."""
     class Devnull(object):
 
         def write(self, s):
@@ -339,7 +339,7 @@ def write_text_file(path, text):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

@@ -18,7 +18,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
         self.assertEqual(result, expect)
 
     def test_run_list(self):
-        "Passing valid list on stdin sorted in reverse order"
+        """Passing valid list on stdin sorted in reverse order."""
         args = ("sort", "-r")
         kwargs = {"stdin": "1\n2\n3"}
         result = phlsys_subprocess.run(*args, **kwargs)
@@ -42,7 +42,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
             unexpected='foo')
 
     def test_invalid_return_code(self):
-        "Passing command returns non zero exit status"
+        """Passing command returns non zero exit status."""
         cmd = "time"
         self.assertRaises(
             phlsys_subprocess.CalledProcessError,
@@ -60,7 +60,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
             "echo hello stdout", "echo goodbye stdout"))
 
     def test_assertion_raised(self):
-        "Assertion raised on bad character input"
+        """Assertion raised on bad character input."""
         for bad in ("'", '"', '`'):
             self.assertRaises(
                 AssertionError,
@@ -68,7 +68,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
                 "echo {0}hello stdout{0}".format(bad))
 
     def test_invalid_return_code_run_commands(self):
-        "Passing incorrect commands returns non zero exit status"
+        """Passing incorrect commands returns non zero exit status."""
         cmd = "time"
         self.assertRaises(
             phlsys_subprocess.CalledProcessError,
@@ -78,7 +78,7 @@ class PhlsysSubprocessTests(unittest.TestCase):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
