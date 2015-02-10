@@ -98,9 +98,9 @@ class phabricator {
     }
 
     # set 'commit' to 'master' for the latest version
-    phabgithubunzip {'phabricator': commit => 'df8474d778048a7364b2e332a1e4cae55d93291e'}
+    phabgithubunzip {'phabricator': commit => 'd13a3225634c47cf2e55b94199a0f2aba37aa293'}
     phabgithubunzip {'libphutil': commit => '0b9f193303dfae4f9204d8f577e2bd45acd4963f'}
-    phabgithubunzip {'arcanist': commit => '42ae7cd92f92e026bdd604e659d2bc23e9352baa'}
+    phabgithubunzip {'arcanist': commit => '6270dd0de5073931f3c3e75ab77f0f1d5fa77eef'}
 }
 
 class phabricatordb {
