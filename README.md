@@ -60,7 +60,7 @@ __To create a new local VM serving up Phabricator__
    Phabricator instance
 
 __To install within an existing VM or machine__
-* Tested on Lubuntu 12.10 on VirtualBox
+* Tested on Lubuntu 14.04 on VirtualBox
 
 1. `$ sudo puppet apply vagrant/puppet/phabricator/manifests/default.pp
    --modulepath vagrant/puppet`
