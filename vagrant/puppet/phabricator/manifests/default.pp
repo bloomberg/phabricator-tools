@@ -6,8 +6,6 @@ $phab_dir      = "/phabricator"
 $dev_dir       = "${phab_dir}/instances/dev"
 $document_root = "${dev_dir}/phabricator/webroot"
 $std_path      = "/usr/bin:/usr/sbin:/bin"
-$http_proxy    = ""
-$https_proxy    = ""
 
 file { 'apt-proxyconfig' :
   path    => '/etc/apt/apt.conf.d/95proxies',
