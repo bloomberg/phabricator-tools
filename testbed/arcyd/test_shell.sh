@@ -218,6 +218,40 @@ function cleanup() {
 
 trap cleanup EXIT
 cd dev
+    clear
+    echo Welcome to Arcyd test shell!
+    echo
+    echo In your current directory there are two utilities:
+    echo
+    echo "    ./poke.sh - create a new review branch and push it"
+    echo "    ./accept.sh - accept the most recent review"
+    echo
+    echo In the parent directory there are some things of interest:
+    echo
+    echo "    ../dev - this directory"
+    echo "    ../origin - the bare repo that this directory is a clone of"
+    echo "    ../origin2 - a second bare repo"
+    echo "    ../dev2 - a clone of origin2"
+    echo "    ../arcyd - an arcyd instance that watches origin and origin2"
+    echo "    ../arcyd2 - another arcyd instance that watches origin and origin2"
+    echo
+    echo You can see the full output of arcyd like so:
+    echo
+    echo "    tail -F ../arcyd/var/log/debug"
+    echo
+    echo You can see the important output of arcyd like so:
+    echo
+    echo "    tail -F ../arcyd/var/log/info"
+    echo
+    echo For more examples of things to do in the test shell, see the log of
+    echo the phabricator-tools repository for relevant test plans:
+    echo
+    echo "    $ git log --grep test_shell.sh"
+    echo "    (note that this won't work from the current directory,)"
+    echo "    (exit the test shell first.                           )"
+    echo
+    echo Exit to shutdown arcyd and cleanup these directories.
+    echo
     /usr/bin/env bash
 cd -
 trap - EXIT
