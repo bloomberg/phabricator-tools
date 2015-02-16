@@ -127,15 +127,16 @@ def find_insertion_point(module_text, contents_signature, block_marker, force):
         else:
             raise Exception(
                 "couldn't find contents block in file\n"
-                "please insert after imports:\n"
-                + contents_signature + block_marker)
+                "please insert after imports:\n" +
+                contents_signature +
+                block_marker)
     else:
         end_index = module_text.find(block_marker_line, start_index + 1)
         if end_index == -1:
             raise Exception(
                 "contents block is unterminated in file\n"
-                "please terminate with this line:\n"
-                + block_marker)
+                "please terminate with this line:\n" +
+                block_marker)
         end_index += len(block_marker_line)
 
     return start_index, end_index
@@ -212,7 +213,7 @@ if __name__ == "__main__":
     sys.exit(main())
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

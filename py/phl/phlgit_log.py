@@ -67,8 +67,8 @@ def get_range_to_here_hashes(repo, start):
     hashes = repo("log", start + "..", "--format=%H").split()
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
-            "phlgit_log__getRangeToHereHashes() invalid hashes\n"
-            + str(hashes))
+            "phlgit_log__getRangeToHereHashes() invalid hashes\n" +
+            str(hashes))
     hashes.reverse()
     return hashes
 
@@ -117,8 +117,8 @@ def get_last_n_commit_hashes_from_ref(repo, n, ref):
             "less hashes than expected\n" + str(hashes))
     if not all(c in string.hexdigits for s in hashes for c in s):
         raise ValueError(
-            "phlgit_log__getLastNCommitHashesFromRef() invalid hashes\n"
-            + str(hashes))
+            "phlgit_log__getLastNCommitHashesFromRef() invalid hashes\n" +
+            str(hashes))
     hashes.reverse()
     return hashes
 
@@ -242,7 +242,7 @@ def get_range_to_here_raw_body(repo, start):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
