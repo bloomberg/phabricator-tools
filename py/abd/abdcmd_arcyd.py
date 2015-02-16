@@ -48,6 +48,7 @@ import abdcmd_fetch
 import abdcmd_fsck
 import abdcmd_init
 import abdcmd_listrepos
+import abdcmd_restart
 import abdcmd_rmrepo
 import abdcmd_start
 import abdcmd_stop
@@ -118,6 +119,8 @@ def main():
     phlsys_subcommand.setup_parser(
         "stop", abdcmd_stop, subparsers)
     phlsys_subcommand.setup_parser(
+        "restart", abdcmd_restart, subparsers)
+    phlsys_subcommand.setup_parser(
         "fsck", abdcmd_fsck, subparsers)
     phlsys_subcommand.setup_parser(
         "fetch", abdcmd_fetch, subparsers)
@@ -128,7 +131,7 @@ def main():
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

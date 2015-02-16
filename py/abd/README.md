@@ -15,6 +15,8 @@ Check the Arcyd files for consistency and fix any issues.
 Create a new arcyd instance in working dir, with backing git repository.
 * `abdcmd_listrepos.py` -
 List the repositories managed by this arcyd instance.
+* `abdcmd_restart.py` -
+Restart the arcyd instance for the current directory.
 * `abdcmd_rmrepo.py` -
 Remove a repository from the Arcyd instance.
 * `abdcmd_start.py` -
@@ -33,6 +35,8 @@ Setup to process multiple repos.
 Manage git repositories watched by arcyd.
 * `abdi_repoargs.py` -
 Define the arguments for a single repository.
+* `abdi_startstop.py` -
+Daemon startup and shutdown helpers.
 * `abdmail_mailer.py` -
 Send mails to interested parties about pre-specified conditions.
 * `abdt_branch.py` -

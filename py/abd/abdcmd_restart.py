@@ -1,8 +1,8 @@
-"""Start the arcyd instance for the current directory, if not already going."""
+"""Restart the arcyd instance for the current directory."""
 # =============================================================================
 # CONTENTS
 # -----------------------------------------------------------------------------
-# abdcmd_start
+# abdcmd_restart
 #
 # Public Functions:
 #   getFromfilePrefixChars
@@ -42,10 +42,11 @@ def setupParser(parser):
 def process(args):
     logging.getLogger().setLevel(logging.DEBUG)
     abdi_startstop.start_arcyd(daemonize=not args.foreground,
-                               loop=not args.no_loop)
+                               loop=not args.no_loop,
+                               restart=True)
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014-2015 Bloomberg Finance L.P.
+# Copyright (C) 2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
