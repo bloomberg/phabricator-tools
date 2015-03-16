@@ -16,6 +16,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import signal
 import sys
 
 
@@ -38,6 +39,13 @@ def do(stdin_path=None, stdout_path=None, stderr_path=None):
     :returns: None
 
     """
+
+    # eliminate possible race condition if current process is a session leader
+    # with a controling terminal: SIGHUP can be delivered if parent process
+    # exits before the child process has created its own session via
+    # os.setsid().
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
+
     if os.fork():
         # there are now two copies of our original process, quit the original
         os._exit(0)
@@ -55,35 +63,39 @@ def do(stdin_path=None, stdout_path=None, stderr_path=None):
         # there are now two copies of our new process, quit the first one
         os._exit(0)
 
-    # detach from existing standard IO
-    sys.stdin.close()
-    sys.stdout.close()
-    sys.stderr.close()
-
-    # attach to the specified new standard io, or just devnull if nothing was
-    # specified. this is important, if it wasn't done then any call to print()
-    # after the original terminal exits would fail and potentially exit the
-    # daemon.
+    # open new standard io files, or just devnull if nothing was
+    # specified. this is important, if it wasn't done then any call to
+    # print() after the original terminal exits would fail and potentially
+    # exit the daemon.
     #
     # use line buffering on the output files so it's possible to monitor them,
     # otherwise the contents will only be available if / when this process
     # exits gracefully.
     #
     line_buffered = 1
-    sys.stdin = open(
+    daemon_stdin = open(
         stdin_path if stdin_path is not None else os.devnull, 'r')
-    sys.stdout = open(
+    daemon_stdout = open(
         stdout_path if stdout_path is not None else os.devnull,
         'w',
         line_buffered)
-    sys.stderr = open(
+    daemon_stderr = open(
         stderr_path if stderr_path is not None else os.devnull,
         'w',
         line_buffered)
 
+    # flush python buffers before closing output descriptors
+    sys.__stdout__.flush()
+    sys.__stderr__.flush()
+
+    # detach from existing standard IO
+    os.dup2(daemon_stdin.fileno(), sys.__stdin__.fileno())
+    os.dup2(daemon_stdout.fileno(), sys.__stdout__.fileno())
+    os.dup2(daemon_stderr.fileno(), sys.__stderr__.fileno())
+
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
