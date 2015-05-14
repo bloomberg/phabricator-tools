@@ -4,7 +4,7 @@
 ('abdt', ['phlcon', 'phldef', 'phlgit', 'phlgitu', 'phlgitx', 'phlmail', 'phlsys'])
 ('phlgit', ['phlgitu', 'phlsys'])
 ('lorcmd', ['phlcon', 'phlsys'])
-('aoncmd', ['phlcon', 'phlsys'])
+('aoncmd', ['abdt', 'phlcon', 'phlsys'])
 ('atecmd', ['phldef', 'phlgit', 'phlgitu', 'phlsys'])
 ('abdcmd', ['abdi', 'abdt', 'phlgitx', 'phlsys', 'phlurl'])
 ('gabcmd', ['phlgit', 'phlsys'])

@@ -30,6 +30,7 @@ import aoncmd_comment
 import aoncmd_commentinline
 import aoncmd_createrevision
 import aoncmd_getdiff
+import aoncmd_gitdiffhelper
 import aoncmd_paste
 import aoncmd_query
 import aoncmd_rawdiff
@@ -62,6 +63,9 @@ usage examples:
 
     to comment on every revision:
     $ arcyon query --format-type ids | arcyon comment --ids-file - -m hello
+
+    to create a diff to pass to arcyon, from within a git repository:
+    $ arcyon git-diff-helper base head
     """
 
 
@@ -93,6 +97,9 @@ def main():
     phlsys_subcommand.setup_parser(
         "task-query", aoncmd_taskquery, subparsers)
 
+    phlsys_subcommand.setup_parser(
+        "git-diff-helper", aoncmd_gitdiffhelper, subparsers)
+
     args = parser.parse_args()
 
     try:
@@ -109,7 +116,7 @@ def main():
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

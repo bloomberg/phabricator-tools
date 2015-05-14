@@ -24,6 +24,8 @@ if sys.version_info[:2] != (2, 7):
 PARENT_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.append(os.path.join(PARENT_DIR, "py", "aon"))
 sys.path.append(os.path.join(PARENT_DIR, "py", "phl"))
+# TODO: do not import from other tools
+sys.path.append(os.path.join(PARENT_DIR, "py", "abd"))
 
 # flake8 rightly complains about this, disable it with 'noqa'
 import aoncmd_arcyon  # noqa

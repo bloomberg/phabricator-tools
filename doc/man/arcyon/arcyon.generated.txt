@@ -1,5 +1,5 @@
 usage: arcyon [-h]
-              {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
+              {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query,git-diff-helper}
               ...
 
 Arcyon - util to interact with Conduit API from the command-line.
@@ -9,7 +9,7 @@ dedicated command-line tool. This should make it easier to write shell scripts
 which extend Phabricator.
 
 positional arguments:
-  {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query}
+  {show-config,query,comment,comment-inline,raw-diff,create-revision,update-revision,get-diff,paste,task-create,task-update,task-query,git-diff-helper}
     show-config         show the configuration as discovered from the current
                         directory.
     query               display and filter the list of differential revisions.
@@ -23,6 +23,8 @@ positional arguments:
     task-create         Create a new task in maniphest.
     task-update         Update a task in maniphest.
     task-query          display and filter the list of maniphest tasks.
+    git-diff-helper     create a diff from a git repository, reducing the diff
+                        if it is too big.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -49,4 +51,7 @@ usage examples:
 
     to comment on every revision:
     $ arcyon query --format-type ids | arcyon comment --ids-file - -m hello
+
+    to create a diff to pass to arcyon, from within a git repository:
+    $ arcyon git-diff-helper base head
     
