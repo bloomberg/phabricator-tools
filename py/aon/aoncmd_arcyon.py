@@ -23,6 +23,7 @@ from __future__ import print_function
 
 import argparse
 
+import phlsys_conduit
 import phlsys_makeconduit
 import phlsys_subcommand
 
@@ -104,6 +105,20 @@ def main():
 
     try:
         return args.func(args)
+    except phlsys_conduit.ConduitException as e:
+
+        # pychecker won't let us pass 'e' in as a keyword argument, so we
+        # address it as parameter 0 instead
+        fmt = (
+            "ERROR ({0.error}): "
+            "Phabricator {0.method} could not perform request:\n"
+            "{0.errormsg}"
+        )
+        message = fmt.format(e)
+
+        print(message)
+        print()
+        return 1
     except phlsys_makeconduit.InsufficientInfoException as e:
         print("ERROR - insufficient information")
         print(e)
