@@ -121,6 +121,8 @@ def query_users_from_emails(conduit, emails):
     If an email does not correspond to a username then None is inserted in
     its place.
 
+    Note: If an empty list is supplied, an empty list will be returned.
+
     :conduit: must support 'call()' like phlsys_conduit
     :emails: a list of strings corresponding to user email addresses
     :returns: a list of strings corresponding to Phabricator usernames
@@ -141,6 +143,8 @@ def query_users_from_phids(conduit, phids):
 
     If a phid does not correspond to a username then return None.
 
+    Note: If an empty list is supplied, an empty list will be returned.
+
     :conduit: must support 'call()' like phlsys_conduit
     :phids: a list of strings corresponding to user phids
     :returns: a list of QueryResponse
@@ -148,6 +152,10 @@ def query_users_from_phids(conduit, phids):
     """
     if not isinstance(phids, list):
         raise ValueError("phids must be a list")
+
+    if len(phids) == 0:
+        return []
+
     d = {"phids": phids, "limit": len(phids)}
 
     response = None
@@ -169,12 +177,18 @@ def query_users_from_usernames(conduit, usernames):
 
     Return None if any of 'usernames' is invalid.
 
+    Note: If an empty list is supplied, an empty list will be returned.
+
     :conduit: must support 'call()' like phlsys_conduit
     :usernames: a list of strings corresponding to usernames
     :returns: a list of QueryResponse
 
     """
     assert isinstance(usernames, list)
+
+    if len(usernames) == 0:
+        return []
+
     d = {"usernames": usernames, "limit": len(usernames)}
 
     response = None
@@ -194,6 +208,8 @@ def query_usernames_from_phids(conduit, phids):
     """Return a list of username strings based on the provided phids.
 
     If a phid does not correspond to a username then raise.
+
+    Note: If an empty list is supplied, an empty list will be returned.
 
     :conduit: must support 'call()' like phlsys_conduit
     :phids: a list of strings corresponding to user phids

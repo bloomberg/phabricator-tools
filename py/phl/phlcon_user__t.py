@@ -120,6 +120,19 @@ class Test(unittest.TestCase):
             self.conduit, [users[0].phid, bad_phid])
         self.assertIsNone(phidDict)
 
+    def testEmptyLists(self):
+        users = phlcon_user.query_users_from_usernames(self.conduit, [])
+        self.assertEqual(len(users), 0)
+
+        users = phlcon_user.query_users_from_phids(self.conduit, [])
+        self.assertEqual(len(users), 0)
+
+        users = phlcon_user.query_usernames_from_phids(self.conduit, [])
+        self.assertEqual(len(users), 0)
+
+        users = phlcon_user.query_users_from_emails(self.conduit, [])
+        self.assertEqual(len(users), 0)
+
 # -----------------------------------------------------------------------------
 # Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
