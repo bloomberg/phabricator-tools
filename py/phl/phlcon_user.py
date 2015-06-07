@@ -39,7 +39,7 @@ QueryResponse = phlsys_namedtuple.make_named_tuple(
     'phlcon_user__QueryResponse',
     required=['phid', 'userName', 'realName', 'image', 'uri', 'roles'],
     defaults={},
-    ignored=['currentStatus', 'currentStatusUntil'])
+    ignored=['currentStatus', 'currentStatusUntil', 'primaryEmail'])
 
 
 class UserPhidCache(object):
