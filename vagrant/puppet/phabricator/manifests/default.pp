@@ -61,7 +61,7 @@ class apache2 {
 }
 
 class otherpackages {
-    $packages = ["git-core", "mysql-server", "php5", "dpkg-dev", "unzip"]
+    $packages = ["git-core", "mysql-server", "php5", "dpkg-dev", "unzip", "wget"]
     $php_packages = ["php5-mysql", "php5-gd", "php5-dev", "php5-curl", "php-apc", "php5-cli"]
 
     package { $packages: ensure     => installed, }
