@@ -18,6 +18,7 @@ from __future__ import division
 from __future__ import print_function
 
 import phlsys_conduit
+import phlsys_makeconduit
 
 import abdt_fs
 
@@ -114,17 +115,16 @@ def process(args):
     fs = abdt_fs.make_default_accessor()
 
     # make sure we can connect with those parameters
+    uri, user, cert, _ = phlsys_makeconduit.get_uri_user_cert_explanation(
+        args.instance_uri, args.arcyd_user, args.arcyd_cert)
     conduit = phlsys_conduit.Conduit(
-        args.instance_uri,
-        args.arcyd_user,
-        args.arcyd_cert,
-        https_proxy=args.https_proxy)
+        uri, user, cert, https_proxy=args.https_proxy)
     conduit.ping()
 
     content = _CONFIG.format(
-        instance_uri=args.instance_uri,
-        arcyd_user=args.arcyd_user,
-        arcyd_cert=args.arcyd_cert,
+        instance_uri=uri,
+        arcyd_user=user,
+        arcyd_cert=cert,
         review_url_format=args.review_url_format)
 
     if args.https_proxy:
@@ -144,7 +144,7 @@ def process(args):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
