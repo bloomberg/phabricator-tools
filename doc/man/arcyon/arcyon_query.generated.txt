@@ -3,11 +3,11 @@ usage: arcyon query [-h] [--ids INT [INT ...]] [--ids-stdin] [--translate]
                     [--order {modified,created}]
                     [--status-type {open,accepted,closed}]
                     [--statuses {Closed,Abandoned,Needs Review,Needs Revision,Accepted} [{Closed,Abandoned,Needs Review,Needs Revision,Accepted} ...]]
-                    [--arcanist-projects STR [STR ...]] [--author-me]
-                    [--reviewer-me] [--cc-me] [--subscriber-me]
-                    [--responsible-me] [--authors USER [USER ...]]
-                    [--reviewers USER [USER ...]] [--ccs USER [USER ...]]
-                    [--subscribers USER [USER ...]]
+                    [--arcanist-projects STR [STR ...]]
+                    [--branches STR [STR ...]] [--author-me] [--reviewer-me]
+                    [--cc-me] [--subscriber-me] [--responsible-me]
+                    [--authors USER [USER ...]] [--reviewers USER [USER ...]]
+                    [--ccs USER [USER ...]] [--subscribers USER [USER ...]]
                     [--responsible-users USER [USER ...]]
                     [--update-min-age AGE] [--update-max-age AGE]
                     [--format-type {ids,short,python,json} | --format-string FORMAT]
@@ -46,6 +46,8 @@ filter parameters:
                         limit output to only these statuses
   --arcanist-projects STR [STR ...]
                         add projects to the arcanistProjects filter
+  --branches STR [STR ...]
+                        add branches to the branches filter
 
 self filter parameters:
   --author-me           add yourself to the authors filter

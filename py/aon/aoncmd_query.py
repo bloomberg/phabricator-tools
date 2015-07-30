@@ -179,6 +179,13 @@ def _setupParserFilters(filters, self_filters, user_filters, time_filters):
         default=[],
         metavar='STR',
         help="add projects to the arcanistProjects filter")
+    filters.add_argument(
+        '--branches',
+        type=str,
+        nargs="+",
+        default=[],
+        metavar='STR',
+        help="add branches to the branches filter")
 
     self_filters.add_argument(
         '--author-me',
@@ -301,6 +308,7 @@ def _process_user_fields(me, conduit, args):
 def _set_options(args, d):
     phlsys_dictutil.set_if_true(d, 'ids', args.ids)
     phlsys_dictutil.set_if_true(d, 'arcanistProjects', args.arcanist_projects)
+    phlsys_dictutil.set_if_true(d, 'branches', args.branches)
     phlsys_dictutil.set_if_true(d, 'limit', args.max_results)
     phlsys_dictutil.set_if_true(d, 'offset', args.offset_results)
 
@@ -424,7 +432,7 @@ def _output_results(args, results):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
