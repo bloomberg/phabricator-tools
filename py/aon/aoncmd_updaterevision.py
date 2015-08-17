@@ -53,6 +53,8 @@ from __future__ import print_function
 
 import argparse
 
+import phlcon_differential
+import phlcon_user
 import phlsys_makeconduit
 
 
@@ -60,11 +62,21 @@ def getFromfilePrefixChars():
     return ""
 
 
+def _get_set_or_none(list_or_none):
+    if list_or_none is not None:
+        list_or_none = set(list_or_none)
+        return list_or_none
+
+
 def setupParser(parser):
     diffsrc_group = parser.add_argument_group(
         'Diff arguments',
         'Mutually exclusive, one is required')
     diffsrc = diffsrc_group.add_mutually_exclusive_group(required=True)
+
+    opt = parser.add_argument_group(
+        'Optional revision arguments',
+        'You can supply these later via the web interface if you wish')
     output_group = parser.add_argument_group(
         'Output format arguments',
         'Mutually exclusive, defaults to "--format-summary"')
@@ -82,6 +94,22 @@ def setupParser(parser):
         help='the file to read the diff from, use \'-\' for stdin',
         metavar='FILE',
         type=argparse.FileType('r'))
+
+    opt.add_argument(
+        '--reviewers',
+        '-r',
+        nargs="+",
+        metavar='USER',
+        help='a list of reviewer usernames',
+        type=str)
+
+    opt.add_argument(
+        '--ccs',
+        '-c',
+        nargs="+",
+        metavar='USER',
+        help='a list of usernames to cc on the review',
+        type=str)
 
     parser.add_argument(
         'revision_id',
@@ -131,6 +159,23 @@ def process(args):
         'message': args.message
     }
 
+    MessageFields = phlcon_differential.MessageFields
+
+    args.ccs = _get_set_or_none(args.ccs)
+    args.reviewers = _get_set_or_none(args.reviewers)
+
+    if args.reviewers:
+        fields[MessageFields.reviewer_phids] = args.reviewers
+    if args.ccs:
+        fields[MessageFields.cc_phids] = args.ccs
+
+    # conduit expects PHIDs not plain usernames
+    user_phids = phlcon_user.UserPhidCache(conduit)
+    for users in fields.itervalues():
+        user_phids.add_hint_list(users)
+    for key in fields.iterkeys():
+        fields[key] = [user_phids.get_phid(u) for u in fields[key]]
+
     result = conduit("differential.updaterevision", d)
 
     if args.format_id:
@@ -145,9 +190,8 @@ def process(args):
             rev_id=result["revisionid"],
             url=result["uri"]))
 
-
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

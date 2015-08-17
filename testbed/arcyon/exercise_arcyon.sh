@@ -35,6 +35,7 @@ $arcyon get-diff -d $diffid2 --ls
 id2="$($arcyon create-revision -t title2 -p plan --diff-id $diffid --format-id)"
 id3=$($arcyon update-revision $id2 update --diff-id $diffid2 --format-id)
 $arcyon update-revision $id2 update --diff-id $diffid2 --format-url
+$arcyon update-revision $id2 update --diff-id $diffid2 --format-url --ccs phab --reviewers bob
 
 if [ "$id2" != "$id3" ]; then
     false
@@ -61,7 +62,7 @@ $arcyon task-update $taskid -t 'exercise task-update' -d 'new description' -p lo
 
 $arcyon paste "test paste" -f diff1
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

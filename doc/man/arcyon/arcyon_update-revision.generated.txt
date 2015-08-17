@@ -1,4 +1,6 @@
 usage: arcyon update-revision [-h] (--diff-id INT | --raw-diff-file FILE)
+                              [--reviewers USER [USER ...]]
+                              [--ccs USER [USER ...]]
                               [--format-summary | --format-id | --format-url]
                               [--uri ADDRESS] [--user NAME] [--cert HEX]
                               [--act-as-user NAME]
@@ -22,6 +24,14 @@ Diff arguments:
                         be the output from a "arcyon raw-diff" call
   --raw-diff-file FILE, -f FILE
                         the file to read the diff from, use '-' for stdin
+
+Optional revision arguments:
+  You can supply these later via the web interface if you wish
+
+  --reviewers USER [USER ...], -r USER [USER ...]
+                        a list of reviewer usernames
+  --ccs USER [USER ...], -c USER [USER ...]
+                        a list of usernames to cc on the review
 
 Output format arguments:
   Mutually exclusive, defaults to "--format-summary"
