@@ -183,13 +183,16 @@ def process(args):
     # determine the repo url from the parsed params
     repo_url = abdi_repoargs.get_repo_url(repo_params)
 
+    # determine the repo push url from the parsed params
+    repo_push_url = abdi_repoargs.get_repo_push_url(repo_params)
+
     with fs.lockfile_context():
-        with abdi_repo.setup_repo_context(repo_url, repo_path):
+        with abdi_repo.setup_repo_context(repo_url, repo_path, repo_push_url):
             fs.create_repo_config(repo_name, config)
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

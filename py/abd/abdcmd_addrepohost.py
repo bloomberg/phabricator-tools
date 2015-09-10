@@ -26,6 +26,11 @@ _CONFIG_REPO_URL_FORMAT = """
 {repo_url_format}
 """.strip()
 
+_CONFIG_REPO_PUSH_URL_FORMAT = """
+--repo-push-url-format
+{repo_push_url_format}
+""".strip()
+
 _CONFIG_REPO_SNOOP_URL_FORMAT = """
 --repo-snoop-url-format
 {repo_snoop_url_format}
@@ -77,6 +82,12 @@ def process(args):
             config,
             _CONFIG_REPO_URL_FORMAT.format(
                 repo_url_format=args.repo_url_format)])
+
+    if args.repo_push_url_format:
+        config = '\n'.join([
+            config,
+            _CONFIG_REPO_PUSH_URL_FORMAT.format(
+                repo_push_url_format=args.repo_push_url_format)])
 
     if args.repo_snoop_url_format:
         config = '\n'.join([

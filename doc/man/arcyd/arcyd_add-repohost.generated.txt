@@ -1,4 +1,5 @@
 usage: arcyd add-repohost [-h] --name STR [--repo-url-format STRING]
+                          [--repo-push-url-format STRING]
                           [--repo-snoop-url-format URL]
                           [--branch-url-format STRING]
                           [--admin-emails [TO [TO ...]]]
@@ -13,6 +14,10 @@ optional arguments:
                         argument to produce the final url, e.g.
                         'http://github.com/{}.git'. the default is '{}' so the
                         '--repo-url' is used unchanged.
+  --repo-push-url-format STRING
+                        a python format() string to apply the '--repo-url'
+                        argument to produce a push url, e.g.
+                        'http://github.com/{}.git'.
   --repo-snoop-url-format URL
                         URL to use to snoop the latest contents of the
                         repository, this is used by Arcyd to more efficiently

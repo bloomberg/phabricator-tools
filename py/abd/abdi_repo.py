@@ -51,30 +51,38 @@ being created.
 """.strip()
 
 
-def setup_repo(repo_url, repo_path):
+def setup_repo(repo_url, repo_path, repo_push_url=None):
     """Setup a repository, if an exception is raised then remove the repo.
 
     :repo_url: string url of the repo to clone
     :repo_path: string path to clone the repo to
+    :repo_push_url: string url to push to, or None
     :returns: None
 
     """
-    with setup_repo_context(repo_url, repo_path):
+    with setup_repo_context(repo_url, repo_path, repo_push_url):
         pass
 
 
 @contextlib.contextmanager
-def setup_repo_context(repo_url, repo_path):
+def setup_repo_context(repo_url, repo_path, repo_push_url=None):
     """Setup a repository, if an exception is raised then remove the repo.
 
     :repo_url: string url of the repo to clone
     :repo_path: string path to clone the repo to
+    :repo_push_url: string url to push to, or None
     :returns: None
 
     """
     # if there's any failure after cloning then we should remove the repo
-    phlsys_subprocess.run(
-        'git', 'clone', repo_url, repo_path)
+    if repo_push_url is not None:
+        phlsys_subprocess.run(
+            'git', 'clone', repo_url, repo_path,
+            '--config', 'remote.origin.pushurl=' + repo_push_url)
+    else:
+        phlsys_subprocess.run(
+            'git', 'clone', repo_url, repo_path)
+
     try:
         repo = phlsys_git.Repo(repo_path)
 
@@ -180,7 +188,7 @@ def remove_landinglog(repo):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

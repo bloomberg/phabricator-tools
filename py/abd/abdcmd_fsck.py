@@ -167,8 +167,10 @@ def _check_repo_cloned(args, repo_name, repo_config):
             repo_name, repo_config.repo_path))
         if args.fix:
             repo_url = abdi_repoargs.get_repo_url(repo_config)
+            repo_push_url = abdi_repoargs.get_repo_push_url(repo_config)
             print("cloning '{}' ..".format(repo_url))
-            abdi_repo.setup_repo(repo_url, repo_config.repo_path)
+            abdi_repo.setup_repo(
+                repo_url, repo_config.repo_path, repo_push_url)
         else:
             all_ok = False
 
@@ -291,7 +293,7 @@ def _print_indented(spaces, s):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

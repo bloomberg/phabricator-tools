@@ -158,7 +158,8 @@ vot7fxrotwpi3ty2b2sa2kvlpf
 
     $arcyd add-repohost \
         --name fs1 \
-        --repo-url-format '../{}' \
+        --repo-url-format 'http://localhost:8000' \
+        --repo-push-url-format $(readlink -f ../)'/{}' \
         --repo-snoop-url-format 'http://localhost:8000/info/refs' \
         --branch-url-format 'http://my.git/gitweb?p={repo_url}.git;a=log;h=refs/heads/{branch}' \
         --admin-emails 'local-git-admin2@localhost' 'local-git-admin@localhost'
