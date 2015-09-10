@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abdi_repoargs
 import abdt_fs
 
 
@@ -54,42 +55,7 @@ def setupParser(parser):
         help="string name of the repohost, {regex}".format(
             regex=abdt_fs.CONFIG_NAME_REGEX))
 
-    parser.add_argument(
-        '--repo-url-format',
-        metavar="STRING",
-        type=str,
-        default="{}",
-        help="a python format() string to apply the '--repo-url' argument to "
-             "produce the final url, e.g. 'http://github.com/{}.git'. the "
-             "default is '{}' so the '--repo-url' is used unchanged.")
-
-    parser.add_argument(
-        '--repo-snoop-url-format',
-        metavar="URL",
-        type=str,
-        help="URL to use to snoop the latest contents of the repository, this "
-             "is used by Arcyd to more efficiently determine if it needs to "
-             "fetch the repository or not.  The efficiency comes from "
-             "re-using connections to the same host when querying.  The "
-             "contents returned by the URL are expected to change every time "
-             "the git repository changes, a good example of a URL to supply "
-             "is to the 'info/refs' address if you're serving up the repo "
-             "over http or https.  "
-             "e.g. 'http://server.test/git/{}/info/refs'. the {} will be "
-             "substituted with the supplied '--repo-url' argument.'")
-
-    parser.add_argument(
-        '--branch-url-format',
-        type=str,
-        metavar='STRING',
-        help="a format string for generating URLs for viewing branches, e.g. "
-             "for a gitweb install: "
-             "'http://my.git/gitweb?p={repo_url}.git"
-             ";a=log;h=refs/heads/{branch}', "
-             "note that the {branch} will be substituted for the branch name. "
-             "note that the {repo_url} will be substituted for the supplied "
-             "'--repo-url' argument. "
-             "the result will be used on the dashboard to link to branches.")
+    abdi_repoargs.setup_repohost_parser(parser)
 
     parser.add_argument(
         '--admin-emails',
@@ -138,7 +104,7 @@ def process(args):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
