@@ -70,8 +70,6 @@ def do(
     url_watcher_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
         fs_accessor.layout.urlwatcher_cache_path)
 
-    finished = False
-
     # decide max workers based on number of CPUs if no value is specified
     if max_workers == 0:
         max_workers = determine_max_workers_default()
@@ -97,6 +95,7 @@ def do(
 
     cycle_timer = phlsys_timer.Timer()
     cycle_timer.start()
+    finished = False
     while not finished:
 
         # This timer needs to be separate from the cycle timer. The cycle timer
