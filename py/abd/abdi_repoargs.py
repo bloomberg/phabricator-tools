@@ -170,7 +170,7 @@ def setup_phab_parser(parser):
         '--https-proxy',
         metavar="PROXY",
         type=str,
-        help="proxy to use, if necessary")
+        help="proxy URI for arcyd to use when connecting to conduit on https.")
 
 
 def setup_repohost_parser(parser):
