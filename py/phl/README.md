@@ -69,6 +69,8 @@ Wrapper to integrate with Arcanist's ~/.arcrc file.
 Prompt the user to choose from some options on the command-line.
 * `phlsys_compiface.py` -
 Ensure that two or more interfaces match, useful for validating mocks.
+* `phlsys_compressedlogging.py` -
+Rotating file handler for compressing rolled over logs.
 * `phlsys_conduit.py` -
 Wrapper to call Phabricator's Conduit API.
 * `phlsys_cppcheck.py` -

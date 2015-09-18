@@ -23,6 +23,7 @@ import logging.handlers
 import os
 import time
 
+import phlsys_compressedlogging
 import phlsys_daemonize
 import phlsys_fs
 import phlsys_multiprocessing
@@ -128,7 +129,7 @@ def _setup_logger(fs):
         backupCount=10)
     info_handler.setLevel(logging.INFO)
 
-    debug_handler = lg.handlers.RotatingFileHandler(
+    debug_handler = phlsys_compressedlogging.CompressedRotatingFileHandler(
         fs.layout.log_debug,
         maxBytes=10 * 1024 * 1024,
         backupCount=10)
