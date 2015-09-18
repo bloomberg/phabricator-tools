@@ -60,20 +60,22 @@ __To create a new local VM serving up Phabricator__
    Phabricator instance
 
 __To install within an existing VM or machine__
-* Tested on Lubuntu 14.04 on VirtualBox
+* Requires [Puppet](https://puppetlabs.com/)
+* This method works only on Ubuntu or its derivatives
+* Tested on Ubuntu 14.04 and Lubuntu 14.04 on VirtualBox
 
 1. `$ sudo puppet apply vagrant/puppet/phabricator/manifests/default.pp
    --modulepath vagrant/puppet`
 2. Point a web-browser at 'http://127.0.0.1' to login to your new Phabricator
    instance
 
-*Note:* Please note that if you have disabled anonymous user access or limited privilages 
-then you would have to specify a user who has required privilages in the default puppet 
-manifest file as follows. Change line reading 
+*Note:* Please note that if you have disabled anonymous user access or limited privilages
+then you would have to specify a user who has required privilages in the default puppet
+manifest file as follows. Change line reading
 
     exec { "mysql < ${phab_dir}/initial.db && ${dev_dir}/phabricator/bin/storage upgrade --force":
 
-to 
+to
 
     exec { "mysql -u phab < ${phab_dir}/initial.db && ${dev_dir}/phabricator/bin/storage upgrade --user phab --force":
 
