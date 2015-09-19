@@ -128,27 +128,6 @@ def setup_parser(parser):
         required=True,
         help="file to touch when successfully updated a repo")
 
-    parser.add_argument(
-        "--plugins",
-        metavar="MODULE_NAME",
-        nargs="+",
-        type=str,
-        default=[],
-        required=False,
-        help="List the plugins to be loaded. MODULE_NAME must be present "
-        "in /testbed/plugins/ directory as this feature is WIP.")
-
-    parser.add_argument(
-        "--trusted-plugins",
-        metavar="MODULE_NAME",
-        nargs="+",
-        type=str,
-        default=[],
-        required=False,
-        help="List the trusted plugins to be loaded. MODULE_NAME must be "
-        "present in /testbed/plugins/ directory as this feature is WIP."
-        "See /testbed/plugins/README.md for detail about trusted-plugins")
-
 
 def setup_phab_parser(parser):
 
@@ -235,7 +214,7 @@ def setup_repohost_parser(parser):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

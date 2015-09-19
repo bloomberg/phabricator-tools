@@ -26,10 +26,6 @@ sys.path.append(os.path.join(PARENT_DIR, "py", "abd"))
 sys.path.append(os.path.join(PARENT_DIR, "py", "bar"))
 sys.path.append(os.path.join(PARENT_DIR, "py", "phl"))
 
-# This is a temprary fix for locationg plugins while not using "."
-# notation python packages.
-sys.path.append(os.path.join(PARENT_DIR, "testbed", "plugins"))
-
 # flake8 rightly complains about this, disable it with 'noqa'
 import barcmd_barc  # noqa
 

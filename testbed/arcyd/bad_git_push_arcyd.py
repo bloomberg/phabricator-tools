@@ -27,10 +27,6 @@ BASE_DIR = os.path.dirname(PARENT_DIR)
 sys.path.append(os.path.join(BASE_DIR, "py", "abd"))
 sys.path.append(os.path.join(BASE_DIR, "py", "phl"))
 
-# This is a temprary fix for locationg plugins while not using "."
-# notation python packages.
-sys.path.append(os.path.join(BASE_DIR, "testbed", "plugins"))
-
 import phlsys_git
 
 import abdcmd_arcyd
@@ -56,7 +52,7 @@ if __name__ == "__main__":
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
