@@ -7,6 +7,7 @@
 # Public Functions:
 #   main
 #   should_process_file
+#   is_new_file
 #   get_first_year
 #   get_last_year
 #   get_corrected_contents
@@ -151,6 +152,12 @@ def should_process_file(path):
     return True
 
 
+def is_new_file(path):
+    timestamp_str = subprocess.check_output(
+        ['git', 'log', '-1', '--format=%ct', '--', path])
+    return False if timestamp_str else True
+
+
 def get_first_year(path):
     timestamp_str_list = subprocess.check_output([
         'git',
@@ -172,8 +179,11 @@ def get_last_year(path):
 
 
 def get_corrected_contents(contents, path):
-    first_year = get_first_year(path)
-    last_year = get_last_year(path)
+    if is_new_file(path):
+        first_year = last_year = datetime.date.today().year
+    else:
+        first_year = get_first_year(path)
+        last_year = get_last_year(path)
 
     expected_legal_text = make_expected_legal_text(path, first_year, last_year)
     before_legal_text, actual_legal_text = divide_legal(contents, path)
