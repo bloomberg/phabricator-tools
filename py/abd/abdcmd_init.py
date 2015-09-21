@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import abdi_processrepos
 import abdt_fs
 
 _DEFAULT_CONFIG = """
@@ -40,12 +41,7 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    parser.add_argument(
-        '--arcyd-email',
-        metavar="EMAIL",
-        type=str,
-        required=True,
-        help="email address for arcyd to send messages from")
+    abdi_processrepos.addCommonParserArgs(parser)
     parser.add_argument(
         '--sys-admin-emails',
         type=str,
@@ -53,32 +49,6 @@ def setupParser(parser):
         nargs='+',
         default=['root@localhost'],
         help='list of email address to send mail to on system error.')
-    parser.add_argument(
-        '--sleep-secs',
-        metavar="TIME",
-        type=int,
-        default=60,
-        help="override time to wait between runs through the list")
-    parser.add_argument(
-        '--sendmail-binary',
-        metavar="PROGRAM",
-        type=str,
-        default="sendmail",
-        help="program to send the mail with (e.g. sendmail, catchmail)")
-    parser.add_argument(
-        '--sendmail-type',
-        metavar="TYPE",
-        type=str,
-        default="sendmail",
-        help="type of program to send the mail with (sendmail, catchmail), "
-        "this will affect the parameters that Arcyd will use.")
-    parser.add_argument(
-        '--external-report-command',
-        metavar="PATH",
-        type=str,
-        default=None,
-        help="path to an external reporter to send monitoring info to, "
-             "will be called like so: $REPORTER <<json report object>>")
 
 
 def process(args):

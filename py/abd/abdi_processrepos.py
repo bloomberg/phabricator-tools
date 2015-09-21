@@ -5,6 +5,7 @@
 # abdi_processrepos
 #
 # Public Functions:
+#   addCommonParserArgs
 #   setupParser
 #   process
 #
@@ -27,20 +28,13 @@ import abdt_logging
 import abdi_processrepoarglist
 
 
-def setupParser(parser):
+def addCommonParserArgs(parser):
     parser.add_argument(
         '--arcyd-email',
         metavar="EMAIL",
         type=str,
         required=True,
         help="email address for arcyd to send messages from")
-    parser.add_argument(
-        '--sys-admin-emails',
-        metavar="EMAIL",
-        nargs="+",
-        type=str,
-        required=True,
-        help="email addresses to send important system events to")
     parser.add_argument(
         '--sendmail-binary',
         metavar="PROGRAM",
@@ -53,30 +47,13 @@ def setupParser(parser):
         type=str,
         default="sendmail",
         help="type of program to send the mail with (sendmail, catchmail), "
-        "this will affect the parameters that Arycd will use.")
-    parser.add_argument(
-        '--kill-file',
-        metavar="NAME",
-        type=str,
-        help="filename to watch for, will stop operations safely if the file "
-             "is detected.")
+        "this will affect the parameters that Arcyd will use.")
     parser.add_argument(
         '--sleep-secs',
         metavar="TIME",
         type=int,
         default=3,
         help="time to wait between runs through the list")
-    parser.add_argument(
-        '--no-loop',
-        action='store_true',
-        help="supply this argument to only process each repo once then exit")
-    parser.add_argument(
-        '--external-error-logger',
-        metavar="PATH",
-        type=str,
-        default=None,
-        help="path to an external logger to send errors to, will be called "
-             "like so: $LOGGER '<<identifier>>' '<<full details>>'")
     parser.add_argument(
         '--external-report-command',
         metavar="PATH",
@@ -92,6 +69,34 @@ def setupParser(parser):
         help="maximum number of worker processes to run at one time, Set to 0 "
              "to let Arcyd decide the number. Set to 1 to disable "
              "multiprocessing completely.")
+
+
+def setupParser(parser):
+    addCommonParserArgs(parser)
+    parser.add_argument(
+        '--sys-admin-emails',
+        metavar="EMAIL",
+        nargs="+",
+        type=str,
+        required=True,
+        help="email addresses to send important system events to")
+    parser.add_argument(
+        '--kill-file',
+        metavar="NAME",
+        type=str,
+        help="filename to watch for, will stop operations safely if the file "
+             "is detected.")
+    parser.add_argument(
+        '--no-loop',
+        action='store_true',
+        help="supply this argument to only process each repo once then exit")
+    parser.add_argument(
+        '--external-error-logger',
+        metavar="PATH",
+        type=str,
+        default=None,
+        help="path to an external logger to send errors to, will be called "
+             "like so: $LOGGER '<<identifier>>' '<<full details>>'")
     parser.add_argument(
         '--overrun-secs',
         metavar="SECONDS",
