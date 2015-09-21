@@ -72,7 +72,7 @@ def do(
     finished = False
 
     # decide max workers based on number of CPUs if no value is specified
-    if max_workers is None:
+    if max_workers == 0:
         try:
             # use the same default as multiprocessing.Pool
             max_workers = multiprocessing.cpu_count()
@@ -83,7 +83,7 @@ def do(
             _LOGGER.warning(
                 "multiprocessing.cpu_count() not supported, disabling "
                 "multiprocessing. Specify max workers explicitly to enable.")
-            max_workers = 0
+            max_workers = 1
 
     repo_list = []
     for name, config in repo_configs:
@@ -128,7 +128,7 @@ def do(
         with abdt_logging.misc_operation_event_context(
                 'process-repos',
                 '{} workers, {} repos'.format(max_workers, len(repo_list))):
-            if max_workers:
+            if max_workers > 1:
                 for i, res in pool.cycle_results(overrun_secs=overrun_secs):
                     repo = repo_list[i]
                     repo.merge_from_worker(res)

@@ -88,9 +88,9 @@ def setupParser(parser):
         '--max-workers',
         metavar="COUNT",
         type=int,
-        default=None,
-        help="maximum number of worker processes to run at one time, leave "
-             "unset to let Arcyd decide the number. Set to 0 to disable "
+        default=0,
+        help="maximum number of worker processes to run at one time, Set to 0 "
+             "to let Arcyd decide the number. Set to 1 to disable "
              "multiprocessing completely.")
     parser.add_argument(
         '--overrun-secs',
