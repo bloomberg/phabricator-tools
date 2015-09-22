@@ -286,7 +286,7 @@ class BranchMock(object):
         """Return a string description of this branch for a human to read."""
         return "description!"
 
-    def describe_new_commits(self):
+    def describe_new_commits(self, max_commits=100, max_size=16000):
         """Return a string description of the new commits on the branch."""
         return "new commits description!"
 
@@ -412,7 +412,7 @@ class BranchMock(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

@@ -282,7 +282,7 @@ class Branch(object):
                 branch_description += " (abandoned)"
         return "{}, {}".format(self.get_repo_name(), branch_description)
 
-    def describe_new_commits(self):
+    def describe_new_commits(self, max_commits=100, max_size=16000):
         """Return a string description of the new commits on the branch."""
         hashes = None
         previous = None
@@ -298,8 +298,18 @@ class Branch(object):
         revisions = self._repo.make_revisions_from_hashes(hashes)
 
         message = ""
+        count = 0
+        message_size = 0
         for r in revisions:
-            message += r.abbrev_hash + " " + r.subject + "\n"
+            new_message = r.abbrev_hash + " " + r.subject + "\n"
+            count += 1
+            message_size += len(new_message)
+            if count > max_commits or message_size > max_size:
+                message += "...{num_commits} commits not shown.\n".format(
+                    num_commits=len(revisions) - count + 1)
+                break
+            else:
+                message += new_message
         return phlsys_textconvert.ensure_ascii(message)
 
     def make_message_digest(self):
@@ -603,7 +613,7 @@ class Branch(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

@@ -11,6 +11,9 @@
 # [XD] can set and retrieve repo name, branch link
 # [ C] can move bad_pre_review -> 'new' states without duplicating branches
 # [ D] unique names and emails are returned in the order of most recent first
+# [ E] all commits are shown when no arguments are supplied
+# [ E] number of commits can be limited by max_commits argument
+# [ E] number of commits can be limited by max_size argument
 # [  ] can detect if review branch has new commits (after ff, merge, rebase)
 # [  ] can get raw diff from branch
 # [  ] can get author names and emails from branch
@@ -36,6 +39,7 @@
 # [ B] test_B_Empty
 # [ C] test_C_BadPreReviewToNew
 # [ D] test_D_AlternatingAuthors
+# [ E] test_E_NewCommitsDescription
 # [XB] test_XB_UntrackedBranch
 # [XC] test_XC_MoveBetweenAllMarkedStates
 # [XD] check_XD_SetRetrieveRepoNameBranchLink
@@ -150,6 +154,41 @@ class Test(unittest.TestCase):
 #         self.assertEqual(any_author_emails[-1], alice_email)
 #         self.assertEqual(any_author_emails[-2], bob_email)
 
+    def test_E_NewCommitsDescription(self):
+        base, branch_name, branch = self._setup_for_untracked_branch()
+        user = 'Alice'
+        email = 'alice@server.test'
+        self._dev_commit_new_empty_file('Commit 1', user, email)
+        self._dev_commit_new_empty_file('Commit 2', user, email)
+        self._dev_commit_new_empty_file('Commit 3', user, email)
+        self._dev_commit_new_empty_file('Commit 4', user, email)
+        phlgit_push.push(self.repo_dev, branch_name, 'origin')
+        self.repo_arcyd('fetch', 'origin')
+
+        # [ E] all commits are shown when no arguments are supplied
+        new_commits_str = branch.describe_new_commits()
+        new_commits = new_commits_str.splitlines()
+        self.assertEqual(4, len(new_commits))
+        count = 4
+        for line in new_commits:
+            self.assertTrue(line.endswith('Commit {}'.format(count)))
+            count -= 1
+
+        # [ E] number of commits can be limited by max_commits argument
+        new_commits_str = branch.describe_new_commits(2)
+        new_commits = new_commits_str.splitlines()
+        self.assertEqual(3, len(new_commits))
+        self.assertTrue(new_commits[0].endswith('Commit 4'))
+        self.assertTrue(new_commits[1].endswith('Commit 3'))
+        self.assertEqual(new_commits[2], '...2 commits not shown.')
+
+        # [ E] number of commits can be limited by max_size argument
+        new_commits_str = branch.describe_new_commits(3, 20)
+        new_commits = new_commits_str.splitlines()
+        self.assertEqual(2, len(new_commits))
+        self.assertTrue(new_commits[0].endswith('Commit 4'))
+        self.assertEqual(new_commits[1], '...3 commits not shown.')
+
     def _dev_commit_new_empty_file(self, filename, user, email):
         self._create_new_file(self.repo_dev, filename)
         self.repo_dev('add', filename)
@@ -208,7 +247,7 @@ class Test(unittest.TestCase):
         return base, branch_name, branch
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
