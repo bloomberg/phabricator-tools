@@ -95,6 +95,14 @@ def main():
              'to exercise concurrency and gather more accurate performance '
              'information.')
 
+    parser.add_argument(
+        '--enable-debug-shell',
+        action='store_true',
+        default=False,
+        help='If this argument is provided, debug shell is launched '
+             'automatically if any of the tests fail. By default, this option '
+             'is set to false.')
+
     args = parser.parse_args()
 
     with phlsys_fs.chtmpdir_context():
@@ -399,7 +407,8 @@ def _do_tests(args):
             run_all_interactions(fixture)
         except:
             print(fixture.arcyds[0].debug_log())
-            fixture.launch_debug_shell()
+            if args.enable_debug_shell:
+                fixture.launch_debug_shell()
             raise
 
 
