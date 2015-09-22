@@ -131,7 +131,7 @@ def _setup_logger(fs):
 
     debug_handler = phlsys_compressedlogging.CompressedRotatingFileHandler(
         fs.layout.log_debug,
-        maxBytes=10 * 1024 * 1024,
+        maxBytes=50 * 1024 * 1024,
         backupCount=10)
     debug_handler.setLevel(logging.DEBUG)
 
