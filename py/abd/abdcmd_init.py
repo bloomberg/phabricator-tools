@@ -33,6 +33,8 @@ _DEFAULT_CONFIG = """
 var/command/killfile
 --sleep-secs
 {sleep_secs}
+--max-workers
+{max_workers}
 """.strip()
 
 
@@ -59,7 +61,8 @@ def process(args):
         sys_admin_emails=' '.join(args.sys_admin_emails),
         sendmail_binary=args.sendmail_binary,
         sendmail_type=args.sendmail_type,
-        sleep_secs=args.sleep_secs)
+        sleep_secs=args.sleep_secs,
+        max_workers=args.max_workers)
 
     if args.external_report_command:
         config += "\n--external-report-command\n{}".format(
