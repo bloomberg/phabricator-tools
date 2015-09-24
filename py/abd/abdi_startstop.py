@@ -29,6 +29,7 @@ import phlsys_fs
 import phlsys_multiprocessing
 import phlsys_pid
 import phlsys_signal
+import phlsys_verboseerrorfilter
 
 import abdt_fs
 
@@ -117,17 +118,24 @@ def stop_arcyd_pid(pid):
 
 
 def _setup_logger(fs):
-    # log DEBUG+ and INFO+ to separate files
+    # log DEBUG+, INFO+ and ERROR+ to separate files
 
     # pychecker makes us do this, it won't recognise that logging.handlers is a
     # thing
     lg = logging
+
+    error_handler = lg.handlers.RotatingFileHandler(
+        fs.layout.log_error,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=10)
+    error_handler.setLevel(logging.ERROR)
 
     info_handler = lg.handlers.RotatingFileHandler(
         fs.layout.log_info,
         maxBytes=10 * 1024 * 1024,
         backupCount=10)
     info_handler.setLevel(logging.INFO)
+    info_handler.addFilter(phlsys_verboseerrorfilter.getFilter())
 
     debug_handler = phlsys_compressedlogging.CompressedRotatingFileHandler(
         fs.layout.log_debug,
@@ -138,8 +146,10 @@ def _setup_logger(fs):
     logfmt = '%(asctime)s UTC: %(levelname)s: (%(processName)-11s) %(message)s'
     formatter = logging.Formatter(logfmt)
     logging.Formatter.converter = time.gmtime
+    error_handler.setFormatter(formatter)
     info_handler.setFormatter(formatter)
     debug_handler.setFormatter(formatter)
+    logging.getLogger().addHandler(error_handler)
     logging.getLogger().addHandler(info_handler)
     logging.getLogger().addHandler(debug_handler)
 

@@ -244,6 +244,11 @@ cd dev
     echo
     echo "    tail -F ../arcyd/var/log/info"
     echo
+    echo If there are any errors during execution of arcyd, you can see those
+    echo like so:
+    echo
+    echo "    tail -F ../arcyd/var/log/error"
+    echo
     echo For more examples of things to do in the test shell, see the log of
     echo the phabricator-tools repository for relevant test plans:
     echo

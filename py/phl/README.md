@@ -113,6 +113,8 @@ Determine the wall clock duration of events.
 Decorators for tracing out the execution of functions and methods.
 * `phlsys_tryloop.py` -
 Conveniently retry exception-prone operations.
+* `phlsys_verboseerrorfilter.py` -
+Filter for log handlers to exclude verbose error messages.
 * `phlurl_request.py` -
 Utilities for making requests with URLs.
 * `phlurl_watcher.py` -
