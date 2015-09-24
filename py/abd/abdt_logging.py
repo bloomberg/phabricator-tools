@@ -78,8 +78,8 @@ def on_retry_exception(identifier, detail, e, delay):
         _LOGGER.error(
             'on_retry_exception: during "{}" encountered exception "{}", '
             'will not retry. More detail: "{}".'.format(
-                identifier, type(e).__name__, detail),
-            exc_info=1)
+                identifier, type(e).__name__, detail))
+        _LOGGER.error('VERBOSE MESSAGE: ', exc_info=1)
 
     _log_system_exception(identifier, detail, e)
 

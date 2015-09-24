@@ -144,7 +144,12 @@ def do(
                 try:
                     phlsys_subprocess.run(full_path, stdin=report_json)
                 except phlsys_subprocess.CalledProcessError as e:
-                    _LOGGER.error("CycleReportJson: {}".format(e))
+                    _LOGGER.error(
+                        "External command: {} failed with exception: "
+                        "{}.".format(
+                            external_report_command, type(e).__name__))
+                    _LOGGER.error("VERBOSE MESSAGE: CycleReportJson:{}".format(
+                        e))
 
         # look for killfile
         if os.path.isfile(kill_file):

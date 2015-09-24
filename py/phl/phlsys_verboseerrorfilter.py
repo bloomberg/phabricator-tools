@@ -9,7 +9,7 @@
 #    .filter
 #
 # Public Functions:
-#   getFilter
+#   make_filter
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -32,7 +32,7 @@ class VerboseErrorFilter(logging.Filter):
             return True
 
 
-def getFilter():
+def make_filter():
     return VerboseErrorFilter()
 
 # -----------------------------------------------------------------------------

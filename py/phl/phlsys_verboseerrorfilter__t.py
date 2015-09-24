@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
                 backupCount=10)
             info_handler.setLevel(logging.INFO)
             # [ B] VerboseErrorFilter can be added to log handler
-            info_handler.addFilter(phlsys_verboseerrorfilter.getFilter())
+            info_handler.addFilter(phlsys_verboseerrorfilter.make_filter())
             logging.getLogger().addHandler(info_handler)
 
             concise_message = "This is a concise error message."

@@ -58,8 +58,8 @@ def make_exception_message_handler(
         _LOGGER.error(
             'abdt_exhandlers: during "{}" encountered exception "{}", '
             'will retry in {}.'.format(
-                repo, exc_type.__name__, message),
-            exc_info=1)
+                repo, exc_type.__name__, message))
+        _LOGGER.error('VERBOSE MESSAGE: ', exc_info=1)
 
         detail = ""
         if repo:
@@ -71,7 +71,8 @@ def make_exception_message_handler(
             _send_mail(
                 mailsender, emails, uname, subject, tb, body_prefix, message)
         except Exception:
-            _LOGGER.error('Exception when sending mail', exc_info=1)
+            _LOGGER.error('Encountered exception when sending mail')
+            _LOGGER.error('VERBOSE MESSAGE: ', exc_info=1)
 
     return msg_exception
 
@@ -85,7 +86,7 @@ def make_exception_delay_handler(sys_admin_emails, repo):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
