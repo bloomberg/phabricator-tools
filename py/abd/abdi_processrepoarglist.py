@@ -152,7 +152,7 @@ def do(
                         e))
 
         # look for killfile
-        if os.path.isfile(kill_file):
+        if os.path.isfile(kill_file) or is_no_loop:
 
             # finish any jobs that overran
             for i, res in pool.finish_results():
@@ -163,11 +163,9 @@ def do(
             # possible after doing fetches
             url_watcher_wrapper.save()
 
-            os.remove(kill_file)
-            finished = True
-            break
+            if os.path.isfile(kill_file):
+                os.remove(kill_file)
 
-        if is_no_loop:
             finished = True
             break
 
@@ -205,7 +203,7 @@ class _RecordingWatcherWrapper(object):
 
     def has_url_recently_changed(self, url):
         self._tested_urls.add(url)
-        return self._watcher.peek_has_url_recently_changed(url)
+        return self._watcher.has_url_recently_changed(url)
 
     @property
     def tested_urls(self):
