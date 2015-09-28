@@ -43,8 +43,9 @@ run_test_script "testbed/barc" "smoketest.sh"
 run_test_script "testbed/git-phab-log" "smoketest.sh"
 run_test_script "testbed/conduit-proxy" "smoketest.sh"
 run_test_script "testbed/arcyd-tester" "smoketest.sh"
+run_test_script "testbed/phab-ping" "exercise_phabping.sh"
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
