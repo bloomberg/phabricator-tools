@@ -68,21 +68,21 @@ def make_default_endless_retry():
     :returns: an endless iterable of datetime.timedelta
 
     """
-    delays = []
+    delays_list = []
 
     # the sum of the initial delays is roughly one of the 'forever' delays,
     # also there are 6 of them, which matches the number of 'forever' delays
     # per hour.
-    delays += [datetime.timedelta(seconds=3)] * 1
-    delays += [datetime.timedelta(seconds=15)] * 1
-    delays += [datetime.timedelta(minutes=1)] * 2
-    delays += [datetime.timedelta(minutes=3)] * 2
+    delays_list += [datetime.timedelta(seconds=3)] * 1
+    delays_list += [datetime.timedelta(seconds=15)] * 1
+    delays_list += [datetime.timedelta(minutes=1)] * 2
+    delays_list += [datetime.timedelta(minutes=3)] * 2
 
     # 6-7 times an hour shouldn't stress the system too much, 9 minutes isn't
     # too long to wait for an automatic recovery.
     forever = itertools.repeat(datetime.timedelta(minutes=9))
 
-    delays = itertools.chain(delays, forever)
+    delays = itertools.chain(delays_list, forever)
 
     return delays
 
@@ -119,7 +119,7 @@ def try_loop_delay(
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

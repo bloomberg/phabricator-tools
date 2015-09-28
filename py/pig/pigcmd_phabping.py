@@ -80,7 +80,9 @@ def main():
     print("conduit.ping " + str(uri))
 
     if args.count is not None:
-        sequence = xrange(args.count)
+        # pychecker requires sequence to be of same type so we have to wrap
+        # xrange() in iter() to make it an iterator.
+        sequence = iter(xrange(args.count))
     else:
         sequence = itertools.count()
 
@@ -135,7 +137,7 @@ def main():
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
