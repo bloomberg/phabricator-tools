@@ -49,7 +49,7 @@ def start_arcyd(daemonize=True, loop=True, restart=False):
         pid = fs.get_pid_or_none()
         if pid is not None and phlsys_pid.is_running(pid):
             if restart:
-                stop_arcyd_pid(pid)
+                stop_arcyd_pid(pid, fs.layout.killfile)
             else:
                 raise Exception("already running")
 
@@ -96,11 +96,10 @@ def stop_arcyd():
         pid = fs.get_pid_or_none()
         if pid is None or not phlsys_pid.is_running(pid):
             raise Exception("Arcyd is not running")
-        stop_arcyd_pid(pid)
+        stop_arcyd_pid(pid, fs.layout.killfile)
 
 
-def stop_arcyd_pid(pid):
-    killfile = 'var/command/killfile'
+def stop_arcyd_pid(pid, killfile):
     phlsys_fs.write_text_file(killfile, '')
 
     if os.path.isfile(killfile):

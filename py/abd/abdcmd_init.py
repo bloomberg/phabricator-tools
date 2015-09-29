@@ -29,8 +29,6 @@ _DEFAULT_CONFIG = """
 {sendmail_binary}
 --sendmail-type
 {sendmail_type}
---kill-file
-var/command/killfile
 --sleep-secs
 {sleep_secs}
 --max-workers

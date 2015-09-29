@@ -81,12 +81,6 @@ def setupParser(parser):
         required=True,
         help="email addresses to send important system events to")
     parser.add_argument(
-        '--kill-file',
-        metavar="NAME",
-        type=str,
-        help="filename to watch for, will stop operations safely if the file "
-             "is detected.")
-    parser.add_argument(
         '--no-loop',
         action='store_true',
         help="supply this argument to only process each repo once then exit")
@@ -129,17 +123,16 @@ def process(args, repo_configs):
         "arcyd stopped with exception",
         "")
 
-    _processrepolist(
+    return _processrepolist(
         args, repo_configs, on_exception, mail_sender)
 
 
 def _processrepolist(
         args, repo_configs, on_exception, mail_sender):
     try:
-        abdi_processrepoarglist.do(
+        return abdi_processrepoarglist.do(
             repo_configs,
             args.sys_admin_emails,
-            args.kill_file,
             args.sleep_secs,
             args.no_loop,
             args.external_report_command,

@@ -148,6 +148,7 @@ class Layout(object):
     repository_config_dir = 'config/repository'
     urlwatcher_cache_path = '.arcyd.urlwatcher.cache'
     lockfile = 'var/lockfile'
+    killfile = 'var/command/killfile'
 
     dir_run = 'var/run'
 
