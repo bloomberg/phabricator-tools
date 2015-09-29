@@ -169,7 +169,7 @@ class _Worker(object):
         self._repo('fetch', '--prune')
 
     def list_reviews(self):
-        return json.loads(self.barc('list', '--format-json'))
+        return json.loads(self._barc('list', '--format-json'))
 
     def _arcyon_action(self, review_id, action):
         connection_args = [
