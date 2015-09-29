@@ -48,6 +48,7 @@ import abdcmd_fetch
 import abdcmd_fsck
 import abdcmd_init
 import abdcmd_listrepos
+import abdcmd_reload
 import abdcmd_restart
 import abdcmd_rmrepo
 import abdcmd_start
@@ -120,6 +121,8 @@ def main():
         "stop", abdcmd_stop, subparsers)
     phlsys_subcommand.setup_parser(
         "restart", abdcmd_restart, subparsers)
+    phlsys_subcommand.setup_parser(
+        "reload", abdcmd_reload, subparsers)
     phlsys_subcommand.setup_parser(
         "fsck", abdcmd_fsck, subparsers)
     phlsys_subcommand.setup_parser(

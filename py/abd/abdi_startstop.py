@@ -8,6 +8,7 @@
 #   start_arcyd
 #   stop_arcyd
 #   stop_arcyd_pid
+#   reload_arcyd
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -33,6 +34,7 @@ import phlsys_verboseerrorfilter
 
 import abdt_fs
 
+import abdi_processexitcodes
 import abdi_processrepos
 import abdi_repoargs
 
@@ -82,11 +84,23 @@ def start_arcyd(daemonize=True, loop=True, restart=False):
 
     with phlsys_multiprocessing.logging_context(logger_config):
         _LOGGER.debug("start with args: {}".format(args))
-        _LOGGER.info("arcyd started")
-        try:
-            abdi_processrepos.process(args, repo_configs)
-        finally:
-            _LOGGER.info("arcyd stopped")
+        while True:
+            _LOGGER.info("arcyd started")
+            try:
+                exit_code = abdi_processrepos.process(args, repo_configs)
+                _LOGGER.debug("arcyd process loop exit_code: %s" % exit_code)
+                if exit_code == abdi_processexitcodes.ExitCodes.ec_exit:
+                    break
+            finally:
+                _LOGGER.info("arcyd stopped")
+
+            _LOGGER.debug("reloading arcyd configuration")
+            try:
+                with fs.lockfile_context():
+                    repo_configs = abdi_repoargs.parse_config_file_list(
+                        fs.repo_config_path_list())
+            except phlsys_fs.LockfileExistsError:
+                _LOGGER.error("couldn't acquire lockfile, reload failed")
 
 
 def stop_arcyd():
@@ -114,6 +128,17 @@ def stop_arcyd_pid(pid, killfile):
         while phlsys_pid.is_running(pid):
             print('waiting for arcyd to exit')
             time.sleep(1)
+
+
+def reload_arcyd():
+    fs = abdt_fs.make_default_accessor()
+
+    with fs.lockfile_context():
+        pid = fs.get_pid_or_none()
+        if pid is None or not phlsys_pid.is_running(pid):
+            raise Exception("Arcyd is not running")
+
+        phlsys_fs.write_text_file('var/command/reload', '')
 
 
 def _setup_logger(fs):

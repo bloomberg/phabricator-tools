@@ -15,6 +15,8 @@ Check the Arcyd files for consistency and fix any issues.
 Create a new arcyd instance in working dir, with backing git repository.
 * `abdcmd_listrepos.py` -
 List the repositories managed by this arcyd instance.
+* `abdcmd_reload.py` -
+Reload the arcyd instance for the current directory.
 * `abdcmd_restart.py` -
 Restart the arcyd instance for the current directory.
 * `abdcmd_rmrepo.py` -
@@ -25,6 +27,8 @@ Start the arcyd instance for the current directory, if not already going.
 Stop the arcyd instance for the current directory.
 * `abdcmnt_commenter.py` -
 Make pre-defined comments on Differential revisions.
+* `abdi_processexitcodes.py` -
+Setup to process multiple repos.
 * `abdi_processrepo.py` -
 abd automates the creation and landing of reviews from branches.
 * `abdi_processrepoarglist.py` -
