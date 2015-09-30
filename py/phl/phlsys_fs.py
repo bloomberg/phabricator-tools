@@ -20,6 +20,8 @@
 #   ensure_dir
 #   read_text_file
 #   write_text_file
+#   delete_file_if_exists
+#   write_text_file_atomic
 #
 # -----------------------------------------------------------------------------
 # (this contents block is generated, edits will be lost)
@@ -30,6 +32,7 @@ from __future__ import division
 from __future__ import print_function
 
 import contextlib
+import errno
 import fcntl
 import os
 import shutil
@@ -336,6 +339,54 @@ def write_text_file(path, text):
         ensure_dir(dir_path)
     with open(path, 'w') as f:
         f.write(text)
+
+
+def delete_file_if_exists(path):
+    """Deletes the file at 'path' if it exists.
+
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     write_text_file('testfile', 'Hello')
+        ...     delete_file_if_exists('testfile')
+        ...     os.path.exists('testfile') # Ensure file was deleted
+        False
+
+        >>> with chtmpdir_context():
+        ...     delete_file_if_exists('non-existent-file') # No error raised
+
+    :path: the string path of the file to delete
+    :returns: None
+
+    """
+    try:
+        os.remove(path)
+    except OSError as e:
+        # errno.ENOENT is code for 'no such file or directory'. Raise the
+        # exception if any other error is encountered.
+        if e.errno != errno.ENOENT:
+            raise
+
+
+def write_text_file_atomic(path, text):
+    """Atomically writes 'text' to the file at 'path' using temporary file.
+
+    Note that the file created by this function is readable and writable only
+    by the user who created it. If you need a different set of permissions for
+    your file, you will need to do that separately.
+
+    :path: the string path of the file to write
+    :text: the string contents of the file
+    :returns: None
+
+    """
+    dir_path = os.path.dirname(path)
+    if dir_path:
+        ensure_dir(dir_path)
+    tmpfile, tmppath = tempfile.mkstemp(text=True)
+    tmpfile.write(text)
+    tmpfile.close()
+    os.rename(tmppath, path)
 
 
 # -----------------------------------------------------------------------------
