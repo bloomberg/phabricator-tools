@@ -307,6 +307,14 @@ def ensure_dir(path):
 
     Create intermediate folders if necessary
 
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     path = "a/big/path/for/testfile"
+        ...     ensure_dir(path)
+        ...     os.path.exists(path)
+        True
+
     :path: the string path of the dir to potentially create
     :returns: None
 
@@ -318,6 +326,19 @@ def ensure_dir(path):
 def read_text_file(path):
     """Return text content of file at 'path', raise on error.
 
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     write_text_file('testfile', 'Hello')
+        ...     print(read_text_file('testfile'))
+        Hello
+
+        >>> with chtmpdir_context():
+        ...     read_text_file('non-existent-file')
+        Traceback (most recent call last):
+        ...
+        IOError: [Errno 2] No such file or directory: 'non-existent-file'
+
     :path: the string path of the file to read
     :returns: string content of file
 
@@ -328,6 +349,13 @@ def read_text_file(path):
 
 def write_text_file(path, text):
     """Write the 'text' to the file at 'path', create dirs and file if needed.
+
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     write_text_file('testfile', 'Hello')
+        ...     print(read_text_file('testfile'))
+        Hello
 
     :path: the string path of the file to write
     :text: the string contents of the file
@@ -371,9 +399,21 @@ def delete_file_if_exists(path):
 def write_text_file_atomic(path, text):
     """Atomically writes 'text' to the file at 'path' using temporary file.
 
+    In case multiple writers try to write to the same file, it is ensured
+    that the readers will always read one consistent version. This is
+    guaranteed by "overwrite-by-rename" which is guaranteed to be an atomic
+    operation.
+
     Note that the file created by this function is readable and writable only
     by the user who created it. If you need a different set of permissions for
     your file, you will need to do that separately.
+
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     write_text_file_atomic('testfile', 'Hello')
+        ...     print(read_text_file('testfile'))
+        Hello
 
     :path: the string path of the file to write
     :text: the string contents of the file
