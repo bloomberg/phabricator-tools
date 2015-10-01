@@ -29,8 +29,10 @@ import json
 import os
 import shutil
 import socket
+import stat
 import subprocess
 import tempfile
+import time
 
 import phldef_conduit
 import phlgit_push
@@ -42,6 +44,18 @@ import phlsys_subprocess
 
 _USAGE_EXAMPLES = """
 """
+
+_EXTERNAL_REPORT_COUNTER = """
+#! /bin/sh
+if [ ! -f cycle_counter ]; then
+    echo 0 > cycle_counter
+    fi
+
+COUNT=$(cat cycle_counter)
+COUNT=$(expr $COUNT + 1)
+
+echo $COUNT > cycle_counter
+""".lstrip()
 
 
 def main():
@@ -322,6 +336,15 @@ class _ArcydInstance(object):
         self._root_dir = root_dir
         self._command = _CommandWithWorkingDirectory(arcyd_command, root_dir)
 
+        count_cycles_script_path = os.path.join(
+            self._root_dir, 'count_cycles.sh')
+        phlsys_fs.write_text_file(
+            count_cycles_script_path,
+            _EXTERNAL_REPORT_COUNTER)
+        mode = os.stat(count_cycles_script_path).st_mode
+        os.chmod(count_cycles_script_path, mode | stat.S_IEXEC)
+
+        self._has_enabled_count_cycles = False
         self._has_started_daemon = False
         self._has_set_overrun_secs = False
 
@@ -335,6 +358,33 @@ class _ArcydInstance(object):
         config_text += '\n--overrun-secs\n{}'.format(overrun_secs)
         phlsys_fs.write_text_file(config_path, config_text)
         self._has_set_overrun_secs = True
+
+    def enable_count_cycles_script(self):
+        assert not self._has_enabled_count_cycles
+        config_path = os.path.join(self._root_dir, 'configfile')
+        config_text = phlsys_fs.read_text_file(config_path)
+        config_text += '\n--external-report-command\ncount_cycles.sh'
+        phlsys_fs.write_text_file(config_path, config_text)
+        self._has_enabled_count_cycles = True
+
+    def count_cycles(self):
+        assert self._has_enabled_count_cycles
+        counter_path = os.path.join(self._root_dir, 'cycle_counter')
+        if not os.path.exists(counter_path):
+            return None
+        return int(phlsys_fs.read_text_file(counter_path).strip())
+
+    def wait_one_or_more_cycles(self):
+        assert self._has_enabled_count_cycles
+        assert self._has_started_daemon
+        while self.count_cycles() is None:
+            time.sleep(1)
+        start = self.count_cycles()
+        count = start
+        while count < start + 2:
+            count = self.count_cycles()
+            print(start, count)
+            time.sleep(1)
 
     def run_once(self):
         return self('start', '--foreground', '--no-loop')
