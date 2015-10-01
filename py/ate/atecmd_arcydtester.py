@@ -495,7 +495,14 @@ class _Fixture(object):
 
     def setup_arcyds(self, arcyd_user, arcyd_email, arcyd_cert, phab_uri):
         for arcyd in self.arcyds:
-            arcyd('init', '--arcyd-email', arcyd_email)
+            arcyd(
+                'init',
+                '--arcyd-email',
+                arcyd_email,
+                '--max-workers',
+                '2',
+                '--sleep-secs',
+                '1')
 
             arcyd(
                 'add-phabricator',
@@ -557,11 +564,31 @@ def _do_tests(args):
         args.alice_user_email_cert,
         args.bob_user_email_cert)
     fixture.setup_arcyds(arcyd_user, arcyd_email, arcyd_cert, phab_uri)
-
     with contextlib.closing(fixture):
         try:
             run_all_interactions(fixture)
-        except:
+        except Exception:
+            print(fixture.arcyds[0].debug_log())
+            if args.enable_debug_shell:
+                fixture.launch_debug_shell()
+            raise
+
+    repo_count = 4
+    fixture = _Fixture(
+        arcyd_cmd_path,
+        barc_cmd_path,
+        arcyon_cmd_path,
+        phab_uri,
+        repo_count,
+        arcyd_count,
+        args.alice_user_email_cert,
+        args.bob_user_email_cert)
+    fixture.setup_arcyds(arcyd_user, arcyd_email, arcyd_cert, phab_uri)
+
+    with contextlib.closing(fixture):
+        try:
+            _test_push_during_overrun(fixture)
+        except Exception:
             print(fixture.arcyds[0].debug_log())
             if args.enable_debug_shell:
                 fixture.launch_debug_shell()
@@ -583,6 +610,42 @@ def run_all_interactions(fixture):
             interaction,
             arcyd_generator,
             fixture)
+
+
+def _test_push_during_overrun(fixture):
+    arcyd = fixture.arcyds[0]
+    repo = fixture.repos[0]
+
+    for i, r in enumerate(fixture.repos):
+        repo_url_format = r.central_path
+        arcyd(
+            'add-repohost',
+            '--name', 'repohost-{}'.format(i),
+            '--repo-url-format', repo_url_format,
+            '--repo-snoop-url-format', r.snoop_url)
+        arcyd(
+            'add-repo',
+            'localphab',
+            'repohost-{}'.format(i),
+            'repo-{}'.format(i))
+
+    branch1_name = '_test_push_during_overrun'
+    branch2_name = '_test_push_during_overrun2'
+
+    arcyd.enable_count_cycles_script()
+    arcyd.set_overrun_secs(1)
+    repo.hold_dev_arcyd_refs()
+    repo.alice.push_new_review_branch(branch1_name)
+    with arcyd.daemon_context():
+        arcyd.wait_one_or_more_cycles()
+        repo.alice.push_new_review_branch(branch2_name)
+        arcyd.wait_one_or_more_cycles()
+        repo.release_dev_arcyd_refs()
+        arcyd.wait_one_or_more_cycles()
+
+    repo.alice.fetch()
+    reviews = repo.alice.list_reviews()
+    assert len(reviews) == 2
 
 
 def run_interaction(user_scenario, arcyd_generator, fixture):
