@@ -95,8 +95,7 @@ def do(
 
     cycle_timer = phlsys_timer.Timer()
     cycle_timer.start()
-    finished = False
-    while not finished:
+    while True:
 
         # This timer needs to be separate from the cycle timer. The cycle timer
         # must be reset every time it is reported. The sleep timer makes sure
@@ -166,7 +165,6 @@ def do(
             if os.path.isfile(kill_file):
                 os.remove(kill_file)
 
-            finished = True
             break
 
         # sleep to pad out the cycle
