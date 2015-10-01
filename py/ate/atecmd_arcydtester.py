@@ -323,9 +323,18 @@ class _ArcydInstance(object):
         self._command = _CommandWithWorkingDirectory(arcyd_command, root_dir)
 
         self._has_started_daemon = False
+        self._has_set_overrun_secs = False
 
     def __call__(self, *args, **kwargs):
         return self._command(*args, **kwargs)
+
+    def set_overrun_secs(self, overrun_secs):
+        assert not self._has_set_overrun_secs
+        config_path = os.path.join(self._root_dir, 'configfile')
+        config_text = phlsys_fs.read_text_file(config_path)
+        config_text += '\n--overrun-secs\n{}'.format(overrun_secs)
+        phlsys_fs.write_text_file(config_path, config_text)
+        self._has_set_overrun_secs = True
 
     def run_once(self):
         return self('start', '--foreground', '--no-loop')
