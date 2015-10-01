@@ -322,11 +322,29 @@ class _ArcydInstance(object):
         self._root_dir = root_dir
         self._command = _CommandWithWorkingDirectory(arcyd_command, root_dir)
 
+        self._has_started_daemon = False
+
     def __call__(self, *args, **kwargs):
         return self._command(*args, **kwargs)
 
     def run_once(self):
         return self('start', '--foreground', '--no-loop')
+
+    def start_daemon(self):
+        self._has_started_daemon = True
+        return self('start')
+
+    def stop_daemon(self):
+        self._has_started_daemon = False
+        return self('stop')
+
+    @contextlib.contextmanager
+    def daemon_context(self):
+        self.start_daemon()
+        try:
+            yield
+        finally:
+            self.stop_daemon()
 
     def _read_log(self, name):
         log_path = '{}/var/log/{}'.format(self._root_dir, name)
