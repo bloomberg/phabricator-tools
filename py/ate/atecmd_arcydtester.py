@@ -4,8 +4,13 @@
 # -----------------------------------------------------------------------------
 # atecmd_arcydtester
 #
+# Public Classes:
+#   SimpleWebServer
+#    .close
+#
 # Public Functions:
 #   main
+#   pick_free_port
 #   run_all_interactions
 #   run_interaction
 #
@@ -23,6 +28,7 @@ import itertools
 import json
 import os
 import shutil
+import socket
 import subprocess
 import tempfile
 
@@ -31,6 +37,7 @@ import phlgit_push
 import phlgitu_fixture
 import phlsys_fs
 import phlsys_git
+import phlsys_pid
 import phlsys_subprocess
 
 _USAGE_EXAMPLES = """
@@ -107,6 +114,14 @@ def main():
 
     with phlsys_fs.chtmpdir_context():
         _do_tests(args)
+
+
+def pick_free_port():
+    sock = socket.socket()
+    sock.bind(('', 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    return port
 
 
 class _Worker(object):
@@ -199,6 +214,20 @@ class _Worker(object):
         return self._barc
 
 
+class SimpleWebServer(object):
+
+    def __init__(self, root_path, port):
+        self._root_path = root_path
+        self._process = subprocess.Popen(
+            ['python', '-m', 'SimpleHTTPServer', str(port)],
+            cwd=root_path)
+
+    def close(self):
+        pid = self._process.pid
+        phlsys_pid.request_terminate(pid)
+        self._process.wait()
+
+
 class _SharedRepo(object):
 
     def __init__(
@@ -211,10 +240,18 @@ class _SharedRepo(object):
             bob):
 
         self._root_dir = root_dir
-        central_path = os.path.join(self._root_dir, 'central')
-        os.makedirs(central_path)
-        self._central_repo = phlsys_git.Repo(central_path)
+        self.central_path = os.path.join(self._root_dir, 'central')
+        os.makedirs(self.central_path)
+        self._central_repo = phlsys_git.Repo(self.central_path)
         self._central_repo("init", "--bare")
+        self.web_port = pick_free_port()
+        shutil.move(
+            os.path.join(self.central_path, 'hooks/post-update.sample'),
+            os.path.join(self.central_path, 'hooks/post-update'))
+
+        self._web = SimpleWebServer(
+            self.central_path,
+            self.web_port)
 
         self._workers = []
         for account in (alice, bob):
@@ -241,6 +278,10 @@ class _SharedRepo(object):
                 self._workers[-1].repo('checkout', 'master')
 
     @property
+    def snoop_url(self):
+        return "http://127.0.0.1:{}/info/refs".format(self.web_port)
+
+    @property
     def central_repo(self):
         return self._central_repo
 
@@ -255,6 +296,9 @@ class _SharedRepo(object):
     @property
     def bob(self):
         return self._workers[1]
+
+    def close(self):
+        self._web.close()
 
 
 class _CommandWithWorkingDirectory(object):
@@ -359,6 +403,8 @@ class _Fixture(object):
                 '--repo-url-format', repo_url_format)
 
     def close(self):
+        for r in self._repos:
+            r.close()
         shutil.rmtree(self._root_dir)
 
     def launch_debug_shell(self):
