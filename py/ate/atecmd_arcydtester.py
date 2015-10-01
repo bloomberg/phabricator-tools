@@ -328,14 +328,20 @@ class _ArcydInstance(object):
     def run_once(self):
         return self('start', '--foreground', '--no-loop')
 
-    def debug_log(self):
-        debug_path = '{}/var/log/debug'.format(self._root_dir)
+    def _read_log(self, name):
+        log_path = '{}/var/log/{}'.format(self._root_dir, name)
 
-        if os.path.isfile(debug_path):
+        if os.path.isfile(log_path):
             return phlsys_fs.read_text_file(
-                debug_path)
+                log_path)
         else:
             return ""
+
+    def info_log(self):
+        return self._read_log('info')
+
+    def debug_log(self):
+        return self._read_log('debug')
 
 
 class _Fixture(object):
