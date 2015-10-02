@@ -21,7 +21,7 @@
 # Public Functions:
 #   act_as_user_context
 #   make_conduit_uri
-#   make_phab_test_conduit
+#   make_phab_example_conduit
 #
 # Public Assignments:
 #   SESSION_ERROR
@@ -65,19 +65,19 @@ def act_as_user_context(conduit, user):
 
     Usage Example:
         impersonate alice
-        >>> conduit = make_phab_test_conduit()
+        >>> conduit = make_phab_example_conduit()
         >>> with act_as_user_context(conduit, 'alice'):\
                 conduit("user.whoami")["userName"]
         u'alice'
 
         impersonate bob
-        >>> conduit = make_phab_test_conduit()
+        >>> conduit = make_phab_example_conduit()
         >>> with act_as_user_context(conduit, 'bob'):\
                 conduit("user.whoami")["userName"]
         u'bob'
 
         impersonate bob, revert to phab when context expires
-        >>> conduit = make_phab_test_conduit()
+        >>> conduit = make_phab_example_conduit()
         >>> with act_as_user_context(conduit, 'bob'): pass
         >>> conduit("user.whoami")["userName"]
         u'phab'
@@ -118,7 +118,7 @@ def make_conduit_uri(uri):
     return expected
 
 
-def make_phab_test_conduit():
+def make_phab_example_conduit():
     """Return a new Conduit constructed from phldef_conduit test_uri and phab.
 
     :returns: a new Conduit constructed from phldef_conduit test_uri and phab
@@ -389,7 +389,7 @@ class CallMultiConduitAsUser(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
