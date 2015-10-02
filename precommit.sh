@@ -52,6 +52,14 @@ while getopts "e:h" opt; do
     esac
 done
 
+shift $((OPTIND-1))
+if [[ -n "$@" ]]; then
+    print_help
+    echo
+    echo Unexpected arguments: "$@"
+    exit 1
+fi
+
 # in the event of an error, print 'FAIL' and exit with code 1
 trap 'echo FAIL; exit 1' ERR
 
