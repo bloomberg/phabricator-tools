@@ -14,7 +14,9 @@
 # :o  perform automatic fixes of minor code issues                            #
 # :o  check the working copy is clean                                         #
 # :o  perform static analysis                                                 #
-# :o  perform runtime tests                                                   #
+# :o  perform runtime(unit) tests                                             #
+# :o  perform integration tests                                               #
+# :o  perform smoke tests                                                     #
 #                                                                             #
 ###############################################################################
 
@@ -134,6 +136,15 @@ if [[ ! "${exclude_tests[@]}" =~ unit_tests ]]; then
     ###########################################################################
     printf "unit tests: "
     ./unit_tests.sh
+    # echo ' OK' <-- nose will print status for itself
+fi
+
+if [[ ! "${exclude_tests[@]}" =~ integration_tests ]]; then
+    ###########################################################################
+    # perform run-time tests (integration-tests etc.)
+    ###########################################################################
+    printf "integration tests: "
+    ./integration_tests.sh
     # echo ' OK' <-- nose will print status for itself
 fi
 
