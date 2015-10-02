@@ -423,9 +423,9 @@ def write_text_file_atomic(path, text):
     dir_path = os.path.dirname(path)
     if dir_path:
         ensure_dir(dir_path)
-    tmpfile, tmppath = tempfile.mkstemp(text=True)
-    tmpfile.write(text)
-    tmpfile.close()
+    tmpfd, tmppath = tempfile.mkstemp(text=True)
+    write_text_file(tmppath, text)
+    os.close(tmpfd)
     os.rename(tmppath, path)
 
 
