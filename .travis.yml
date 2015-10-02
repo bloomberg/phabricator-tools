@@ -4,14 +4,8 @@ language: python
 python:
   - "2.7"
 
-# Install pip using apt
-addons:
-  apt:
-    packages:
-    - python-pip
-
-# Install dependencies using pip
 install:
+  # Install dependencies using pip
   - pip install autopep8
   - pip install docformatter
   - pip install flake8
