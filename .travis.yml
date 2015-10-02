@@ -16,5 +16,11 @@ install:
   - pip install pylint
   - pip install snakefood
 
-# command to run tests
-script: ./static_tests.sh
+before_script:
+  # This is necessary because Travis shallow clones the repo and we require the
+  # entire log to run meta/autofix/fixlegal.py
+  - git fetch --unshallow
+
+script:
+  # Run code checks and tests while exclding those which require phabricator.
+  - ./precommit.sh -e unit_tests -e smoke_tests
