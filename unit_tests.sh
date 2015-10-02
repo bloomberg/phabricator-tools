@@ -15,7 +15,18 @@ set -e # exit immediately on error
 cd "$(dirname "$0")"
 
 # only test 'library' scripts for now
-libscripts="$(find py -iname '*.py')"
+all_libscripts="$(find py -iname '*.py')"
+it_libscripts="$(find py -iname '*__it.py')"
+
+all_arr=($all_libscripts)
+it_arr=($it_libscripts)
+libscripts=
+# Exclude integration tests from being executed.
+for i in "${all_arr[@]}"; do
+    if [[ ! "${it_arr[@]}" =~ $i ]]; then
+        libscripts="$libscripts $i"
+    fi
+done
 
 ###############################################################################
 # unit-tests and doc-tests
@@ -32,7 +43,7 @@ PYTHONPATH=py/phl:py/abd:testbed/plugins nosetests $libscripts --with-doctest --
 # N.B. can easily run individual tests with nose like so:
 # nosetests abdcmd_default:TestAbd.test_abandonedWorkflow
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

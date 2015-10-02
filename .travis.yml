@@ -4,6 +4,11 @@ language: python
 python:
   - "2.7"
 
+addons:
+  apt:
+    packages:
+      - time
+
 install:
   # Install dependencies using pip
   - pip install autopep8
@@ -20,7 +25,9 @@ before_script:
   # This is necessary because Travis shallow clones the repo and we require the
   # entire log to run meta/autofix/fixlegal.py
   - git fetch --unshallow
+  - git config --global user.email travis@server.test
+  - git config --global user.name Travis CI
 
 script:
   # Run code checks and tests while exclding those which require phabricator.
-  - ./precommit.sh -e unit_tests -e smoke_tests
+  - ./precommit.sh -e integration_tests -e smoke_tests
