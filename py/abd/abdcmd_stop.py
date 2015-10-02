@@ -25,11 +25,15 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    pass
+    parser.add_argument(
+        '-m',
+        '--message',
+        default='',
+        help="reason for stopping arcyd")
 
 
-def process(unused_args):
-    abdi_startstop.stop_arcyd()
+def process(args):
+    abdi_startstop.stop_arcyd(args.message)
 
 
 # -----------------------------------------------------------------------------

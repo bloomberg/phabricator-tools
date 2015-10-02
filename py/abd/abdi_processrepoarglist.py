@@ -27,6 +27,7 @@ import phlcon_reviewstatecache
 import phlgitx_refcache
 import phlmp_cyclingpool
 import phlsys_conduit
+import phlsys_fs
 import phlsys_git
 import phlsys_strtotime
 import phlsys_subprocess
@@ -155,6 +156,9 @@ def do(
             exit_code = abdi_processexitcodes.ExitCodes.ec_exit
         elif os.path.isfile(fs_accessor.layout.killfile):
             exit_code = abdi_processexitcodes.ExitCodes.ec_exit
+            if phlsys_fs.read_text_file(fs_accessor.layout.killfile):
+                _LOGGER.info("Reason for stopping arcyd: {}".format(
+                    phlsys_fs.read_text_file(fs_accessor.layout.killfile)))
             os.remove(fs_accessor.layout.killfile)
         elif os.path.isfile(fs_accessor.layout.reloadfile):
             exit_code = abdi_processexitcodes.ExitCodes.ec_reload

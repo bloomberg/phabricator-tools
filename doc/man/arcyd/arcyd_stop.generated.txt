@@ -1,6 +1,8 @@
-usage: arcyd stop [-h]
+usage: arcyd stop [-h] [-m MESSAGE]
 
 Stop the arcyd instance for the current directory.
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help            show this help message and exit
+  -m MESSAGE, --message MESSAGE
+                        reason for stopping arcyd

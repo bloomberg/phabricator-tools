@@ -41,7 +41,7 @@ import abdi_repoargs
 _LOGGER = logging.getLogger(__name__)
 
 
-def start_arcyd(daemonize=True, loop=True, restart=False):
+def start_arcyd(daemonize=True, loop=True, restart=False, stop_message=''):
     # exit gracefully if this process is killed
     phlsys_signal.set_exit_on_sigterm()
 
@@ -51,7 +51,7 @@ def start_arcyd(daemonize=True, loop=True, restart=False):
         pid = fs.get_pid_or_none()
         if pid is not None and phlsys_pid.is_running(pid):
             if restart:
-                stop_arcyd_pid(pid, fs.layout.killfile)
+                stop_arcyd_pid(pid, fs.layout.killfile, stop_message)
             else:
                 raise Exception("already running")
 
@@ -103,18 +103,19 @@ def start_arcyd(daemonize=True, loop=True, restart=False):
                 _LOGGER.error("couldn't acquire lockfile, reload failed")
 
 
-def stop_arcyd():
+def stop_arcyd(message=''):
     fs = abdt_fs.make_default_accessor()
 
     with fs.lockfile_context():
         pid = fs.get_pid_or_none()
         if pid is None or not phlsys_pid.is_running(pid):
             raise Exception("Arcyd is not running")
-        stop_arcyd_pid(pid, fs.layout.killfile)
+
+        stop_arcyd_pid(pid, fs.layout.killfile, message)
 
 
-def stop_arcyd_pid(pid, killfile):
-    phlsys_fs.write_text_file(killfile, '')
+def stop_arcyd_pid(pid, killfile, message=''):
+    phlsys_fs.write_text_file_atomic(killfile, message)
 
     if os.path.isfile(killfile):
         time.sleep(1)

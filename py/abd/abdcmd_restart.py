@@ -37,13 +37,19 @@ def setupParser(parser):
         '--no-loop',
         action='store_true',
         help="supply this argument to only process each repo once then exit")
+    parser.add_argument(
+        '-m',
+        '--message',
+        default='',
+        help="reason for restarting arcyd")
 
 
 def process(args):
     logging.getLogger().setLevel(logging.DEBUG)
     abdi_startstop.start_arcyd(daemonize=not args.foreground,
                                loop=not args.no_loop,
-                               restart=True)
+                               restart=True,
+                               stop_message=args.message)
 
 # -----------------------------------------------------------------------------
 # Copyright (C) 2015 Bloomberg Finance L.P.
