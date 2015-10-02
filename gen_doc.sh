@@ -18,7 +18,7 @@ cd "$(dirname "$0")"
 
 python meta/docgen/updatemodcontents.py \
     --force-insert \
-    `find py/ meta/docgen meta/autofix -iname '*.py' | grep -v __t`
+    `find py/ meta/docgen meta/autofix -iname '*.py' | grep -v __t | grep -v __it`
 printf "."
 printf " "
 
@@ -32,7 +32,7 @@ for dir in $(find py/ -mindepth 1 -maxdepth 1 -type d); do
     echo "# ${group}" > ${mdfile}
     python meta/docgen/genmoddoc.py \
         --docfile - \
-        `find ${dir} -iname '*.py' | grep -v __t` \
+        `find ${dir} -iname '*.py' | grep -v __t | grep -v __it`  \
         >> ${mdfile}
     echo >> ${mdfile}
     echo '-----' >> ${mdfile}
@@ -78,7 +78,7 @@ printf "."
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

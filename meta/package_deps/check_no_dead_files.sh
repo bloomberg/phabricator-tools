@@ -15,21 +15,23 @@ from_phl='phl/phlsys_subprocess.py'
 sfood --follow --internal $binaries $from_phl | sfood-flatten > $needed_file
 
 # determine which files are test-drivers for the needed files by guessing a
-# suffix of '__t' and testing if that file exists
+# suffix of '__t' or '__it' and testing if that file exists
 test_drivers=`cat $needed_file | sed 's/\.py/__t.py/g' | python -c 'import os, sys; sys.stdout.writelines([f for f in sys.stdin if os.path.isfile(f.strip())])'`
+test_drivers="$test_drivers `cat $needed_file | sed 's/\.py/__it.py/g' | python -c 'import os, sys; sys.stdout.writelines([f for f in sys.stdin if os.path.isfile(f.strip())])'`"
 
 # append the dependencies of the test drivers to the list of needed files
 sfood --follow --internal $test_drivers $from_phl | sfood-flatten >> $needed_file
 
 # determine which files are test-drivers for the needed files by guessing a
-# suffix of '__t' and testing if that file exists
+# suffix of '__t' or '__it' and testing if that file exists
 test_drivers=`cat $needed_file | sed 's/\.py/__t.py/g' | python -c 'import os, sys; sys.stdout.writelines([f for f in sys.stdin if os.path.isfile(f.strip())])'`
+test_drivers="$test_drivers `cat $needed_file | sed 's/\.py/__it.py/g' | python -c 'import os, sys; sys.stdout.writelines([f for f in sys.stdin if os.path.isfile(f.strip())])'`"
 
 # append the dependencies of the test drivers to the list of needed files
 sfood --follow --internal $test_drivers $from_phl | sfood-flatten >> $needed_file
 
 # list all of the python source files
-find `pwd` -iname *.py | grep -v '__t' > $all_file
+find `pwd` -iname *.py | grep -v '__t' | grep -v '__it' > $all_file
 
 # exclude files from 'all' that appear in 'needed'
 # ('uniq -u' only removes repeated entries)
@@ -51,7 +53,7 @@ exit $result
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
