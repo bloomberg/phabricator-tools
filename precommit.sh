@@ -18,6 +18,38 @@
 #                                                                             #
 ###############################################################################
 
+function print_help {
+    echo "Usage: $0 [-e TEST_NAME] [-h]"
+    echo
+    echo "-e: Takes as argument the name of the test to be excluded from being"
+    echo "    run. If you want to exclude multiple tests, use this option those"
+    echo "    many times. Valid values for this argument are 'gen_docs',"
+    echo "    'autofix', 'static_tests', 'unit_tests' and 'smoke_tests'. Note"
+    echo "    that it always raises an error if working directory is not clean"
+    echo "    even if all tests are excluded."
+    echo
+    echo -h: Prints this help.
+}
+
+exclude_tests=()
+
+while getopts "e:h" opt; do
+    case $opt in
+        e)
+            exclude_tests+=("$OPTARG")
+            ;;
+        h)
+            print_help
+            exit 0
+            ;;
+        ?)
+            echo
+            print_help
+            exit 1
+            ;;
+    esac
+done
+
 # in the event of an error, print 'FAIL' and exit with code 1
 trap 'echo FAIL; exit 1' ERR
 
@@ -43,69 +75,79 @@ if [ "$?" -ne 0 ]; then
 fi
 trap 'echo FAIL; exit 1' ERR
 
-###############################################################################
-# refresh the documentation
-###############################################################################
-printf "gen_doc: "
-./gen_doc.sh
+if [[ ! "${exclude_tests[@]}" =~ gen_doc ]]; then
+    ###########################################################################
+    # refresh the documentation
+    ###########################################################################
+    printf "gen_doc: "
+    ./gen_doc.sh
 
-###############################################################################
-# check that the working copy is clean after refreshing documentation
-###############################################################################
-trap - ERR
-git diff --exit-code
-if [ "$?" -ne 0 ]; then
-    echo
-    echo The working copy is dirty after generating docs, please review and add
-    echo the changes before continuing.
-    exit -1
+    ###########################################################################
+    # check that the working copy is clean after refreshing documentation
+    ###########################################################################
+    trap - ERR
+    git diff --exit-code
+    if [ "$?" -ne 0 ]; then
+        echo
+        echo The working copy is dirty after generating docs, please review and
+        echo add the changes before continuing.
+        exit -1
+    fi
+    trap 'echo FAIL; exit 1' ERR
+    echo ' OK'
 fi
-trap 'echo FAIL; exit 1' ERR
-echo ' OK'
 
-###############################################################################
-# perform automatic fixes of minor code issues
-###############################################################################
-printf "autofix: "
-./autofix.sh
+if [[ ! "${exclude_tests[@]}" =~ autofix ]]; then
+    ###########################################################################
+    # perform automatic fixes of minor code issues
+    ###########################################################################
+    printf "autofix: "
+    ./autofix.sh
 
-###############################################################################
-# check that the working copy is clean after autofix
-###############################################################################
-trap - ERR
-git diff --exit-code
-if [ "$?" -ne 0 ]; then
-    echo
-    echo The working copy is dirty after automatic fixes, please review and add
-    echo the changes before continuing.
-    exit -1
+    ###########################################################################
+    # check that the working copy is clean after autofix
+    ###########################################################################
+    trap - ERR
+    git diff --exit-code
+    if [ "$?" -ne 0 ]; then
+        echo
+        echo The working copy is dirty after automatic fixes, please review and
+        echo add the changes before continuing.
+        exit -1
+    fi
+    trap 'echo FAIL; exit 1' ERR
+    echo ' OK'
 fi
-trap 'echo FAIL; exit 1' ERR
-echo ' OK'
 
-###############################################################################
-# perform static analysis
-###############################################################################
-printf "static tests: "
-./static_tests.sh
-echo ' OK'
+if [[ ! "${exclude_tests[@]}" =~ static_tests ]]; then
+    ###########################################################################
+    # perform static analysis
+    ###########################################################################
+    printf "static tests: "
+    ./static_tests.sh
+    echo ' OK'
+fi
 
-###############################################################################
-# perform run-time tests (unit-tests etc.)
-###############################################################################
-printf "unit tests: "
-./unit_tests.sh
-# echo ' OK' <-- nose will print status for itself
+if [[ ! "${exclude_tests[@]}" =~ unit_tests ]]; then
+    ###########################################################################
+    # perform run-time tests (unit-tests etc.)
+    ###########################################################################
+    printf "unit tests: "
+    ./unit_tests.sh
+    # echo ' OK' <-- nose will print status for itself
+fi
 
-###############################################################################
-# perform smoke tests (stuff in testbed/ etc.)
-###############################################################################
-printf "smoke tests: "
-./smoke_tests.sh
-echo ' OK'
+if [[ ! "${exclude_tests[@]}" =~ smoke_tests ]]; then
+    ###########################################################################
+    # perform smoke tests (stuff in testbed/ etc.)
+    ###########################################################################
+    printf "smoke tests: "
+    ./smoke_tests.sh
+    echo ' OK'
+fi
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
