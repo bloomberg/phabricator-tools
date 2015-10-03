@@ -23,10 +23,11 @@ install:
 
 before_script:
   # This is necessary because Travis shallow clones the repo and we require the
-  # entire log to run meta/autofix/fixlegal.py
+  # entire log to run meta/autofix/fixlegal.py, we also require origin/master.
   - git fetch --unshallow
   - git config --global user.email travis@server.test
   - git config --global user.name Travis CI
+  - git fetch origin master:refs/remotes/origin/master
 
 script:
   # Run code checks and tests while exclding those which require phabricator.
