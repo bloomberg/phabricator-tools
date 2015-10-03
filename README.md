@@ -37,6 +37,9 @@ e.g. say 'poke' on all open reviews not updated for 2 weeks
 
     $ arcyon query --min-update-age "2 weeks" --status-type open | arcyon comment --ids-file - -m 'poke'
 
+See the intro documentation here:
+[glossy page](http://bloomberg.github.io/phabricator-tools/).
+
 See the raw documentation here:
 [MAN PAGES](https://github.com/bloomberg/phabricator-tools/tree/master/doc/man/arcyon).
 
