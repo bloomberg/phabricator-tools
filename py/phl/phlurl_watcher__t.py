@@ -8,9 +8,18 @@
 # Concerns:
 # [ A] can dump and load again from empty watcher
 # [ A] can dump and load again from watcher with one element
+# [ B] a.merge_data_consume_only(a.get_data_for_merging()) changes nothing
+# [ C] can consume newness in merge_data_consume_only() with matching hashes
+# [ D] can't consume newness in merge_data_consume_only() with unmatched hashes
+# [ E] b.merge_data_consume_only(a.get_data_for_merging()) copies elements
+#      which are present in b but not in a.
 # -----------------------------------------------------------------------------
 # Tests:
 # [ A] test_A_Breathing
+# [ B] test_B_Merging
+# [ C] test_C_MergeConsumeMatching
+# [ D] test_D_MergeNotConsumeUnmatching
+# [ E] test_E_MergeConsumeNew
 # =============================================================================
 
 from __future__ import absolute_import
@@ -104,6 +113,109 @@ class Test(unittest.TestCase):
             self.assertTrue(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.has_url_recently_changed(url))
             self.assertFalse(watcher.peek_has_url_recently_changed(url))
+
+    def test_B_Merging(self):
+
+        requester = _MockRequesterObject()
+        url_a = 'http://a.test'
+        url_b = 'http://b.test'
+
+        watcher = phlurl_watcher.Watcher(requester)
+
+        # set state 'a is new, b is not new'
+        self.assertTrue(watcher.peek_has_url_recently_changed(url_a))
+        self.assertTrue(watcher.has_url_recently_changed(url_b))
+        self.assertFalse(watcher.peek_has_url_recently_changed(url_b))
+
+        # [ B] a.merge_data_consume_only(a.get_data_for_merging()) changes
+        #      nothing
+        data_before_merge = watcher.get_data_for_merging()
+        watcher.merge_data_consume_only(data_before_merge)
+        data_after_merge = watcher.get_data_for_merging()
+        self.assertDictEqual(data_before_merge, data_after_merge)
+
+    def test_C_MergeConsumeMatching(self):
+
+        with phlsys_fs.chtmpdir_context():
+
+            requester = _MockRequesterObject()
+            url = 'http://a.test'
+            cache_path = 'phlurl_watcher_cache.json'
+
+            # initialise without existing cache
+            watcher_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher = watcher_cache_wrapper.watcher
+
+            # set state 'a is new'
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+
+            # clone the watcher
+            watcher_cache_wrapper.save()
+            watcher2 = watcher_cache_wrapper.watcher
+
+            # [ C] can consume newness in merge_data_consume_only() with
+            #      matching hashes
+            watcher.has_url_recently_changed(url)
+            data_after_consume = watcher.get_data_for_merging()
+            watcher2.merge_data_consume_only(data_after_consume)
+            self.assertFalse(watcher.peek_has_url_recently_changed(url))
+
+    def test_D_MergeNotConsumeUnmatching(self):
+
+        with phlsys_fs.chtmpdir_context():
+
+            requester = _MockRequesterObject()
+            url = 'http://host.test'
+            cache_path = 'phlurl_watcher_cache.json'
+
+            # initialise without existing cache
+            watcher_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher = watcher_cache_wrapper.watcher
+
+            # set state 'a is new'
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+
+            # clone the watcher
+            watcher_cache_wrapper.save()
+            watcher2 = watcher_cache_wrapper.watcher
+
+            # [ D] can't consume newness in merge_data_consume_only() with
+            #      unmatched hashes
+            watcher.has_url_recently_changed(url)
+            data_after_consume = watcher.get_data_for_merging()
+            watcher2.refresh()
+            watcher2.merge_data_consume_only(data_after_consume)
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+
+    def test_E_MergeConsumeNew(self):
+
+        with phlsys_fs.chtmpdir_context():
+
+            requester = _MockRequesterObject()
+            url = 'http://a.test'
+            cache_path = 'phlurl_watcher_cache.json'
+
+            # initialise without existing cache
+            watcher_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher = watcher_cache_wrapper.watcher
+
+            # set state 'a is new'
+            self.assertTrue(watcher.peek_has_url_recently_changed(url))
+
+            watcher2_cache_wrapper = phlurl_watcher.FileCacheWatcherWrapper(
+                cache_path, requester)
+            watcher2 = watcher2_cache_wrapper.watcher
+
+            data_before_merge = watcher2.get_data_for_merging()
+            watcher2.merge_data_consume_only(watcher.get_data_for_merging())
+            data_after_merge = watcher2.get_data_for_merging()
+            self.assertEqual(data_before_merge, {})
+            # [ E] b.merge_data_consume_only(a.get_data_for_merging()) copies
+            #      elements which are present in b but not in a.
+            self.assertEqual(data_after_merge, watcher.get_data_for_merging())
 
 
 # -----------------------------------------------------------------------------

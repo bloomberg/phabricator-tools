@@ -9,6 +9,8 @@
 #    .peek_has_url_recently_changed
 #    .has_url_recently_changed
 #    .refresh
+#    .get_data_for_merging
+#    .merge_data_consume_only
 #    .load
 #    .dump
 #   FileCacheWatcherWrapper
@@ -110,6 +112,32 @@ class Watcher(object):
 
             self._results[url] = _HashHexdigestHasChanged(
                 new_hash, has_changed)
+
+    def get_data_for_merging(self):
+        return {k: tuple(v) for k, v in self._results.iteritems()}
+
+    def merge_data_consume_only(self, data):
+        """Merge in data such as returned from get_data_for_merging().
+
+        For each url mentioned in data that is also in self, consume the
+        newness of the URL if the content hash matches.
+
+        :data: a dict as returned from get_data_for_merging()
+        :returns: None
+
+        """
+        for key, value in data.iteritems():
+            if key not in self._results:
+                self._results[key] = _HashHexdigestHasChanged(*value)
+
+        overlap = set(self._results.keys()) & set(data.keys())
+        for url in overlap:
+            ours = self._results[url]
+            theirs = _HashHexdigestHasChanged(*data[url])
+            if ours.hash_hexdigest == theirs.hash_hexdigest:
+                if ours.has_changed and not theirs.has_changed:
+                    self._results[url] = _HashHexdigestHasChanged(
+                        ours.hash_hexdigest, False)
 
     def load(self, f):
         """Load data from the supplied file pointer, overwriting existing data.
