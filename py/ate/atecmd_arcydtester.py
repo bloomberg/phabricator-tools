@@ -546,7 +546,8 @@ def _do_tests(args):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     py_dir = os.path.dirname(script_dir)
     root_dir = os.path.dirname(py_dir)
-    arcyd_cmd_path = os.path.join(root_dir, 'proto', 'arcyd')
+    arcyd_cmd_path = os.path.join(
+        root_dir, 'testbed', 'arcyd-tester', 'git_fetch_counter_arcyd.py')
     barc_cmd_path = os.path.join(root_dir, 'proto', 'barc')
     arcyon_cmd_path = os.path.join(root_dir, 'bin', 'arcyon')
     phab_uri = args.phab_uri
@@ -615,6 +616,9 @@ def run_all_interactions(fixture):
 def _test_push_during_overrun(fixture):
     arcyd = fixture.arcyds[0]
     repo = fixture.repos[0]
+    phab_str = 'localphab'
+    repohost_prefix = 'repohost'
+    repo_prefix = 'repo'
 
     for i, r in enumerate(fixture.repos):
         repo_url_format = r.central_path
@@ -625,9 +629,9 @@ def _test_push_during_overrun(fixture):
             '--repo-snoop-url-format', r.snoop_url)
         arcyd(
             'add-repo',
-            'localphab',
-            'repohost-{}'.format(i),
-            'repo-{}'.format(i))
+            phab_str,
+            '{}-{}'.format(repohost_prefix, i),
+            '{}-{}'.format(repo_prefix, i))
 
     branch1_name = '_test_push_during_overrun'
     branch2_name = '_test_push_during_overrun2'
@@ -642,10 +646,21 @@ def _test_push_during_overrun(fixture):
         arcyd.wait_one_or_more_cycles()
         repo.release_dev_arcyd_refs()
         arcyd.wait_one_or_more_cycles()
+        arcyd.wait_one_or_more_cycles()
 
     repo.alice.fetch()
     reviews = repo.alice.list_reviews()
     assert len(reviews) == 2
+
+    fetch_counter_path = os.path.join(
+        arcyd._root_dir,
+        'var',
+        'repo',
+        '{}_{}-0_{}-0'.format(phab_str, repohost_prefix, repo_prefix),
+        '.git',
+        'fetch_counter')
+    fetch_count = int(phlsys_fs.read_text_file(fetch_counter_path))
+    assert fetch_count == 4
 
 
 def run_interaction(user_scenario, arcyd_generator, fixture):
