@@ -4,13 +4,8 @@
 # -----------------------------------------------------------------------------
 # atecmd_arcydtester
 #
-# Public Classes:
-#   SimpleWebServer
-#    .close
-#
 # Public Functions:
 #   main
-#   pick_free_port
 #   run_all_interactions
 #   run_interaction
 #
@@ -28,7 +23,6 @@ import itertools
 import json
 import os
 import shutil
-import socket
 import stat
 import subprocess
 import tempfile
@@ -39,8 +33,8 @@ import phlgit_push
 import phlgitu_fixture
 import phlsys_fs
 import phlsys_git
-import phlsys_pid
 import phlsys_subprocess
+import phlsys_web
 
 _USAGE_EXAMPLES = """
 """
@@ -139,14 +133,6 @@ def main():
         _do_tests(args)
 
 
-def pick_free_port():
-    sock = socket.socket()
-    sock.bind(('', 0))
-    port = sock.getsockname()[1]
-    sock.close()
-    return port
-
-
 class _Worker(object):
 
     """Simulate a person working with Phabricator, Git and Arcyd."""
@@ -237,20 +223,6 @@ class _Worker(object):
         return self._barc
 
 
-class SimpleWebServer(object):
-
-    def __init__(self, root_path, port):
-        self._root_path = root_path
-        self._process = subprocess.Popen(
-            ['python', '-m', 'SimpleHTTPServer', str(port)],
-            cwd=root_path)
-
-    def close(self):
-        pid = self._process.pid
-        phlsys_pid.request_terminate(pid)
-        self._process.wait()
-
-
 class _SharedRepo(object):
 
     def __init__(
@@ -267,7 +239,7 @@ class _SharedRepo(object):
         os.makedirs(self.central_path)
         self._central_repo = phlsys_git.Repo(self.central_path)
         self._central_repo("init", "--bare")
-        self.web_port = pick_free_port()
+        self.web_port = phlsys_web.pick_free_port()
         shutil.move(
             os.path.join(self.central_path, 'hooks/post-update.sample'),
             os.path.join(self.central_path, 'hooks/post-update'))
@@ -282,7 +254,7 @@ class _SharedRepo(object):
         mode = os.stat(pre_receive_path).st_mode
         os.chmod(pre_receive_path, mode | stat.S_IEXEC)
 
-        self._web = SimpleWebServer(
+        self._web = phlsys_web.SimpleWebServer(
             self.central_path,
             self.web_port)
 

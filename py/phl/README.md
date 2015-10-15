@@ -115,6 +115,8 @@ Decorators for tracing out the execution of functions and methods.
 Conveniently retry exception-prone operations.
 * `phlsys_verboseerrorfilter.py` -
 Filter for log handlers to exclude verbose error messages.
+* `phlsys_web.py` -
+Tools for managing a web server.
 * `phlurl_request.py` -
 Utilities for making requests with URLs.
 * `phlurl_watcher.py` -
