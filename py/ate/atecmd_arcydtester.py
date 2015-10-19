@@ -22,29 +22,17 @@ import contextlib
 import itertools
 import os
 import shutil
-import stat
 import subprocess
 import tempfile
 
 import phldef_conduit
 import phlsys_fs
-import phlsys_git
-import phlsys_web
 
 import atet_arcyd_instance
-import atet_worker
+import atet_sharedrepo
 
 _USAGE_EXAMPLES = """
 """
-
-_PRE_RECEIVE_HOLD_DEV_ARCYD_REFS = """
-#! /bin/sh
-if grep 'refs/heads/dev/arcyd/' -; then
-    while [ -f command/hold_dev_arcyd_refs ]; do
-        sleep 1
-    done
-fi
-""".lstrip()
 
 
 def main():
@@ -119,97 +107,6 @@ def main():
         _do_tests(args)
 
 
-class _SharedRepo(object):
-
-    def __init__(
-            self,
-            root_dir,
-            barc_cmd_path,
-            arcyon_cmd_path,
-            phab_uri,
-            alice,
-            bob):
-
-        self._root_dir = root_dir
-        self.central_path = os.path.join(self._root_dir, 'central')
-        os.makedirs(self.central_path)
-        self._central_repo = phlsys_git.Repo(self.central_path)
-        self._central_repo("init", "--bare")
-        self.web_port = phlsys_web.pick_free_port()
-        shutil.move(
-            os.path.join(self.central_path, 'hooks/post-update.sample'),
-            os.path.join(self.central_path, 'hooks/post-update'))
-
-        self._command_hold_path = os.path.join(
-            self.central_path, 'command/hold_dev_arcyd_refs')
-
-        pre_receive_path = os.path.join(self.central_path, 'hooks/pre-receive')
-        phlsys_fs.write_text_file(
-            pre_receive_path,
-            _PRE_RECEIVE_HOLD_DEV_ARCYD_REFS)
-        mode = os.stat(pre_receive_path).st_mode
-        os.chmod(pre_receive_path, mode | stat.S_IEXEC)
-
-        self._web = phlsys_web.SimpleWebServer(
-            self.central_path,
-            self.web_port)
-
-        self._workers = []
-        for account in (alice, bob):
-            account_user = account[0]
-            account_email = account[1]
-            account_cert = account[2]
-            worker_path = os.path.join(self._root_dir, account_user)
-            os.makedirs(worker_path)
-            self._workers.append(
-                atet_worker.Worker(
-                    phlsys_git.Repo(worker_path),
-                    worker_path,
-                    barc_cmd_path,
-                    account_user,
-                    account_email,
-                    account_cert,
-                    arcyon_cmd_path,
-                    phab_uri))
-            self._workers[-1].setup(self._central_repo.working_dir)
-
-            if len(self._workers) == 1:
-                self._workers[0].push_initial_commit()
-            else:
-                self._workers[-1].repo('checkout', 'master')
-
-    def hold_dev_arcyd_refs(self):
-        phlsys_fs.write_text_file(
-            self._command_hold_path,
-            _PRE_RECEIVE_HOLD_DEV_ARCYD_REFS)
-
-    def release_dev_arcyd_refs(self):
-        os.remove(self._command_hold_path)
-
-    @property
-    def snoop_url(self):
-        return "http://127.0.0.1:{}/info/refs".format(self.web_port)
-
-    @property
-    def central_repo(self):
-        return self._central_repo
-
-    @property
-    def workers(self):
-        return self._workers
-
-    @property
-    def alice(self):
-        return self._workers[0]
-
-    @property
-    def bob(self):
-        return self._workers[1]
-
-    def close(self):
-        self._web.close()
-
-
 class _Fixture(object):
 
     def __init__(
@@ -238,7 +135,7 @@ class _Fixture(object):
             repo_path = os.path.join(self._repo_root_dir, 'repo-{}'.format(i))
             os.makedirs(repo_path)
             self._repos.append(
-                _SharedRepo(
+                atet_sharedrepo.SharedRepo(
                     repo_path,
                     barc_command,
                     arcyon_command,
