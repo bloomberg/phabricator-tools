@@ -32,8 +32,8 @@ import phlgit_push
 import phlgitu_fixture
 import phlsys_fs
 import phlsys_git
-import phlsys_subprocess
 import phlsys_web
+import phlsys_workingdircommand
 
 import atet_arcyd_instance
 
@@ -137,8 +137,9 @@ class _Worker(object):
             arcyon_cmd_path,
             phab_uri):
         self._repo = repo
-        self._barc = _CommandWithWorkingDirectory(barc_cmd_path, working_dir)
-        self._arcyon = _CommandWithWorkingDirectory(
+        self._barc = phlsys_workingdircommand.CommandWithWorkingDirectory(
+            barc_cmd_path, working_dir)
+        self._arcyon = phlsys_workingdircommand.CommandWithWorkingDirectory(
             arcyon_cmd_path, working_dir)
         self._working_dir = working_dir
         self._git_worker = phlgitu_fixture.Worker(repo)
@@ -301,21 +302,6 @@ class _SharedRepo(object):
 
     def close(self):
         self._web.close()
-
-
-class _CommandWithWorkingDirectory(object):
-
-    def __init__(self, command_path, working_dir_path):
-        self._working_dir_path = os.path.abspath(working_dir_path)
-        self._command_path = os.path.abspath(command_path)
-
-    def __call__(self, *args, **kwargs):
-        stdin = kwargs.pop("stdin", None)
-        assert(not kwargs)
-        result = phlsys_subprocess.run(
-            self._command_path, *args,
-            stdin=stdin, workingDir=self._working_dir_path)
-        return result.stdout
 
 
 class _Fixture(object):

@@ -117,6 +117,8 @@ Conveniently retry exception-prone operations.
 Filter for log handlers to exclude verbose error messages.
 * `phlsys_web.py` -
 Tools for managing a web server.
+* `phlsys_workingdircommand.py` -
+Run a system command in its own working directory.
 * `phlurl_request.py` -
 Utilities for making requests with URLs.
 * `phlurl_watcher.py` -

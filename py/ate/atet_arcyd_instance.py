@@ -31,8 +31,7 @@ import stat
 import time
 
 import phlsys_fs
-
-import atecmd_arcydtester
+import phlsys_workingdircommand
 
 _EXTERNAL_REPORT_COUNTER = """
 #! /bin/sh
@@ -51,7 +50,7 @@ class ArcydInstance(object):
 
     def __init__(self, root_dir, arcyd_command):
         self._root_dir = root_dir
-        self._command = atecmd_arcydtester._CommandWithWorkingDirectory(
+        self._command = phlsys_workingdircommand.CommandWithWorkingDirectory(
             arcyd_command, root_dir)
 
         count_cycles_script_path = os.path.join(
