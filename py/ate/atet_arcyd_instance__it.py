@@ -36,7 +36,7 @@ import unittest
 import phldef_conduit
 import phlsys_fs
 
-import atecmd_arcydtester
+import atet_fixture
 
 
 @contextlib.contextmanager
@@ -61,7 +61,7 @@ def setup_arcyd():
 
     arcyd_count = 1
     repo_count = 1
-    fixture = atecmd_arcydtester._Fixture(
+    fixture = atet_fixture.Fixture(
         arcyd_cmd_path,
         barc_cmd_path,
         arcyon_cmd_path,
