@@ -119,7 +119,7 @@ class Test(unittest.TestCase):
                 arcyd._root_dir, 'cycle_counter'), '2')
             with phlsys_fs.chdir_context(arcyd._root_dir):
                 os.system("./count_cycles.sh")
-            # [C] correct number of cycles counted - 3 (2 + 1)
+            # [ C] correct number of cycles counted - 3 (2 + 1)
             self.assertEqual(3, arcyd.count_cycles())
 
     def test_D_exercise_read_log(self):
@@ -130,9 +130,9 @@ class Test(unittest.TestCase):
             phlsys_fs.write_text_file(info_log_path, 'info log entry')
             info_log = arcyd.info_log()
             debug_log = arcyd.debug_log()
-            # info_log returns correct info log
+            # [ D] info_log returns correct info log
             self.assertIn('info log entry', info_log)
-            # debug_log returns correct debug log
+            # [ D] debug_log returns correct debug log
             self.assertIn('debug log entry', debug_log)
 
 # -----------------------------------------------------------------------------
