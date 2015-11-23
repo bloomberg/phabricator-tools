@@ -424,9 +424,16 @@ def write_text_file_atomic(path, text):
     if dir_path:
         ensure_dir(dir_path)
     tmpfd, tmppath = tempfile.mkstemp(text=True, dir=dir_path)
-    write_text_file(tmppath, text)
-    os.close(tmpfd)
-    os.rename(tmppath, path)
+
+    try:
+        with os.fdopen(tmpfd, 'w') as f:
+            f.write(text)
+            f.flush()
+            os.fsync(tmpfd)
+        os.rename(tmppath, path)
+    except:
+        os.remove(tmppath)
+        raise
 
 
 # -----------------------------------------------------------------------------
