@@ -34,6 +34,7 @@ from __future__ import print_function
 import os
 
 import phlsys_fs
+import phlsys_git
 
 
 _REPO_ATTRIBUTES_PATH = '.git/info/attributes'
@@ -57,11 +58,29 @@ def is_repo_definitely_ignoring(repo_path):
 
 
 def ensure_repo_ignoring(repo_path):
+    """Make sure the .gitattributes override is set up.
+
+    Note that this function will perform clean checkout of all files
+    in the working copy from the index so any non-staged changes will
+    be lost.
+
+    :repo_path: repository to set up
+
+    """
     if is_repo_definitely_ignoring(repo_path):
         # nothing to do
         return
 
+    repo = phlsys_git.Repo(repo_path)
     repo_attributes_path = os.path.join(repo_path, _REPO_ATTRIBUTES_PATH)
+
+    # Files in our working copy might have been 'smudged' by some
+    # filters. After repo-wide attributes override is written those
+    # smudged files might be considered as 'modified' because
+    # apropriate clean filter is no longer applied.
+    #
+    # To fix that side effect we need to rebuild the working copy
+    # after the attributes are modified.
 
     # check that any existing file is compatible with the new contents we will
     # write, i.e. it is a subset of the new content
@@ -81,6 +100,9 @@ def ensure_repo_ignoring(repo_path):
     phlsys_fs.write_text_file(
         repo_attributes_path,
         _REPO_ATTRIBUTES_CONTENT)
+
+    # overwrite working copy with files from index
+    repo("checkout-index", "-afqu")
 
 
 # -----------------------------------------------------------------------------
