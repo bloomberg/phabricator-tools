@@ -157,10 +157,13 @@ def do(
         elif os.path.isfile(fs_accessor.layout.killfile):
             exit_code = abdi_processexitcodes.ExitCodes.ec_exit
             if phlsys_fs.read_text_file(fs_accessor.layout.killfile):
-                _LOGGER.info("Reason for stopping arcyd: {}".format(
+                _LOGGER.info("Killfile observed, reason given: {}".format(
                     phlsys_fs.read_text_file(fs_accessor.layout.killfile)))
+            else:
+                _LOGGER.info("Killfile observed, arcyd will stop")
             os.remove(fs_accessor.layout.killfile)
         elif os.path.isfile(fs_accessor.layout.reloadfile):
+            _LOGGER.info("Reloadfile observed, arcyd will reload")
             exit_code = abdi_processexitcodes.ExitCodes.ec_reload
             os.remove(fs_accessor.layout.reloadfile)
 
