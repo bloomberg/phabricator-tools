@@ -1,0 +1,35 @@
+#! /bin/sh
+set -x
+REPO_URL=$1
+if [ ! -d /var/arcyd ]; then
+    cd /var
+    git clone $REPO_URL arcyd
+    git config --global user.email ${ARCYD_EMAIL}
+    git config --global user.name ${ARCYD_NAME}
+    cd arcyd
+    if [ ! -f configfile ]; then
+        arcyd init \
+            --arcyd-email ${ARCYD_EMAIL} \
+            --sleep-secs ${ARCYD_SLEEP_SECS}
+        git push origin master
+    else
+        arcyd fsck --fix
+    fi
+fi
+cd /var/arcyd
+arcyd start --foreground
+# -----------------------------------------------------------------------------
+# Copyright (C) 2015 Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------ END-OF-FILE ----------------------------------
