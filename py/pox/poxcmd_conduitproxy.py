@@ -135,7 +135,9 @@ class _RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile = None  # for pychecker
         self.headers = None  # for pychecker
 
+        # pylint: disable=E1120
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *args)
+        # pylint: enable=E1120
 
     def do_POST(self):
         """Handle http POST requests, override of base class function."""
@@ -260,7 +262,7 @@ def _request_handler_factory(custom_param):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2015 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
