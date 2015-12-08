@@ -114,6 +114,7 @@ def should_process_file(path):
     ignore_endings = [
         '.generated.txt',
         '.md',
+        '.json',
     ]
 
     ignore_filenames = [
