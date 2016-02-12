@@ -5,6 +5,12 @@ set -eux
 # called 'phab-web', serving http. The test users are expected to be installed,
 # as found in phldef_conduit.py and set up with puppet manifest in
 # phabricator-tools.
+#
+# You can achieve this by simply running:
+#
+#   $ ./testbed/docker-phabricator/run-docker-phab-web-mysql.sh
+#
+# It will run the necessary containers for you.
 
 # NOTE: This script expects you to have built the 'gitdaemon' and 'gituser'
 # images already. It will build the arcyd image for you.
@@ -94,7 +100,7 @@ docker rm arcydclustertest-arcyd2
 docker rm arcydclustertest-consulserver
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
