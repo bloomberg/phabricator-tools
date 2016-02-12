@@ -35,7 +35,7 @@ while ! docker exec arcydclustertest-consulserver consul info | grep 'leader = t
 
 docker build -t arcydclustertest-gituser ../../docker/gituser/
 docker build -t arcydclustertest-gitdaemon ../../docker/gitdaemon/
-../../docker/build-image.sh ../../docker/arcyd-cluster/arcyd-dockerfile arcyd-cluster
+../../docker/build-image.sh ../../docker/arcyd-cluster/arcyd-cluster-dockerfile arcyd-cluster
 
 docker run -d --name arcydclustertest-git arcydclustertest-gitdaemon arcyd testrepo
 docker run -d --name arcydclustertest-arcyd --link arcydclustertest-git:git --link phab-web arcyd-cluster git://git/arcyd "${CONSUL_SERVER_IP}"
