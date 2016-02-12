@@ -37,7 +37,7 @@ while ! docker exec arcydclustertest-consulserver consul info | grep 'leader = t
 
 docker run -d --name arcydclustertest-git gitdaemon arcyd testrepo
 ../build-image.sh arcyd-dockerfile arcyd-cluster
-docker run -d --name arcydclustertest-arcyd arcyd-cluster git://arcydclustertest-git/arcyd "${CONSUL_SERVER_IP}"
+docker run -d --name arcydclustertest-arcyd --link arcydclustertest-git:git --link phab-web arcyd-cluster git://git/arcyd "${CONSUL_SERVER_IP}"
 
 # wait for arcyd container to be ready
 while ! docker exec arcydclustertest-arcyd arcyd-do list-repos 2> /dev/null; do sleep 1; done
@@ -59,10 +59,10 @@ docker exec arcydclustertest-arcyd arcyd-do add-phabricator \
     --arcyd-user "$arcyduser" \
     --arcyd-cert "$arcydcert"
 
-docker run --rm -i gituser <<EOF
+docker run --rm --link arcydclustertest-git:git -i gituser <<EOF
     mkdir data
     cd data
-    git clone git://arcydclustertest-git/testrepo
+    git clone git://git/testrepo
     cd testrepo
     git config user.email alice@server.test
     git config user.name alice
@@ -76,11 +76,11 @@ docker run --rm -i gituser <<EOF
     git push origin r/master/hello
 EOF
 
-docker exec arcydclustertest-arcyd arcyd-do add-repo phabweb mygit git://arcydclustertest-git/testrepo --name testrepo
+docker exec arcydclustertest-arcyd arcyd-do add-repo phabweb mygit git://git/testrepo --name testrepo
 docker exec arcydclustertest-arcyd sh -c 'cd /var/arcyd; git push origin master;'
 docker exec arcydclustertest-arcyd arcyd-do reload
 
-docker run -d --name arcydclustertest-arcyd2 arcyd-cluster git://arcydclustertest-git/arcyd "${CONSUL_SERVER_IP}"
+docker run -d --name arcydclustertest-arcyd2 --link arcydclustertest-git:git --link phab-web arcyd-cluster git://git/arcyd "${CONSUL_SERVER_IP}"
 
 # let some stuff happen
 sleep 5
