@@ -3,17 +3,17 @@ set -euo pipefail
 THIS_DIR=$(cd $(dirname $0); pwd -P)
 echo ${THIS_DIR}
 BUILD_DIR=$(mktemp -d /tmp/temp.XXXXX)
-DOCKERFILE=$(readlink -f "$1")
+
+cp "$1" "${BUILD_DIR}/Dockerfile"
 
 pushd ${BUILD_DIR}
 cp -R "${THIS_DIR}/.." .
-cp "$DOCKERFILE" Dockerfile
 docker build -t "$2" .
 popd
 
 rm -rf ${BUILD_DIR}
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
