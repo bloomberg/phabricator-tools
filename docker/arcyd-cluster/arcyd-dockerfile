@@ -4,17 +4,17 @@ RUN apk update && apk add python py-pip git
 RUN pip install requests
 COPY py /opt/phabricator-tools/py
 COPY proto/arcyd /opt/phabricator-tools/bin/arcyd
-COPY docker/arcyd/entrypoint /bin/entrypoint
-COPY docker/arcyd/arcyd-do /bin/arcyd-do
-COPY docker/arcyd/contend-leadership.py /bin/contend-leadership.py
-COPY docker/arcyd/config/ /config
+COPY docker/arcyd-cluster/entrypoint /bin/entrypoint
+COPY docker/arcyd-cluster/arcyd-do /bin/arcyd-do
+COPY docker/arcyd-cluster/contend-leadership.py /bin/contend-leadership.py
+COPY docker/arcyd-cluster/config/ /config
 ENV ARCYD_EMAIL arcyd@localhost.invalid
 ENV ARCYD_NAME Arcyd
 ENV ARCYD_SLEEP_SECS 3
 RUN ln -s /opt/phabricator-tools/bin/arcyd /usr/bin/arcyd
 ENTRYPOINT ["/bin/entrypoint"]
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
