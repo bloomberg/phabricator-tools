@@ -18,8 +18,6 @@ set -eux
 # cd to the dir of this script, so paths are relative
 cd "$(dirname "$0")"
 
-cd ../../docker/arcyd-cluster
-
 docker kill arcydclustertest-git || true
 docker kill arcydclustertest-arcyd || true
 docker kill arcydclustertest-arcyd2 || true
@@ -35,8 +33,11 @@ CONSUL_SERVER_IP=$(docker inspect arcydclustertest-consulserver | python -c 'imp
 # wait for consul server to be ready
 while ! docker exec arcydclustertest-consulserver consul info | grep 'leader = true'; do sleep 1; done
 
-docker run -d --name arcydclustertest-git gitdaemon arcyd testrepo
-../build-image.sh arcyd-dockerfile arcyd-cluster
+docker build -t arcydclustertest-gituser ../../docker/gituser/
+docker build -t arcydclustertest-gitdaemon ../../docker/gitdaemon/
+../../docker/build-image.sh ../../docker/arcyd-cluster/arcyd-dockerfile arcyd-cluster
+
+docker run -d --name arcydclustertest-git arcydclustertest-gitdaemon arcyd testrepo
 docker run -d --name arcydclustertest-arcyd --link arcydclustertest-git:git --link phab-web arcyd-cluster git://git/arcyd "${CONSUL_SERVER_IP}"
 
 # wait for arcyd container to be ready
@@ -59,7 +60,7 @@ docker exec arcydclustertest-arcyd arcyd-do add-phabricator \
     --arcyd-user "$arcyduser" \
     --arcyd-cert "$arcydcert"
 
-docker run --rm --link arcydclustertest-git:git -i gituser <<EOF
+docker run --rm --link arcydclustertest-git:git -i arcydclustertest-gituser <<EOF
     mkdir data
     cd data
     git clone git://git/testrepo
