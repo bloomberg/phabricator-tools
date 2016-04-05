@@ -27,7 +27,7 @@ To participate under these terms, all that you must do is include a line like
 the following as the last line of the commit message for each commit in your
 contribution:
 
-    Signed-Off-By: Random J. Developer <random@developer.example.org>
+    Signed-off-by: Random J. Developer <random@developer.example.org>
 
 You must use your real name (sorry, no pseudonyms, and no anonymous
 contributions).
