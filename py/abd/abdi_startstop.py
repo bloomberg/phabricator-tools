@@ -22,6 +22,7 @@ import argparse
 import logging
 import logging.handlers
 import os
+import sys
 import time
 
 import phlsys_compressedlogging
@@ -80,7 +81,7 @@ def start_arcyd(daemonize=True, loop=True, restart=False, stop_message=''):
         args = parser.parse_args(params)
 
     def logger_config():
-        _setup_logger(fs)
+        _setup_logger(fs, daemonize)
 
     with phlsys_multiprocessing.logging_context(logger_config):
         _LOGGER.debug("start with args: {}".format(args))
@@ -142,7 +143,7 @@ def reload_arcyd():
         phlsys_fs.write_text_file('var/command/reload', '')
 
 
-def _setup_logger(fs):
+def _setup_logger(fs, is_background):
     # log DEBUG+, INFO+ and ERROR+ to separate files
 
     # pychecker makes us do this, it won't recognise that logging.handlers is a
@@ -178,9 +179,16 @@ def _setup_logger(fs):
     logging.getLogger().addHandler(info_handler)
     logging.getLogger().addHandler(debug_handler)
 
+    if not is_background:
+        stdout_handler = lg.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.INFO)
+        stdout_handler.addFilter(phlsys_verboseerrorfilter.make_filter())
+        stdout_handler.setFormatter(formatter)
+        logging.getLogger().addHandler(stdout_handler)
+
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
