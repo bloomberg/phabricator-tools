@@ -3,8 +3,10 @@
 
 import argparse
 import os
+import signal
 import subprocess
 import sys
+import time
 
 
 def main():
@@ -24,7 +26,29 @@ def main():
         setup_repo(args.REPO_URL, repo_dir)
 
     os.chdir(repo_dir)
-    subprocess.check_call(['arcyd', 'start', '--foreground'])
+
+    got_sigterm = False
+    def handle_sigterm(unused1, unused2):
+        nonlocal got_sigterm
+        got_sigterm = True
+
+    signal.signal(signal.SIGTERM, handle_sigterm)
+
+    arcyd = subprocess.Popen(['arcyd', 'start', '--foreground'])
+    while arcyd.poll() is None:
+        if got_sigterm:
+            arcyd_stop = subprocess.Popen([
+                'arcyd', 'stop', '--message', 'SIGTERM / probably docker stop',
+            ])
+
+            # If we don't wait(2) on Arcyd then 'arcyd stop' will wait
+            # indefinitely for Arcyd to stop, as it will have an entry in the
+            # process table until it is waited on.
+            arcyd.wait()
+
+            arcyd_stop.wait()
+        else:
+            time.sleep(1)
 
 
 def setup_git_user(email, name):
