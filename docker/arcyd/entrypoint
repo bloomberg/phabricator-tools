@@ -14,6 +14,13 @@ def main():
     parser.add_argument(
         'REPO_URL',
         help='URL of the config repository to git clone')
+    parser.add_argument(
+        '--standby-loop',
+        metavar='SECS',
+        type=int,
+        default=None,
+        help='Only fetch in a loop, waiting the specified number of seconds. '
+             'This is useful when you want a warm standby instance.')
     args = parser.parse_args()
 
     repo_dir = '/var/arcyd/'
@@ -26,7 +33,10 @@ def main():
         setup_repo(args.REPO_URL, repo_dir)
 
     os.chdir(repo_dir)
-    run_arcyd()
+    if args.standby_loop is None:
+        run_arcyd()
+    else:
+        run_standby_loop(args.standby_loop)
 
 
 def run_arcyd():
@@ -52,6 +62,29 @@ def run_arcyd():
             arcyd_stop.wait()
         else:
             time.sleep(1)
+
+
+def run_standby_loop(sleep_secs):
+    got_sigterm = False
+    def handle_sigterm(unused1, unused2):
+        nonlocal got_sigterm
+        got_sigterm = True
+
+    signal.signal(signal.SIGTERM, handle_sigterm)
+
+    while not got_sigterm:
+        print('Start refresh', flush=True)
+        if not got_sigterm:
+            subprocess.call(['git', 'pull', '--ff-only'])
+        if not got_sigterm:
+            subprocess.call(['arcyd', 'fsck', '--fix'])
+        if not got_sigterm:
+            subprocess.call(['arcyd', 'fetch'])
+        if not got_sigterm:
+            print('Sleep', sleep_secs, 'secs', flush=True)
+            time.sleep(sleep_secs)  # If we get SIGTERM we'll wake up early
+
+    print('Stopped', flush=True)
 
 
 def setup_git_user(email, name):
