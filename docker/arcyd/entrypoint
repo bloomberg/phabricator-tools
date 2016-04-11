@@ -26,7 +26,10 @@ def main():
         setup_repo(args.REPO_URL, repo_dir)
 
     os.chdir(repo_dir)
+    run_arcyd()
 
+
+def run_arcyd():
     got_sigterm = False
     def handle_sigterm(unused1, unused2):
         nonlocal got_sigterm
