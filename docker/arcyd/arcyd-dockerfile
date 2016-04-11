@@ -1,6 +1,6 @@
 FROM alpine
 MAINTAINER Angelos Evripiotis <jevripiotis@bloomberg.net>
-RUN apk update && apk add python python3 git
+RUN apk update && apk add python python3 git openssh-client
 COPY py /opt/phabricator-tools/py
 COPY proto/arcyd /opt/phabricator-tools/bin/arcyd
 COPY docker/arcyd/entrypoint /bin/entrypoint
