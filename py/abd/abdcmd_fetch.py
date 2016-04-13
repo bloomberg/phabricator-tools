@@ -26,6 +26,7 @@ import sys
 import phlgitx_refcache
 import phlsys_git
 import phlsys_pid
+import phlsys_subprocess
 import phlurl_watcher
 
 import abdi_processrepoarglist
@@ -48,6 +49,7 @@ def process(args):
     _ = args  # NOQA
     fs = abdt_fs.make_default_accessor()
 
+    any_failed = False
     with fs.lockfile_context():
         pid = fs.get_pid_or_none()
         if pid is not None and phlsys_pid.is_running(pid):
@@ -88,22 +90,33 @@ def process(args):
                 "origin",
                 repo_config.repo_desc)
 
-            did_fetch = abdi_processrepoarglist.fetch_if_needed(
-                url_watcher_wrapper.watcher,
-                snoop_url,
-                abd_repo,
-                repo_config.repo_desc)
+            try:
+                did_fetch = abdi_processrepoarglist.fetch_if_needed(
+                    url_watcher_wrapper.watcher,
+                    snoop_url,
+                    abd_repo,
+                    repo_config.repo_desc)
 
-            if did_fetch:
-                print('fetched')
-            else:
-                print('skipped')
+                if did_fetch:
+                    print('fetched')
+                else:
+                    print('skipped')
+            except phlsys_subprocess.CalledProcessError as e:
+                print('failed')
+                print(e)
+                any_failed = True
 
             url_watcher_wrapper.save()
 
+    if any_failed:
+        print("Some repositories failed to be fetched.")
+        return 1
+    else:
+        return 0
+
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
