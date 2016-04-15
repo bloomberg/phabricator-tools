@@ -61,6 +61,7 @@ docker run --rm -i gituser <<EOF
 EOF
 
 docker exec arcydtest-arcyd arcyd-do add-repo phabweb mygit git://arcydtest-git/testrepo --name testrepo
+docker exec arcydtest-arcyd git -C /var/arcyd push origin HEAD
 docker exec arcydtest-arcyd arcyd-do reload
 docker logs arcydtest-arcyd
 
