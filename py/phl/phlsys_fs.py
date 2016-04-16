@@ -21,6 +21,7 @@
 #   read_text_file
 #   write_text_file
 #   delete_file_if_exists
+#   open_write_text_file_atomic
 #   write_text_file_atomic
 #
 # -----------------------------------------------------------------------------
@@ -396,8 +397,9 @@ def delete_file_if_exists(path):
             raise
 
 
-def write_text_file_atomic(path, text):
-    """Atomically writes 'text' to the file at 'path' using temporary file.
+@contextlib.contextmanager
+def open_write_text_file_atomic(path):
+    """Open a temp file that will be swapped into 'path' when finished.
 
     In case multiple writers try to write to the same file, it is ensured
     that the readers will always read one consistent version. This is
@@ -411,12 +413,12 @@ def write_text_file_atomic(path, text):
     Usage example:
 
         >>> with chtmpdir_context():
-        ...     write_text_file_atomic('testfile', 'Hello')
+        ...     with open_write_text_file_atomic('testfile') as f:
+        ...         f.write('Hello')
         ...     print(read_text_file('testfile'))
         Hello
 
     :path: the string path of the file to write
-    :text: the string contents of the file
     :returns: None
 
     """
@@ -427,7 +429,7 @@ def write_text_file_atomic(path, text):
 
     try:
         with os.fdopen(tmpfd, 'w') as f:
-            f.write(text)
+            yield f
             f.flush()
             os.fsync(tmpfd)
         os.rename(tmppath, path)
@@ -436,8 +438,29 @@ def write_text_file_atomic(path, text):
         raise
 
 
+def write_text_file_atomic(path, text):
+    """Atomically writes 'text' to the file at 'path' using temporary file.
+
+    See open_write_text_file_atomic() for notes.
+
+    Usage example:
+
+        >>> with chtmpdir_context():
+        ...     write_text_file_atomic('testfile', 'Hello')
+        ...     print(read_text_file('testfile'))
+        Hello
+
+    :path: the string path of the file to write
+    :text: the string contents of the file
+    :returns: None
+
+    """
+    with open_write_text_file_atomic(path) as f:
+        f.write(text)
+
+
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2015 Bloomberg Finance L.P.
+# Copyright (C) 2013-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
