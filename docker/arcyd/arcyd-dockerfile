@@ -1,6 +1,6 @@
 FROM alpine
 MAINTAINER Angelos Evripiotis <jevripiotis@bloomberg.net>
-RUN apk update && apk add python git
+RUN apk update && apk add python python3 git
 COPY py /opt/phabricator-tools/py
 COPY proto/arcyd /opt/phabricator-tools/bin/arcyd
 COPY docker/arcyd/entrypoint /bin/entrypoint
@@ -11,7 +11,7 @@ ENV ARCYD_SLEEP_SECS 3
 RUN ln -s /opt/phabricator-tools/bin/arcyd /usr/bin/arcyd
 ENTRYPOINT ["/bin/entrypoint"]
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

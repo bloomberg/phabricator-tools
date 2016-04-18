@@ -1,25 +1,59 @@
-#! /bin/sh
-set -x
-REPO_URL=$1
-if [ ! -d /var/arcyd ]; then
-    cd /var
-    git clone $REPO_URL arcyd
-    git config --global user.email ${ARCYD_EMAIL}
-    git config --global user.name ${ARCYD_NAME}
-    cd arcyd
-    if [ ! -f configfile ]; then
-        arcyd init \
-            --arcyd-email ${ARCYD_EMAIL} \
-            --sleep-secs ${ARCYD_SLEEP_SECS}
-        git push origin master
-    else
-        arcyd fsck --fix
-    fi
-fi
-cd /var/arcyd
-arcyd start --foreground
+#! /usr/bin/python3
+"""Entrypoint for the arcyd docker container."""
+
+import argparse
+import os
+import subprocess
+import sys
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        'REPO_URL',
+        help='URL of the config repository to git clone')
+    args = parser.parse_args()
+
+    repo_dir = '/var/arcyd/'
+
+    setup_git_user(
+        os.environ['ARCYD_EMAIL'],
+        os.environ['ARCYD_NAME'])
+
+    if not os.path.exists(repo_dir):
+        setup_repo(args.REPO_URL, repo_dir)
+
+    os.chdir(repo_dir)
+    subprocess.check_call(['arcyd', 'start', '--foreground'])
+
+
+def setup_git_user(email, name):
+    subprocess.check_call(['git', 'config', '--global', 'user.email', email])
+    subprocess.check_call(['git', 'config', '--global', 'user.name', name])
+
+
+def setup_repo(repo_url, repo_dir):
+        subprocess.check_call(['git', 'clone', repo_url, repo_dir])
+        os.chdir(repo_dir)
+        if not os.path.exists(os.path.join(repo_dir, 'configfile')):
+            # Set this repository up for the first time
+            subprocess.check_call([
+                'arcyd', 'init',
+                '--arcyd-email', os.environ['ARCYD_EMAIL'],
+                '--sleep-secs', os.environ['ARCYD_SLEEP_SECS']
+            ])
+            subprocess.check_call(['git', 'push', 'origin', 'HEAD'])
+        else:
+            # This repository has config, retrieve any missing repos
+            subprocess.check_call(['arcyd', 'fsck', '--fix'])
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+
+
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
