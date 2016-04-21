@@ -64,7 +64,30 @@ docker exec arcydtest-arcyd arcyd-do add-repo phabweb mygit git://arcydtest-git/
 docker exec arcydtest-arcyd arcyd-do reload
 docker logs arcydtest-arcyd
 
-sleep 5
+set +x
+clear
+cat << EOF
+Welcome to Arcyd docker-testshell!
+
+Type 'exit' to leave and clean up the provided docker containers.
+
+Some things to try:
+
+Get logs from the Arcyd container:
+$ docker logs arcydtest-arcyd
+
+See the info log from the Arcyd container:
+$ docker exec arcydtest-arcyd cat /var/arcyd/var/log/info
+
+Start a new 'arcyd2' container (to clean up yourself):
+$ docker run -d --link phab-web --name arcyd2 arcyd git://arcydtest-git/arcyd
+
+EOF
+set +e
+bash
+set -e
+set -x
+
 docker exec arcydtest-arcyd cat var/arcyd/var/log/info
 
 docker kill arcydtest-git
