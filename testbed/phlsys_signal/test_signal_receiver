@@ -1,0 +1,45 @@
+#! /usr/bin/env bash
+# Check that the sequence 'AB' is not observed from the 'signal_receiver'
+# program when interrupting it with SIGTERM over many iterations.
+truncate -s0 all_signal_stdout
+for i in {1..100000}; do
+    ./signal_receiver > signal_stdout &
+    PID=$!
+
+    # Wait about the same amount of time as our background process should take
+    # before killing it, to give us a good chance of interrupting it between
+    # printing 'B' and 'C'.
+    ./signal_receiver > /dev/null
+
+    kill $PID 2>/dev/null
+    wait $PID 2>/dev/null
+    OUTPUT=$(cat signal_stdout 2>/dev/null)
+    echo $OUTPUT >> all_signal_stdout
+    if [[ ! -z "${OUTPUT}" ]]; then
+        if [[ "${OUTPUT}" != "ABCD" ]]; then
+            echo $OUTPUT
+            if [[ "${OUTPUT}" == "AB" ]]; then
+                echo '!! BAD !!'
+                exit 1
+            fi
+        fi
+    fi
+    rm signal_stdout 2>/dev/null
+done
+sort all_signal_stdout | uniq -c
+rm all_signal_stdout
+# -----------------------------------------------------------------------------
+# Copyright (C) 2016 Bloomberg Finance L.P.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------ END-OF-FILE ----------------------------------
