@@ -228,10 +228,11 @@ class _RepoActiveRetryState(object):
     def __init__(self, retry_timestr_list):
         self._is_active = True
         self._reactivate_time = None
-        self._retry_delays = [
+        self._original_retry_delays = [
             phlsys_strtotime.duration_string_to_time_delta(s)
             for s in retry_timestr_list
         ]
+        self._retry_delays = self._original_retry_delays[:]
 
     def calc_active(self):
 
@@ -259,6 +260,9 @@ class _RepoActiveRetryState(object):
     @property
     def reactivate_time(self):
         return self._reactivate_time
+
+    def reset_retries(self):
+        self._retry_delays = self._original_retry_delays[:]
 
 
 class _ArcydManagedRepository(object):
@@ -322,6 +326,8 @@ class _ArcydManagedRepository(object):
                     'repo-event: {} disabled, retry in {}'.format(
                         self._name, retry_delay))
                 self._on_exception(retry_delay)
+            else:
+                self._active_state.reset_retries()
         else:
             _LOGGER.debug(
                 'repo-status: {} is inactive until {}'.format(
@@ -478,7 +484,7 @@ def _flatten_list(hierarchy):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014-2015 Bloomberg Finance L.P.
+# Copyright (C) 2014-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
