@@ -40,6 +40,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import signal
 import unittest
 
 import phlsys_signal
@@ -51,6 +52,10 @@ class Test(unittest.TestCase):
         super(Test, self).__init__(data)
 
     def test_A_Breathing(self):
+        # We must restore the original signal handler when we're done testing
+        # or nose will hang indefinitely when we run the tests.
+        handler = signal.getsignal(signal.SIGTERM)
+
         # CONCERN: can run phlsys_signal.set_exit_on_sigterm
         phlsys_signal.set_exit_on_sigterm()
 
@@ -67,6 +72,8 @@ class Test(unittest.TestCase):
         self.assertEqual(
             phlsys_signal._SIGNAL_FLAGS.delay_sigterm_exit_level,
             0)
+
+        signal.signal(signal.SIGTERM, handler)
 
     def test_B_can_recurse_exit_context(self):
         # CONCERN: exit_level is 0 before recursive exit contexts are active
