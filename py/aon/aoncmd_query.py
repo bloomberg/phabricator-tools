@@ -411,28 +411,29 @@ def _output_results(args, results):
         args.format_type = "short"
     if args.format_type:
         if args.format_type == "json":
-            print(json.dumps(results, sort_keys=True, indent=2))
+            print(json.dumps(
+                results, sort_keys=True, indent=2).encode('utf-8'))
         elif args.format_type == "python":
             pprint.pprint(results)
         elif args.format_type == "short":
             shortTemplate = string.Template("$id / $statusName / $title")
             for x in results:
-                print(shortTemplate.safe_substitute(x))
+                print(shortTemplate.safe_substitute(x).encode('utf-8'))
         elif args.format_type == "ids":
             shortTemplate = string.Template("$id")
             for x in results:
-                print(shortTemplate.safe_substitute(x))
+                print(shortTemplate.safe_substitute(x).encode('utf-8'))
         else:
             raise Exception("unsupported format")
     else:  # args.format_string
         assert args.format_string
         template = string.Template(args.format_string)
         for x in results:
-            print(template.safe_substitute(x))
+            print(template.safe_substitute(x).encode('utf-8'))
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2015 Bloomberg Finance L.P.
+# Copyright (C) 2013-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
