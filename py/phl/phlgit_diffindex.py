@@ -1,9 +1,9 @@
 """Wrapper around 'git diff-index'.
 
-Compares the content and mode of the blobs found via a tree object with the
-content of the current index and, optionally ignoring the stat state of the
-file on disk. When paths are specified, compares only those named paths.
-Otherwise all entries in the index are compared.
+Compares the content and mode of the blobs found via a tree object with
+the content of the current index and, optionally ignoring the stat state
+of the file on disk. When paths are specified, compares only those named
+paths. Otherwise all entries in the index are compared.
 
 """
 # =============================================================================
@@ -37,7 +37,7 @@ def is_index_dirty(repo):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

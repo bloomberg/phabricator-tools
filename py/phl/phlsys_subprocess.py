@@ -33,21 +33,19 @@ RunResult = collections.namedtuple(
 
 
 class Error(Exception):
-
     """Base class for exceptions in this module."""
     pass
 
 
 class CalledProcessError(Error):
-
     """Exception for passing errors from called processes.
 
     Attributes:
-        cmd      -- array, the command used to launch the subprocess
-        stdin    -- string, the input supplied to the command
-        stdout   -- string, the stdout output from the command
-        stderr   -- string, the stderr output from the command
-        exitcode -- int, the exitcode from the command
+        cmd      - array, the command used to launch the subprocess
+        stdin    - string, the input supplied to the command
+        stdout   - string, the stdout output from the command
+        stderr   - string, the stderr output from the command
+        exitcode - int, the exitcode from the command
 
     """
 
@@ -159,7 +157,7 @@ def run_commands(*commands):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

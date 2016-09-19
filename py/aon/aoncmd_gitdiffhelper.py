@@ -1,6 +1,6 @@
 """create a diff from a git repository, reducing the diff if it is too big.
-Automatic size reduction is achieved by discarding context.
-`git-diff-helper` will call `git diff BASE...HEAD` on your behalf.
+Automatic size reduction is achieved by discarding context. `git-diff-helper`
+will call `git diff BASE...HEAD` on your behalf.
 
 usage examples:
 
@@ -61,7 +61,7 @@ def process(args):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2015 Bloomberg Finance L.P.
+# Copyright (C) 2015-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

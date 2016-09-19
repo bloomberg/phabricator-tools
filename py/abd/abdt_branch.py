@@ -330,8 +330,8 @@ class Branch(object):
     def make_raw_diff(self):
         """Return an abdt_differ.DiffResult of the changes on the branch.
 
-        If the diff would exceed the pre-specified max diff size then take
-        measures to reduce the diff.
+        If the diff would exceed the pre-specified max diff size then
+        take measures to reduce the diff.
 
         """
         try:
@@ -613,7 +613,7 @@ class Branch(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2015 Bloomberg Finance L.P.
+# Copyright (C) 2013-2016 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
