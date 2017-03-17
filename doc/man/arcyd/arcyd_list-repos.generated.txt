@@ -1,7 +1,8 @@
-usage: arcyd list-repos [-h] [--only-formatted-repo-urls]
+usage: arcyd list-repos [-h] [--only-formatted-repo-urls | --only-identifiers]
 
 List the repositories managed by this arcyd instance.
 
 optional arguments:
   -h, --help            show this help message and exit
   --only-formatted-repo-urls
+  --only-identifiers

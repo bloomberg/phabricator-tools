@@ -26,8 +26,12 @@ def getFromfilePrefixChars():
 
 
 def setupParser(parser):
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
         '--only-formatted-repo-urls',
+        action='store_true')
+    group.add_argument(
+        '--only-identifiers',
         action='store_true')
 
 
@@ -40,15 +44,17 @@ def process(args):
         repo_name_config_list = abdi_repoargs.parse_config_file_list(
             repo_config_path_list)
 
-        for _, repo_config in repo_name_config_list:
+        for repo_name, repo_config in repo_name_config_list:
             if args.only_formatted_repo_urls:
                 print(abdi_repoargs.get_repo_url(repo_config))
+            elif args.only_identifiers:
+                print(repo_name)
             else:
                 print(repo_config)
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

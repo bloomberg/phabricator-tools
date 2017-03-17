@@ -163,6 +163,7 @@ class ConduitException(Exception):
         self.uri = uri
         self.actAsUser = actAsUser
 
+
 # we would expect this to arise normally from time to time
 SESSION_ERROR = "ERR-INVALID-SESSION"
 
@@ -389,7 +390,7 @@ class CallMultiConduitAsUser(object):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2015 Bloomberg Finance L.P.
+# Copyright (C) 2013-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
