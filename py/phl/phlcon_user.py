@@ -69,9 +69,10 @@ class UserPhidCache(object):
         if user not in self._user_to_phid:
             results = make_username_phid_dict(
                 self._conduit, list(self._hinted_users))
-            self._user_to_phid.update(results)
+            norm = {key.lower(): value for (key, value) in results.items()}
+            self._user_to_phid.update(norm)
             self._hinted_users = set()
-        return self._user_to_phid[user]
+        return self._user_to_phid[user.lower()]
 
 
 def is_no_such_error(e):
@@ -255,7 +256,7 @@ def make_phid_username_dict(conduit, phids):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2015 Bloomberg Finance L.P.
+# Copyright (C) 2013-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
