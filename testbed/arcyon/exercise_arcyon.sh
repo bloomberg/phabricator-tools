@@ -6,6 +6,17 @@ cd "$(dirname "$0")"
 
 arcyon='../../bin/arcyon'
 
+phaburi="http://127.0.0.1"
+phabuser='phab'
+phabcert=xnh5tpatpfh4pff4tpnvdv74mh74zkmsualo4l6mx7bb262zqr55vcachxgz7ru3lrv\
+afgzquzl3geyjxw426ujcyqdi2t4ktiv7gmrtlnc3hsy2eqsmhvgifn2vah2uidj6u6hhhxo2j3y2w\
+6lcsehs2le4msd5xsn4f333udwvj6aowokq5l2llvfsl3efcucraawtvzw462q2sxmryg5y5rpicdk\
+3lyr3uvot7fxrotwpi3ty2b2sa2kvlpf
+
+arcyon_() {
+    $arcyon "$@" --uri ${phaburi} --user ${phabuser} --cert ${phabcert}
+}
+
 $arcyon -h
 $arcyon comment -h
 $arcyon comment-inline -h
@@ -18,51 +29,51 @@ $arcyon update-revision -h
 $arcyon task-create -h
 $arcyon task-query -h
 
-id="$($arcyon create-revision -t title -p plan --summary ssss -f diff1 --format-id)"
-$arcyon get-diff -r $id --ls
-$arcyon update-revision $id update -f diff2
-$arcyon get-diff -r $id --ls
+id="$(arcyon_ create-revision -t title -p plan --summary ssss -f diff1 --format-id)"
+arcyon_ get-diff -r $id --ls
+arcyon_ update-revision $id update -f diff2
+arcyon_ get-diff -r $id --ls
 
-$arcyon query --format-type ids | grep $id
-$arcyon query --ids $id --format-string '$summary' | grep ssss
-$arcyon query --format-type ids --order created | grep $id
-$arcyon query --format-type ids --order modified | grep $id
+arcyon_ query --format-type ids | grep $id
+arcyon_ query --ids $id --format-string '$summary' | grep ssss
+arcyon_ query --format-type ids --order created | grep $id
+arcyon_ query --format-type ids --order modified | grep $id
 
-diffid="$($arcyon raw-diff diff1)"
-diffid2="$($arcyon raw-diff diff2)"
-$arcyon get-diff -d $diffid --ls
-$arcyon get-diff -d $diffid2 --ls
-id2="$($arcyon create-revision -t title2 -p plan --diff-id $diffid --format-id)"
-id3=$($arcyon update-revision $id2 update --diff-id $diffid2 --format-id)
-$arcyon update-revision $id2 update --diff-id $diffid2 --format-url
-$arcyon update-revision $id2 update --diff-id $diffid2 --format-url --ccs phab --reviewers bob
+diffid="$(arcyon_ raw-diff diff1)"
+diffid2="$(arcyon_ raw-diff diff2)"
+arcyon_ get-diff -d $diffid --ls
+arcyon_ get-diff -d $diffid2 --ls
+id2="$(arcyon_ create-revision -t title2 -p plan --diff-id $diffid --format-id)"
+id3=$(arcyon_ update-revision $id2 update --diff-id $diffid2 --format-id)
+arcyon_ update-revision $id2 update --diff-id $diffid2 --format-url
+arcyon_ update-revision $id2 update --diff-id $diffid2 --format-url --ccs phab --reviewers bob
 
 if [ "$id2" != "$id3" ]; then
     false
 fi
 
-$arcyon query --format-type ids | grep $id2
+arcyon_ query --format-type ids | grep $id2
 
-$arcyon comment $id2 -m 'hello there!'
-$arcyon comment-inline $id2 --start-line 51 --end-line-offset 0 --filepath 'bin/arcyon' -m 'inline comment!'
-$arcyon comment-inline $id2 --start-line 51 --end-line-offset 0 --filepath 'bin/arcyon' -m 'old-side inline comment!' --left-side
-$arcyon comment $id2 --attach-inlines
+arcyon_ comment $id2 -m 'hello there!'
+arcyon_ comment-inline $id2 --start-line 51 --end-line-offset 0 --filepath 'bin/arcyon' -m 'inline comment!'
+arcyon_ comment-inline $id2 --start-line 51 --end-line-offset 0 --filepath 'bin/arcyon' -m 'old-side inline comment!' --left-side
+arcyon_ comment $id2 --attach-inlines
 
-taskid=$($arcyon task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob --format-id)
-$arcyon task-query
-taskid2=$($arcyon task-query --max-results 1 --format-ids)
+taskid=$(arcyon_ task-create 'exercise task-create' -d 'description' -p wish -o alice --ccs phab bob --format-id)
+arcyon_ task-query
+taskid2=$(arcyon_ task-query --max-results 1 --format-ids)
 
 if [ "$taskid" != "$taskid2" ]; then
     false
 fi
 
-$arcyon task-create 'exercise task-create again'
-$arcyon task-update $taskid -m 'just a comment'
-$arcyon task-update $taskid -t 'exercise task-update' -d 'new description' -p low -o bob --ccs phab alice -m 'updated loads'
+arcyon_ task-create 'exercise task-create again'
+arcyon_ task-update $taskid -m 'just a comment'
+arcyon_ task-update $taskid -t 'exercise task-update' -d 'new description' -p low -o bob --ccs phab alice -m 'updated loads'
 
-$arcyon paste "test paste" -f diff1
+arcyon_ paste "test paste" -f diff1
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2015 Bloomberg Finance L.P.
+# Copyright (C) 2013-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
