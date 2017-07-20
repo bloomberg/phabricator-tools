@@ -70,7 +70,10 @@ class Test(unittest.TestCase):
             refcache_repo = phlgitx_refcache.Repo(breakable_repo)
             differ = abdt_differresultcache.Cache(refcache_repo)
 
+            # pylint has faulty detection here
+            # pylint: disable=not-callable
             worker.repo('checkout', '-b', branch_name)
+            # pylint: enable=not-callable
 
             def make_diff(max_bytes):
                 return differ.checkout_make_raw_diff(
@@ -102,7 +105,10 @@ class Test(unittest.TestCase):
 
             # the differ will detach HEAD so attach to branch again before
             # making any more commits on the branch
+            # pylint has faulty detection here
+            # pylint: disable=not-callable
             worker.repo('checkout', branch_name)
+            # pylint: enable=not-callable
 
             worker.commit_new_file(
                 "make a test diff", "newfile", "test content")
@@ -125,7 +131,7 @@ class Test(unittest.TestCase):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

@@ -32,9 +32,14 @@ class Test(unittest.TestCase):
 
     def testSimpleFork(self):
         with phlgitu_fixture.lone_worker_context() as worker:
+
+            # pylint has faulty detection here
+            # pylint: disable=not-callable
             worker.repo("branch", "fork")
             worker.commit_new_file("add ONLY_MASTER", "ONLY_MASTER")
             worker.repo("checkout", "fork")
+            # pylint: enable=not-callable
+
             worker.commit_new_file("add ONLY_FORK", "ONLY_FORK")
             worker.commit_new_file("add ONLY_FORK2", "ONLY_FORK2")
             rawDiff = phlgit_diff.raw_diff_range_to_here(
@@ -55,7 +60,7 @@ class Test(unittest.TestCase):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2013-2014 Bloomberg Finance L.P.
+# Copyright (C) 2013-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.

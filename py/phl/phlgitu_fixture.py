@@ -81,7 +81,7 @@ def temprepo_context():
 
     """
     with contextlib.closing(TempRepo()) as temp_repo:
-        yield temp_repo.repo
+        yield temp_repo.repo  # pylint: disable=no-member
 
 
 class TempRepo(object):
@@ -319,7 +319,7 @@ class CentralisedWithTwoWorkers(CentralisedWithWorkers):
 
 
 # -----------------------------------------------------------------------------
-# Copyright (C) 2014 Bloomberg Finance L.P.
+# Copyright (C) 2014-2017 Bloomberg Finance L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
